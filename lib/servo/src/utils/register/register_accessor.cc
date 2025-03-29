@@ -14,47 +14,47 @@
 
 #include "register_accessor.h"
 
-#include "../../core/register_field.h"
+#include "../../core/register.h"
 
 namespace hortor_servo {
 
-Error RegisterAccessor::WriteRegField(const Field& reg, uint8_t value) {
+Error RegisterAccessor::WriteRegField(const Register& reg, uint8_t value) {
   uint8_t data;
   CHECK_ERROR(Read(reg.address, &data));
-  RegisterField::SetValue(reg, value, data);
+  Register::SetValue(reg, value, data);
   CHECK_ERROR(Write(reg.address, data));
   return Error::kOk;
 }
 
-Error RegisterAccessor::WriteRegField(const Field& high, const Field& low, const uint16_t value) {
+Error RegisterAccessor::WriteRegField(const Register& high, const Register& low, const uint16_t value) {
   uint8_t high_value, low_value;
   CHECK_ERROR(Read(high.address, &high_value));
   CHECK_ERROR(Read(low.address, &low_value));
-  RegisterField::SetCombinedValue(high, low, value, high_value, low_value);
+  Register::SetCombinedValue(high, low, value, high_value, low_value);
   CHECK_ERROR(Write(high.address, high_value));
   CHECK_ERROR(Write(low.address, low_value));
   return Error::kOk;
 }
 
-Error RegisterAccessor::ReadRegField(const Field& reg, uint8_t* value) {
+Error RegisterAccessor::ReadRegField(const Register& reg, uint8_t* value) {
   uint8_t data;
   CHECK_ERROR(Read(reg.address, &data));
-  *value = RegisterField::GetValue(reg, data);
+  *value = Register::GetValue(reg, data);
   return Error::kOk;
 }
 
-Error RegisterAccessor::ReadRegField(const Field& reg, bool* value) {
+Error RegisterAccessor::ReadRegField(const Register& reg, bool* value) {
   uint8_t data;
   CHECK_ERROR(Read(reg.address, &data));
-  *value = RegisterField::GetValue(reg, data) != 0;
+  *value = Register::GetValue(reg, data) != 0;
   return Error::kOk;
 }
 
-Error RegisterAccessor::ReadRegField(const Field& high, const Field& low, uint16_t* value) {
+Error RegisterAccessor::ReadRegField(const Register& high, const Register& low, uint16_t* value) {
   uint8_t high_value, low_value;
   CHECK_ERROR(Read(high.address, &high_value));
   CHECK_ERROR(Read(low.address, &low_value));
-  *value = RegisterField::GetCombinedValue(high, low, high_value, low_value);
+  *value = Register::GetCombinedValue(high, low, high_value, low_value);
   return Error::kOk;
 }
 }  // namespace hortor_servo

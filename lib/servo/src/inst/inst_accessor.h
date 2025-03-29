@@ -22,6 +22,8 @@ namespace hortor_servo {
 
 class InstAccessor : public RegisterAccessor {
  public:
+  using Regs = ServoRegs;
+
   Error Init();
   Error RecoveryEeprom();
   Error LoadEEPROM();
@@ -34,7 +36,7 @@ class InstAccessor : public RegisterAccessor {
    */
   bool GetWriteLock() {
     uint8_t lock;
-    ReadRegField(ServoRegisters::kWriteLock, &lock);
+    ReadRegField(Regs::kWriteLock, &lock);
     return lock == 1;
   }
 
@@ -44,7 +46,7 @@ class InstAccessor : public RegisterAccessor {
    */
   uint8_t GetId() {
     uint8_t id;
-    ReadRegField(ServoRegisters::kId, &id);
+    ReadRegField(Regs::kId, &id);
     return id;
   }
 
@@ -54,7 +56,7 @@ class InstAccessor : public RegisterAccessor {
    */
   uint8_t GetFirmwareMajor() {
     uint8_t major;
-    ReadRegField(ServoRegisters::kFirmwareMajor, &major);
+    ReadRegField(Regs::kFirmwareMajor, &major);
     return major;
   }
 
@@ -64,7 +66,7 @@ class InstAccessor : public RegisterAccessor {
    */
   uint8_t GetFirmwareMinor() {
     uint8_t minor;
-    ReadRegField(ServoRegisters::kFirmwareMinor, &minor);
+    ReadRegField(Regs::kFirmwareMinor, &minor);
     return minor;
   }
 
@@ -74,7 +76,7 @@ class InstAccessor : public RegisterAccessor {
    */
   uint8_t GetStatus() {
     uint8_t status;
-    ReadRegField(ServoRegisters::kStatus, &status);
+    ReadRegField(Regs::kStatus, &status);
     return status;
   }
 
@@ -84,7 +86,7 @@ class InstAccessor : public RegisterAccessor {
    */
   bool GetResponseLevel() {
     uint8_t response_level;
-    ReadRegField(ServoRegisters::kResponseLevel, &response_level);
+    ReadRegField(Regs::kResponseLevel, &response_level);
     return response_level == 1;
   }
 

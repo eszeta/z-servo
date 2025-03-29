@@ -16,7 +16,7 @@
 #include <functional>
 
 #include "../../core/object_interface.h"
-#include "../../core/register_field.h"
+#include "../../core/register.h"
 #include "../../servo_types.h"
 namespace hortor_servo {
 /**
@@ -26,7 +26,6 @@ namespace hortor_servo {
  */
 class RegisterAccessor : public ObjectInterface {
  public:
-  using Field = RegisterField;
   /** @brief 写寄存器函数类型 */
   using WriteFunc = std::function<Error(const uint8_t address, const uint8_t data)>;
   /** @brief 多字节写寄存器函数类型 */
@@ -79,7 +78,7 @@ class RegisterAccessor : public ObjectInterface {
    * @param value 要写入的值
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  Error WriteRegField(const Field& reg, uint8_t value);
+  Error WriteRegField(const Register& reg, uint8_t value);
 
   /**
    * @brief 通用的寄存器读写模板函数
@@ -88,7 +87,7 @@ class RegisterAccessor : public ObjectInterface {
    * @param value 要写入的值
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  Error WriteRegField(const Field& high, const Field& low, uint16_t value);
+  Error WriteRegField(const Register& high, const Register& low, uint16_t value);
 
   /**
    * @brief 通用的寄存器读取模板函数
@@ -96,7 +95,7 @@ class RegisterAccessor : public ObjectInterface {
    * @param value 读取值的存储指针
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  Error ReadRegField(const Field& reg, uint8_t* value);
+  Error ReadRegField(const Register& reg, uint8_t* value);
 
   /**
    * @brief 通用的寄存器读取模板函数
@@ -104,7 +103,7 @@ class RegisterAccessor : public ObjectInterface {
    * @param value 读取值的存储指针
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  Error ReadRegField(const Field& reg, bool* value);
+  Error ReadRegField(const Register& reg, bool* value);
 
   /**
    * @brief 通用的寄存器读取模板函数
@@ -113,13 +112,13 @@ class RegisterAccessor : public ObjectInterface {
    * @param value 读取值的存储指针
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  Error ReadRegField(const Field& high, const Field& low, uint16_t* value);
+  Error ReadRegField(const Register& high, const Register& low, uint16_t* value);
 
   /** @brief 设置8位无符号整数值 */
   void SetUint8(const size_t address, const uint8_t value) { Write(address, value); }
 
   /** @brief 设置8位无符号整数值到指定字段 */
-  void SetUint8(const Field& field, const uint8_t value) { WriteRegField(field, value); }
+  void SetUint8(const Register& field, const uint8_t value) { WriteRegField(field, value); }
 
   /** @brief 获取8位无符号整数值 */
   uint8_t GetUint8(const size_t address) {
@@ -129,7 +128,7 @@ class RegisterAccessor : public ObjectInterface {
   }
 
   /** @brief 从指定字段获取8位无符号整数值 */
-  uint8_t GetUint8(const Field& field) {
+  uint8_t GetUint8(const Register& field) {
     uint8_t value;
     ReadRegField(field, &value);
     return value;
@@ -139,13 +138,13 @@ class RegisterAccessor : public ObjectInterface {
   void SetInt8(const size_t address, const int8_t value) { SetUint8(address, static_cast<uint8_t>(value)); }
 
   /** @brief 设置8位有符号整数值到指定字段 */
-  void SetInt8(const Field& field, const int8_t value) { SetUint8(field, static_cast<uint8_t>(value)); }
+  void SetInt8(const Register& field, const int8_t value) { SetUint8(field, static_cast<uint8_t>(value)); }
 
   /** @brief 获取8位有符号整数值 */
   int8_t GetInt8(const size_t address) { return static_cast<int8_t>(GetUint8(address)); }
 
   /** @brief 从指定字段获取8位有符号整数值 */
-  int8_t GetInt8(const Field& field) { return static_cast<int8_t>(GetUint8(field)); }
+  int8_t GetInt8(const Register& field) { return static_cast<int8_t>(GetUint8(field)); }
 
   /** @brief 设置16位无符号整数值 */
   void SetUint16(const size_t high, const size_t low, const uint16_t value) {
@@ -154,7 +153,7 @@ class RegisterAccessor : public ObjectInterface {
   }
 
   /** @brief 设置16位无符号整数值到指定字段 */
-  void SetUint16(const Field& high, const Field& low, const uint16_t value) {
+  void SetUint16(const Register& high, const Register& low, const uint16_t value) {
     WriteRegField(high, static_cast<uint8_t>(value >> 8 & 0xFF));
     WriteRegField(low, static_cast<uint8_t>(value & 0xFF));
   }
@@ -165,7 +164,7 @@ class RegisterAccessor : public ObjectInterface {
   }
 
   /** @brief 从指定字段获取16位无符号整数值 */
-  uint16_t GetUint16(const Field& high, const Field& low) {
+  uint16_t GetUint16(const Register& high, const Register& low) {
     return bit_utils::CombineToUint16(GetUint8(high), GetUint8(low));
   }
 

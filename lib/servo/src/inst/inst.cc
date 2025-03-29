@@ -19,6 +19,7 @@
 #include "./inst_accessor.h"
 #include "./inst_types.h"
 namespace hortor_servo {
+using Regs = ServoRegs;
 
 Error Inst::Init() {
   buffer_size_ = 0;
@@ -83,112 +84,111 @@ Error Inst::WriteRegs(const uint8_t address, const uint8_t *data, const size_t s
 }
 
 Error Inst::LoadEepromConfig() {
-  const auto response_delay = accessor_->GetUint8(ServoRegisters::kResponseDelay) * 2;
+  const auto response_delay = accessor_->GetUint8(Regs::kResponseDelay) * 2;
   transport_->SetResponseDelay(response_delay);
 
-  const auto mode = static_cast<MotorMode>(accessor_->GetUint8(ServoRegisters::kMode));
+  const auto mode = static_cast<MotorMode>(accessor_->GetUint8(Regs::kMode));
   servo_->SetMode(mode);
 
-  const auto min_position = accessor_->GetUint16(ServoRegisters::kMinPositionH, ServoRegisters::kMinPositionL);
+  const auto min_position = accessor_->GetUint16(Regs::kMinPositionH, Regs::kMinPositionL);
   servo_->SetMinPosition(min_position);
 
-  const auto max_position = accessor_->GetUint16(ServoRegisters::kMaxPositionH, ServoRegisters::kMaxPositionL);
+  const auto max_position = accessor_->GetUint16(Regs::kMaxPositionH, Regs::kMaxPositionL);
   servo_->SetMaxPosition(max_position);
 
-  const auto max_temperature = accessor_->GetUint8(ServoRegisters::kMaxTemperature);
+  const auto max_temperature = accessor_->GetUint8(Regs::kMaxTemperature);
   servo_->SetMaxTemperature(max_temperature);
 
-  const auto max_voltage = accessor_->GetUint8(ServoRegisters::kMaxVoltage) * 0.1f;
+  const auto max_voltage = accessor_->GetUint8(Regs::kMaxVoltage) * 0.1f;
   servo_->SetMaxVoltage(max_voltage);
 
-  const auto min_voltage = accessor_->GetUint8(ServoRegisters::kMinVoltage) * 0.1f;
+  const auto min_voltage = accessor_->GetUint8(Regs::kMinVoltage) * 0.1f;
   servo_->SetMinVoltage(min_voltage);
 
-  const auto max_torque = accessor_->GetUint16(ServoRegisters::kMaxTorqueH, ServoRegisters::kMaxTorqueL) * 0.001f;
+  const auto max_torque = accessor_->GetUint16(Regs::kMaxTorqueH, Regs::kMaxTorqueL) * 0.001f;
   servo_->SetMaxTorque(max_torque);
 
   // todo:kOption
   // todo:kUnloadCondition
 
-  const auto min_startup_force = accessor_->GetUint8(ServoRegisters::kMinStartupForce) * 0.001f;
+  const auto min_startup_force = accessor_->GetUint8(Regs::kMinStartupForce) * 0.001f;
   servo_->SetMinStartupForce(min_startup_force);
 
-  const auto cw_insensitive_area = accessor_->GetUint8(ServoRegisters::kCWInsensitiveArea);
+  const auto cw_insensitive_area = accessor_->GetUint8(Regs::kCWInsensitiveArea);
   servo_->SetCWInsensitiveArea(cw_insensitive_area);
 
-  const auto ccw_insensitive_area = accessor_->GetUint8(ServoRegisters::kCCWInsensitiveArea);
+  const auto ccw_insensitive_area = accessor_->GetUint8(Regs::kCCWInsensitiveArea);
   servo_->SetCCWInsensitiveArea(ccw_insensitive_area);
 
   const auto current_protection_threshold =
-      accessor_->GetUint16(ServoRegisters::kCurrentProtectionThH, ServoRegisters::kCurrentProtectionThL) * 6.5f;
+      accessor_->GetUint16(Regs::kCurrentProtectionThH, Regs::kCurrentProtectionThL) * 6.5f;
   servo_->SetCurrentProtectionThreshold(current_protection_threshold);
 
-  const auto angular_resolution = accessor_->GetUint8(ServoRegisters::kAngularResolution);
+  const auto angular_resolution = accessor_->GetUint8(Regs::kAngularResolution);
   servo_->SetAngularResolution(angular_resolution);
 
-  const auto position_correction =
-      accessor_->GetUint16(ServoRegisters::kPositionCorrectionH, ServoRegisters::kPositionCorrectionL);
+  const auto position_correction = accessor_->GetUint16(Regs::kPositionCorrectionH, Regs::kPositionCorrectionL);
   // BIT11为方向位，表示正负方向，其他位可表示范围为0-2047步
   servo_->SetPositionCorrection(bit_utils::SignToTwos(position_correction, 11));
 
-  const auto torque_protection_threshold = accessor_->GetUint8(ServoRegisters::kTorqueProtectionTh) * 0.01f;
+  const auto torque_protection_threshold = accessor_->GetUint8(Regs::kTorqueProtectionTh) * 0.01f;
   servo_->SetTorqueProtectionThreshold(torque_protection_threshold);
 
-  const auto torque_protection_time = accessor_->GetUint8(ServoRegisters::kTorqueProtectionTime) * 10;
+  const auto torque_protection_time = accessor_->GetUint8(Regs::kTorqueProtectionTime) * 10;
   servo_->SetTorqueProtectionTime(torque_protection_time);
 
-  const auto overload_torque = accessor_->GetUint8(ServoRegisters::kOverloadTorque) * 0.01f;
+  const auto overload_torque = accessor_->GetUint8(Regs::kOverloadTorque) * 0.01f;
   servo_->SetOverloadTorque(overload_torque);
 
-  const auto overcurrent_protection_time = accessor_->GetUint8(ServoRegisters::kOvercurrentProtectionTime) * 10;
+  const auto overcurrent_protection_time = accessor_->GetUint8(Regs::kOvercurrentProtectionTime) * 10;
   servo_->SetOvercurrentProtectionTime(overcurrent_protection_time);
 
   auto &pos_pid = servo_->GetPosPid();
-  pos_pid.SetKp(accessor_->GetUint8(ServoRegisters::kPosProportionalGain) * 0.1f);
-  pos_pid.SetKi(accessor_->GetUint8(ServoRegisters::kPosIntegralGain) * 0.1f);
-  pos_pid.SetKd(accessor_->GetUint8(ServoRegisters::kPosDerivativeGain) * 0.1f);
-  pos_pid.SetFf(accessor_->GetUint8(ServoRegisters::kPosPidFf) * 0.1f);
-  pos_pid.SetRamp(accessor_->GetUint8(ServoRegisters::kPosPidRamp) * 0.1f);
+  pos_pid.SetKp(accessor_->GetUint8(Regs::kPosProportionalGain) * 0.1f);
+  pos_pid.SetKi(accessor_->GetUint8(Regs::kPosIntegralGain) * 0.1f);
+  pos_pid.SetKd(accessor_->GetUint8(Regs::kPosDerivativeGain) * 0.1f);
+  pos_pid.SetFf(accessor_->GetUint8(Regs::kPosPidFf) * 0.1f);
+  pos_pid.SetRamp(accessor_->GetUint8(Regs::kPosPidRamp) * 0.1f);
   if (mode == MotorMode::kPosition || mode == MotorMode::kStep) {
-    pos_pid.SetLimit(accessor_->GetUint8(ServoRegisters::kIntegralLimit) * 4.0f);
+    pos_pid.SetLimit(accessor_->GetUint8(Regs::kIntegralLimit) * 4.0f);
   } else {
     pos_pid.SetLimit(0);
   }
 
   auto &vel_pid = servo_->GetVelPid();
-  vel_pid.SetKp(accessor_->GetUint8(ServoRegisters::kVelocityProportionalGain) * 0.1f);
-  vel_pid.SetKi(accessor_->GetUint8(ServoRegisters::kVelocityIntegralGain) * 0.1f);
+  vel_pid.SetKp(accessor_->GetUint8(Regs::kVelocityProportionalGain) * 0.1f);
+  vel_pid.SetKi(accessor_->GetUint8(Regs::kVelocityIntegralGain) * 0.1f);
 
-  const auto motor_direction = accessor_->GetUint8(ServoRegisters::kMotorDirection);
+  const auto motor_direction = accessor_->GetUint8(Regs::kMotorDirection);
   servo_->SetMotorDirection(motor_direction ? Direction::CCW : Direction::CW);
 
-  const auto sensor_direction = accessor_->GetUint8(ServoRegisters::kSensorDirection);
+  const auto sensor_direction = accessor_->GetUint8(Regs::kSensorDirection);
   servo_->SetSensorDirection(sensor_direction ? Direction::CCW : Direction::CW);
 
-  const auto pos_filter = accessor_->GetUint8(ServoRegisters::kPosFilter);
+  const auto pos_filter = accessor_->GetUint8(Regs::kPosFilter);
   servo_->GetPosLpf().SetTimeConstant(pos_filter * 0.001f);
 
-  const auto current_filter = accessor_->GetUint8(ServoRegisters::kCurrentFilter);
+  const auto current_filter = accessor_->GetUint8(Regs::kCurrentFilter);
   servo_->GetCurrentLpf().SetTimeConstant(current_filter * 0.001f);
 
-  const auto velocity_filter = accessor_->GetUint8(ServoRegisters::kVelocityFilter);
+  const auto velocity_filter = accessor_->GetUint8(Regs::kVelocityFilter);
   servo_->GetVelocityLpf().SetTimeConstant(velocity_filter * 0.001f);
   return Error::kOk;
 }
 
 Error Inst::LoadRamConfig() {
-  const auto mode = static_cast<MotorMode>(accessor_->GetUint8(ServoRegisters::kMode));
+  const auto mode = static_cast<MotorMode>(accessor_->GetUint8(Regs::kMode));
 
-  const auto torque_enable = accessor_->GetUint8(ServoRegisters::kTorqueEnable);
+  const auto torque_enable = accessor_->GetUint8(Regs::kTorqueEnable);
   servo_->SetTorqueEnable(torque_enable);
 
-  const auto target_acceleration = accessor_->GetUint8(ServoRegisters::kTargetAcceleration) * 100;
+  const auto target_acceleration = accessor_->GetUint8(Regs::kTargetAcceleration) * 100;
   servo_->SetTargetAcceleration(target_acceleration);
 
-  const auto target_position = accessor_->GetUint16(ServoRegisters::kTargetPositionH, ServoRegisters::kTargetPositionL);
+  const auto target_position = accessor_->GetUint16(Regs::kTargetPositionH, Regs::kTargetPositionL);
   servo_->SetTargetPosition(bit_utils::SignToTwos(target_position, 15));
 
-  const auto target_time = accessor_->GetUint16(ServoRegisters::kTargetTimeH, ServoRegisters::kTargetTimeL);
+  const auto target_time = accessor_->GetUint16(Regs::kTargetTimeH, Regs::kTargetTimeL);
   if (mode == MotorMode::kPwm) {
     servo_->SetTargetTime(0);
     servo_->SetTargetPwm(bit_utils::SignToTwos(target_time, 10) * 0.01f);
@@ -197,10 +197,10 @@ Error Inst::LoadRamConfig() {
     servo_->SetTargetPwm(0);
   }
 
-  const auto target_velocity = accessor_->GetUint16(ServoRegisters::kTargetVelocityH, ServoRegisters::kTargetVelocityL);
+  const auto target_velocity = accessor_->GetUint16(Regs::kTargetVelocityH, Regs::kTargetVelocityL);
   servo_->SetTargetVelocity(bit_utils::SignToTwos(target_velocity, 15));
 
-  const auto torque_limit = accessor_->GetUint16(ServoRegisters::kTorqueLimitH, ServoRegisters::kTorqueLimitL) * 0.001f;
+  const auto torque_limit = accessor_->GetUint16(Regs::kTorqueLimitH, Regs::kTorqueLimitL) * 0.001f;
   servo_->SetTorqueLimit(torque_limit);
 
   return Error::kOk;
@@ -223,32 +223,30 @@ Error Inst::CheckAction(const uint8_t address, const size_t size) {
 Error Inst::UpdateStatusRegs() {
   const auto present_position = servo_->GetPresentPosition();
 
-  accessor_->WriteRegField(ServoRegisters::kPresentPositionH, ServoRegisters::kPresentPositionL,
+  accessor_->WriteRegField(Regs::kPresentPositionH, Regs::kPresentPositionL,
                            bit_utils::TwosToSign(present_position, 15));
 
   const auto present_velocity = servo_->GetPresentVelocity();
-  accessor_->WriteRegField(ServoRegisters::kPresentVelocityH, ServoRegisters::kPresentVelocityL,
+  accessor_->WriteRegField(Regs::kPresentVelocityH, Regs::kPresentVelocityL,
                            bit_utils::TwosToSign(present_velocity, 15));
 
   const auto present_load = servo_->GetPresentLoad();
-  accessor_->WriteRegField(ServoRegisters::kPresentLoadH, ServoRegisters::kPresentLoadL,
-                           bit_utils::TwosToSign(present_load, 10));
+  accessor_->WriteRegField(Regs::kPresentLoadH, Regs::kPresentLoadL, bit_utils::TwosToSign(present_load, 10));
 
   const auto present_voltage = servo_->GetPresentVoltage() / 0.1f;
-  accessor_->WriteRegField(ServoRegisters::kPresentVoltage, static_cast<uint8_t>(present_voltage));
+  accessor_->WriteRegField(Regs::kPresentVoltage, static_cast<uint8_t>(present_voltage));
 
   const auto present_temperature = servo_->GetPresentTemperature();
-  accessor_->WriteRegField(ServoRegisters::kPresentTemperature, static_cast<uint8_t>(present_temperature));
+  accessor_->WriteRegField(Regs::kPresentTemperature, static_cast<uint8_t>(present_temperature));
 
   const auto error_status = servo_->GetErrorStatus();
-  accessor_->WriteRegField(ServoRegisters::kStatus, error_status);
+  accessor_->WriteRegField(Regs::kStatus, error_status);
 
   const auto moving = servo_->GetMoving();
-  accessor_->WriteRegField(ServoRegisters::kMoving, moving);
+  accessor_->WriteRegField(Regs::kMoving, moving);
 
   const auto present_current = servo_->GetPresentCurrent() / 6.5f;
-  accessor_->WriteRegField(ServoRegisters::kPresentCurrentH, ServoRegisters::kPresentCurrentL,
-                           static_cast<uint16_t>(present_current));
+  accessor_->WriteRegField(Regs::kPresentCurrentH, Regs::kPresentCurrentL, static_cast<uint16_t>(present_current));
 
   return Error::kOk;
 }
@@ -377,7 +375,7 @@ Error Inst::RegWriteHandler(const InstPacket *packet, const bool response) {
   }
   memcpy(async_write_buffer_ + buffer_size_, tx_buffer_, size);
   buffer_size_ += size;
-  CHECK_ERROR(accessor_->Write(ServoRegisters::kAsynchronousWriteSt.address, 1));
+  CHECK_ERROR(accessor_->Write(Regs::kAsynchronousWriteSt.address, 1));
   if (response) {
     CHECK_ERROR(Response(0, nullptr, 0));
   }
@@ -405,7 +403,7 @@ Error Inst::ActionHandler(const InstPacket *packet, const bool response) {
     buffer += packet_size;
   }
   buffer_size_ = 0;
-  CHECK_ERROR(accessor_->Write(ServoRegisters::kAsynchronousWriteSt.address, 0));
+  CHECK_ERROR(accessor_->Write(Regs::kAsynchronousWriteSt.address, 0));
   if (response) {
     CHECK_ERROR(Response(0, nullptr, 0));
   }

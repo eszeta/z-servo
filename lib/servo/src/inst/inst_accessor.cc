@@ -17,10 +17,12 @@
 #include <EEPROM.h>
 #endif
 
-#include "../core/register_field.h"
+#include "../core/register.h"
 #include "./inst_types.h"
 
 namespace hortor_servo {
+using Regs = ServoRegs;
+
 Error InstAccessor::Init() {
   CHECK_ERROR(local_transport_.Init(regs_, sizeof(regs_)));
   CHECK_ERROR(local_transport_.LinkAccessor(*this));
@@ -35,94 +37,94 @@ Error InstAccessor::Init() {
 
 Error InstAccessor::RecoveryEeprom() {
   // 固件版本
-  WriteRegField(ServoRegisters::kFirmwareMajor, RegsDefaultValues::kDefFirmwareMajor);
-  WriteRegField(ServoRegisters::kFirmwareMinor, RegsDefaultValues::kDefFirmwareMinor);
-  WriteRegField(ServoRegisters::kEnd, RegsDefaultValues::kDefEnd);
-  WriteRegField(ServoRegisters::kServoMajor, RegsDefaultValues::kDefServoMajor);
-  WriteRegField(ServoRegisters::kServoMinor, RegsDefaultValues::kDefServoMinor);
+  WriteRegField(Regs::kFirmwareMajor, RegsDefaultValues::kDefFirmwareMajor);
+  WriteRegField(Regs::kFirmwareMinor, RegsDefaultValues::kDefFirmwareMinor);
+  WriteRegField(Regs::kEnd, RegsDefaultValues::kDefEnd);
+  WriteRegField(Regs::kServoMajor, RegsDefaultValues::kDefServoMajor);
+  WriteRegField(Regs::kServoMinor, RegsDefaultValues::kDefServoMinor);
 
   // 基本参数
-  WriteRegField(ServoRegisters::kId, RegsDefaultValues::kDefId);
-  WriteRegField(ServoRegisters::kBaudrate, RegsDefaultValues::kDefBaudrate);
-  WriteRegField(ServoRegisters::kResponseDelay, RegsDefaultValues::kDefResponseDelay);
-  WriteRegField(ServoRegisters::kResponseLevel, RegsDefaultValues::kDefResponseStatusLevel);
+  WriteRegField(Regs::kId, RegsDefaultValues::kDefId);
+  WriteRegField(Regs::kBaudrate, RegsDefaultValues::kDefBaudrate);
+  WriteRegField(Regs::kResponseDelay, RegsDefaultValues::kDefResponseDelay);
+  WriteRegField(Regs::kResponseLevel, RegsDefaultValues::kDefResponseStatusLevel);
 
   // 角度限制
-  WriteRegField(ServoRegisters::kMinPositionL, RegsDefaultValues::kDefMinPositionL);
-  WriteRegField(ServoRegisters::kMinPositionH, RegsDefaultValues::kDefMinPositionH);
-  WriteRegField(ServoRegisters::kMaxPositionL, RegsDefaultValues::kDefMaxPositionL);
-  WriteRegField(ServoRegisters::kMaxPositionH, RegsDefaultValues::kDefMaxPositionH);
+  WriteRegField(Regs::kMinPositionL, RegsDefaultValues::kDefMinPositionL);
+  WriteRegField(Regs::kMinPositionH, RegsDefaultValues::kDefMinPositionH);
+  WriteRegField(Regs::kMaxPositionL, RegsDefaultValues::kDefMaxPositionL);
+  WriteRegField(Regs::kMaxPositionH, RegsDefaultValues::kDefMaxPositionH);
 
   // 温度和电压限制
-  WriteRegField(ServoRegisters::kMaxTemperature, RegsDefaultValues::kDefMaxTemperature);
-  WriteRegField(ServoRegisters::kMaxVoltage, RegsDefaultValues::kDefMaxVoltage);
-  WriteRegField(ServoRegisters::kMinVoltage, RegsDefaultValues::kDefMinVoltage);
+  WriteRegField(Regs::kMaxTemperature, RegsDefaultValues::kDefMaxTemperature);
+  WriteRegField(Regs::kMaxVoltage, RegsDefaultValues::kDefMaxVoltage);
+  WriteRegField(Regs::kMinVoltage, RegsDefaultValues::kDefMinVoltage);
 
   // 扭矩相关
-  WriteRegField(ServoRegisters::kMaxTorqueL, RegsDefaultValues::kDefMaxTorqueL);
-  WriteRegField(ServoRegisters::kMaxTorqueH, RegsDefaultValues::kDefMaxTorqueH);
+  WriteRegField(Regs::kMaxTorqueL, RegsDefaultValues::kDefMaxTorqueL);
+  WriteRegField(Regs::kMaxTorqueH, RegsDefaultValues::kDefMaxTorqueH);
 
   // 选项
-  WriteRegField(ServoRegisters::kOption, RegsDefaultValues::kDefOption);
+  WriteRegField(Regs::kOption, RegsDefaultValues::kDefOption);
 
   // 卸载条件
-  WriteRegField(ServoRegisters::kUnloadCondition, RegsDefaultValues::kDefUnloadCondition);
+  WriteRegField(Regs::kUnloadCondition, RegsDefaultValues::kDefUnloadCondition);
 
   // LED报警条件
-  WriteRegField(ServoRegisters::kLedAlarmCondition, RegsDefaultValues::kDefLedAlarmCondition);
+  WriteRegField(Regs::kLedAlarmCondition, RegsDefaultValues::kDefLedAlarmCondition);
 
   // 位置环PID参数
-  WriteRegField(ServoRegisters::kPosProportionalGain, RegsDefaultValues::kDefPosProportionalGain);
-  WriteRegField(ServoRegisters::kPosDerivativeGain, RegsDefaultValues::kDefPosDerivativeGain);
-  WriteRegField(ServoRegisters::kPosIntegralGain, RegsDefaultValues::kDefPosIntegralGain);
-  WriteRegField(ServoRegisters::kIntegralLimit, RegsDefaultValues::kDefIntegralLimit);
+  WriteRegField(Regs::kPosProportionalGain, RegsDefaultValues::kDefPosProportionalGain);
+  WriteRegField(Regs::kPosDerivativeGain, RegsDefaultValues::kDefPosDerivativeGain);
+  WriteRegField(Regs::kPosIntegralGain, RegsDefaultValues::kDefPosIntegralGain);
+  WriteRegField(Regs::kIntegralLimit, RegsDefaultValues::kDefIntegralLimit);
 
   // 最小启动力
-  WriteRegField(ServoRegisters::kMinStartupForce, RegsDefaultValues::kDefMinStartupForce);
+  WriteRegField(Regs::kMinStartupForce, RegsDefaultValues::kDefMinStartupForce);
 
   // 不灵敏区设置
-  WriteRegField(ServoRegisters::kCWInsensitiveArea, RegsDefaultValues::kDefCWInsensitiveArea);
-  WriteRegField(ServoRegisters::kCCWInsensitiveArea, RegsDefaultValues::kDefCCWInsensitiveArea);
+  WriteRegField(Regs::kCWInsensitiveArea, RegsDefaultValues::kDefCWInsensitiveArea);
+  WriteRegField(Regs::kCCWInsensitiveArea, RegsDefaultValues::kDefCCWInsensitiveArea);
 
   // 电流保护
-  WriteRegField(ServoRegisters::kCurrentProtectionThL, RegsDefaultValues::kDefCurrentProtectionThL);
-  WriteRegField(ServoRegisters::kCurrentProtectionThH, RegsDefaultValues::kDefCurrentProtectionThH);
-  WriteRegField(ServoRegisters::kOvercurrentProtectionTime, RegsDefaultValues::kDefOvercurrentProtectionTime);
+  WriteRegField(Regs::kCurrentProtectionThL, RegsDefaultValues::kDefCurrentProtectionThL);
+  WriteRegField(Regs::kCurrentProtectionThH, RegsDefaultValues::kDefCurrentProtectionThH);
+  WriteRegField(Regs::kOvercurrentProtectionTime, RegsDefaultValues::kDefOvercurrentProtectionTime);
 
   // 角度分辨率
-  WriteRegField(ServoRegisters::kAngularResolution, RegsDefaultValues::kDefAngularResolution);
+  WriteRegField(Regs::kAngularResolution, RegsDefaultValues::kDefAngularResolution);
 
   // 位置校正
-  WriteRegField(ServoRegisters::kPositionCorrectionL, RegsDefaultValues::kDefPositionCorrectionL);
-  WriteRegField(ServoRegisters::kPositionCorrectionH, RegsDefaultValues::kDefPositionCorrectionH);
+  WriteRegField(Regs::kPositionCorrectionL, RegsDefaultValues::kDefPositionCorrectionL);
+  WriteRegField(Regs::kPositionCorrectionH, RegsDefaultValues::kDefPositionCorrectionH);
 
   // 运行模式
-  WriteRegField(ServoRegisters::kMode, RegsDefaultValues::kDefMode);
+  WriteRegField(Regs::kMode, RegsDefaultValues::kDefMode);
 
   // 扭矩保护
-  WriteRegField(ServoRegisters::kTorqueProtectionTh, RegsDefaultValues::kDefTorqueProtectionTh);
-  WriteRegField(ServoRegisters::kTorqueProtectionTime, RegsDefaultValues::kDefTorqueProtectionTime);
-  WriteRegField(ServoRegisters::kOverloadTorque, RegsDefaultValues::kDefOverloadTorque);
+  WriteRegField(Regs::kTorqueProtectionTh, RegsDefaultValues::kDefTorqueProtectionTh);
+  WriteRegField(Regs::kTorqueProtectionTime, RegsDefaultValues::kDefTorqueProtectionTime);
+  WriteRegField(Regs::kOverloadTorque, RegsDefaultValues::kDefOverloadTorque);
 
   // 速度环PID参数
-  WriteRegField(ServoRegisters::kVelocityProportionalGain, RegsDefaultValues::kDefVelocityProportionalGain);
-  WriteRegField(ServoRegisters::kVelocityIntegralGain, RegsDefaultValues::kDefVelocityIntegralGain);
+  WriteRegField(Regs::kVelocityProportionalGain, RegsDefaultValues::kDefVelocityProportionalGain);
+  WriteRegField(Regs::kVelocityIntegralGain, RegsDefaultValues::kDefVelocityIntegralGain);
 
   //-----------内部EEPROM（读写）-------------------
   //
-  WriteRegField(ServoRegisters::kMotorDirection, RegsDefaultValues::kDefMotorDirection);
-  WriteRegField(ServoRegisters::kSensorDirection, RegsDefaultValues::kDefSensorDirection);
-  WriteRegField(ServoRegisters::kAdcShuntResistor, RegsDefaultValues::kDefAdcShuntResistor);
-  WriteRegField(ServoRegisters::kAdcCurrentFactor, RegsDefaultValues::kDefAdcCurrentFactor);
+  WriteRegField(Regs::kMotorDirection, RegsDefaultValues::kDefMotorDirection);
+  WriteRegField(Regs::kSensorDirection, RegsDefaultValues::kDefSensorDirection);
+  WriteRegField(Regs::kAdcShuntResistor, RegsDefaultValues::kDefAdcShuntResistor);
+  WriteRegField(Regs::kAdcCurrentFactor, RegsDefaultValues::kDefAdcCurrentFactor);
 
   // 位置滤波器
-  WriteRegField(ServoRegisters::kPosFilter, RegsDefaultValues::kDefPosFilter);
-  WriteRegField(ServoRegisters::kCurrentFilter, RegsDefaultValues::kDefCurrentFilter);
-  WriteRegField(ServoRegisters::kVelocityFilter, RegsDefaultValues::kDefVelocityFilter);
+  WriteRegField(Regs::kPosFilter, RegsDefaultValues::kDefPosFilter);
+  WriteRegField(Regs::kCurrentFilter, RegsDefaultValues::kDefCurrentFilter);
+  WriteRegField(Regs::kVelocityFilter, RegsDefaultValues::kDefVelocityFilter);
 
   // 位置PID
-  WriteRegField(ServoRegisters::kPosPidFf, RegsDefaultValues::kDefPosPidFf);
-  WriteRegField(ServoRegisters::kPosPidRamp, RegsDefaultValues::kDefPosPidRamp);
+  WriteRegField(Regs::kPosPidFf, RegsDefaultValues::kDefPosPidFf);
+  WriteRegField(Regs::kPosPidRamp, RegsDefaultValues::kDefPosPidRamp);
   return Error::kOk;
 }
 
@@ -154,54 +156,54 @@ Error InstAccessor::StoreEeprom() {
 
 Error InstAccessor::ResetRam() {
   // 扭矩开关
-  WriteRegField(ServoRegisters::kTorqueEnable, 0);
+  WriteRegField(Regs::kTorqueEnable, 0);
 
   // 动作
-  WriteRegField(ServoRegisters::kTargetAcceleration, 0);
-  WriteRegField(ServoRegisters::kTargetPositionL, 0);
-  WriteRegField(ServoRegisters::kTargetPositionH, 0);
-  WriteRegField(ServoRegisters::kTargetTimeL, 0);
-  WriteRegField(ServoRegisters::kTargetTimeH, 0);
-  WriteRegField(ServoRegisters::kTargetVelocityL, 0);
-  WriteRegField(ServoRegisters::kTargetVelocityH, 0);
+  WriteRegField(Regs::kTargetAcceleration, 0);
+  WriteRegField(Regs::kTargetPositionL, 0);
+  WriteRegField(Regs::kTargetPositionH, 0);
+  WriteRegField(Regs::kTargetTimeL, 0);
+  WriteRegField(Regs::kTargetTimeH, 0);
+  WriteRegField(Regs::kTargetVelocityL, 0);
+  WriteRegField(Regs::kTargetVelocityH, 0);
 
   // 转矩限制
-  WriteRegField(ServoRegisters::kTorqueLimitL, GetUint8(ServoRegisters::kMaxTorqueL));
-  WriteRegField(ServoRegisters::kTorqueLimitH, GetUint8(ServoRegisters::kMaxTorqueH));
+  WriteRegField(Regs::kTorqueLimitL, GetUint8(Regs::kMaxTorqueL));
+  WriteRegField(Regs::kTorqueLimitH, GetUint8(Regs::kMaxTorqueH));
 
   // 写入锁
-  WriteRegField(ServoRegisters::kWriteLock, 0);
+  WriteRegField(Regs::kWriteLock, 0);
 
   // 当前位置
-  WriteRegField(ServoRegisters::kPresentPositionL, 0);
-  WriteRegField(ServoRegisters::kPresentPositionH, 0);
+  WriteRegField(Regs::kPresentPositionL, 0);
+  WriteRegField(Regs::kPresentPositionH, 0);
 
   // 当前速度
-  WriteRegField(ServoRegisters::kPresentVelocityL, 0);
-  WriteRegField(ServoRegisters::kPresentVelocityH, 0);
+  WriteRegField(Regs::kPresentVelocityL, 0);
+  WriteRegField(Regs::kPresentVelocityH, 0);
 
   // 当前负载
-  WriteRegField(ServoRegisters::kPresentLoadL, 0);
-  WriteRegField(ServoRegisters::kPresentLoadH, 0);
+  WriteRegField(Regs::kPresentLoadL, 0);
+  WriteRegField(Regs::kPresentLoadH, 0);
 
   // 当前电压
-  WriteRegField(ServoRegisters::kPresentVoltage, 0);
+  WriteRegField(Regs::kPresentVoltage, 0);
 
   // 当前温度
-  WriteRegField(ServoRegisters::kPresentTemperature, 0);
+  WriteRegField(Regs::kPresentTemperature, 0);
 
   // 异步写标志
-  WriteRegField(ServoRegisters::kAsynchronousWriteSt, 0);
+  WriteRegField(Regs::kAsynchronousWriteSt, 0);
 
   // 舵机状态
-  WriteRegField(ServoRegisters::kStatus, 0);
+  WriteRegField(Regs::kStatus, 0);
 
   // 移动标志
-  WriteRegField(ServoRegisters::kMoving, 0);
+  WriteRegField(Regs::kMoving, 0);
 
   // 当前电流
-  WriteRegField(ServoRegisters::kPresentCurrentL, 0);
-  WriteRegField(ServoRegisters::kPresentCurrentH, 0);
+  WriteRegField(Regs::kPresentCurrentL, 0);
+  WriteRegField(Regs::kPresentCurrentH, 0);
   return Error::kOk;
 }
 }  // namespace hortor_servo

@@ -11,26 +11,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include "MA330_types.h"
 
-#include "MA330.h"
-
-#include "./MA330_types.h"
 namespace hortor_servo {
 namespace MA330 {
 
-MA330::MA330() : Sensor(kResolution) {}
+using Regs = MA330Regs;
 
-Error MA330::InitSPI(SPIClass *spi, const uint8_t cs_pin) {
-  CHECK_ERROR(spi_transport_.Init(spi, cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
-  CHECK_ERROR(spi_transport_.LinkAccessor(accessor_));
-  CHECK_ERROR(accessor_.Init());
-  hortor_servo::Sensor::Init();
-  return Error::kOk;
-}
+// 兼容GD32的编译环境，需要手动定义，否则会链接错误
+constexpr Register Regs::kZ_L;
+constexpr Register Regs::kZ_H;
+constexpr Register Regs::kBCT;
+constexpr Register Regs::kETX;
+constexpr Register Regs::kETY;
+constexpr Register Regs::kILIP;
+constexpr Register Regs::kPPT_L;
+constexpr Register Regs::kPPT_H;
+constexpr Register Regs::kMGHT;
+constexpr Register Regs::kMGLT;
+constexpr Register Regs::kNPP;
+constexpr Register Regs::kRD;
+constexpr Register Regs::kFW;
+constexpr Register Regs::kHYS;
+constexpr Register Regs::kMGL_MGH;
 
-uint16_t MA330::GetRaw() {
-  uint16_t angle = accessor_.ReadRaw();
-  return angle;
-}
 }  // namespace MA330
 }  // namespace hortor_servo

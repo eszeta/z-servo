@@ -19,6 +19,8 @@
 namespace hortor_servo {
 namespace MT6701 {
 
+using Regs = MT6701Regs;
+
 Error MT6701I2cTransport::LinkAccessor(MT6701Accessor& accessor) {
   accessor.SetWrite([this](const uint8_t address, const uint8_t data) { return Write(address, data); });
   accessor.SetWriteMultiple([this](const uint8_t address, const uint8_t* data, const size_t size) {
@@ -35,11 +37,11 @@ Error MT6701I2cTransport::LinkAccessor(MT6701Accessor& accessor) {
 
 Error MT6701I2cTransport::ReadRaw(uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss) {
   uint8_t angle6, angle0;
-  CHECK_ERROR(Read(MT6701Regs::kANGLE_6.address, &angle6));
-  CHECK_ERROR(Read(MT6701Regs::kANGLE_0.address, &angle0));
+  CHECK_ERROR(Read(Regs::kANGLE_6.address, &angle6));
+  CHECK_ERROR(Read(Regs::kANGLE_0.address, &angle0));
 
   if (angle_raw) {
-    *angle_raw = RegisterField::GetCombinedValue(MT6701Regs::kANGLE_6, MT6701Regs::kANGLE_0, angle6, angle0);
+    *angle_raw = Register::GetCombinedValue(Regs::kANGLE_6, Regs::kANGLE_0, angle6, angle0);
   }
 
   // I2C模式下不支持这些状态读取

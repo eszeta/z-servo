@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "../../core/register_field.h"
+#include "../../core/register.h"
 
 namespace hortor_servo {
 namespace LSM6DSOW {
@@ -230,209 +230,200 @@ enum class LOW_PASS_ON_6D {
 /**
  * @brief 陀螺仪控制寄存器，用于控制陀螺仪的工作模式
  */
-namespace LSM6DSOWRegs {
-/**
- * @brief WHO_AM_I寄存器
- * @note 这是一个只读寄存器。其值固定为6Ch。
- */
-static constexpr RegisterField kWHO_AM_I(0X0F, 0, 8);
+struct LSM6DSOWRegs {
+  /**
+   * @brief WHO_AM_I寄存器
+   * @note 这是一个只读寄存器。其值固定为6Ch。
+   */
+  static constexpr Register kWHO_AM_I{0X0F, 0, 8};
 
-/**
- * @brief CTRL1_XL (10h)
- */
-static constexpr RegisterField kCTRL1_XL(0X10, 0, 8);
-/**
- * @brief 加速度计ODR选择
- */
-static constexpr RegisterField kODR_XL(0X10, 4, 4);
-/**
- * @brief 加速度计满量程选择
- */
-static constexpr RegisterField kFS_XL(0X10, 2, 2);
-/**
- * @brief 加速度计高分辨率选择
- */
-static constexpr RegisterField kLPF2_XL_EN(0X10, 1, 1);
+  /**
+   * @brief CTRL1_XL (10h)
+   */
+  static constexpr Register kCTRL1_XL{0X10, 0, 8};
+  /**
+   * @brief 加速度计ODR选择
+   */
+  static constexpr Register kODR_XL{0X10, 4, 4};
+  /**
+   * @brief 加速度计满量程选择
+   */
+  static constexpr Register kFS_XL{0X10, 2, 2};
+  /**
+   * @brief 加速度计高分辨率选择
+   */
+  static constexpr Register kLPF2_XL_EN{0X10, 1, 1};
 
-/**
- * @brief CTRL2_G (11h)
- */
-static constexpr RegisterField kCTRL2_G(0X11, 0, 8);
-/**
- * @brief 陀螺仪ODR选择
- */
-static constexpr RegisterField kODR_G(0X11, 4, 4);
-/**
- * @brief 陀螺仪满量程选择
- */
-static constexpr RegisterField kFS_G(0X11, 2, 2);
-/**
- * @brief 陀螺仪125 dps选择
- */
-static constexpr RegisterField kFS_125(0X11, 1, 1);
+  /**
+   * @brief CTRL2_G (11h)
+   */
+  static constexpr Register kCTRL2_G{0X11, 0, 8};
+  /**
+   * @brief 陀螺仪ODR选择
+   */
+  static constexpr Register kODR_G{0X11, 4, 4};
+  /**
+   * @brief 陀螺仪满量程选择
+   */
+  static constexpr Register kFS_G{0X11, 2, 2};
+  /**
+   * @brief 陀螺仪125 dps满量程选择
+   */
+  static constexpr Register kFS_125{0X11, 1, 1};
 
-/**
- * @brief CTRL7_G (16h)
- */
-static constexpr RegisterField kCTRL7_G(0X16, 0, 8);
-/**
- * @brief 禁用陀螺仪高性能工作模式
- */
-static constexpr RegisterField kG_HM_MODE(0X16, 7, 1);
-/**
- * @brief 启用陀螺仪数字高通滤波器
- */
-static constexpr RegisterField kHP_EN_G(0X16, 6, 1);
-/**
- * @brief 陀螺仪数字高通滤波器截止频率选择
- */
-static constexpr RegisterField kHPM_G(0X16, 4, 2);
-/**
- * @brief 启用加速度计用户偏移校正模块
- */
-static constexpr RegisterField kUSR_OFF_ON_OUT(0X16, 1, 1);
+  /**
+   * @brief CTRL7_G (16h)
+   */
+  static constexpr Register kCTRL7_G{0X16, 0, 8};
+  /**
+   * @brief 陀螺仪高性能工作模式选择
+   */
+  static constexpr Register kG_HM_MODE{0X16, 7, 1};
+  /**
+   * @brief 陀螺仪高通滤波器使能
+   */
+  static constexpr Register kHP_EN_G{0X16, 6, 1};
+  /**
+   * @brief 陀螺仪高通滤波器截止频率选择
+   */
+  static constexpr Register kHPM_G{0X16, 4, 2};
+  /**
+   * @brief 加速度计用户偏移校正模块使能
+   */
+  static constexpr Register kUSR_OFF_ON_OUT{0X16, 1, 1};
 
-/**
- * @brief CTRL8_XL (17h)
- */
-static constexpr RegisterField kCTRL8_XL(0X17, 0, 8);
-/**
- * @brief 加速度计LPF2和高通滤波器配置及截止频率设置
- */
-static constexpr RegisterField kHPCF_XL(0X17, 5, 3);
-/**
- * @brief 启用加速度计高通滤波器参考模式
- */
-static constexpr RegisterField kHP_REF_MODE_XL(0X17, 4, 1);
-/**
- * @brief 启用加速度计LPF2和HPF快速稳定模式
- */
-static constexpr RegisterField kFASTSETTL_MODE_XL(0X17, 3, 1);
-/**
- * @brief 加速度计斜率滤波器/高通滤波器选择
- */
-static constexpr RegisterField kHP_SLOPE_XL_EN(0X17, 2, 1);
-/**
- * @brief LPF2在6D功能上的选择
- */
-static constexpr RegisterField kLOW_PASS_ON_6D(0X17, 0, 1);
+  /**
+   * @brief CTRL8_XL (17h)
+   */
+  static constexpr Register kCTRL8_XL{0X17, 0, 8};
+  /**
+   * @brief 加速度计LPF2和高通滤波器配置及截止频率设置
+   */
+  static constexpr Register kHPCF_XL{0X17, 5, 3};
+  /**
+   * @brief 加速度计高通滤波器参考模式使能
+   */
+  static constexpr Register kHP_REF_MODE_XL{0X17, 4, 1};
+  /**
+   * @brief 加速度计LPF2和HPF快速稳定模式使能
+   */
+  static constexpr Register kFASTSETTL_MODE_XL{0X17, 3, 1};
+  /**
+   * @brief 加速度计斜率滤波器/高通滤波器选择
+   */
+  static constexpr Register kHP_SLOPE_XL_EN{0X17, 2, 1};
+  /**
+   * @brief 6D功能的LPF2选择
+   */
+  static constexpr Register kLOW_PASS_ON_6D{0X17, 0, 1};
 
-/**
- * @brief STATUS_REG (1Eh)
- */
-static constexpr RegisterField kSTATUS_REG(0X1E, 0, 8);
-/**
- * @brief 温度新数据可用
- * @note 0：温度传感器输出没有可用的数据集
- * @note 1：温度传感器输出有新的数据集可用
- * @note 默认值：0
- */
-static constexpr RegisterField kTDA(0x1E, 2, 1);
-/**
- * @brief 陀螺仪新数据可用
- * @note 0：陀螺仪输出没有可用的数据集
- * @note 1：陀螺仪输出有新的数据集可用
- * @note 默认值：0
- */
-static constexpr RegisterField kGDA(0x1E, 1, 1);
-/**
- * @brief 加速度计新数据可用
- * @note 0：加速度计输出没有可用的数据集
- * @note 1：加速度计输出有新的数据集可用
- * @note 默认值：0
- */
-static constexpr RegisterField kXLDA(0x1E, 0, 1);
+  /**
+   * @brief STATUS_REG (1Eh)
+   */
+  static constexpr Register kSTATUS_REG{0X1E, 0, 8};
+  /**
+   * @brief 温度数据可用标志
+   */
+  static constexpr Register kTDA{0x1E, 2, 1};
+  /**
+   * @brief 陀螺仪数据可用标志
+   */
+  static constexpr Register kGDA{0x1E, 1, 1};
+  /**
+   * @brief 加速度计数据可用标志
+   */
+  static constexpr Register kXLDA{0x1E, 0, 1};
 
-/**
- * @brief 温度输出(20h,21h)
- */
-static constexpr RegisterField kOUT_TEMP(0x20, 0, 8);
-/**
- * @brief 温度数据输出低字节
- */
-static constexpr RegisterField kOUT_TEMP_L(0x20, 0, 8);
-/**
- * @brief 温度数据输出高字节
- */
-static constexpr RegisterField kOUT_TEMP_H(0x21, 0, 8);
+  /**
+   * @brief 温度数据输出寄存器
+   */
+  static constexpr Register kOUT_TEMP{0x20, 0, 8};
+  /**
+   * @brief 温度数据输出寄存器低字节
+   */
+  static constexpr Register kOUT_TEMP_L{0x20, 0, 8};
+  /**
+   * @brief 温度数据输出寄存器高字节
+   */
+  static constexpr Register kOUT_TEMP_H{0x21, 0, 8};
 
-/**
- * @brief 陀螺仪X轴输出 (22h,23h)
- */
-static constexpr RegisterField kOUTX_G(0x22, 0, 8);
-/**
- * @brief 陀螺仪X轴数据输出低字节
- */
-static constexpr RegisterField kOUTX_L_G(0x22, 0, 8);
-/**
- * @brief 陀螺仪X轴数据输出高字节
- */
-static constexpr RegisterField kOUTX_H_G(0x23, 0, 8);
+  /**
+   * @brief 陀螺仪X轴角速度数据输出寄存器
+   */
+  static constexpr Register kOUTX_G{0x22, 0, 8};
+  /**
+   * @brief 陀螺仪X轴角速度数据输出寄存器低字节
+   */
+  static constexpr Register kOUTX_L_G{0x22, 0, 8};
+  /**
+   * @brief 陀螺仪X轴角速度数据输出寄存器高字节
+   */
+  static constexpr Register kOUTX_H_G{0x23, 0, 8};
 
-/**
- * @brief 陀螺仪Y轴输出 (24h,25h)
- */
-static constexpr RegisterField kOUTY_G(0x24, 0, 8);
-/**
- * @brief 陀螺仪Y轴数据输出低字节
- */
-static constexpr RegisterField kOUTY_L_G(0x24, 0, 8);
-/**
- * @brief 陀螺仪Y轴数据输出高字节
- */
-static constexpr RegisterField kOUTY_H_G(0x25, 0, 8);
+  /**
+   * @brief 陀螺仪Y轴角速度数据输出寄存器
+   */
+  static constexpr Register kOUTY_G{0x24, 0, 8};
+  /**
+   * @brief 陀螺仪Y轴角速度数据输出寄存器低字节
+   */
+  static constexpr Register kOUTY_L_G{0x24, 0, 8};
+  /**
+   * @brief 陀螺仪Y轴角速度数据输出寄存器高字节
+   */
+  static constexpr Register kOUTY_H_G{0x25, 0, 8};
 
-/**
- * @brief 陀螺仪Z轴输出 (26h,27h)
- */
-static constexpr RegisterField kOUTZ_G(0x26, 0, 8);
-/**
- * @brief 陀螺仪Z轴数据输出低字节
- */
-static constexpr RegisterField kOUTZ_L_G(0x26, 0, 8);
-/**
- * @brief 陀螺仪Z轴数据输出高字节
- */
-static constexpr RegisterField kOUTZ_H_G(0x27, 0, 8);
+  /**
+   * @brief 陀螺仪Z轴角速度数据输出寄存器
+   */
+  static constexpr Register kOUTZ_G{0x26, 0, 8};
+  /**
+   * @brief 陀螺仪Z轴角速度数据输出寄存器低字节
+   */
+  static constexpr Register kOUTZ_L_G{0x26, 0, 8};
+  /**
+   * @brief 陀螺仪Z轴角速度数据输出寄存器高字节
+   */
+  static constexpr Register kOUTZ_H_G{0x27, 0, 8};
 
-/**
- * @brief 加速度计X轴输出 (28h,29h)
- */
-static constexpr RegisterField kOUTX_A(0x28, 0, 8);
-/**
- * @brief 加速度计X轴数据输出低字节
- */
-static constexpr RegisterField kOUTX_L_A(0x28, 0, 8);
-/**
- * @brief 加速度计X轴数据输出高字节
- */
-static constexpr RegisterField kOUTX_H_A(0x29, 0, 8);
+  /**
+   * @brief 加速度计X轴加速度数据输出寄存器
+   */
+  static constexpr Register kOUTX_A{0x28, 0, 8};
+  /**
+   * @brief 加速度计X轴加速度数据输出寄存器低字节
+   */
+  static constexpr Register kOUTX_L_A{0x28, 0, 8};
+  /**
+   * @brief 加速度计X轴加速度数据输出寄存器高字节
+   */
+  static constexpr Register kOUTX_H_A{0x29, 0, 8};
 
-/**
- * @brief 加速度计Y轴输出 (2Ah,2Bh)
- */
-static constexpr RegisterField kOUTY_A(0x2A, 0, 8);
-/**
- * @brief 加速度计Y轴数据输出低字节
- */
-static constexpr RegisterField kOUTY_L_A(0x2A, 0, 8);
-/**
- * @brief 加速度计Y轴数据输出高字节
- */
-static constexpr RegisterField kOUTY_H_A(0x2B, 0, 8);
+  /**
+   * @brief 加速度计Y轴加速度数据输出寄存器
+   */
+  static constexpr Register kOUTY_A{0x2A, 0, 8};
+  /**
+   * @brief 加速度计Y轴加速度数据输出寄存器低字节
+   */
+  static constexpr Register kOUTY_L_A{0x2A, 0, 8};
+  /**
+   * @brief 加速度计Y轴加速度数据输出寄存器高字节
+   */
+  static constexpr Register kOUTY_H_A{0x2B, 0, 8};
 
-/**
- * @brief 加速度计Z轴输出 (2Ch,2Dh)
- */
-static constexpr RegisterField kOUTZ_A(0x2C, 0, 8);
-/**
- * @brief 加速度计Z轴数据输出低字节
- */
-static constexpr RegisterField kOUTZ_L_A(0x2C, 0, 8);
-/**
- * @brief 加速度计Z轴数据输出高字节
- */
-static constexpr RegisterField kOUTZ_H_A(0x2D, 0, 8);
-};  // namespace LSM6DSOWRegs
+  /**
+   * @brief 加速度计Z轴加速度数据输出寄存器
+   */
+  static constexpr Register kOUTZ_A{0x2C, 0, 8};
+  /**
+   * @brief 加速度计Z轴加速度数据输出寄存器低字节
+   */
+  static constexpr Register kOUTZ_L_A{0x2C, 0, 8};
+  /**
+   * @brief 加速度计Z轴加速度数据输出寄存器高字节
+   */
+  static constexpr Register kOUTZ_H_A{0x2D, 0, 8};
+};  // struct LSM6DSOWRegs
 }  // namespace LSM6DSOW
 }  // namespace hortor_servo
