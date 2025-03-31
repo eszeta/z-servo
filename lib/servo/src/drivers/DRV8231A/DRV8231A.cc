@@ -20,18 +20,11 @@
 namespace hortor_servo {
 namespace DRV8231A {
 
-void DRV8231A::InitDriver(const uint8_t pin_a, const uint8_t pin_b) {
+void DRV8231A::Init(const uint8_t pin_a, const uint8_t pin_b) {
   pin_a_ = pin_a;
   pin_b_ = pin_b;
   pinMode(pin_a_, OUTPUT);
   pinMode(pin_b_, OUTPUT);
-}
-
-void DRV8231A::InitCurrentSensor(const uint8_t pin_adc, const uint16_t shunt_resistor, const float factor) {
-  pin_adc_ = pin_adc;
-  pinMode(pin_adc_, INPUT);
-  CalibrateOffsets();
-  gain_ = 1.0f / shunt_resistor / (factor / 1e6f);
 }
 
 void DRV8231A::SetPWM(float pwm) {
@@ -48,26 +41,5 @@ void DRV8231A::SetPWM(float pwm) {
     analogWrite(pin_b_, 0);
   }
 }
-
-void DRV8231A::CalibrateOffsets() {
-  offset_ = 0;
-  if (!pin_adc_) return;
-  constexpr int calibration_rounds = 1000;
-  for (int i = 0; i < calibration_rounds; i++) {
-    offset_ += ReadADCVoltage();
-    delay(1);
-  }
-  offset_ /= calibration_rounds;
-}
-
-float DRV8231A::GetCurrent() {
-  if (!pin_adc_) {
-    return 0;
-  }
-  const float current = ReadADCVoltage();
-  return (current - offset_) * gain_;
-}
-
-float DRV8231A::ReadADCVoltage() { return static_cast<float>(analogRead(pin_adc_)) * kAdcVoltageConv; }
 }  // namespace DRV8231A
 }  // namespace hortor_servo

@@ -23,22 +23,14 @@ namespace DRV8231A {
  * @brief DRV8231A电机驱动器
  * @details 使用两个PWM输出控制电机正反转
  */
-class DRV8231A final : public MotorDriver, public Current {
+class DRV8231A final : public MotorDriver {
  public:
   /**
    * @brief 初始化电机驱动器
    * @param pin_a 正转PWM输出引脚
    * @param pin_b 反转PWM输出引脚
    */
-  void InitDriver(const uint8_t pin_a, const uint8_t pin_b);
-
-  /**
-   * @brief 使用指定参数初始化电流传感器
-   * @param pin_adc ADC引脚编号
-   * @param shunt_resistor 分流电阻值（欧姆）
-   * @param factor 电流镜像比例因子（µA/A）
-   */
-  void InitCurrentSensor(const uint8_t pin_adc, const uint16_t shunt_resistor, const float factor);
+  void Init(const uint8_t pin_a, const uint8_t pin_b);
 
   /**
    * @brief 设置PWM输出
@@ -46,38 +38,11 @@ class DRV8231A final : public MotorDriver, public Current {
    */
   void SetPWM(float pwm) override;
 
-  /**
-   * @brief 获取当前电流值
-   * @return float 当前测量的电流值（安培）
-   */
-  float GetCurrent() override;
-
  private:
-  /** @brief ADC电压转换系数 */
-  constexpr static float kAdcVoltageConv = 3.3f / 1024.0f;
-
-  /**
-   * @brief 校准ADC零点偏移
-   * @details 通过多次采样计算ADC的零点偏移值
-   */
-  void CalibrateOffsets();
-
-  /**
-   * @brief 读取ADC电压值
-   * @return float ADC测量的电压值
-   */
-  float ReadADCVoltage();
-
   /** @brief PWMA输出引脚 */
   uint8_t pin_a_;
   /** @brief PWMB输出引脚 */
   uint8_t pin_b_;
-  /** @brief ADC引脚编号 */
-  uint8_t pin_adc_;
-  /** @brief 增益系数 */
-  float gain_;
-  /** @brief ADC修正值 */
-  float offset_;
 };
 }  // namespace DRV8231A
 }  // namespace hortor_servo

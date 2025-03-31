@@ -20,8 +20,7 @@
 namespace hortor_servo {
 namespace MP6515 {
 
-void MP6515::InitDriver(const uint8_t pin_phase, const uint8_t pin_enbl, const uint8_t pin_brake,
-                        const uint8_t pin_sleep) {
+void MP6515::Init(const uint8_t pin_phase, const uint8_t pin_enbl, const uint8_t pin_brake, const uint8_t pin_sleep) {
   pin_phase_ = pin_phase;
   pin_enbl_ = pin_enbl;
   pin_brake_ = pin_brake;
@@ -38,13 +37,6 @@ void MP6515::InitDriver(const uint8_t pin_phase, const uint8_t pin_enbl, const u
   digitalWrite(pin_sleep_, 1);
 }
 
-void MP6515::InitCurrentSensor(const uint8_t pin_adc, const uint16_t shunt_resistor, const uint16_t factor) {
-  pin_visen_ = pin_adc;
-  pinMode(pin_visen_, INPUT);
-  CalibrateOffsets();
-  gain_ = 1.0f / shunt_resistor / (factor / 1e6f);
-}
-
 void MP6515::SetPWM(float pwm) {
   if (pwm > 0.0f) {
     pwm = constrain(pwm, 0.0f, 1.0f);
@@ -59,26 +51,5 @@ void MP6515::SetPWM(float pwm) {
     digitalWrite(pin_enbl_, 0);
   }
 }
-
-void MP6515::CalibrateOffsets() {
-  offset_ = 0;
-  if (!pin_visen_) return;
-  constexpr int calibration_rounds = 1000;
-  for (int i = 0; i < calibration_rounds; i++) {
-    offset_ += ReadADCVoltage();
-    delay(1);
-  }
-  offset_ /= calibration_rounds;
-}
-
-float MP6515::GetCurrent() {
-  if (!pin_visen_) {
-    return 0;
-  }
-  const float current = ReadADCVoltage();
-  return (current - offset_) * gain_;
-}
-
-float MP6515::ReadADCVoltage() { return static_cast<float>(analogRead(pin_visen_)) * kAdcVoltageConv; }
 }  // namespace MP6515
 }  // namespace hortor_servo
