@@ -47,7 +47,7 @@ Error InstAccessor::RecoveryEeprom() {
   WriteRegField(Regs::kId, RegsDefaultValues::kDefId);
   WriteRegField(Regs::kBaudrate, RegsDefaultValues::kDefBaudrate);
   WriteRegField(Regs::kResponseDelay, RegsDefaultValues::kDefResponseDelay);
-  WriteRegField(Regs::kResponseLevel, RegsDefaultValues::kDefResponseStatusLevel);
+  WriteRegField(Regs::kResponseLevel, RegsDefaultValues::kDefResponseLevel);
 
   // 角度限制
   WriteRegField(Regs::kMinPositionL, RegsDefaultValues::kDefMinPositionL);
@@ -74,10 +74,10 @@ Error InstAccessor::RecoveryEeprom() {
   WriteRegField(Regs::kLedAlarmCondition, RegsDefaultValues::kDefLedAlarmCondition);
 
   // 位置环PID参数
-  WriteRegField(Regs::kPosProportionalGain, RegsDefaultValues::kDefPosProportionalGain);
-  WriteRegField(Regs::kPosDerivativeGain, RegsDefaultValues::kDefPosDerivativeGain);
-  WriteRegField(Regs::kPosIntegralGain, RegsDefaultValues::kDefPosIntegralGain);
-  WriteRegField(Regs::kIntegralLimit, RegsDefaultValues::kDefIntegralLimit);
+  WriteRegField(Regs::kPosPidKp, RegsDefaultValues::kDefPosPidKp);
+  WriteRegField(Regs::kPosPidKd, RegsDefaultValues::kDefPosPidKd);
+  WriteRegField(Regs::kPosPidKi, RegsDefaultValues::kDefPosPidKi);
+  WriteRegField(Regs::kPosPidLimit, RegsDefaultValues::kDefPosPidLimit);
 
   // 最小启动力
   WriteRegField(Regs::kMinStartupForce, RegsDefaultValues::kDefMinStartupForce);
@@ -107,8 +107,8 @@ Error InstAccessor::RecoveryEeprom() {
   WriteRegField(Regs::kOverloadTorque, RegsDefaultValues::kDefOverloadTorque);
 
   // 速度环PID参数
-  WriteRegField(Regs::kVelocityProportionalGain, RegsDefaultValues::kDefVelocityProportionalGain);
-  WriteRegField(Regs::kVelocityIntegralGain, RegsDefaultValues::kDefVelocityIntegralGain);
+  WriteRegField(Regs::kVelPidKp, RegsDefaultValues::kDefVelPidKp);
+  WriteRegField(Regs::kVelPidKi, RegsDefaultValues::kDefVelPidKi);
 
   //-----------内部EEPROM（读写）-------------------
   //
@@ -123,7 +123,7 @@ Error InstAccessor::RecoveryEeprom() {
   WriteRegField(Regs::kVelocityFilter, RegsDefaultValues::kDefVelocityFilter);
 
   // 位置PID
-  WriteRegField(Regs::kPosPidFf, RegsDefaultValues::kDefPosPidFf);
+  WriteRegField(Regs::kPosPidKf, RegsDefaultValues::kDefPosPidFf);
   WriteRegField(Regs::kPosPidRamp, RegsDefaultValues::kDefPosPidRamp);
   return Error::kOk;
 }
@@ -193,7 +193,7 @@ Error InstAccessor::ResetRam() {
   WriteRegField(Regs::kPresentTemperature, 0);
 
   // 异步写标志
-  WriteRegField(Regs::kAsynchronousWriteSt, 0);
+  WriteRegField(Regs::kAsynWriteSt, 0);
 
   // 舵机状态
   WriteRegField(Regs::kStatus, 0);

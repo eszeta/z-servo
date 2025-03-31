@@ -137,18 +137,18 @@ struct ServoRegs {
    * @brief 位置环P比例系数 [0-254]
    * 控制电机的比例系数
    */
-  static constexpr const Register kPosProportionalGain{0x15, 0, 8};
+  static constexpr const Register kPosPidKp{0x15, 0, 8};
   /**
    * @brief 位置环D微分系数 [0-254]
    * 控制电机的微分系数
    */
-  static constexpr const Register kPosDerivativeGain{0x16, 0, 8};
+  static constexpr const Register kPosPidKd{0x16, 0, 8};
   /**
    * @brief 位置环I积分系数 [0-254]
    * 单位:0.1
    * 控制电机的积分系数
    */
-  static constexpr const Register kPosIntegralGain{0x17, 0, 8};
+  static constexpr const Register kPosPidKi{0x17, 0, 8};
   /**
    * @brief 最小启动力 [0-254]
    * 单位:0.1%
@@ -159,7 +159,7 @@ struct ServoRegs {
    * @brief 积分限制值 [0-254]
    * 最大积分值=积分限制值*4,0表示关闭积分限制功能，位置模式0与步进模式3生效
    */
-  static constexpr const Register kIntegralLimit{0x19, 0, 8};
+  static constexpr const Register kPosPidLimit{0x19, 0, 8};
   /**
    * @brief 顺时针不灵敏区 [0-32]
    * 单位:步
@@ -224,7 +224,7 @@ struct ServoRegs {
    * 单位:0.1
    * 电机恒速模式（模式1）下,速度环比例系数
    */
-  static constexpr const Register kVelocityProportionalGain{0x25, 0, 8};
+  static constexpr const Register kVelPidKp{0x25, 0, 8};
   /**
    * @brief 过流保护时间 [0-254]
    * 单位:10ms
@@ -236,7 +236,7 @@ struct ServoRegs {
    * 单位:0.1
    * 电机恒速模式（模式1）下,速度环积分系数（变动备注：速度闭环I积分系数缩小10倍较3.6版本）
    */
-  static constexpr const Register kVelocityIntegralGain{0x27, 0, 8};
+  static constexpr const Register kVelPidKi{0x27, 0, 8};
 
   //-----------RAM（读写）-------------------
 
@@ -325,7 +325,7 @@ struct ServoRegs {
    * @brief 异步写标志 [0-1]
    * 采用异步写指令时，标志位被置1表示相应错误出现,对应位0为无相应该错误,详见特殊字节位解析
    */
-  static constexpr const Register kAsynchronousWriteSt{0x40, 0, 8};
+  static constexpr const Register kAsynWriteSt{0x40, 0, 8};
   /**
    * @brief 舵机状态 [0-1]
    * 对应位被置1表示相应错误出现,对应位0为无相应该错误,详见特殊字节位解析
@@ -384,7 +384,7 @@ struct ServoRegs {
    * @brief 位置PID控制器前馈增益
    * 单位:0.1
    */
-  static constexpr const Register kPosPidFf{0x64, 0, 8};
+  static constexpr const Register kPosPidKf{0x64, 0, 8};
   /**
    * @brief 位置PID控制器斜坡增益
    * 单位:0.1
@@ -404,7 +404,7 @@ struct RegsDefaultValues {
   static constexpr uint8_t kDefId = 1;
   static constexpr uint8_t kDefBaudrate = 0;
   static constexpr uint8_t kDefResponseDelay = 250;
-  static constexpr uint8_t kDefResponseStatusLevel = 1;
+  static constexpr uint8_t kDefResponseLevel = 1;
 
   // 角度限制初始值
   static constexpr uint8_t kDefMinPositionL = 0 & 0xFF;  // 0
@@ -422,15 +422,15 @@ struct RegsDefaultValues {
   static constexpr uint8_t kDefMaxTorqueH = (1000 >> 8) & 0xFF;
 
   // PID参数初始值
-  static constexpr uint8_t kDefPosProportionalGain = 0;
-  static constexpr uint8_t kDefPosDerivativeGain = 0;
-  static constexpr uint8_t kDefPosIntegralGain = 0;
+  static constexpr uint8_t kDefPosPidKp = 1;
+  static constexpr uint8_t kDefPosPidKd = 0;
+  static constexpr uint8_t kDefPosPidKi = 0;
 
   // 最小启动力初始值
   static constexpr uint8_t kDefMinStartupForce = 0;
 
   // 积分限制初始值
-  static constexpr uint8_t kDefIntegralLimit = 0;
+  static constexpr uint8_t kDefPosPidLimit = 0;
 
   // 不灵敏区初始值
   static constexpr uint8_t kDefCWInsensitiveArea = 1;
@@ -450,9 +450,9 @@ struct RegsDefaultValues {
   static constexpr uint8_t kDefTorqueProtectionTh = 20;
   static constexpr uint8_t kDefTorqueProtectionTime = 200;
   static constexpr uint8_t kDefOverloadTorque = 80;
-  static constexpr uint8_t kDefVelocityProportionalGain = 0;
+  static constexpr uint8_t kDefVelPidKp = 0;
   static constexpr uint8_t kDefOvercurrentProtectionTime = 200;
-  static constexpr uint8_t kDefVelocityIntegralGain = 0;
+  static constexpr uint8_t kDefVelPidKi = 0;
 
   // 结束标志初始值
   static constexpr uint8_t kDefEnd = 0;
@@ -486,8 +486,7 @@ struct RegsBlock {
 };
 
 struct RegsBlocks {
-  constexpr static RegsBlock kEeprom = {ServoRegs::kFirmwareMajor.address,
-                                        ServoRegs::kVelocityIntegralGain.address + 1};
+  constexpr static RegsBlock kEeprom = {ServoRegs::kFirmwareMajor.address, ServoRegs::kVelPidKi.address + 1};
   constexpr static RegsBlock kNormalRam = {ServoRegs::kTorqueEnable.address, ServoRegs::kWriteLock.address + 1};
   constexpr static RegsBlock kReadOnlyRam = {ServoRegs::kPresentPositionL.address,
                                              static_cast<uint8_t>(ServoRegs::kPresentCurrentH.address + 1)};

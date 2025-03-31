@@ -94,7 +94,7 @@ class Servo {
   float present_load_;
   float present_voltage_;
   float present_current_;
-  float present_temperature_;
+  uint8_t present_temperature_;
 
   uint8_t error_status_;
   bool moving_;
