@@ -394,54 +394,54 @@ struct ServoRegs {
 
 struct RegsDefaultValues {
   // EEPROM（只读）
-  static constexpr uint8_t kDefFirmwareMajor = 1;      // 0x00
-  static constexpr uint8_t kDefFirmwareMinor = 0;      // 0x01
-  static constexpr uint8_t kDefEnd = 0;                // 0x02
-  static constexpr uint8_t kDefServoMajor = 9;         // 0x03
-  static constexpr uint8_t kDefServoMinor = 0;         // 0x04
+  static constexpr uint8_t kDefFirmwareMajor = 1;  // 0x00
+  static constexpr uint8_t kDefFirmwareMinor = 0;  // 0x01
+  static constexpr uint8_t kDefEnd = 0;            // 0x02
+  static constexpr uint8_t kDefServoMajor = 9;     // 0x03
+  static constexpr uint8_t kDefServoMinor = 0;     // 0x04
 
   // EEPROM（读写）
-  static constexpr uint8_t kDefId = 1;                 // 0x05
-  static constexpr uint8_t kDefBaudrate = 0;           // 0x06
-  static constexpr uint16_t kDefResponseDelay = 500;    // 0x07
-  static constexpr bool kDefResponseLevel = true;      // 0x08
-  static constexpr uint16_t kDefMinPosition = 0;       // 0x09-0x0A
-  static constexpr uint16_t kDefMaxPosition = 4095;    // 0x0B-0x0C
-  static constexpr uint8_t kDefMaxTemperature = 70;    // 0x0D
-  static constexpr float kDefMaxVoltage = 7.4f;         // 0x0E
-  static constexpr float kDefMinVoltage = 4.0f;         // 0x0F
-  static constexpr uint16_t kDefMaxTorque = 1;         // 0x10-0x11
-  static constexpr uint8_t kDefOption = 0;             // 0x12
-  static constexpr uint8_t kDefUnloadCondition = 44;   // 0x13
-  static constexpr uint8_t kDefLedAlarmCondition = 47; // 0x14
-  static constexpr float kDefPosPidKp = 1.0f;           // 0x15
-  static constexpr float kDefPosPidKd = 0.0f;           // 0x16
-  static constexpr float kDefPosPidKi = 0.0f;           // 0x17
-  static constexpr float kDefMinStartupForce = 0.0f;    // 0x18
-  static constexpr float kDefPosPidLimit = 0.0f;        // 0x19
-  static constexpr uint8_t kDefCWInsensitiveArea = 1;  // 0x1A
-  static constexpr uint8_t kDefCCWInsensitiveArea = 1; // 0x1B
-  static constexpr float kDefCurrentProtectionTh = 0.0f; // 0x1C-0x1D
-  static constexpr uint8_t kDefAngularResolution = 1;  // 0x1E
-  static constexpr uint16_t kDefPositionCorrection = 0; // 0x1F-0x20
-  static constexpr ServoMode kDefMode = ServoMode::kPosition; // 0x21
-  static constexpr float kDefTorqueProtectionTh = 0.2f; // 0x22
-  static constexpr uint16_t kDefTorqueProtectionTime = 2000; // 0x23
-  static constexpr float kDefOverloadTorque = 0.0f;    // 0x24
-  static constexpr float kDefVelPidKp = 0.0f;           // 0x25
-  static constexpr uint16_t kDefOvercurrentProtectionTime = 2000; // 0x26
-  static constexpr float kDefVelPidKi = 0.0f;           // 0x27
+  static constexpr uint8_t kDefId = 1;                             // 0x05
+  static constexpr uint8_t kDefBaudrate = 0;                       // 0x06
+  static constexpr uint16_t kDefResponseDelay = 500;               // 0x07
+  static constexpr bool kDefResponseLevel = true;                  // 0x08
+  static constexpr uint16_t kDefMinPosition = 0;                   // 0x09-0x0A
+  static constexpr uint16_t kDefMaxPosition = 4095;                // 0x0B-0x0C
+  static constexpr uint8_t kDefMaxTemperature = 70;                // 0x0D
+  static constexpr float kDefMaxVoltage = 7.4f;                    // 0x0E
+  static constexpr float kDefMinVoltage = 4.0f;                    // 0x0F
+  static constexpr uint16_t kDefMaxTorque = 1;                     // 0x10-0x11
+  static constexpr uint8_t kDefOption = 0;                         // 0x12
+  static constexpr uint8_t kDefUnloadCondition = 44;               // 0x13
+  static constexpr uint8_t kDefLedAlarmCondition = 47;             // 0x14
+  static constexpr float kDefPosPidKp = 1.0f;                      // 0x15
+  static constexpr float kDefPosPidKd = 0.0f;                      // 0x16
+  static constexpr float kDefPosPidKi = 0.0f;                      // 0x17
+  static constexpr float kDefMinStartupForce = 0.0f;               // 0x18
+  static constexpr float kDefPosPidLimit = 0.0f;                   // 0x19
+  static constexpr uint8_t kDefCWInsensitiveArea = 1;              // 0x1A
+  static constexpr uint8_t kDefCCWInsensitiveArea = 1;             // 0x1B
+  static constexpr float kDefCurrentProtectionTh = 0.0f;           // 0x1C-0x1D
+  static constexpr uint8_t kDefAngularResolution = 1;              // 0x1E
+  static constexpr uint16_t kDefPositionCorrection = 0;            // 0x1F-0x20
+  static constexpr ServoMode kDefMode = ServoMode::kPosition;      // 0x21
+  static constexpr float kDefTorqueProtectionTh = 0.2f;            // 0x22
+  static constexpr uint16_t kDefTorqueProtectionTime = 2000;       // 0x23
+  static constexpr float kDefOverloadTorque = 0.0f;                // 0x24
+  static constexpr float kDefVelPidKp = 0.0f;                      // 0x25
+  static constexpr uint16_t kDefOvercurrentProtectionTime = 2000;  // 0x26
+  static constexpr float kDefVelPidKi = 0.0f;                      // 0x27
 
   // 内部EEPROM（读写）
-  static constexpr Direction kDefMotorDirection = Direction::CCW; // 0x60
-  static constexpr Direction kDefSensorDirection = Direction::CW; // 0x61
-  static constexpr uint16_t kDefAdcShuntResistor = 1000;  // 0x62
-  static constexpr uint16_t kDefAdcCurrentFactor = 1500; // 0x63
-  static constexpr uint8_t kDefPosPidFf = 0;           // 0x64
-  static constexpr uint8_t kDefPosPidRamp = 0;         // 0x68
-  static constexpr uint8_t kDefPosFilter = 5;          // 0x6C
-  static constexpr uint8_t kDefCurrentFilter = 5;      // 0x70
-  static constexpr uint8_t kDefVelocityFilter = 0;     // 0x74
+  static constexpr Direction kDefMotorDirection = Direction::CCW;  // 0x60
+  static constexpr Direction kDefSensorDirection = Direction::CW;  // 0x61
+  static constexpr uint16_t kDefAdcShuntResistor = 1000;           // 0x62
+  static constexpr uint16_t kDefAdcCurrentFactor = 1500;           // 0x63
+  static constexpr uint8_t kDefPosPidFf = 0;                       // 0x64
+  static constexpr uint8_t kDefPosPidRamp = 0;                     // 0x68
+  static constexpr uint8_t kDefPosFilter = 5;                      // 0x6C
+  static constexpr uint8_t kDefCurrentFilter = 5;                  // 0x70
+  static constexpr uint8_t kDefVelocityFilter = 0;                 // 0x74
 };
 
 struct RegsBlock {
@@ -487,7 +487,7 @@ enum class PacketState : uint8_t {
   kChecksum,
 };
 
-static constexpr uint32_t kBaudrateTable[] = {1000000, 500000, 400000, 256000, 230400, 115200, 76800};
+static constexpr uint32_t kBaudrateTable[] = {1000000, 500000, 250000, 128000, 115200, 76800, 57600, 38400};
 
 struct __attribute__((packed)) InstPacket {
   uint16_t header;
