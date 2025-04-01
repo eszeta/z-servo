@@ -31,14 +31,14 @@ class Servo {
   uint8_t GetErrorStatus() { return error_status_; }
   bool GetMoving() { return moving_; }
   int16_t GetTargetPosition() { return target_position_; }
-  MotorMode GetMode() { return mode_; }
+  ServoMode GetMode() { return mode_; }
   PidController &GetPosPid() { return pos_pid_; }
   PidController &GetVelPid() { return velocity_pid_; }
   LowPassFilter &GetCurrentLpf() { return current_lpf_; }
   LowPassFilter &GetVelocityLpf() { return velocity_lpf_; }
   LowPassFilter &GetPosLpf() { return pos_lpf_; }
 
-  void SetMode(MotorMode mode) { mode_ = mode; }
+  void SetMode(ServoMode mode) { mode_ = mode; }
   void SetMinPosition(uint16_t min_position) { min_position_ = min_position; }
   void SetMaxPosition(uint16_t max_position) { max_position_ = max_position; }
   void SetMaxTemperature(uint8_t max_temperature) { max_temperature_ = max_temperature; }
@@ -99,7 +99,7 @@ class Servo {
   uint8_t error_status_;
   bool moving_;
 
-  MotorMode mode_;
+  ServoMode mode_;
 
   uint16_t min_position_;
   uint16_t max_position_;

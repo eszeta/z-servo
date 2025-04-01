@@ -146,7 +146,7 @@ Error Inst::LoadEepromConfig() {
   pos_pid.SetKd(accessor_->GetPosPidKd());
   pos_pid.SetFf(accessor_->GetPosPidFf());
   pos_pid.SetRamp(accessor_->GetPosPidRamp());
-  if (mode == MotorMode::kPosition || mode == MotorMode::kStep) {
+  if (mode == ServoMode::kPosition || mode == ServoMode::kStep) {
     pos_pid.SetLimit(accessor_->GetPosPidLimit());
   } else {
     pos_pid.SetLimit(0);
@@ -185,7 +185,7 @@ Error Inst::LoadRamConfig() {
   const auto target_position = accessor_->GetTargetPosition();
   servo_->SetTargetPosition(target_position);
 
-  if (mode == MotorMode::kPwm) {
+  if (mode == ServoMode::kPwm) {
     servo_->SetTargetTime(0);
     servo_->SetTargetPwm(accessor_->GetTargetPwm());
   } else {
@@ -367,7 +367,7 @@ Error Inst::RegWriteHandler(const InstPacket *packet, const bool response) {
   }
   memcpy(async_write_buffer_ + buffer_size_, tx_buffer_, size);
   buffer_size_ += size;
-  accessor_->SetAsynWrite(true);
+  accessor_->SetAsyncWrite(true);
   if (response) {
     CHECK_ERROR(Response(0, nullptr, 0));
   }
@@ -395,7 +395,7 @@ Error Inst::ActionHandler(const InstPacket *packet, const bool response) {
     buffer += packet_size;
   }
   buffer_size_ = 0;
-  accessor_->SetAsynWrite(false);
+  accessor_->SetAsyncWrite(false);
   if (response) {
     CHECK_ERROR(Response(0, nullptr, 0));
   }

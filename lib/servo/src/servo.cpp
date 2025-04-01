@@ -27,7 +27,7 @@ void Servo::Process(uint32_t dt) {
     setPower(0, true);
   } else {
     switch (mode_) {
-      case MotorMode::kPosition: {
+      case ServoMode::kPosition: {
         position_set_ = target_position_;
         pwm_set_ = pos_pid_.Compute(position_set_ - present_position_, dt);
         voltage_set_ = max_voltage_ * pwm_set_;

@@ -22,11 +22,11 @@
 
 namespace hortor_servo {
 using Regs = ServoRegs;
-
+using Def = RegsDefaultValues;
 Error InstAccessor::Init() {
   CHECK_ERROR(local_transport_.Init(regs_, sizeof(regs_)));
   CHECK_ERROR(local_transport_.LinkAccessor(*this));
-  CHECK_ERROR(LoadEEPROM());
+  CHECK_ERROR(LoadEeprom());
   if (GetFirmwareMajor() == 0 && GetFirmwareMinor() == 0) {
     CHECK_ERROR(RecoveryEeprom());
     CHECK_ERROR(StoreEeprom());
@@ -37,98 +37,93 @@ Error InstAccessor::Init() {
 
 Error InstAccessor::RecoveryEeprom() {
   // 固件版本
-  WriteRegField(Regs::kFirmwareMajor, RegsDefaultValues::kDefFirmwareMajor);
-  WriteRegField(Regs::kFirmwareMinor, RegsDefaultValues::kDefFirmwareMinor);
-  WriteRegField(Regs::kEnd, RegsDefaultValues::kDefEnd);
-  WriteRegField(Regs::kServoMajor, RegsDefaultValues::kDefServoMajor);
-  WriteRegField(Regs::kServoMinor, RegsDefaultValues::kDefServoMinor);
+  SetFirmwareMajor(Def::kDefFirmwareMajor);
+  SetFirmwareMinor(Def::kDefFirmwareMinor);
+  SetEnd(Def::kDefEnd);
+  SetServoMajor(Def::kDefServoMajor);
+  SetServoMinor(Def::kDefServoMinor);
 
   // 基本参数
-  WriteRegField(Regs::kId, RegsDefaultValues::kDefId);
-  WriteRegField(Regs::kBaudrate, RegsDefaultValues::kDefBaudrate);
-  WriteRegField(Regs::kResponseDelay, RegsDefaultValues::kDefResponseDelay);
-  WriteRegField(Regs::kResponseLevel, RegsDefaultValues::kDefResponseLevel);
+  SetId(Def::kDefId);
+  SetBaudrate(Def::kDefBaudrate);
+  SetResponseDelay(Def::kDefResponseDelay);
+  SetResponseLevel(Def::kDefResponseLevel);
 
   // 角度限制
-  WriteRegField(Regs::kMinPositionL, RegsDefaultValues::kDefMinPositionL);
-  WriteRegField(Regs::kMinPositionH, RegsDefaultValues::kDefMinPositionH);
-  WriteRegField(Regs::kMaxPositionL, RegsDefaultValues::kDefMaxPositionL);
-  WriteRegField(Regs::kMaxPositionH, RegsDefaultValues::kDefMaxPositionH);
+  SetMinPosition(Def::kDefMinPosition);
+  SetMaxPosition(Def::kDefMaxPosition);
 
   // 温度和电压限制
-  WriteRegField(Regs::kMaxTemperature, RegsDefaultValues::kDefMaxTemperature);
-  WriteRegField(Regs::kMaxVoltage, RegsDefaultValues::kDefMaxVoltage);
-  WriteRegField(Regs::kMinVoltage, RegsDefaultValues::kDefMinVoltage);
+  SetMaxTemperature(Def::kDefMaxTemperature);
+  SetMaxVoltage(Def::kDefMaxVoltage);
+  SetMinVoltage(Def::kDefMinVoltage);
 
   // 扭矩相关
-  WriteRegField(Regs::kMaxTorqueL, RegsDefaultValues::kDefMaxTorqueL);
-  WriteRegField(Regs::kMaxTorqueH, RegsDefaultValues::kDefMaxTorqueH);
+  SetMaxTorque(Def::kDefMaxTorque);
 
   // 选项
-  WriteRegField(Regs::kOption, RegsDefaultValues::kDefOption);
+  SetOption(Def::kDefOption);
 
   // 卸载条件
-  WriteRegField(Regs::kUnloadCondition, RegsDefaultValues::kDefUnloadCondition);
+  SetUnloadCondition(Def::kDefUnloadCondition);
 
   // LED报警条件
-  WriteRegField(Regs::kLedAlarmCondition, RegsDefaultValues::kDefLedAlarmCondition);
+  SetLedAlarmCondition(Def::kDefLedAlarmCondition);
 
   // 位置环PID参数
-  WriteRegField(Regs::kPosPidKp, RegsDefaultValues::kDefPosPidKp);
-  WriteRegField(Regs::kPosPidKd, RegsDefaultValues::kDefPosPidKd);
-  WriteRegField(Regs::kPosPidKi, RegsDefaultValues::kDefPosPidKi);
-  WriteRegField(Regs::kPosPidLimit, RegsDefaultValues::kDefPosPidLimit);
+  SetPosPidKp(Def::kDefPosPidKp);
+  SetPosPidKd(Def::kDefPosPidKd);
+  SetPosPidKi(Def::kDefPosPidKi);
+  SetPosPidLimit(Def::kDefPosPidLimit);
 
   // 最小启动力
-  WriteRegField(Regs::kMinStartupForce, RegsDefaultValues::kDefMinStartupForce);
+  SetMinStartupForce(Def::kDefMinStartupForce);
 
   // 不灵敏区设置
-  WriteRegField(Regs::kCWInsensitiveArea, RegsDefaultValues::kDefCWInsensitiveArea);
-  WriteRegField(Regs::kCCWInsensitiveArea, RegsDefaultValues::kDefCCWInsensitiveArea);
+  SetCWInsensitiveArea(Def::kDefCWInsensitiveArea);
+  SetCCWInsensitiveArea(Def::kDefCCWInsensitiveArea);
 
   // 电流保护
-  WriteRegField(Regs::kCurrentProtectionThL, RegsDefaultValues::kDefCurrentProtectionThL);
-  WriteRegField(Regs::kCurrentProtectionThH, RegsDefaultValues::kDefCurrentProtectionThH);
-  WriteRegField(Regs::kOvercurrentProtectionTime, RegsDefaultValues::kDefOvercurrentProtectionTime);
+  SetCurrentProtectionThreshold(Def::kDefCurrentProtectionTh);
+  SetOvercurrentProtectionTime(Def::kDefOvercurrentProtectionTime);
 
   // 角度分辨率
-  WriteRegField(Regs::kAngularResolution, RegsDefaultValues::kDefAngularResolution);
+  SetAngularResolution(Def::kDefAngularResolution);
 
   // 位置校正
-  WriteRegField(Regs::kPositionCorrectionL, RegsDefaultValues::kDefPositionCorrectionL);
-  WriteRegField(Regs::kPositionCorrectionH, RegsDefaultValues::kDefPositionCorrectionH);
+  SetPositionCorrection(Def::kDefPositionCorrection);
 
   // 运行模式
-  WriteRegField(Regs::kMode, RegsDefaultValues::kDefMode);
+  SetMode(Def::kDefMode);
 
   // 扭矩保护
-  WriteRegField(Regs::kTorqueProtectionTh, RegsDefaultValues::kDefTorqueProtectionTh);
-  WriteRegField(Regs::kTorqueProtectionTime, RegsDefaultValues::kDefTorqueProtectionTime);
-  WriteRegField(Regs::kOverloadTorque, RegsDefaultValues::kDefOverloadTorque);
+  SetTorqueProtectionThreshold(Def::kDefTorqueProtectionTh);
+  SetTorqueProtectionTime(Def::kDefTorqueProtectionTime);
+  SetOverloadTorque(Def::kDefOverloadTorque);
 
   // 速度环PID参数
-  WriteRegField(Regs::kVelPidKp, RegsDefaultValues::kDefVelPidKp);
-  WriteRegField(Regs::kVelPidKi, RegsDefaultValues::kDefVelPidKi);
+  SetVelPidKp(Def::kDefVelPidKp);
+  SetVelPidKi(Def::kDefVelPidKi);
 
   //-----------内部EEPROM（读写）-------------------
   //
-  WriteRegField(Regs::kMotorDirection, RegsDefaultValues::kDefMotorDirection);
-  WriteRegField(Regs::kSensorDirection, RegsDefaultValues::kDefSensorDirection);
-  WriteRegField(Regs::kAdcShuntResistor, RegsDefaultValues::kDefAdcShuntResistor);
-  WriteRegField(Regs::kAdcCurrentFactor, RegsDefaultValues::kDefAdcCurrentFactor);
+  SetMotorDirection(Def::kDefMotorDirection);
+  SetSensorDirection(Def::kDefSensorDirection);
+  SetAdcShuntResistor(Def::kDefAdcShuntResistor);
+  SetAdcCurrentFactor(Def::kDefAdcCurrentFactor);
 
   // 位置滤波器
-  WriteRegField(Regs::kPosFilter, RegsDefaultValues::kDefPosFilter);
-  WriteRegField(Regs::kCurrentFilter, RegsDefaultValues::kDefCurrentFilter);
-  WriteRegField(Regs::kVelocityFilter, RegsDefaultValues::kDefVelocityFilter);
+  SetPosFilter(Def::kDefPosFilter);
+  SetCurrentFilter(Def::kDefCurrentFilter);
+  SetVelFilter(Def::kDefVelocityFilter);
 
   // 位置PID
-  WriteRegField(Regs::kPosPidKf, RegsDefaultValues::kDefPosPidFf);
-  WriteRegField(Regs::kPosPidRamp, RegsDefaultValues::kDefPosPidRamp);
+  SetPosPidFf(Def::kDefPosPidFf);
+  SetPosPidRamp(Def::kDefPosPidRamp);
   return Error::kOk;
 }
 
-Error InstAccessor::LoadEEPROM() {
+Error InstAccessor::LoadEeprom() {
 #ifdef ARDUINO_ARCH_STM32
   int pos = 0;
   for (uint8_t address = RegsBlocks::kEeprom.begin; address < RegsBlocks::kEeprom.end; address++) {
@@ -156,54 +151,46 @@ Error InstAccessor::StoreEeprom() {
 
 Error InstAccessor::ResetRam() {
   // 扭矩开关
-  WriteRegField(Regs::kTorqueEnable, 0);
+  SetTorqueEnable(false);
 
   // 动作
-  WriteRegField(Regs::kTargetAcceleration, 0);
-  WriteRegField(Regs::kTargetPositionL, 0);
-  WriteRegField(Regs::kTargetPositionH, 0);
-  WriteRegField(Regs::kTargetTimeL, 0);
-  WriteRegField(Regs::kTargetTimeH, 0);
-  WriteRegField(Regs::kTargetVelocityL, 0);
-  WriteRegField(Regs::kTargetVelocityH, 0);
+  SetTargetAcceleration(0);
+  SetTargetPosition(0);
+  SetTargetTime(0);
+  SetTargetVelocity(0);
 
   // 转矩限制
-  WriteRegField(Regs::kTorqueLimitL, GetUint8(Regs::kMaxTorqueL));
-  WriteRegField(Regs::kTorqueLimitH, GetUint8(Regs::kMaxTorqueH));
+  SetTorqueLimit(GetMaxTorque());
 
   // 写入锁
-  WriteRegField(Regs::kWriteLock, 0);
+  SetWriteLock(false);
 
   // 当前位置
-  WriteRegField(Regs::kPresentPositionL, 0);
-  WriteRegField(Regs::kPresentPositionH, 0);
+  SetPresentPosition(0);
 
   // 当前速度
-  WriteRegField(Regs::kPresentVelocityL, 0);
-  WriteRegField(Regs::kPresentVelocityH, 0);
+  SetPresentVelocity(0);
 
   // 当前负载
-  WriteRegField(Regs::kPresentLoadL, 0);
-  WriteRegField(Regs::kPresentLoadH, 0);
+  SetPresentLoad(0);
 
   // 当前电压
-  WriteRegField(Regs::kPresentVoltage, 0);
+  SetPresentVoltage(0);
 
   // 当前温度
-  WriteRegField(Regs::kPresentTemperature, 0);
+  SetPresentTemperature(0);
 
   // 异步写标志
-  WriteRegField(Regs::kAsynWriteSt, 0);
+  SetAsyncWrite(false);
 
   // 舵机状态
-  WriteRegField(Regs::kStatus, 0);
+  SetStatus(0);
 
   // 移动标志
-  WriteRegField(Regs::kMoving, 0);
+  SetMoving(false);
 
   // 当前电流
-  WriteRegField(Regs::kPresentCurrentL, 0);
-  WriteRegField(Regs::kPresentCurrentH, 0);
+  SetPresentCurrent(0);
   return Error::kOk;
 }
 }  // namespace hortor_servo

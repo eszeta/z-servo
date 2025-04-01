@@ -67,7 +67,7 @@ enum class Error : uint8_t {
 /**
  * @brief 电机控制类型
  */
-enum class MotorMode : uint8_t {
+enum class ServoMode : uint8_t {
   /**
    * @brief 位置伺服模式
    */

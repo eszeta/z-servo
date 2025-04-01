@@ -26,7 +26,7 @@ class InstAccessor : public RegisterAccessor {
 
   Error Init();
   Error RecoveryEeprom();
-  Error LoadEEPROM();
+  Error LoadEeprom();
   Error StoreEeprom();
   Error ResetRam();
 
@@ -41,6 +41,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置固件主版本号 (0x00)
+   * @param major 固件主版本号
+   */
+  void SetFirmwareMajor(const uint8_t major) { WriteRegField(Regs::kFirmwareMajor, major); }
+
+  /**
    * @brief 获取固件次版本号 (0x01)
    * @return 固件次版本号
    */
@@ -51,6 +57,60 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置固件次版本号 (0x01)
+   * @param minor 固件次版本号
+   */
+  void SetFirmwareMinor(const uint8_t minor) { WriteRegField(Regs::kFirmwareMinor, minor); }
+
+  /**
+   * @brief 获取结束标志 (0x02)
+   * @return 结束标志
+   */
+  uint8_t GetEnd() {
+    uint8_t end;
+    ReadRegField(Regs::kEnd, &end);
+    return end;
+  }
+
+  /**
+   * @brief 设置结束标志 (0x02)
+   * @param end 结束标志
+   */
+  void SetEnd(const uint8_t end) { WriteRegField(Regs::kEnd, end); }
+
+  /**
+   * @brief 获取舵机主版本号 (0x03)
+   * @return 舵机主版本号
+   */
+  uint8_t GetServoMajor() {
+    uint8_t major;
+    ReadRegField(Regs::kServoMajor, &major);
+    return major;
+  }
+
+  /**
+   * @brief 设置舵机主版本号 (0x03)
+   * @param major 舵机主版本号
+   */
+  void SetServoMajor(const uint8_t major) { WriteRegField(Regs::kServoMajor, major); }
+
+  /**
+   * @brief 获取舵机次版本号 (0x03)
+   * @return 舵机次版本号
+   */
+  uint8_t GetServoMinor() {
+    uint8_t minor;
+    ReadRegField(Regs::kServoMinor, &minor);
+    return minor;
+  }
+
+  /**
+   * @brief 设置舵机次版本号 (0x03)
+   * @param minor 舵机次版本号
+   */
+  void SetServoMinor(const uint8_t minor) { WriteRegField(Regs::kServoMinor, minor); }
+
+  /**
    * @brief 获取舵机ID (0x05)
    * @return 舵机ID
    */
@@ -58,6 +118,37 @@ class InstAccessor : public RegisterAccessor {
     uint8_t id;
     ReadRegField(Regs::kId, &id);
     return id;
+  }
+
+  /**
+   * @brief 设置舵机ID (0x05)
+   * @param id 舵机ID
+   */
+  void SetId(const uint8_t id) { WriteRegField(Regs::kId, id); }
+
+  /**
+   * @brief 获取波特率 (0x06)
+   * @return 波特率
+   */
+  uint8_t GetBaudrate() {
+    uint8_t baudrate;
+    ReadRegField(Regs::kBaudrate, &baudrate);
+    return kBaudrateTable[baudrate];
+  }
+
+  /**
+   * @brief 设置波特率 (0x06)
+   * @param baudrate 波特率
+   */
+  void SetBaudrate(const uint16_t baudrate) {
+    uint8_t baudrate_index = 0;
+    for (uint8_t i = 0; i < sizeof(kBaudrateTable) / sizeof(kBaudrateTable[0]); i++) {
+      if (baudrate == kBaudrateTable[i]) {
+        baudrate_index = i;
+        break;
+      }
+    }
+    WriteRegField(Regs::kBaudrate, baudrate_index);
   }
 
   /**
@@ -71,6 +162,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置响应延迟时间 (0x07)
+   * @param delay 响应延迟时间(2us)
+   */
+  void SetResponseDelay(const uint16_t delay) { WriteRegField(Regs::kResponseDelay, static_cast<uint8_t>(delay / 2)); }
+
+  /**
    * @brief 获取响应级别 (0x08)
    * @return 响应级别
    */
@@ -79,6 +176,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kResponseLevel, &response_level);
     return response_level == 1;
   }
+
+  /**
+   * @brief 设置响应级别 (0x08)
+   * @param response_level 响应级别
+   */
+  void SetResponseLevel(const bool response_level) { WriteRegField(Regs::kResponseLevel, response_level ? 1 : 0); }
 
   /**
    * @brief 获取最小位置 (0x09-0x0A)
@@ -91,6 +194,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置最小位置 (0x09-0x0A)
+   * @param position 最小位置(步)
+   */
+  void SetMinPosition(const uint16_t position) { WriteRegField(Regs::kMinPositionH, Regs::kMinPositionL, position); }
+
+  /**
    * @brief 获取最大位置 (0x0B-0x0C)
    * @return 最大位置(步)
    */
@@ -99,6 +208,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kMaxPositionH, Regs::kMaxPositionL, &position);
     return position;
   }
+
+  /**
+   * @brief 设置最大位置 (0x0B-0x0C)
+   * @param position 最大位置(步)
+   */
+  void SetMaxPosition(const uint16_t position) { WriteRegField(Regs::kMaxPositionH, Regs::kMaxPositionL, position); }
 
   /**
    * @brief 获取最大温度 (0x0D)
@@ -111,6 +226,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置最大温度 (0x0D)
+   * @param temperature 最大温度(℃)
+   */
+  void SetMaxTemperature(const uint8_t temperature) { WriteRegField(Regs::kMaxTemperature, temperature); }
+
+  /**
    * @brief 获取最大电压 (0x0E)
    * @return 最大电压(0.1V)
    */
@@ -119,6 +240,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kMaxVoltage, &voltage);
     return voltage * 0.1f;
   }
+
+  /**
+   * @brief 设置最大电压 (0x0E)
+   * @param voltage 最大电压(0.1V)
+   */
+  void SetMaxVoltage(const float voltage) { WriteRegField(Regs::kMaxVoltage, static_cast<uint8_t>(voltage * 10)); }
 
   /**
    * @brief 获取最小电压 (0x0F)
@@ -131,6 +258,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置最小电压 (0x0F)
+   * @param voltage 最小电压(0.1V)
+   */
+  void SetMinVoltage(const float voltage) { WriteRegField(Regs::kMinVoltage, static_cast<uint8_t>(voltage * 10)); }
+
+  /**
    * @brief 获取最大扭矩 (0x10-0x11)
    * @return 最大扭矩(0.10%)
    */
@@ -139,6 +272,62 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kMaxTorqueH, Regs::kMaxTorqueL, &torque);
     return torque * 0.001f;
   }
+
+  /**
+   * @brief 设置最大扭矩 (0x10-0x11)
+   * @param torque 最大扭矩(0.10%)
+   */
+  void SetMaxTorque(const float torque) {
+    WriteRegField(Regs::kMaxTorqueH, Regs::kMaxTorqueL, static_cast<uint16_t>(torque * 1000));
+  }
+
+  /**
+   * @brief 获取选项 (0x12)
+   * @return 选项
+   */
+  uint8_t GetOption() {
+    uint8_t option;
+    ReadRegField(Regs::kOption, &option);
+    return option;
+  }
+
+  /**
+   * @brief 设置选项 (0x12)
+   * @param option 选项
+   */
+  void SetOption(const uint8_t option) { WriteRegField(Regs::kOption, option); }
+
+  /**
+   * @brief 获取卸载条件 (0x13)
+   * @return 卸载条件
+   */
+  uint8_t GetUnloadCondition() {
+    uint8_t condition;
+    ReadRegField(Regs::kUnloadCondition, &condition);
+    return condition;
+  }
+
+  /**
+   * @brief 设置卸载条件 (0x13)
+   * @param condition 卸载条件
+   */
+  void SetUnloadCondition(const uint8_t condition) { WriteRegField(Regs::kUnloadCondition, condition); }
+
+  /**
+   * @brief 获取LED报警条件 (0x14)
+   * @return LED报警条件
+   */
+  uint8_t GetLedAlarmCondition() {
+    uint8_t condition;
+    ReadRegField(Regs::kLedAlarmCondition, &condition);
+    return condition;
+  }
+
+  /**
+   * @brief 设置LED报警条件 (0x14)
+   * @param condition LED报警条件
+   */
+  void SetLedAlarmCondition(const uint8_t condition) { WriteRegField(Regs::kLedAlarmCondition, condition); }
 
   /**
    * @brief 获取位置PID比例系数 (0x15)
@@ -151,6 +340,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置位置PID比例系数 (0x15)
+   * @param kp 位置PID比例系数(0.1)
+   */
+  void SetPosPidKp(const float kp) { WriteRegField(Regs::kPosPidKp, static_cast<uint8_t>(kp * 10)); }
+
+  /**
    * @brief 获取位置PID微分系数 (0x16)
    * @return 位置PID微分系数(0.1)
    */
@@ -159,6 +354,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kPosPidKd, &kd);
     return kd * 0.1f;
   }
+
+  /**
+   * @brief 设置位置PID微分系数 (0x16)
+   * @param kd 位置PID微分系数(0.1)
+   */
+  void SetPosPidKd(const float kd) { WriteRegField(Regs::kPosPidKd, static_cast<uint8_t>(kd * 10)); }
 
   /**
    * @brief 获取位置PID积分系数 (0x17)
@@ -171,6 +372,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置位置PID积分系数 (0x17)
+   * @param ki 位置PID积分系数(0.1)
+   */
+  void SetPosPidKi(const float ki) { WriteRegField(Regs::kPosPidKi, static_cast<uint8_t>(ki * 10)); }
+
+  /**
    * @brief 获取最小启动力 (0x18)
    * @return 最小启动力(0.1%)
    */
@@ -178,6 +385,14 @@ class InstAccessor : public RegisterAccessor {
     uint8_t force;
     ReadRegField(Regs::kMinStartupForce, &force);
     return force * 0.001f;
+  }
+
+  /**
+   * @brief 设置最小启动力 (0x18)
+   * @param force 最小启动力(0.1%)
+   */
+  void SetMinStartupForce(const float force) {
+    WriteRegField(Regs::kMinStartupForce, static_cast<uint8_t>(force * 1000));
   }
 
   /**
@@ -191,6 +406,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置位置PID限制值 (0x19)
+   * @param limit 位置PID限制值(4)
+   */
+  void SetPosPidLimit(const float limit) { WriteRegField(Regs::kPosPidLimit, static_cast<uint8_t>(limit / 4)); }
+
+  /**
    * @brief 获取顺时针死区 (0x1A)
    * @return 顺时针死区(步)
    */
@@ -199,6 +420,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kCWInsensitiveArea, &area);
     return area;
   }
+
+  /**
+   * @brief 设置顺时针死区 (0x1A)
+   * @param area 顺时针死区(步)
+   */
+  void SetCWInsensitiveArea(const uint8_t area) { WriteRegField(Regs::kCWInsensitiveArea, area); }
 
   /**
    * @brief 获取逆时针死区 (0x1B)
@@ -211,6 +438,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置逆时针死区 (0x1B)
+   * @param area 逆时针死区(步)
+   */
+  void SetCCWInsensitiveArea(const uint8_t area) { WriteRegField(Regs::kCCWInsensitiveArea, area); }
+
+  /**
    * @brief 获取电流保护阈值 (0x1C-0x1D)
    * @return 电流保护阈值(6.5mA)
    */
@@ -218,6 +451,14 @@ class InstAccessor : public RegisterAccessor {
     uint16_t threshold;
     ReadRegField(Regs::kCurrentProtectionThH, Regs::kCurrentProtectionThL, &threshold);
     return threshold * 6.5f;
+  }
+
+  /**
+   * @brief 设置电流保护阈值 (0x1C-0x1D)
+   * @param threshold 电流保护阈值(6.5mA)
+   */
+  void SetCurrentProtectionThreshold(const float threshold) {
+    WriteRegField(Regs::kCurrentProtectionThH, Regs::kCurrentProtectionThL, static_cast<uint16_t>(threshold / 6.5f));
   }
 
   /**
@@ -231,24 +472,44 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置角度分辨率 (0x1E)
+   * @param resolution 角度分辨率(度/步)
+   */
+  void SetAngularResolution(const uint8_t resolution) { WriteRegField(Regs::kAngularResolution, resolution); }
+
+  /**
    * @brief 获取位置校正值 (0x1F-0x20)
    * @return 位置校正值(步)
    */
-  uint16_t GetPositionCorrection() {
+  int16_t GetPositionCorrection() {
     uint16_t correction;
     ReadRegField(Regs::kPositionCorrectionH, Regs::kPositionCorrectionL, &correction);
     return bit_utils::SignToTwos(correction, 11);
   }
 
   /**
+   * @brief 设置位置校正值 (0x1F-0x20)
+   * @param correction 位置校正值(步)
+   */
+  void SetPositionCorrection(const int16_t correction) {
+    WriteRegField(Regs::kPositionCorrectionH, Regs::kPositionCorrectionL, bit_utils::SignToTwos(correction, 11));
+  }
+
+  /**
    * @brief 获取电机模式 (0x21)
    * @return 电机模式
    */
-  MotorMode GetMode() {
+  ServoMode GetMode() {
     uint8_t mode;
     ReadRegField(Regs::kMode, &mode);
-    return static_cast<MotorMode>(mode);
+    return static_cast<ServoMode>(mode);
   }
+
+  /**
+   * @brief 设置电机模式 (0x21)
+   * @param mode 电机模式
+   */
+  void SetMode(const ServoMode mode) { WriteRegField(Regs::kMode, static_cast<uint8_t>(mode)); }
 
   /**
    * @brief 获取扭矩保护阈值 (0x22)
@@ -258,6 +519,14 @@ class InstAccessor : public RegisterAccessor {
     uint8_t threshold;
     ReadRegField(Regs::kTorqueProtectionTh, &threshold);
     return threshold * 0.01f;
+  }
+
+  /**
+   * @brief 设置扭矩保护阈值 (0x22)
+   * @param threshold 扭矩保护阈值(1.0%)
+   */
+  void SetTorqueProtectionThreshold(const float threshold) {
+    WriteRegField(Regs::kTorqueProtectionTh, static_cast<uint8_t>(threshold * 100));
   }
 
   /**
@@ -271,6 +540,14 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置扭矩保护时间 (0x23)
+   * @param time 扭矩保护时间(10ms)
+   */
+  void SetTorqueProtectionTime(const uint16_t time) {
+    WriteRegField(Regs::kTorqueProtectionTime, static_cast<uint8_t>(time / 10));
+  }
+
+  /**
    * @brief 获取过载扭矩 (0x24)
    * @return 过载扭矩(1.0%)
    */
@@ -278,6 +555,14 @@ class InstAccessor : public RegisterAccessor {
     uint8_t torque;
     ReadRegField(Regs::kOverloadTorque, &torque);
     return torque * 0.01f;
+  }
+
+  /**
+   * @brief 设置过载扭矩 (0x24)
+   * @param torque 过载扭矩(1.0%)
+   */
+  void SetOverloadTorque(const float torque) {
+    WriteRegField(Regs::kOverloadTorque, static_cast<uint8_t>(torque * 100));
   }
 
   /**
@@ -291,6 +576,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置速度PID比例系数 (0x25)
+   * @param kp 速度PID比例系数(0.1)
+   */
+  void SetVelPidKp(const float kp) { WriteRegField(Regs::kVelPidKp, static_cast<uint8_t>(kp * 10)); }
+
+  /**
    * @brief 获取过流保护时间 (0x26)
    * @return 过流保护时间(10ms)
    */
@@ -298,6 +589,14 @@ class InstAccessor : public RegisterAccessor {
     uint8_t time;
     ReadRegField(Regs::kOvercurrentProtectionTime, &time);
     return time * 10;
+  }
+
+  /**
+   * @brief 设置过流保护时间 (0x26)
+   * @param time 过流保护时间(10ms)
+   */
+  void SetOvercurrentProtectionTime(const uint16_t time) {
+    WriteRegField(Regs::kOvercurrentProtectionTime, static_cast<uint8_t>(time / 10));
   }
 
   /**
@@ -311,6 +610,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置速度PID积分系数 (0x27)
+   * @param ki 速度PID积分系数(0.1)
+   */
+  void SetVelPidKi(const float ki) { WriteRegField(Regs::kVelPidKi, static_cast<uint8_t>(ki * 10)); }
+
+  /**
    * @brief 获取使能状态 (0x28)
    * @return 使能状态
    */
@@ -321,6 +626,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置使能状态 (0x28)
+   * @param enable 使能状态
+   */
+  void SetTorqueEnable(const bool enable) { WriteRegField(Regs::kTorqueEnable, enable ? 1 : 0); }
+
+  /**
    * @brief 获取目标加速度 (0x29)
    * @return 目标加速度(100步/s²)
    */
@@ -328,6 +639,14 @@ class InstAccessor : public RegisterAccessor {
     uint8_t acceleration;
     ReadRegField(Regs::kTargetAcceleration, &acceleration);
     return acceleration * 100;
+  }
+
+  /**
+   * @brief 设置目标加速度 (0x29)
+   * @param acceleration 目标加速度(100步/s²)
+   */
+  void SetTargetAcceleration(const uint16_t acceleration) {
+    WriteRegField(Regs::kTargetAcceleration, static_cast<uint8_t>(acceleration / 100));
   }
 
   /**
@@ -341,6 +660,14 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置目标位置 (0x2A-0x2B)
+   * @param position 目标位置(步)
+   */
+  void SetTargetPosition(const int16_t position) {
+    WriteRegField(Regs::kTargetPositionH, Regs::kTargetPositionL, bit_utils::SignToTwos(position, 15));
+  }
+
+  /**
    * @brief 获取目标PWM (0x2C-0x2D)
    * @return 目标PWM值(0.10%)
    */
@@ -348,6 +675,14 @@ class InstAccessor : public RegisterAccessor {
     uint16_t pwm;
     ReadRegField(Regs::kTargetTimeH, Regs::kTargetTimeL, &pwm);
     return pwm * 0.01f;
+  }
+
+  /**
+   * @brief 设置目标PWM (0x2C-0x2D)
+   * @param pwm 目标PWM值(0.10%)
+   */
+  void SetTargetPwm(const float pwm) {
+    WriteRegField(Regs::kTargetTimeH, Regs::kTargetTimeL, static_cast<uint16_t>(pwm * 100));
   }
 
   /**
@@ -361,6 +696,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置目标时间 (0x2C-0x2D)
+   * @param time 目标时间(0.10%)
+   */
+  void SetTargetTime(const uint16_t time) { WriteRegField(Regs::kTargetTimeH, Regs::kTargetTimeL, time); }
+
+  /**
    * @brief 获取目标速度 (0x2E-0x2F)
    * @return 目标速度(步/s)
    */
@@ -368,6 +709,14 @@ class InstAccessor : public RegisterAccessor {
     uint16_t velocity;
     ReadRegField(Regs::kTargetVelocityH, Regs::kTargetVelocityL, &velocity);
     return bit_utils::SignToTwos(velocity, 15);
+  }
+
+  /**
+   * @brief 设置目标速度 (0x2E-0x2F)
+   * @param velocity 目标速度(步/s)
+   */
+  void SetTargetVelocity(const int16_t velocity) {
+    WriteRegField(Regs::kTargetVelocityH, Regs::kTargetVelocityL, bit_utils::SignToTwos(velocity, 15));
   }
 
   /**
@@ -381,6 +730,14 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置扭矩限制 (0x30-0x31)
+   * @param limit 扭矩限制(1.0%)
+   */
+  void SetTorqueLimit(const float limit) {
+    WriteRegField(Regs::kTorqueLimitH, Regs::kTorqueLimitL, static_cast<uint16_t>(limit * 100));
+  }
+
+  /**
    * @brief 获取EEPROM写保护状态 (0x37)
    * @return 是否锁定
    */
@@ -389,6 +746,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kWriteLock, &lock);
     return lock == 1;
   }
+
+  /**
+   * @brief 设置EEPROM写保护状态 (0x37)
+   * @param lock 是否锁定
+   */
+  void SetWriteLock(const bool lock) { WriteRegField(Regs::kWriteLock, lock ? 1 : 0); }
 
   /**
    * @brief 获取当前位置 (0x38-0x39)
@@ -462,7 +825,7 @@ class InstAccessor : public RegisterAccessor {
    * @brief 设置异步写入状态 (0x40)
    * @param enable 是否启用异步写入
    */
-  void SetAsynWrite(const bool enable) { WriteRegField(Regs::kAsynWriteSt, enable ? 1 : 0); }
+  void SetAsyncWrite(const bool enable) { WriteRegField(Regs::kAsyncWriteSt, enable ? 1 : 0); }
 
   /**
    * @brief 获取舵机状态 (0x41)
@@ -505,6 +868,14 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置电机方向 (0x60)
+   * @param direction 电机方向
+   */
+  void SetMotorDirection(const Direction direction) {
+    WriteRegField(Regs::kMotorDirection, direction == Direction::CCW ? 1 : 0);
+  }
+
+  /**
    * @brief 获取传感器方向 (0x61)
    * @return 传感器方向
    */
@@ -512,6 +883,50 @@ class InstAccessor : public RegisterAccessor {
     uint8_t direction;
     ReadRegField(Regs::kSensorDirection, &direction);
     return direction == 1 ? Direction::CCW : Direction::CW;
+  }
+
+  /**
+   * @brief 设置传感器方向 (0x61)
+   * @param direction 传感器方向
+   */
+  void SetSensorDirection(const Direction direction) {
+    WriteRegField(Regs::kSensorDirection, direction == Direction::CCW ? 1 : 0);
+  }
+
+  /**
+   * @brief 获取ADC分流电阻 (0x62)
+   * @return ADC分流电阻(100Ω)
+   */
+  uint16_t GetAdcShuntResistor() {
+    uint8_t resistor;
+    ReadRegField(Regs::kAdcShuntResistor, &resistor);
+    return resistor * 100.0f;
+  }
+
+  /**
+   * @brief 设置ADC分流电阻 (0x62)
+   * @param resistor ADC分流电阻(100Ω)
+   */
+  void SetAdcShuntResistor(const uint16_t resistor) {
+    WriteRegField(Regs::kAdcShuntResistor, static_cast<uint8_t>(resistor / 100));
+  }
+
+  /**
+   * @brief 获取ADC电流系数 (0x63)
+   * @return ADC电流系数(100)
+   */
+  uint16_t GetAdcCurrentFactor() {
+    uint8_t factor;
+    ReadRegField(Regs::kAdcCurrentFactor, &factor);
+    return factor * 100;
+  }
+
+  /**
+   * @brief 设置ADC电流系数 (0x63)
+   * @param factor ADC电流系数(100)
+   */
+  void SetAdcCurrentFactor(const uint16_t factor) {
+    WriteRegField(Regs::kAdcCurrentFactor, static_cast<uint8_t>(factor / 100));
   }
 
   /**
@@ -525,6 +940,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置位置PID前馈系数 (0x64)
+   * @param ff 位置PID前馈系数(0.1)
+   */
+  void SetPosPidFf(const float ff) { WriteRegField(Regs::kPosPidKf, static_cast<uint8_t>(ff * 10)); }
+
+  /**
    * @brief 获取位置PID斜坡系数 (0x68)
    * @return 位置PID斜坡系数(0.1)
    */
@@ -533,6 +954,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kPosPidRamp, &ramp);
     return ramp * 0.1f;
   }
+
+  /**
+   * @brief 设置位置PID斜坡系数 (0x68)
+   * @param ramp 位置PID斜坡系数(0.1)
+   */
+  void SetPosPidRamp(const float ramp) { WriteRegField(Regs::kPosPidRamp, static_cast<uint8_t>(ramp * 10)); }
 
   /**
    * @brief 获取位置滤波系数 (0x6C)
@@ -545,6 +972,12 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 设置位置滤波系数 (0x6C)
+   * @param filter 位置滤波系数(0.001)
+   */
+  void SetPosFilter(const float filter) { WriteRegField(Regs::kPosFilter, static_cast<uint8_t>(filter * 1000)); }
+
+  /**
    * @brief 获取电流滤波系数 (0x70)
    * @return 电流滤波系数(0.001)
    */
@@ -552,6 +985,14 @@ class InstAccessor : public RegisterAccessor {
     uint8_t filter;
     ReadRegField(Regs::kCurrentFilter, &filter);
     return filter * 0.001f;
+  }
+
+  /**
+   * @brief 设置电流滤波系数 (0x70)
+   * @param filter 电流滤波系数(0.001)
+   */
+  void SetCurrentFilter(const float filter) {
+    WriteRegField(Regs::kCurrentFilter, static_cast<uint8_t>(filter * 1000));
   }
 
   /**
@@ -563,6 +1004,12 @@ class InstAccessor : public RegisterAccessor {
     ReadRegField(Regs::kVelocityFilter, &filter);
     return filter * 0.001f;
   }
+
+  /**
+   * @brief 设置速度滤波系数 (0x74)
+   * @param filter 速度滤波系数(0.001)
+   */
+  void SetVelFilter(const float filter) { WriteRegField(Regs::kVelocityFilter, static_cast<uint8_t>(filter * 1000)); }
 
  private:
   RegisterLocalTransport local_transport_;
