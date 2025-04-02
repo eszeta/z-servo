@@ -34,7 +34,8 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
 
 Error Inst::LinkTransport(InstTransportInterface *transport) {
   transport_ = transport;
-  CHECK(transport_->SetExecute([this](uint8_t *data) -> Error { return this->Execute(data); }));
+  CHECK(transport_->SetExecute(
+      [this](uint8_t *data) -> Error { return this->Execute(data); }));
   return Error::kOk;
 }
 
@@ -49,7 +50,9 @@ Error Inst::Process(uint32_t dt) {
   return Error::kOk;
 }
 
-Error Inst::Response(const uint8_t reply_idx, const uint8_t *parameter, const size_t parameter_size) {
+Error Inst::Response(const uint8_t reply_idx,
+                     const uint8_t *parameter,
+                     const size_t parameter_size) {
   status_packet_.header = 0xffff;
   status_packet_.id = accessor_->GetId();
   if (parameter == nullptr) {
@@ -64,12 +67,15 @@ Error Inst::Response(const uint8_t reply_idx, const uint8_t *parameter, const si
   return Error::kOk;
 }
 
-Error Inst::WriteRegs(const uint8_t address, const uint8_t *data, const size_t size) {
+Error Inst::WriteRegs(const uint8_t address,
+                      const uint8_t *data,
+                      const size_t size) {
   if (data == nullptr || size == 0) {
     return Error::kInvalidParameter;
   }
   CHECK(accessor_->WriteMultiple(address, data, size));
-  if (RegsBlocks::kEeprom.InBlock(address, size) || RegsBlocks::kInternalEeprom.InBlock(address, size)) {
+  if (RegsBlocks::kEeprom.InBlock(address, size) ||
+      RegsBlocks::kInternalEeprom.InBlock(address, size)) {
     if (!accessor_->GetWriteLock()) {
       CHECK(accessor_->StoreEeprom());
     }
@@ -119,7 +125,8 @@ Error Inst::LoadEepromConfig() {
   const auto ccw_insensitive_area = accessor_->GetCCWInsensitiveArea();
   servo_->SetCCWInsensitiveArea(ccw_insensitive_area);
 
-  const auto current_protection_threshold = accessor_->GetCurrentProtectionThreshold();
+  const auto current_protection_threshold =
+      accessor_->GetCurrentProtectionThreshold();
   servo_->SetCurrentProtectionThreshold(current_protection_threshold);
 
   const auto angular_resolution = accessor_->GetAngularResolution();
@@ -128,7 +135,8 @@ Error Inst::LoadEepromConfig() {
   const auto position_correction = accessor_->GetPositionCorrection();
   servo_->SetPositionCorrection(position_correction);
 
-  const auto torque_protection_threshold = accessor_->GetTorqueProtectionThreshold();
+  const auto torque_protection_threshold =
+      accessor_->GetTorqueProtectionThreshold();
   servo_->SetTorqueProtectionThreshold(torque_protection_threshold);
 
   const auto torque_protection_time = accessor_->GetTorqueProtectionTime();
@@ -137,7 +145,8 @@ Error Inst::LoadEepromConfig() {
   const auto overload_torque = accessor_->GetOverloadTorque();
   servo_->SetOverloadTorque(overload_torque);
 
-  const auto overcurrent_protection_time = accessor_->GetOvercurrentProtectionTime();
+  const auto overcurrent_protection_time =
+      accessor_->GetOvercurrentProtectionTime();
   servo_->SetOvercurrentProtectionTime(overcurrent_protection_time);
 
   auto &pos_pid = servo_->GetPosPid();
@@ -354,8 +363,8 @@ Error Inst::WriteDataHandler(const InstPacket *packet, const bool response) {
 /**
  * @brief 寄存器写入指令处理函数
  * REG WRITE 指令相似于 WRITE DATA，只是执行的时间不同。
- * 当收到 REG WRITE 指令帧时，把收到的数据储存在缓冲区备用，并把kAsyncWriteSt 寄存器置 1。
- * 当收到 ACTION指令后，储存的指令最终被执行。
+ * 当收到 REG WRITE 指令帧时，把收到的数据储存在缓冲区备用，并把kAsyncWriteSt
+ * 寄存器置 1。 当收到 ACTION指令后，储存的指令最终被执行。
  * @param packet 指令包
  * @param response 是否响应
  * @return 错误码
@@ -383,7 +392,8 @@ Error Inst::RegWriteHandler(const InstPacket *packet, const bool response) {
 Error Inst::ActionHandler(const InstPacket *packet, const bool response) {
   const uint8_t *buffer = async_write_buffer_;
   while (buffer_size_ > 0) {
-    const InstPacket *const reg_write_packet = reinterpret_cast<const InstPacket *>(buffer);
+    const InstPacket *const reg_write_packet =
+        reinterpret_cast<const InstPacket *>(buffer);
     const size_t packet_size = reg_write_packet->GetBufferSize();
     if (buffer_size_ < packet_size) {
       break;

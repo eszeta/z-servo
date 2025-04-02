@@ -44,7 +44,9 @@ class InstTransportInterface {
    * @brief 设置响应延迟
    * 单位: 毫秒
    */
-  void SetResponseDelay(const uint16_t response_delay) { response_delay_ = response_delay; }
+  void SetResponseDelay(const uint16_t response_delay) {
+    response_delay_ = response_delay;
+  }
 
   /**
    * @brief 设置执行函数

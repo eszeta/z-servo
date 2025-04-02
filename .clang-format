@@ -1,2 +1,3 @@
 BasedOnStyle: Google
-ColumnLimit: 120
+BinPackArguments: false   # 函数调用参数是否允许放在同一行
+BinPackParameters: false  # 函数声明参数是否允许放在同一行

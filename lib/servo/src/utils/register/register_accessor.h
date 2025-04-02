@@ -27,20 +27,25 @@ namespace hortor_servo {
 class RegisterAccessor : public ObjectInterface {
  public:
   /** @brief 写寄存器函数类型 */
-  using WriteFunc = std::function<Error(const uint8_t address, const uint8_t data)>;
+  using WriteFunc =
+      std::function<Error(const uint8_t address, const uint8_t data)>;
   /** @brief 多字节写寄存器函数类型 */
-  using WriteMultipleFunc = std::function<Error(const uint8_t address, const uint8_t* data, const size_t size)>;
+  using WriteMultipleFunc = std::function<Error(
+      const uint8_t address, const uint8_t* data, const size_t size)>;
   /** @brief 读寄存器函数类型 */
   using ReadFunc = std::function<Error(const uint8_t address, uint8_t* data)>;
   /** @brief 多字节读寄存器函数类型 */
-  using ReadMultipleFunc = std::function<Error(const uint8_t address, const size_t size, uint8_t* data)>;
+  using ReadMultipleFunc = std::function<Error(
+      const uint8_t address, const size_t size, uint8_t* data)>;
   /**
    * @brief 写寄存器
    * @param address 寄存器地址
    * @param data 要写入的数据
    * @return 错误码，成功返回OK
    */
-  Error Write(const uint8_t address, const uint8_t data) { return write_(address, data); }
+  Error Write(const uint8_t address, const uint8_t data) {
+    return write_(address, data);
+  }
 
   /**
    * @brief 写寄存器
@@ -49,7 +54,9 @@ class RegisterAccessor : public ObjectInterface {
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteMultiple(const uint8_t address, const uint8_t* data, const size_t size) {
+  Error WriteMultiple(const uint8_t address,
+                      const uint8_t* data,
+                      const size_t size) {
     return write_multiple_(address, data, size);
   }
 
@@ -59,7 +66,9 @@ class RegisterAccessor : public ObjectInterface {
    * @param data 读取数据的存储指针
    * @return 错误码，成功返回OK
    */
-  Error Read(const uint8_t address, uint8_t* data) { return read_(address, data); }
+  Error Read(const uint8_t address, uint8_t* data) {
+    return read_(address, data);
+  }
 
   /**
    * @brief 读取多个寄存器
@@ -87,7 +96,9 @@ class RegisterAccessor : public ObjectInterface {
    * @param value 要写入的值
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  Error WriteRegField(const Register& high, const Register& low, uint16_t value);
+  Error WriteRegField(const Register& high,
+                      const Register& low,
+                      uint16_t value);
 
   /**
    * @brief 通用的寄存器读取模板函数
@@ -112,13 +123,19 @@ class RegisterAccessor : public ObjectInterface {
    * @param value 读取值的存储指针
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  Error ReadRegField(const Register& high, const Register& low, uint16_t* value);
+  Error ReadRegField(const Register& high,
+                     const Register& low,
+                     uint16_t* value);
 
   /** @brief 设置8位无符号整数值 */
-  void SetUint8(const size_t address, const uint8_t value) { Write(address, value); }
+  void SetUint8(const size_t address, const uint8_t value) {
+    Write(address, value);
+  }
 
   /** @brief 设置8位无符号整数值到指定字段 */
-  void SetUint8(const Register& field, const uint8_t value) { WriteRegField(field, value); }
+  void SetUint8(const Register& field, const uint8_t value) {
+    WriteRegField(field, value);
+  }
 
   /** @brief 获取8位无符号整数值 */
   uint8_t GetUint8(const size_t address) {
@@ -135,16 +152,24 @@ class RegisterAccessor : public ObjectInterface {
   }
 
   /** @brief 设置8位有符号整数值 */
-  void SetInt8(const size_t address, const int8_t value) { SetUint8(address, static_cast<uint8_t>(value)); }
+  void SetInt8(const size_t address, const int8_t value) {
+    SetUint8(address, static_cast<uint8_t>(value));
+  }
 
   /** @brief 设置8位有符号整数值到指定字段 */
-  void SetInt8(const Register& field, const int8_t value) { SetUint8(field, static_cast<uint8_t>(value)); }
+  void SetInt8(const Register& field, const int8_t value) {
+    SetUint8(field, static_cast<uint8_t>(value));
+  }
 
   /** @brief 获取8位有符号整数值 */
-  int8_t GetInt8(const size_t address) { return static_cast<int8_t>(GetUint8(address)); }
+  int8_t GetInt8(const size_t address) {
+    return static_cast<int8_t>(GetUint8(address));
+  }
 
   /** @brief 从指定字段获取8位有符号整数值 */
-  int8_t GetInt8(const Register& field) { return static_cast<int8_t>(GetUint8(field)); }
+  int8_t GetInt8(const Register& field) {
+    return static_cast<int8_t>(GetUint8(field));
+  }
 
   /** @brief 设置16位无符号整数值 */
   void SetUint16(const size_t high, const size_t low, const uint16_t value) {
@@ -153,7 +178,9 @@ class RegisterAccessor : public ObjectInterface {
   }
 
   /** @brief 设置16位无符号整数值到指定字段 */
-  void SetUint16(const Register& high, const Register& low, const uint16_t value) {
+  void SetUint16(const Register& high,
+                 const Register& low,
+                 const uint16_t value) {
     WriteRegField(high, static_cast<uint8_t>(value >> 8 & 0xFF));
     WriteRegField(low, static_cast<uint8_t>(value & 0xFF));
   }
@@ -172,13 +199,17 @@ class RegisterAccessor : public ObjectInterface {
   void SetWrite(WriteFunc write) { write_ = write; }
 
   /** @brief 设置多字节写寄存器函数 */
-  void SetWriteMultiple(WriteMultipleFunc write_multiple) { write_multiple_ = write_multiple; }
+  void SetWriteMultiple(WriteMultipleFunc write_multiple) {
+    write_multiple_ = write_multiple;
+  }
 
   /** @brief 设置读寄存器函数 */
   void SetRead(ReadFunc read) { read_ = read; }
 
   /** @brief 设置多字节读寄存器函数 */
-  void SetReadMultiple(ReadMultipleFunc read_multiple) { read_multiple_ = read_multiple; }
+  void SetReadMultiple(ReadMultipleFunc read_multiple) {
+    read_multiple_ = read_multiple;
+  }
 
  protected:
   /** @brief 写寄存器函数对象 */

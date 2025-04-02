@@ -17,7 +17,9 @@
 namespace hortor_servo {
 
 Sensor::Sensor(const uint8_t resolution)
-    : resolution(resolution), full_scale_(1 << resolution), overflow_threshold_(0.8f * full_scale_) {}
+    : resolution(resolution),
+      full_scale_(1 << resolution),
+      overflow_threshold_(0.8f * full_scale_) {}
 
 void Sensor::Init() {
   GetRaw();
@@ -50,7 +52,9 @@ void Sensor::CalculateVelocity(uint32_t dt) {
   if (accumulated_dt_ < kMinElapsedTime) return;
 
   // 计算角度变化
-  const uint16_t angle_diff = (full_rotations_ - vel_full_rotations_) * full_scale_ + (raw_val_ - vel_raw_prev_);
+  const uint16_t angle_diff =
+      (full_rotations_ - vel_full_rotations_) * full_scale_ +
+      (raw_val_ - vel_raw_prev_);
 
   // 计算速度（单位：计数/秒）
   const float time_seconds = static_cast<float>(accumulated_dt_) * 1e-6;

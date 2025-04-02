@@ -33,7 +33,10 @@ class MP6515 final : public MotorDriver {
    * @param pin_brake 刹车引脚编号
    * @param pin_sleep 睡眠引脚编号
    */
-  void Init(const uint8_t pin_phase, const uint8_t pin_enbl, const uint8_t pin_brake, const uint8_t pin_sleep);
+  void Init(const uint8_t pin_phase,
+            const uint8_t pin_enbl,
+            const uint8_t pin_brake,
+            const uint8_t pin_sleep);
   /**
    * @brief 设置PWM输出
    * @param pwm PWM值，范围为-1.0到1.0

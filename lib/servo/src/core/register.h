@@ -37,8 +37,13 @@ struct Register {
    * @param shift 起始位置
    * @param bits 位宽 (1-8)
    */
-  constexpr Register(const uint8_t address, const uint8_t shift, const uint8_t bits)
-      : address(address), shift(shift), bits(bits), mask(bit_utils::CreateMask8(shift, bits)) {}
+  constexpr Register(const uint8_t address,
+                     const uint8_t shift,
+                     const uint8_t bits)
+      : address(address),
+        shift(shift),
+        bits(bits),
+        mask(bit_utils::CreateMask8(shift, bits)) {}
 
   /** @brief 复制构造函数 */
   Register(const Register& other) = delete;
@@ -52,7 +57,8 @@ struct Register {
    * @param data 寄存器数据
    * @return 特定位域的值
    */
-  static constexpr uint8_t GetValue(const Register& field, const uint8_t data) noexcept {
+  static constexpr uint8_t GetValue(const Register& field,
+                                    const uint8_t data) noexcept {
     return (data & field.mask) >> field.shift;
   }
 
@@ -63,7 +69,9 @@ struct Register {
    * @param data 寄存器数据
    * @return 更新后的寄存器数据
    */
-  static constexpr uint8_t SetValue(const Register& field, const uint8_t value, uint8_t& data) noexcept {
+  static constexpr uint8_t SetValue(const Register& field,
+                                    const uint8_t value,
+                                    uint8_t& data) noexcept {
     data = (data & ~field.mask) | ((value << field.shift) & field.mask);
     return data;
   }
@@ -76,8 +84,11 @@ struct Register {
    * @param highByte 高位字节
    * @param lowByte 低位字节
    */
-  static constexpr void SetCombinedValue(const Register& highField, const Register& lowField, const uint16_t value,
-                                         uint8_t& highByte, uint8_t& lowByte) noexcept {
+  static constexpr void SetCombinedValue(const Register& highField,
+                                         const Register& lowField,
+                                         const uint16_t value,
+                                         uint8_t& highByte,
+                                         uint8_t& lowByte) noexcept {
     SetValue(lowField, value, lowByte);
     SetValue(highField, value >> lowField.bits, highByte);
   }
@@ -90,8 +101,10 @@ struct Register {
    * @param lowByte 低位字节
    * @return 组合后的寄存器数据
    */
-  static constexpr uint16_t GetCombinedValue(const Register& highField, const Register& lowField,
-                                             const uint8_t highByte, const uint8_t lowByte) noexcept {
+  static constexpr uint16_t GetCombinedValue(const Register& highField,
+                                             const Register& lowField,
+                                             const uint8_t highByte,
+                                             const uint8_t lowByte) noexcept {
     const uint16_t high = GetValue(highField, highByte);
     const uint16_t low = GetValue(lowField, lowByte);
     return (high << lowField.bits) | low;

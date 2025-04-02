@@ -28,7 +28,9 @@ hortor_servo::MT6701::MT6701 angle_sensor;
 hortor_servo::generic_current::GenericCurrent current_sensor;
 #elif ARDUINO_ARCH_GD32
 static constexpr auto kInfoLedPin = PB1;
-SPIClass spi_sensor(DIGITAL_TO_PINNAME(PA8), DIGITAL_TO_PINNAME(PA9), DIGITAL_TO_PINNAME(PA10));
+SPIClass spi_sensor(DIGITAL_TO_PINNAME(PA8),
+                    DIGITAL_TO_PINNAME(PA9),
+                    DIGITAL_TO_PINNAME(PA10));
 HardwareSerial serial_debug(PB4, PB3, 0);
 HardwareSerial serial_inst(PA10, PA9, 1);
 hortor_servo::MP6515::MP6515 motor_driver;

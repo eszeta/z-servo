@@ -36,9 +36,13 @@ namespace inst_utils {
  * @param buffer 指令包
  * @return ID
  */
-static constexpr uint8_t GetBufferId(const uint8_t *buffer) { return buffer[PacketIndex::kId]; }
+static constexpr uint8_t GetBufferId(const uint8_t *buffer) {
+  return buffer[PacketIndex::kId];
+}
 
-static constexpr uint8_t GetLength(const uint8_t *buffer) { return buffer[PacketIndex::kLength]; }
+static constexpr uint8_t GetLength(const uint8_t *buffer) {
+  return buffer[PacketIndex::kLength];
+}
 
 /**
  * @brief 获取参数长度
@@ -50,7 +54,9 @@ static constexpr uint8_t GetParameterSize(const uint8_t *buffer) {
   return GetLength(buffer) - 2;
 }
 
-static constexpr void SetParameterSize(uint8_t *buffer, const uint8_t size) { buffer[PacketIndex::kLength] = size + 2; }
+static constexpr void SetParameterSize(uint8_t *buffer, const uint8_t size) {
+  buffer[PacketIndex::kLength] = size + 2;
+}
 
 /**
  * @brief 获取校验和

@@ -455,14 +455,20 @@ struct RegsBlock {
 };
 
 struct RegsBlocks {
-  constexpr static RegsBlock kEeprom = {ServoRegs::kFirmwareMajor.address, ServoRegs::kVelPidKi.address + 1};
-  constexpr static RegsBlock kNormalRam = {ServoRegs::kTorqueEnable.address, ServoRegs::kWriteLock.address + 1};
-  constexpr static RegsBlock kReadOnlyRam = {ServoRegs::kPresentPositionL.address,
-                                             static_cast<uint8_t>(ServoRegs::kPresentCurrentH.address + 1)};
-  constexpr static RegsBlock kInternalEeprom = {ServoRegs::kMotorDirection.address, ServoRegs::kPosPidRamp.address + 1};
-  constexpr static RegsBlock kAction = {ServoRegs::kTargetAcceleration.address,
-                                        ServoRegs::kTargetVelocityH.address + 1};
-  constexpr static RegsBlock kTotal = {ServoRegs::kFirmwareMajor.address, ServoRegs::kPosPidRamp.address + 1};
+  constexpr static RegsBlock kEeprom = {ServoRegs::kFirmwareMajor.address,
+                                        ServoRegs::kVelPidKi.address + 1};
+  constexpr static RegsBlock kNormalRam = {ServoRegs::kTorqueEnable.address,
+                                           ServoRegs::kWriteLock.address + 1};
+  constexpr static RegsBlock kReadOnlyRam = {
+      ServoRegs::kPresentPositionL.address,
+      static_cast<uint8_t>(ServoRegs::kPresentCurrentH.address + 1)};
+  constexpr static RegsBlock kInternalEeprom = {
+      ServoRegs::kMotorDirection.address, ServoRegs::kPosPidRamp.address + 1};
+  constexpr static RegsBlock kAction = {
+      ServoRegs::kTargetAcceleration.address,
+      ServoRegs::kTargetVelocityH.address + 1};
+  constexpr static RegsBlock kTotal = {ServoRegs::kFirmwareMajor.address,
+                                       ServoRegs::kPosPidRamp.address + 1};
 };
 
 struct Instruction {
@@ -487,7 +493,8 @@ enum class PacketState : uint8_t {
   kChecksum,
 };
 
-static constexpr uint32_t kBaudrateTable[] = {1000000, 500000, 250000, 128000, 115200, 76800, 57600, 38400};
+static constexpr uint32_t kBaudrateTable[] = {
+    1000000, 500000, 250000, 128000, 115200, 76800, 57600, 38400};
 
 struct __attribute__((packed)) InstPacket {
   uint16_t header;
@@ -496,36 +503,50 @@ struct __attribute__((packed)) InstPacket {
   uint8_t instruction;
   uint8_t parameter[];
 
-  uint8_t CalculateChecksum() const { return inst_utils::CalculateChecksum(reinterpret_cast<const uint8_t *>(this)); }
+  uint8_t CalculateChecksum() const {
+    return inst_utils::CalculateChecksum(
+        reinterpret_cast<const uint8_t *>(this));
+  }
 
   /**
    * @brief 获取参数长度
    * @return 参数长度
    */
-  uint8_t GetParameterSize() const { return inst_utils::GetParameterSize(reinterpret_cast<const uint8_t *>(this)); }
+  uint8_t GetParameterSize() const {
+    return inst_utils::GetParameterSize(
+        reinterpret_cast<const uint8_t *>(this));
+  }
 
   /**
    * @brief 设置参数长度
    * @param size 参数长度
    */
-  void SetParameterSize(const uint8_t size) { inst_utils::SetParameterSize(reinterpret_cast<uint8_t *>(this), size); }
+  void SetParameterSize(const uint8_t size) {
+    inst_utils::SetParameterSize(reinterpret_cast<uint8_t *>(this), size);
+  }
 
   /**
    * @brief 获取校验和
    * @return 校验和
    */
-  uint8_t GetChecksum() const { return inst_utils::GetChecksum(reinterpret_cast<const uint8_t *>(this)); }
+  uint8_t GetChecksum() const {
+    return inst_utils::GetChecksum(reinterpret_cast<const uint8_t *>(this));
+  }
 
   /**
    * @brief 设置校验和
    */
-  void SetChecksum() { inst_utils::SetChecksum(reinterpret_cast<uint8_t *>(this)); }
+  void SetChecksum() {
+    inst_utils::SetChecksum(reinterpret_cast<uint8_t *>(this));
+  }
 
   /**
    * @brief 获取缓冲区大小
    * @return 缓冲区大小
    */
-  size_t GetBufferSize() const { return inst_utils::GetBufferSize(reinterpret_cast<const uint8_t *>(this)); }
+  size_t GetBufferSize() const {
+    return inst_utils::GetBufferSize(reinterpret_cast<const uint8_t *>(this));
+  }
 };
 
 struct __attribute__((packed)) StatusPacket {
@@ -535,35 +556,49 @@ struct __attribute__((packed)) StatusPacket {
   uint8_t error;
   uint8_t parameter[];
 
-  uint8_t CalculateChecksum() const { return inst_utils::CalculateChecksum(reinterpret_cast<const uint8_t *>(this)); }
+  uint8_t CalculateChecksum() const {
+    return inst_utils::CalculateChecksum(
+        reinterpret_cast<const uint8_t *>(this));
+  }
 
   /**
    * @brief 获取参数长度
    * @return 参数长度
    */
-  uint8_t GetParameterSize() const { return inst_utils::GetParameterSize(reinterpret_cast<const uint8_t *>(this)); }
+  uint8_t GetParameterSize() const {
+    return inst_utils::GetParameterSize(
+        reinterpret_cast<const uint8_t *>(this));
+  }
 
   /**
    * @brief 设置参数长度
    * @param size 参数长度
    */
-  void SetParameterSize(const uint8_t size) { inst_utils::SetParameterSize(reinterpret_cast<uint8_t *>(this), size); }
+  void SetParameterSize(const uint8_t size) {
+    inst_utils::SetParameterSize(reinterpret_cast<uint8_t *>(this), size);
+  }
 
   /**
    * @brief 获取校验和
    * @return 校验和
    */
-  uint8_t GetChecksum() const { return inst_utils::GetChecksum(reinterpret_cast<const uint8_t *>(this)); }
+  uint8_t GetChecksum() const {
+    return inst_utils::GetChecksum(reinterpret_cast<const uint8_t *>(this));
+  }
 
   /**
    * @brief 设置校验和
    */
-  void SetChecksum() { inst_utils::SetChecksum(reinterpret_cast<uint8_t *>(this)); }
+  void SetChecksum() {
+    inst_utils::SetChecksum(reinterpret_cast<uint8_t *>(this));
+  }
 
   /**
    * @brief 获取缓冲区大小
    * @return 缓冲区大小
    */
-  size_t GetBufferSize() const { return inst_utils::GetBufferSize(reinterpret_cast<const uint8_t *>(this)); }
+  size_t GetBufferSize() const {
+    return inst_utils::GetBufferSize(reinterpret_cast<const uint8_t *>(this));
+  }
 };
 }  // namespace hortor_servo

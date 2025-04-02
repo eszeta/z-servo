@@ -6,12 +6,16 @@ namespace hortor_servo {
 
 PidController::PidController(const PIDParam param) : param_(param) {}
 
-float PidController::Compute(const float error, const uint32_t dt) { return Compute(error, 0, dt); }
+float PidController::Compute(const float error, const uint32_t dt) {
+  return Compute(error, 0, dt);
+}
 
 /**
  * @brief 计算PID控制器输出
  */
-inline float PidController::Compute(const float error, const float feed, const uint32_t dt) {
+inline float PidController::Compute(const float error,
+                                    const float feed,
+                                    const uint32_t dt) {
   // 1. 时间计算
   float dt_sec = static_cast<float>(dt) * kMicroToSec;
   if (dt_sec <= 0 || dt_sec > kMaxDt) {

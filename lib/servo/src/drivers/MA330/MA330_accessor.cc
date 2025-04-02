@@ -140,7 +140,8 @@ Error MA330Accessor::SetHysteresis(uint8_t value) {
   return Error::kOk;
 };
 
-Error MA330Accessor::SetFieldStrengthThresholds(uint8_t high_threshold, uint8_t low_threshold) {
+Error MA330Accessor::SetFieldStrengthThresholds(uint8_t high_threshold,
+                                                uint8_t low_threshold) {
   CHECK(WriteRegField(Regs::kMGLT, low_threshold));
   CHECK(WriteRegField(Regs::kMGHT, high_threshold));
   return Error::kOk;

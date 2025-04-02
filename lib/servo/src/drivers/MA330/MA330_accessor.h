@@ -53,7 +53,8 @@ class MA330Accessor : public RegisterAccessor {
   Error SetRotationDirection(uint8_t direction);
   Error SetFilterWidth(uint8_t filter_width);
   Error SetHysteresis(uint8_t hysteresis);
-  Error SetFieldStrengthThresholds(uint8_t high_threshold, uint8_t low_threshold);
+  Error SetFieldStrengthThresholds(uint8_t high_threshold,
+                                   uint8_t low_threshold);
   /**
    * @brief 设置读取原始值的函数
    * @param read_raw 读取原始值的函数

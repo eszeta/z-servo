@@ -49,13 +49,17 @@ class LSM6DSOW final : public IMU {
    * @param z 加速度Z轴数据,单位：g
    * @return 读取结果
    */
-  Error ReadAcceleration(float* x, float* y, float* z) override { return accessor_.ReadAcceleration(x, y, z); }
+  Error ReadAcceleration(float* x, float* y, float* z) override {
+    return accessor_.ReadAcceleration(x, y, z);
+  }
 
   /**
    * @brief 检查加速度数据是否可用
    * @return 是否可用
    */
-  bool AccelerationAvailable() override { return accessor_.AccelerationAvailable(); }
+  bool AccelerationAvailable() override {
+    return accessor_.AccelerationAvailable();
+  }
 
   /**
    * @brief 读取陀螺仪数据
@@ -64,7 +68,9 @@ class LSM6DSOW final : public IMU {
    * @param z 陀螺仪Z轴数据
    * @return 读取结果
    */
-  Error ReadGyroscope(float* x, float* y, float* z) override { return accessor_.ReadGyroscope(x, y, z); }
+  Error ReadGyroscope(float* x, float* y, float* z) override {
+    return accessor_.ReadGyroscope(x, y, z);
+  }
 
   /**
    * @brief 检查陀螺仪数据是否可用
@@ -77,13 +83,17 @@ class LSM6DSOW final : public IMU {
    * @param temperature_deg 温度数据
    * @return 读取结果
    */
-  Error ReadTemperature(float* temperature_deg) override { return accessor_.ReadTemperature(temperature_deg); }
+  Error ReadTemperature(float* temperature_deg) override {
+    return accessor_.ReadTemperature(temperature_deg);
+  }
 
   /**
    * @brief 检查温度数据是否可用
    * @return 是否可用
    */
-  bool TemperatureAvailable() override { return accessor_.TemperatureAvailable(); }
+  bool TemperatureAvailable() override {
+    return accessor_.TemperatureAvailable();
+  }
 
  private:
   /** @brief 访问器实例，负责与传感器的具体通信操作 */

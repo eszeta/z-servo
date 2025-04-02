@@ -105,7 +105,14 @@ class InfoLED {
       // ERROR - 快闪
       {{200, true}, {200, false}},
       // FATAL_ERROR - 三闪一长
-      {{200, true}, {200, false}, {200, true}, {200, false}, {200, true}, {200, false}, {1000, true}, {1000, false}},
+      {{200, true},
+       {200, false},
+       {200, true},
+       {200, false},
+       {200, true},
+       {200, false},
+       {1000, true},
+       {1000, false}},
   };
 };
 

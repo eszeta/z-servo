@@ -20,7 +20,10 @@
 namespace hortor_servo {
 namespace MP6515 {
 
-void MP6515::Init(const uint8_t pin_phase, const uint8_t pin_enbl, const uint8_t pin_brake, const uint8_t pin_sleep) {
+void MP6515::Init(const uint8_t pin_phase,
+                  const uint8_t pin_enbl,
+                  const uint8_t pin_brake,
+                  const uint8_t pin_sleep) {
   pin_phase_ = pin_phase;
   pin_enbl_ = pin_enbl;
   pin_brake_ = pin_brake;

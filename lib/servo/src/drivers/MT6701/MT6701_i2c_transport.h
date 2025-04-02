@@ -52,7 +52,10 @@ class MT6701I2cTransport : public RegisterI2cTransport {
    * 通过I2C接口从MT6701传感器读取当前角度值。
    * 注意：I2C模式下只支持角度读取，不支持其他状态信息。
    */
-  Error ReadRaw(uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss);
+  Error ReadRaw(uint16_t* angle_raw,
+                Status* field_status,
+                bool* button_pushed,
+                bool* track_loss);
 };
 
 }  // namespace MT6701

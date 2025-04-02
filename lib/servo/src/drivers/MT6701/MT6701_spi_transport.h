@@ -45,7 +45,9 @@ class MT6701SpiTransport : public RegisterSpiTransport {
    * @param data 要写入的数据
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error Write(const uint8_t address, const uint8_t data) { return Error::kGeneralErr; }
+  Error Write(const uint8_t address, const uint8_t data) {
+    return Error::kGeneralErr;
+  }
 
   /**
    * @brief 写寄存器 MT6701不支持SPI写
@@ -54,7 +56,11 @@ class MT6701SpiTransport : public RegisterSpiTransport {
    * @param size 数据长度
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error WriteMultiple(const uint8_t address, const uint8_t* data, const size_t size) { return Error::kGeneralErr; }
+  Error WriteMultiple(const uint8_t address,
+                      const uint8_t* data,
+                      const size_t size) {
+    return Error::kGeneralErr;
+  }
 
   /**
    * @brief 读寄存器 MT6701不支持SPI读
@@ -62,7 +68,9 @@ class MT6701SpiTransport : public RegisterSpiTransport {
    * @param data 读取数据的存储指针
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error Read(const uint8_t address, uint8_t* data) { return Error::kGeneralErr; }
+  Error Read(const uint8_t address, uint8_t* data) {
+    return Error::kGeneralErr;
+  }
 
   /**
    * @brief 读寄存器 MT6701不支持SPI读
@@ -71,7 +79,9 @@ class MT6701SpiTransport : public RegisterSpiTransport {
    * @param size 读取数据的长度
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) { return Error::kGeneralErr; }
+  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) {
+    return Error::kGeneralErr;
+  }
 
   /**
    * @brief 读取原始数据
@@ -84,7 +94,10 @@ class MT6701SpiTransport : public RegisterSpiTransport {
    * 通过SPI接口从MT6701传感器读取当前角度值和状态信息。
    * SPI模式支持完整的状态信息读取。
    */
-  Error ReadRaw(uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss);
+  Error ReadRaw(uint16_t* angle_raw,
+                Status* field_status,
+                bool* button_pushed,
+                bool* track_loss);
 };
 
 }  // namespace MT6701

@@ -26,7 +26,9 @@ Error RegisterAccessor::WriteRegField(const Register& reg, uint8_t value) {
   return Error::kOk;
 }
 
-Error RegisterAccessor::WriteRegField(const Register& high, const Register& low, const uint16_t value) {
+Error RegisterAccessor::WriteRegField(const Register& high,
+                                      const Register& low,
+                                      const uint16_t value) {
   uint8_t high_value, low_value;
   CHECK(Read(high.address, &high_value));
   CHECK(Read(low.address, &low_value));
@@ -50,7 +52,9 @@ Error RegisterAccessor::ReadRegField(const Register& reg, bool* value) {
   return Error::kOk;
 }
 
-Error RegisterAccessor::ReadRegField(const Register& high, const Register& low, uint16_t* value) {
+Error RegisterAccessor::ReadRegField(const Register& high,
+                                     const Register& low,
+                                     uint16_t* value) {
   uint8_t high_value, low_value;
   CHECK(Read(high.address, &high_value));
   CHECK(Read(low.address, &low_value));

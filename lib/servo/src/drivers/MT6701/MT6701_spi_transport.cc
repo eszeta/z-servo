@@ -20,20 +20,33 @@ namespace hortor_servo {
 namespace MT6701 {
 
 Error MT6701SpiTransport::LinkAccessor(MT6701Accessor& accessor) {
-  accessor.SetWrite([this](const uint8_t address, const uint8_t data) { return Write(address, data); });
-  accessor.SetWriteMultiple([this](const uint8_t address, const uint8_t* data, const size_t size) {
-    return WriteMultiple(address, data, size);
+  accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
+    return Write(address, data);
   });
-  accessor.SetRead([this](const uint8_t address, uint8_t* data) { return Read(address, data); });
+  accessor.SetWriteMultiple(
+      [this](const uint8_t address, const uint8_t* data, const size_t size) {
+        return WriteMultiple(address, data, size);
+      });
+  accessor.SetRead([this](const uint8_t address, uint8_t* data) {
+    return Read(address, data);
+  });
   accessor.SetReadMultiple(
-      [this](const uint8_t address, const size_t size, uint8_t* data) { return ReadMultiple(address, size, data); });
-  accessor.SetReadRaw([this](uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss) {
+      [this](const uint8_t address, const size_t size, uint8_t* data) {
+        return ReadMultiple(address, size, data);
+      });
+  accessor.SetReadRaw([this](uint16_t* angle_raw,
+                             Status* field_status,
+                             bool* button_pushed,
+                             bool* track_loss) {
     return ReadRaw(angle_raw, field_status, button_pushed, track_loss);
   });
   return Error::kOk;
 }
 
-Error MT6701SpiTransport::ReadRaw(uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss) {
+Error MT6701SpiTransport::ReadRaw(uint16_t* angle_raw,
+                                  Status* field_status,
+                                  bool* button_pushed,
+                                  bool* track_loss) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }

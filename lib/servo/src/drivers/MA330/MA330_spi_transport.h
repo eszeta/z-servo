@@ -52,7 +52,11 @@ class MA330SpiTransport : public RegisterSpiTransport {
    * @param size 数据长度
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error WriteMultiple(const uint8_t address, const uint8_t* data, const size_t size) { return Error::kGeneralErr; }
+  Error WriteMultiple(const uint8_t address,
+                      const uint8_t* data,
+                      const size_t size) {
+    return Error::kGeneralErr;
+  }
 
   /**
    * @brief 读寄存器 MA330不支持SPI读数据
@@ -69,7 +73,9 @@ class MA330SpiTransport : public RegisterSpiTransport {
    * @param size 读取数据的长度
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) { return Error::kGeneralErr; }
+  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) {
+    return Error::kGeneralErr;
+  }
 
   /**
    * @brief 读取原始数据

@@ -38,8 +38,10 @@ namespace MT6701 {
 // todo：除了ReadRaw,其它函数都没测试过
 class MT6701Accessor : public RegisterAccessor {
  public:
-  using ReadRawFunc =
-      std::function<Error(uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss)>;
+  using ReadRawFunc = std::function<Error(uint16_t* angle_raw,
+                                          Status* field_status,
+                                          bool* button_pushed,
+                                          bool* track_loss)>;
 
   Error Init() { return Error::kOk; }
   /**
@@ -80,7 +82,9 @@ class MT6701Accessor : public RegisterAccessor {
    * 参数可以为nullptr，表示不需要该信息。
    * 注意：I2C模式下只支持角度读取，其他状态信息不可用。
    */
-  Error ReadRaw(uint16_t* angle_raw, Status* field_status = nullptr, bool* button_pushed = nullptr,
+  Error ReadRaw(uint16_t* angle_raw,
+                Status* field_status = nullptr,
+                bool* button_pushed = nullptr,
                 bool* track_loss = nullptr);
 
   /**
@@ -112,7 +116,9 @@ class MT6701Accessor : public RegisterAccessor {
    * 配置MT6701传感器工作在ABZ模式，提供增量式编码器输出。
    * 可以设置分辨率、Z信号宽度和迟滞参数。
    */
-  Error SetAbzMode(const uint16_t pulses_per_round, const PulseWidth z_pulse_width, const Hyst hysteresis);
+  Error SetAbzMode(const uint16_t pulses_per_round,
+                   const PulseWidth z_pulse_width,
+                   const Hyst hysteresis);
 
   /**
    * @brief 启用-a-b-z UVW模式（仅适用于QFN封装）
@@ -144,7 +150,8 @@ class MT6701Accessor : public RegisterAccessor {
    * 配置MT6701传感器工作在PWM输出模式，并设置频率和极性。
    * PWM占空比将随角度线性变化。
    */
-  Error SetPwmMode(const PwmFreq frequency = PwmFreq::kPWMFreq497_2, const PwmPol polarity = PwmPol::kHigh);
+  Error SetPwmMode(const PwmFreq frequency = PwmFreq::kPWMFreq497_2,
+                   const PwmPol polarity = PwmPol::kHigh);
 
   /**
    * @brief 设置旋转方向

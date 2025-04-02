@@ -18,7 +18,10 @@ namespace hortor_servo {
 namespace MT6701 {
 using Regs = MT6701Regs;
 
-Error MT6701Accessor::ReadRaw(uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss) {
+Error MT6701Accessor::ReadRaw(uint16_t* angle_raw,
+                              Status* field_status,
+                              bool* button_pushed,
+                              bool* track_loss) {
   return read_raw_(angle_raw, field_status, button_pushed, track_loss);
 }
 
@@ -34,7 +37,8 @@ Error MT6701Accessor::SetUvmMode(const uint8_t pairs) {
   return Error::kOk;
 }
 
-Error MT6701Accessor::SetAbzMode(const uint16_t pulses_per_round, const PulseWidth z_pulse_width,
+Error MT6701Accessor::SetAbzMode(const uint16_t pulses_per_round,
+                                 const PulseWidth z_pulse_width,
                                  const Hyst hysteresis) {
   CHECK(SetPulseWidth(z_pulse_width));
   CHECK(SetHyst(hysteresis));
@@ -54,7 +58,8 @@ Error MT6701Accessor::SetAnalogMode(const float start, const float stop) {
   return Error::kOk;
 }
 
-Error MT6701Accessor::SetPwmMode(const PwmFreq frequency, const PwmPol polarity) {
+Error MT6701Accessor::SetPwmMode(const PwmFreq frequency,
+                                 const PwmPol polarity) {
   CHECK(SetOutMode(OutMode::kPWM));
   CHECK(SetPwmFreq(frequency));
   CHECK(SetPwmPolarity(polarity));
@@ -109,10 +114,13 @@ Error MT6701Accessor::SetZeroRaw(uint16_t zero) {
   return Error::kOk;
 }
 
-Error MT6701Accessor::SetZero(const float zero) { return SetZeroRaw(static_cast<uint16_t>(zero * 4096 / 360.0f)); }
+Error MT6701Accessor::SetZero(const float zero) {
+  return SetZeroRaw(static_cast<uint16_t>(zero * 4096 / 360.0f));
+}
 
 Error MT6701Accessor::SetHyst(const Hyst hysteresis) {
-  CHECK(WriteRegField(Regs::kHYST_2, Regs::kHYST_0, static_cast<uint16_t>(hysteresis)));
+  CHECK(WriteRegField(
+      Regs::kHYST_2, Regs::kHYST_0, static_cast<uint16_t>(hysteresis)));
   return Error::kOk;
 }
 

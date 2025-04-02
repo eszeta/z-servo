@@ -21,7 +21,9 @@ namespace hortor_servo {
 namespace generic_current {
 class GenericCurrent : public Current {
  public:
-  void Init(const uint8_t pin_adc, const uint16_t shunt_resistor, const float factor);
+  void Init(const uint8_t pin_adc,
+            const uint16_t shunt_resistor,
+            const float factor);
   /**
    * @brief 获取当前电流值
    * @return float 当前测量的电流值（安培）

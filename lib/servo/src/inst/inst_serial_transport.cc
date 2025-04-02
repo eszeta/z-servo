@@ -104,7 +104,8 @@ Error InstSerialTransport::Receive(uint8_t data) {
   return Error::kOk;
 }
 
-Error InstSerialTransport::Response(const uint8_t reply_idx, const uint8_t *data) {
+Error InstSerialTransport::Response(const uint8_t reply_idx,
+                                    const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);
   memcpy(tx_buffer_, data, size);
   delay_time_ = response_delay_ * (reply_idx + 1);

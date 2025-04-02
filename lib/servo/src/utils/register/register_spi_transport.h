@@ -55,7 +55,9 @@ class RegisterSpiTransport : public ObjectInterface {
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteMultiple(const uint8_t address, const uint8_t *data, const size_t size);
+  Error WriteMultiple(const uint8_t address,
+                      const uint8_t *data,
+                      const size_t size);
 
   /**
    * @brief 读寄存器

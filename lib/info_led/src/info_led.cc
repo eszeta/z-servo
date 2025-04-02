@@ -18,7 +18,9 @@
 namespace hortor_servo {
 namespace InfoLED {
 
-void InfoLED::Init(const uint32_t pin, const Mode mode) { Init(digitalPinToPinName(pin), mode); }
+void InfoLED::Init(const uint32_t pin, const Mode mode) {
+  Init(digitalPinToPinName(pin), mode);
+}
 
 void InfoLED::Init(const PinName pinName, const Mode mode) {
   current_step_ = 0;

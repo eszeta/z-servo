@@ -28,7 +28,8 @@ namespace hortor_servo {
  * I2C模式支持完整的寄存器读写操作，适用于配置和数据读取。
  * 通信时序：
  * 1. 写操作：START -> 从机地址(写) -> 寄存器地址 -> 数据 -> STOP
- * 2. 读操作：START -> 从机地址(写) -> 寄存器地址 -> START -> 从机地址(读) -> 数据 -> STOP
+ * 2. 读操作：START -> 从机地址(写) -> 寄存器地址 -> START -> 从机地址(读) ->
+ * 数据 -> STOP
  *
  * 错误码说明：
  * - kOk: 操作成功
@@ -67,7 +68,9 @@ class RegisterI2cTransport : public ObjectInterface {
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteMultiple(const uint8_t address, const uint8_t* data, const size_t size);
+  Error WriteMultiple(const uint8_t address,
+                      const uint8_t* data,
+                      const size_t size);
 
   /**
    * @brief 读寄存器

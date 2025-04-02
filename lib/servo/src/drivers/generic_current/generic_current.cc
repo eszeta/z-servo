@@ -17,7 +17,9 @@
 namespace hortor_servo {
 namespace generic_current {
 
-void GenericCurrent::Init(const uint8_t pin_adc, const uint16_t shunt_resistor, const float factor) {
+void GenericCurrent::Init(const uint8_t pin_adc,
+                          const uint16_t shunt_resistor,
+                          const float factor) {
   pin_adc_ = pin_adc;
   pinMode(pin_adc_, INPUT);
   CalibrateOffsets();
@@ -43,7 +45,9 @@ float GenericCurrent::GetCurrent() {
   return (current - offset_) * gain_;
 }
 
-float GenericCurrent::ReadADCVoltage() { return static_cast<float>(analogRead(pin_adc_)) * kAdcVoltageConv; }
+float GenericCurrent::ReadADCVoltage() {
+  return static_cast<float>(analogRead(pin_adc_)) * kAdcVoltageConv;
+}
 
 }  // namespace generic_current
 }  // namespace hortor_servo

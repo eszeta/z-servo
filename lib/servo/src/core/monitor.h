@@ -53,8 +53,10 @@ class Monitor : public ObjectInterface {
   /**
    * @brief 监控变量
    */
-  uint8_t variables_ = static_cast<uint8_t>(MonitorBitmap::kTarget) | static_cast<uint8_t>(MonitorBitmap::kVoltage) |
-                       static_cast<uint8_t>(MonitorBitmap::kVelocity) | static_cast<uint8_t>(MonitorBitmap::kPosition);
+  uint8_t variables_ = static_cast<uint8_t>(MonitorBitmap::kTarget) |
+                       static_cast<uint8_t>(MonitorBitmap::kVoltage) |
+                       static_cast<uint8_t>(MonitorBitmap::kVelocity) |
+                       static_cast<uint8_t>(MonitorBitmap::kPosition);
   /**
    * @brief 伺服电机
    */

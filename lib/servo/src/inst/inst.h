@@ -66,7 +66,9 @@ class Inst {
    * @param parameter_size 参数大小
    * @return 错误码
    */
-  Error Response(const uint8_t reply_idx, const uint8_t *parameter, const size_t parameter_size);
+  Error Response(const uint8_t reply_idx,
+                 const uint8_t *parameter,
+                 const size_t parameter_size);
   /**
    * @brief 写寄存器
    * @param address 地址
@@ -74,7 +76,9 @@ class Inst {
    * @param size 大小
    * @return 错误码
    */
-  Error WriteRegs(const uint8_t address, const uint8_t *data, const size_t size);
+  Error WriteRegs(const uint8_t address,
+                  const uint8_t *data,
+                  const size_t size);
   /**
    * @brief 检查是否需要执行
    * @param address 地址

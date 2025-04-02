@@ -124,7 +124,8 @@ static constexpr T ToggleBit(const T data, const uint8_t idx) noexcept {
  * @param numBits 位宽
  * @return 位掩码
  */
-static constexpr uint8_t CreateMask8(const uint8_t startBit, const uint8_t numBits) noexcept {
+static constexpr uint8_t CreateMask8(const uint8_t startBit,
+                                     const uint8_t numBits) noexcept {
   return ((1U << numBits) - 1) << startBit;
 }
 
@@ -134,7 +135,8 @@ static constexpr uint8_t CreateMask8(const uint8_t startBit, const uint8_t numBi
  * @param lowByte 低字节
  * @return 拼接后的uint16_t值
  */
-static constexpr uint16_t CombineToUint16(const uint8_t highByte, const uint8_t lowByte) noexcept {
+static constexpr uint16_t CombineToUint16(const uint8_t highByte,
+                                          const uint8_t lowByte) noexcept {
   return (static_cast<uint16_t>(highByte) << 8) | lowByte;
 }
 
@@ -144,7 +146,8 @@ static constexpr uint16_t CombineToUint16(const uint8_t highByte, const uint8_t 
  * @param lowByte 低字节
  * @return 拼接后的int16_t值
  */
-static constexpr int16_t CombineToInt16(const uint8_t highByte, const uint8_t lowByte) noexcept {
+static constexpr int16_t CombineToInt16(const uint8_t highByte,
+                                        const uint8_t lowByte) noexcept {
   return static_cast<int16_t>(CombineToUint16(highByte, lowByte));
 }
 
@@ -154,7 +157,8 @@ static constexpr int16_t CombineToInt16(const uint8_t highByte, const uint8_t lo
  * @param sign 符号位索引
  * @return 原码值（uint16_t，最高位为符号位）
  */
-static constexpr uint16_t TwosToSign(const int16_t value, const uint8_t sign) noexcept {
+static constexpr uint16_t TwosToSign(const int16_t value,
+                                     const uint8_t sign) noexcept {
   if (value >= 0) {
     return static_cast<uint16_t>(value);
   }
@@ -176,7 +180,8 @@ static constexpr uint16_t TwosToSign(const int16_t value) noexcept {
  * @param sign 符号位索引
  * @return 补码值（uint16_t）
  */
-static constexpr int16_t SignToTwos(const uint16_t value, const uint8_t sign) noexcept {
+static constexpr int16_t SignToTwos(const uint16_t value,
+                                    const uint8_t sign) noexcept {
   if (!IsBitSet(value, sign)) {
     return static_cast<int16_t>(value);
   }

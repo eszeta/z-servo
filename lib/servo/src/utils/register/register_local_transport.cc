@@ -31,13 +31,20 @@ Error RegisterLocalTransport::Init(uint8_t* regs, const size_t size) {
 }
 
 Error RegisterLocalTransport::LinkAccessor(RegisterAccessor& accessor) {
-  accessor.SetWrite([this](const uint8_t address, const uint8_t data) { return Write(address, data); });
-  accessor.SetWriteMultiple([this](const uint8_t address, const uint8_t* data, const size_t size) {
-    return WriteMultiple(address, data, size);
+  accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
+    return Write(address, data);
   });
-  accessor.SetRead([this](const uint8_t address, uint8_t* data) { return Read(address, data); });
+  accessor.SetWriteMultiple(
+      [this](const uint8_t address, const uint8_t* data, const size_t size) {
+        return WriteMultiple(address, data, size);
+      });
+  accessor.SetRead([this](const uint8_t address, uint8_t* data) {
+    return Read(address, data);
+  });
   accessor.SetReadMultiple(
-      [this](const uint8_t address, const size_t size, uint8_t* data) { return ReadMultiple(address, size, data); });
+      [this](const uint8_t address, const size_t size, uint8_t* data) {
+        return ReadMultiple(address, size, data);
+      });
   return Error::kOk;
 }
 
@@ -49,7 +56,9 @@ Error RegisterLocalTransport::Write(const uint8_t address, const uint8_t data) {
   return Error::kOk;
 }
 
-Error RegisterLocalTransport::WriteMultiple(const uint8_t address, const uint8_t* data, const size_t size) {
+Error RegisterLocalTransport::WriteMultiple(const uint8_t address,
+                                            const uint8_t* data,
+                                            const size_t size) {
   if (address + size > size_) {
     return Error::kInvalidParameter;
   }
@@ -67,7 +76,9 @@ Error RegisterLocalTransport::Read(const uint8_t address, uint8_t* data) {
   return Error::kOk;
 }
 
-Error RegisterLocalTransport::ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) {
+Error RegisterLocalTransport::ReadMultiple(const uint8_t address,
+                                           const size_t size,
+                                           uint8_t* data) {
   if (address + size > size_) {
     return Error::kInvalidParameter;
   }

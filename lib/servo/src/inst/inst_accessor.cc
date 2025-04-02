@@ -126,10 +126,14 @@ Error InstAccessor::RecoveryEeprom() {
 Error InstAccessor::LoadEeprom() {
 #ifdef ARDUINO_ARCH_STM32
   int pos = 0;
-  for (uint8_t address = RegsBlocks::kEeprom.begin; address < RegsBlocks::kEeprom.end; address++) {
+  for (uint8_t address = RegsBlocks::kEeprom.begin;
+       address < RegsBlocks::kEeprom.end;
+       address++) {
     this->regs_[address] = EEPROM.read(pos++);
   }
-  for (uint8_t address = RegsBlocks::kInternalEeprom.begin; address < RegsBlocks::kInternalEeprom.end; address++) {
+  for (uint8_t address = RegsBlocks::kInternalEeprom.begin;
+       address < RegsBlocks::kInternalEeprom.end;
+       address++) {
     this->regs_[address] = EEPROM.read(pos++);
   }
 #endif
@@ -139,10 +143,14 @@ Error InstAccessor::LoadEeprom() {
 Error InstAccessor::StoreEeprom() {
 #ifdef ARDUINO_ARCH_STM32
   int pos = 0;
-  for (uint8_t address = RegsBlocks::kEeprom.begin; address < RegsBlocks::kEeprom.end; address++) {
+  for (uint8_t address = RegsBlocks::kEeprom.begin;
+       address < RegsBlocks::kEeprom.end;
+       address++) {
     EEPROM.update(pos++, this->regs_[address]);
   }
-  for (uint8_t address = RegsBlocks::kInternalEeprom.begin; address < RegsBlocks::kInternalEeprom.end; address++) {
+  for (uint8_t address = RegsBlocks::kInternalEeprom.begin;
+       address < RegsBlocks::kInternalEeprom.end;
+       address++) {
     EEPROM.update(pos++, this->regs_[address]);
   }
 #endif

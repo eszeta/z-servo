@@ -42,8 +42,8 @@ struct PIDParam {
  *    - Kp, Ki, Kd, Kff: 控制器参数
  *
  * 2. 离散化实现
- *    u(k) = Kp * e(k) + Ki * Ts * Σ(e(k)) + Kd * (e(k) - e(k-1))/Ts + Kff * r(k)
- *    其中：
+ *    u(k) = Kp * e(k) + Ki * Ts * Σ(e(k)) + Kd * (e(k) - e(k-1))/Ts + Kff *
+ * r(k) 其中：
  *    - Ts: 采样时间
  *    - k: 当前采样点
  *
