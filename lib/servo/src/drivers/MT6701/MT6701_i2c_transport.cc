@@ -37,8 +37,8 @@ Error MT6701I2cTransport::LinkAccessor(MT6701Accessor& accessor) {
 
 Error MT6701I2cTransport::ReadRaw(uint16_t* angle_raw, Status* field_status, bool* button_pushed, bool* track_loss) {
   uint8_t angle6, angle0;
-  CHECK_ERROR(Read(Regs::kANGLE_6.address, &angle6));
-  CHECK_ERROR(Read(Regs::kANGLE_0.address, &angle0));
+  CHECK(Read(Regs::kANGLE_6.address, &angle6));
+  CHECK(Read(Regs::kANGLE_0.address, &angle0));
 
   if (angle_raw) {
     *angle_raw = Register::GetCombinedValue(Regs::kANGLE_6, Regs::kANGLE_0, angle6, angle0);

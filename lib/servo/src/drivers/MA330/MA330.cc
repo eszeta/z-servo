@@ -21,9 +21,9 @@ namespace MA330 {
 MA330::MA330() : Sensor(kResolution) {}
 
 Error MA330::InitSPI(SPIClass *spi, const uint8_t cs_pin) {
-  CHECK_ERROR(spi_transport_.Init(spi, cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
-  CHECK_ERROR(spi_transport_.LinkAccessor(accessor_));
-  CHECK_ERROR(accessor_.Init());
+  CHECK(spi_transport_.Init(spi, cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
+  CHECK(spi_transport_.LinkAccessor(accessor_));
+  CHECK(accessor_.Init());
   hortor_servo::Sensor::Init();
   return Error::kOk;
 }

@@ -7,14 +7,14 @@
 namespace hortor_servo {
 
 /**
- * @def CHECK_ERROR
+ * @def CHECK
  * @brief 错误处理辅助宏
  * @param x 要检查的表达式
  *
  * 执行表达式并检查返回的错误码。如果发生错误，立即返回该错误码。
  * 用于简化连续操作的错误处理。
  */
-#define CHECK_ERROR(x)                 \
+#define CHECK(x)                       \
   do {                                 \
     Error err = (x);                   \
     if (err != Error::kOk) return err; \

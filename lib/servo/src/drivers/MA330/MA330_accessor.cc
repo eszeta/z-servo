@@ -25,124 +25,124 @@ uint16_t MA330Accessor::ReadRaw() {
 };
 
 Error MA330Accessor::GetZero(uint16_t* zero) {
-  CHECK_ERROR(ReadRegField(Regs::kZ_H, Regs::kZ_L, zero));
+  CHECK(ReadRegField(Regs::kZ_H, Regs::kZ_L, zero));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetBiasCurrentTrimming(uint8_t* bias_current_trimming) {
-  CHECK_ERROR(ReadRegField(Regs::kBCT, bias_current_trimming));
+  CHECK(ReadRegField(Regs::kBCT, bias_current_trimming));
   return Error::kOk;
 };
 
 Error MA330Accessor::IsEnableTrimmingX(bool* enable) {
-  CHECK_ERROR(ReadRegField(Regs::kETX, enable));
+  CHECK(ReadRegField(Regs::kETX, enable));
   return Error::kOk;
 };
 
 Error MA330Accessor::IsEnableTrimmingY(bool* enable) {
-  CHECK_ERROR(ReadRegField(Regs::kETY, enable));
+  CHECK(ReadRegField(Regs::kETY, enable));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetPulsesPerTurn(uint16_t* pulses_per_turn) {
   uint16_t result;
-  CHECK_ERROR(ReadRegField(Regs::kPPT_H, Regs::kPPT_L, &result));
+  CHECK(ReadRegField(Regs::kPPT_H, Regs::kPPT_L, &result));
   *pulses_per_turn = result + 1;
   return Error::kOk;
 };
 
 Error MA330Accessor::GetIndexLength(uint8_t* index_length) {
-  CHECK_ERROR(ReadRegField(Regs::kILIP, index_length));
+  CHECK(ReadRegField(Regs::kILIP, index_length));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetNumberPolePairs(uint8_t* number_pole_pairs) {
-  CHECK_ERROR(ReadRegField(Regs::kNPP, number_pole_pairs));
+  CHECK(ReadRegField(Regs::kNPP, number_pole_pairs));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetRotationDirection(uint8_t* rotation_direction) {
-  CHECK_ERROR(ReadRegField(Regs::kRD, rotation_direction));
+  CHECK(ReadRegField(Regs::kRD, rotation_direction));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetFieldStrengthHighThreshold(uint8_t* high_threshold) {
-  CHECK_ERROR(ReadRegField(Regs::kMGHT, high_threshold));
+  CHECK(ReadRegField(Regs::kMGHT, high_threshold));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetFieldStrengthLowThreshold(uint8_t* low_threshold) {
-  CHECK_ERROR(ReadRegField(Regs::kMGLT, low_threshold));
+  CHECK(ReadRegField(Regs::kMGLT, low_threshold));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetFilterWidth(uint8_t* filter_width) {
-  CHECK_ERROR(ReadRegField(Regs::kFW, filter_width));
+  CHECK(ReadRegField(Regs::kFW, filter_width));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetHysteresis(uint8_t* hysteresis) {
-  CHECK_ERROR(ReadRegField(Regs::kHYS, hysteresis));
+  CHECK(ReadRegField(Regs::kHYS, hysteresis));
   return Error::kOk;
 };
 
 Error MA330Accessor::GetFieldStrength(FieldStrength* field_strength) {
   uint8_t result;
-  CHECK_ERROR(ReadRegField(Regs::kMGL_MGH, &result));
+  CHECK(ReadRegField(Regs::kMGL_MGH, &result));
   *field_strength = static_cast<FieldStrength>(result);
   return Error::kOk;
 };
 
 Error MA330Accessor::SetZero(uint16_t value) {
-  CHECK_ERROR(WriteRegField(Regs::kZ_H, Regs::kZ_L, value));
+  CHECK(WriteRegField(Regs::kZ_H, Regs::kZ_L, value));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetBiasCurrentTrimming(uint8_t value) {
-  CHECK_ERROR(WriteRegField(Regs::kBCT, value));
+  CHECK(WriteRegField(Regs::kBCT, value));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetTrimmingEnabled(bool Xenabled, bool Yenabled) {
-  CHECK_ERROR(WriteRegField(Regs::kETX, Xenabled));
-  CHECK_ERROR(WriteRegField(Regs::kETY, Yenabled));
+  CHECK(WriteRegField(Regs::kETX, Xenabled));
+  CHECK(WriteRegField(Regs::kETY, Yenabled));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetPulsesPerTurn(uint16_t value) {
   uint16_t pptVal = value - 1;
-  CHECK_ERROR(WriteRegField(Regs::kPPT_H, Regs::kPPT_L, pptVal));
+  CHECK(WriteRegField(Regs::kPPT_H, Regs::kPPT_L, pptVal));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetIndexLength(uint8_t value) {
-  CHECK_ERROR(WriteRegField(Regs::kILIP, value));
+  CHECK(WriteRegField(Regs::kILIP, value));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetNumberPolePairs(uint8_t value) {
-  CHECK_ERROR(WriteRegField(Regs::kNPP, value));
+  CHECK(WriteRegField(Regs::kNPP, value));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetRotationDirection(uint8_t value) {
-  CHECK_ERROR(WriteRegField(Regs::kRD, value));
+  CHECK(WriteRegField(Regs::kRD, value));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetFilterWidth(uint8_t value) {
-  CHECK_ERROR(WriteRegField(Regs::kFW, value));
+  CHECK(WriteRegField(Regs::kFW, value));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetHysteresis(uint8_t value) {
-  CHECK_ERROR(WriteRegField(Regs::kHYS, value));
+  CHECK(WriteRegField(Regs::kHYS, value));
   return Error::kOk;
 };
 
 Error MA330Accessor::SetFieldStrengthThresholds(uint8_t high_threshold, uint8_t low_threshold) {
-  CHECK_ERROR(WriteRegField(Regs::kMGLT, low_threshold));
-  CHECK_ERROR(WriteRegField(Regs::kMGHT, high_threshold));
+  CHECK(WriteRegField(Regs::kMGLT, low_threshold));
+  CHECK(WriteRegField(Regs::kMGHT, high_threshold));
   return Error::kOk;
 };
 

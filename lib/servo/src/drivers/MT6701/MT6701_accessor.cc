@@ -29,53 +29,53 @@ Status MT6701Accessor::ReadFieldStatus() {
 }
 
 Error MT6701Accessor::SetUvmMode(const uint8_t pairs) {
-  CHECK_ERROR(SetUVWPolePair(pairs));
-  CHECK_ERROR(SetMode(Mode::kUVW));
+  CHECK(SetUVWPolePair(pairs));
+  CHECK(SetMode(Mode::kUVW));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetAbzMode(const uint16_t pulses_per_round, const PulseWidth z_pulse_width,
                                  const Hyst hysteresis) {
-  CHECK_ERROR(SetPulseWidth(z_pulse_width));
-  CHECK_ERROR(SetHyst(hysteresis));
-  CHECK_ERROR(SetABZPulsePerRound(pulses_per_round));
-  CHECK_ERROR(SetMode(Mode::kABZ));
+  CHECK(SetPulseWidth(z_pulse_width));
+  CHECK(SetHyst(hysteresis));
+  CHECK(SetABZPulsePerRound(pulses_per_round));
+  CHECK(SetMode(Mode::kABZ));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetNaNbNzEnable(const bool enable) {
-  CHECK_ERROR(WriteRegField(Regs::kUVM_MUX, enable ? 1 : 0));
+  CHECK(WriteRegField(Regs::kUVM_MUX, enable ? 1 : 0));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetAnalogMode(const float start, const float stop) {
-  CHECK_ERROR(SetStartStop(start, stop));
-  CHECK_ERROR(SetOutMode(OutMode::kAnalog));
+  CHECK(SetStartStop(start, stop));
+  CHECK(SetOutMode(OutMode::kAnalog));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetPwmMode(const PwmFreq frequency, const PwmPol polarity) {
-  CHECK_ERROR(SetOutMode(OutMode::kPWM));
-  CHECK_ERROR(SetPwmFreq(frequency));
-  CHECK_ERROR(SetPwmPolarity(polarity));
+  CHECK(SetOutMode(OutMode::kPWM));
+  CHECK(SetPwmFreq(frequency));
+  CHECK(SetPwmPolarity(polarity));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetDirection(const Direction direction) {
-  CHECK_ERROR(WriteRegField(Regs::kDIR, static_cast<uint8_t>(direction)));
+  CHECK(WriteRegField(Regs::kDIR, static_cast<uint8_t>(direction)));
   return Error::kOk;
 }
 
 Error MT6701Accessor::GetDirection(Direction* direction) {
   uint8_t value;
-  CHECK_ERROR(ReadRegField(Regs::kDIR, &value));
+  CHECK(ReadRegField(Regs::kDIR, &value));
   *direction = static_cast<Direction>(value);
   return Error::kOk;
 }
 
 Error MT6701Accessor::ProgramEEPROM() {
-  CHECK_ERROR(Write(0x09, 0xB3));
-  CHECK_ERROR(Write(0x0A, 0x05));
+  CHECK(Write(0x09, 0xB3));
+  CHECK(Write(0x0A, 0x05));
   delay(600);
   return Error::kOk;
 }
@@ -85,7 +85,7 @@ Error MT6701Accessor::SetABZPulsePerRound(uint16_t pulses) {
   if (pulses >= 1024) {
     return Error::kOutOfRange;
   }
-  CHECK_ERROR(WriteRegField(Regs::kABZ_RES_8, Regs::kABZ_RES_0, pulses));
+  CHECK(WriteRegField(Regs::kABZ_RES_8, Regs::kABZ_RES_0, pulses));
   return Error::kOk;
 }
 
@@ -95,24 +95,24 @@ Error MT6701Accessor::SetUVWPolePair(uint8_t pairs) {
     return Error::kOutOfRange;
   }
 
-  CHECK_ERROR(WriteRegField(Regs::kUVM_RES_0, pairs));
+  CHECK(WriteRegField(Regs::kUVM_RES_0, pairs));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetMode(const Mode mode) {
-  CHECK_ERROR(WriteRegField(Regs::kABZ_MUX, static_cast<uint8_t>(mode)));
+  CHECK(WriteRegField(Regs::kABZ_MUX, static_cast<uint8_t>(mode)));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetZeroRaw(uint16_t zero) {
-  CHECK_ERROR(WriteRegField(Regs::kZERO_8, Regs::kZERO_0, zero));
+  CHECK(WriteRegField(Regs::kZERO_8, Regs::kZERO_0, zero));
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetZero(const float zero) { return SetZeroRaw(static_cast<uint16_t>(zero * 4096 / 360.0f)); }
 
 Error MT6701Accessor::SetHyst(const Hyst hysteresis) {
-  CHECK_ERROR(WriteRegField(Regs::kHYST_2, Regs::kHYST_0, static_cast<uint16_t>(hysteresis)));
+  CHECK(WriteRegField(Regs::kHYST_2, Regs::kHYST_0, static_cast<uint16_t>(hysteresis)));
   return Error::kOk;
 }
 
@@ -127,8 +127,8 @@ Error MT6701Accessor::SetStartStopRaw(uint16_t start, uint16_t stop) {
     return Error::kInvalidParameter;
   }
 
-  CHECK_ERROR(WriteRegField(Regs::kA_START_8, Regs::kA_START_0, start));
-  CHECK_ERROR(WriteRegField(Regs::kA_STOP_8, Regs::kA_STOP_0, stop));
+  CHECK(WriteRegField(Regs::kA_START_8, Regs::kA_START_0, start));
+  CHECK(WriteRegField(Regs::kA_STOP_8, Regs::kA_STOP_0, stop));
   return Error::kOk;
 }
 
@@ -141,49 +141,49 @@ Error MT6701Accessor::SetStartStop(const float start, const float stop) {
 }
 
 Error MT6701Accessor::SetPulseWidth(const PulseWidth width) {
-  CHECK_ERROR(WriteRegField(Regs::kPULSE_WIDTH, static_cast<uint8_t>(width)));
+  CHECK(WriteRegField(Regs::kPULSE_WIDTH, static_cast<uint8_t>(width)));
   return Error::kOk;
 }
 
 Error MT6701Accessor::GetPulseWidth(PulseWidth* width) {
   uint8_t value;
-  CHECK_ERROR(ReadRegField(Regs::kPULSE_WIDTH, &value));
+  CHECK(ReadRegField(Regs::kPULSE_WIDTH, &value));
   *width = static_cast<PulseWidth>(value);
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetPwmFreq(const PwmFreq freq) {
-  CHECK_ERROR(WriteRegField(Regs::kPWM_FREQ, static_cast<uint8_t>(freq)));
+  CHECK(WriteRegField(Regs::kPWM_FREQ, static_cast<uint8_t>(freq)));
   return Error::kOk;
 }
 
 Error MT6701Accessor::GetPwmFreq(PwmFreq* freq) {
   uint8_t value;
-  CHECK_ERROR(ReadRegField(Regs::kPWM_FREQ, &value));
+  CHECK(ReadRegField(Regs::kPWM_FREQ, &value));
   *freq = static_cast<PwmFreq>(value);
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetPwmPolarity(const PwmPol polarity) {
-  CHECK_ERROR(WriteRegField(Regs::kPWM_POL, static_cast<uint8_t>(polarity)));
+  CHECK(WriteRegField(Regs::kPWM_POL, static_cast<uint8_t>(polarity)));
   return Error::kOk;
 }
 
 Error MT6701Accessor::GetPwmPolarity(PwmPol* polarity) {
   uint8_t value;
-  CHECK_ERROR(ReadRegField(Regs::kPWM_POL, &value));
+  CHECK(ReadRegField(Regs::kPWM_POL, &value));
   *polarity = static_cast<PwmPol>(value);
   return Error::kOk;
 }
 
 Error MT6701Accessor::SetOutMode(const OutMode mode) {
-  CHECK_ERROR(WriteRegField(Regs::kOUT_MODE, static_cast<uint8_t>(mode)));
+  CHECK(WriteRegField(Regs::kOUT_MODE, static_cast<uint8_t>(mode)));
   return Error::kOk;
 }
 
 Error MT6701Accessor::GetOutMode(OutMode* mode) {
   uint8_t value;
-  CHECK_ERROR(ReadRegField(Regs::kOUT_MODE, &value));
+  CHECK(ReadRegField(Regs::kOUT_MODE, &value));
   *mode = static_cast<OutMode>(value);
   return Error::kOk;
 }

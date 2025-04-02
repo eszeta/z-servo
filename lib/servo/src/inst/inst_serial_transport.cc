@@ -38,7 +38,7 @@ Error InstSerialTransport::Process(uint32_t dt) {
   // 接收数据
   while (serial_->available()) {
     uint8_t data = serial_->read();
-    CHECK_ERROR(Receive(data));
+    CHECK(Receive(data));
   }
   return Error::kOk;
 }
@@ -93,7 +93,7 @@ Error InstSerialTransport::Receive(uint8_t data) {
         packet_state_ = PacketState::kHeader1;
         return Error::kInvalidPacket;
       }
-      CHECK_ERROR(execute_(rx_buffer_));
+      CHECK(execute_(rx_buffer_));
       break;
     }
     default: {

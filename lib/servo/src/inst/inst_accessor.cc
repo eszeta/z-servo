@@ -24,14 +24,14 @@ namespace hortor_servo {
 using Regs = ServoRegs;
 using Def = RegsDefaultValues;
 Error InstAccessor::Init() {
-  CHECK_ERROR(local_transport_.Init(regs_, sizeof(regs_)));
-  CHECK_ERROR(local_transport_.LinkAccessor(*this));
-  CHECK_ERROR(LoadEeprom());
+  CHECK(local_transport_.Init(regs_, sizeof(regs_)));
+  CHECK(local_transport_.LinkAccessor(*this));
+  CHECK(LoadEeprom());
   if (GetFirmwareMajor() == 0 && GetFirmwareMinor() == 0) {
-    CHECK_ERROR(RecoveryEeprom());
-    CHECK_ERROR(StoreEeprom());
+    CHECK(RecoveryEeprom());
+    CHECK(StoreEeprom());
   }
-  CHECK_ERROR(ResetRam());
+  CHECK(ResetRam());
   return Error::kOk;
 }
 

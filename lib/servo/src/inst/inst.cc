@@ -23,7 +23,7 @@ namespace hortor_servo {
 Error Inst::Init() {
   buffer_size_ = 0;
 
-  CHECK_ERROR(LoadEepromConfig());
+  CHECK(LoadEepromConfig());
   return Error::kOk;
 }
 
@@ -34,7 +34,7 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
 
 Error Inst::LinkTransport(InstTransportInterface *transport) {
   transport_ = transport;
-  CHECK_ERROR(transport_->SetExecute([this](uint8_t *data) -> Error { return this->Execute(data); }));
+  CHECK(transport_->SetExecute([this](uint8_t *data) -> Error { return this->Execute(data); }));
   return Error::kOk;
 }
 
@@ -44,8 +44,8 @@ Error Inst::LinkServo(Servo *servo) {
 }
 
 Error Inst::Process(uint32_t dt) {
-  CHECK_ERROR(transport_->Process(dt));
-  CHECK_ERROR(UpdateStatusRegs());
+  CHECK(transport_->Process(dt));
+  CHECK(UpdateStatusRegs());
   return Error::kOk;
 }
 
@@ -60,7 +60,7 @@ Error Inst::Response(const uint8_t reply_idx, const uint8_t *parameter, const si
   }
   status_packet_.error = accessor_->GetStatus();
   status_packet_.SetChecksum();
-  CHECK_ERROR(transport_->Response(reply_idx, tx_buffer_));
+  CHECK(transport_->Response(reply_idx, tx_buffer_));
   return Error::kOk;
 }
 
@@ -68,17 +68,17 @@ Error Inst::WriteRegs(const uint8_t address, const uint8_t *data, const size_t s
   if (data == nullptr || size == 0) {
     return Error::kInvalidParameter;
   }
-  CHECK_ERROR(accessor_->WriteMultiple(address, data, size));
+  CHECK(accessor_->WriteMultiple(address, data, size));
   if (RegsBlocks::kEeprom.InBlock(address, size) || RegsBlocks::kInternalEeprom.InBlock(address, size)) {
     if (!accessor_->GetWriteLock()) {
-      CHECK_ERROR(accessor_->StoreEeprom());
+      CHECK(accessor_->StoreEeprom());
     }
-    CHECK_ERROR(LoadEepromConfig());
+    CHECK(LoadEepromConfig());
   }
   if (RegsBlocks::kNormalRam.InBlock(address, size)) {
-    CHECK_ERROR(LoadRamConfig());
+    CHECK(LoadRamConfig());
   }
-  CHECK_ERROR(CheckAction(address, size));
+  CHECK(CheckAction(address, size));
   return Error::kOk;
 }
 
@@ -262,39 +262,39 @@ Error Inst::Execute(const uint8_t *data) {
   const bool response = response_id && response_level;
   switch (instruction) {
     case Instruction::kPing: {
-      CHECK_ERROR(PingHandler(packet, response_id));
+      CHECK(PingHandler(packet, response_id));
       break;
     }
     case Instruction::kReadData: {
-      CHECK_ERROR(ReadDataHandler(packet, response));
+      CHECK(ReadDataHandler(packet, response));
       break;
     }
     case Instruction::kWriteData: {
-      CHECK_ERROR(WriteDataHandler(packet, response));
+      CHECK(WriteDataHandler(packet, response));
       break;
     }
     case Instruction::kRegWrite: {
-      CHECK_ERROR(RegWriteHandler(packet, response));
+      CHECK(RegWriteHandler(packet, response));
       break;
     }
     case Instruction::kAction: {
-      CHECK_ERROR(ActionHandler(packet, response));
+      CHECK(ActionHandler(packet, response));
       break;
     }
     case Instruction::kSyncWrite: {
-      CHECK_ERROR(SyncWriteHandler(packet, response));
+      CHECK(SyncWriteHandler(packet, response));
       break;
     }
     case Instruction::kSyncRead: {
-      CHECK_ERROR(SyncReadHandler(packet, response));
+      CHECK(SyncReadHandler(packet, response));
       break;
     }
     case Instruction::kRecovery: {
-      CHECK_ERROR(RecoveryHandler(packet, response));
+      CHECK(RecoveryHandler(packet, response));
       break;
     }
     case Instruction::kReset: {
-      CHECK_ERROR(ResetHandler(packet, response));
+      CHECK(ResetHandler(packet, response));
       break;
     }
     default: {
@@ -313,7 +313,7 @@ Error Inst::Execute(const uint8_t *data) {
  */
 Error Inst::PingHandler(const InstPacket *packet, const bool response) {
   if (response) {
-    CHECK_ERROR(Response(0, nullptr, 0));
+    CHECK(Response(0, nullptr, 0));
   }
   return Error::kOk;
 }
@@ -329,8 +329,8 @@ Error Inst::ReadDataHandler(const InstPacket *packet, const bool response) {
     const uint8_t address = packet->parameter[0];
     const uint8_t size = packet->parameter[1];
     uint8_t buffer[128];
-    CHECK_ERROR(accessor_->ReadMultiple(address, size, buffer));
-    CHECK_ERROR(Response(0, buffer, size));
+    CHECK(accessor_->ReadMultiple(address, size, buffer));
+    CHECK(Response(0, buffer, size));
   }
   return Error::kOk;
 }
@@ -344,9 +344,9 @@ Error Inst::ReadDataHandler(const InstPacket *packet, const bool response) {
 Error Inst::WriteDataHandler(const InstPacket *packet, const bool response) {
   const uint8_t address = packet->parameter[0];
   const uint8_t size = packet->GetParameterSize() - 1;
-  CHECK_ERROR(WriteRegs(address, packet->parameter + 1, size));
+  CHECK(WriteRegs(address, packet->parameter + 1, size));
   if (response) {
-    CHECK_ERROR(Response(0, nullptr, 0));
+    CHECK(Response(0, nullptr, 0));
   }
   return Error::kOk;
 }
@@ -354,7 +354,7 @@ Error Inst::WriteDataHandler(const InstPacket *packet, const bool response) {
 /**
  * @brief 寄存器写入指令处理函数
  * REG WRITE 指令相似于 WRITE DATA，只是执行的时间不同。
- * 当收到 REG WRITE 指令帧时，把收到的数据储存在缓冲区备用，并把kAsynWriteSt 寄存器置 1。
+ * 当收到 REG WRITE 指令帧时，把收到的数据储存在缓冲区备用，并把kAsyncWriteSt 寄存器置 1。
  * 当收到 ACTION指令后，储存的指令最终被执行。
  * @param packet 指令包
  * @param response 是否响应
@@ -369,7 +369,7 @@ Error Inst::RegWriteHandler(const InstPacket *packet, const bool response) {
   buffer_size_ += size;
   accessor_->SetAsyncWrite(true);
   if (response) {
-    CHECK_ERROR(Response(0, nullptr, 0));
+    CHECK(Response(0, nullptr, 0));
   }
   return Error::kOk;
 }
@@ -390,14 +390,14 @@ Error Inst::ActionHandler(const InstPacket *packet, const bool response) {
     }
     const uint8_t address = reg_write_packet->parameter[0];
     const uint8_t size = reg_write_packet->GetParameterSize() - 1;
-    CHECK_ERROR(WriteRegs(address, reg_write_packet->parameter + 1, size));
+    CHECK(WriteRegs(address, reg_write_packet->parameter + 1, size));
     buffer_size_ -= packet_size;
     buffer += packet_size;
   }
   buffer_size_ = 0;
   accessor_->SetAsyncWrite(false);
   if (response) {
-    CHECK_ERROR(Response(0, nullptr, 0));
+    CHECK(Response(0, nullptr, 0));
   }
   return Error::kOk;
 }
@@ -426,12 +426,12 @@ Error Inst::SyncWriteHandler(const InstPacket *packet, const bool response) {
       const uint8_t *data = parameter + 1;
       hit = true;
       response_idx = i;
-      CHECK_ERROR(WriteRegs(address, data, data_size));
+      CHECK(WriteRegs(address, data, data_size));
     }
     parameter += block_size;
   }
   if (response && hit) {
-    CHECK_ERROR(Response(response_idx, nullptr, 0));
+    CHECK(Response(response_idx, nullptr, 0));
   }
   return Error::kOk;
 }
@@ -460,12 +460,12 @@ Error Inst::SyncReadHandler(const InstPacket *packet, const bool response) {
     if (id == accessor_->GetId()) {
       hit = true;
       response_idx = i;
-      CHECK_ERROR(accessor_->ReadMultiple(address, data_size, buffer));
+      CHECK(accessor_->ReadMultiple(address, data_size, buffer));
     }
     parameter += 1;
   }
   if (response && hit) {
-    CHECK_ERROR(Response(response_idx, buffer, data_size));
+    CHECK(Response(response_idx, buffer, data_size));
   }
   return Error::kOk;
 }
@@ -477,10 +477,10 @@ Error Inst::SyncReadHandler(const InstPacket *packet, const bool response) {
  * @return 错误码
  */
 Error Inst::RecoveryHandler(const InstPacket *packet, const bool response) {
-  CHECK_ERROR(accessor_->RecoveryEeprom());
-  CHECK_ERROR(accessor_->StoreEeprom());
+  CHECK(accessor_->RecoveryEeprom());
+  CHECK(accessor_->StoreEeprom());
   if (response) {
-    CHECK_ERROR(Response(0, nullptr, 0));
+    CHECK(Response(0, nullptr, 0));
   }
   return Error::kOk;
 }
@@ -493,9 +493,9 @@ Error Inst::RecoveryHandler(const InstPacket *packet, const bool response) {
  */
 Error Inst::ResetHandler(const InstPacket *packet, const bool response) {
   // todo: 重置舵机圈数
-  CHECK_ERROR(accessor_->ResetRam());
+  CHECK(accessor_->ResetRam());
   if (response) {
-    CHECK_ERROR(Response(0, nullptr, 0));
+    CHECK(Response(0, nullptr, 0));
   }
   return Error::kOk;
 }

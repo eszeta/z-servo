@@ -19,9 +19,9 @@ namespace hortor_servo {
 namespace LSM6DSOW {
 
 Error LSM6DSOW::InitI2C(TwoWire* wire) {
-  CHECK_ERROR(i2c_transport_.Init(wire, kI2CAddress));
-  CHECK_ERROR(i2c_transport_.LinkAccessor(accessor_));
-  CHECK_ERROR(accessor_.Init());
+  CHECK(i2c_transport_.Init(wire, kI2CAddress));
+  CHECK(i2c_transport_.LinkAccessor(accessor_));
+  CHECK(accessor_.Init());
   return Error::kOk;
 }
 }  // namespace LSM6DSOW
