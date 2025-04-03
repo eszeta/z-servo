@@ -86,7 +86,7 @@ class Servo {
   }
 
   void SetTorqueEnable(bool torque_enable) { torque_enable_ = torque_enable; }
-  void SetTargetAcceleration(int16_t target_acceleration) {
+  void SetTargetAcceleration(float target_acceleration) {
     target_acceleration_ = target_acceleration;
   }
   void SetTargetPosition(int16_t target_position) {
@@ -94,24 +94,26 @@ class Servo {
   }
   void SetTargetTime(int16_t target_time) { target_time_ = target_time; }
   void SetTargetPwm(float target_pwm) { target_pwm_ = target_pwm; }
-  void SetTargetVelocity(int16_t target_velocity) {
+  void SetTargetVelocity(float target_velocity) {
     target_velocity_ = target_velocity;
   }
   void SetTorqueLimit(float torque_limit) { torque_limit_ = torque_limit; }
 
  private:
-  void setPower(const float power, const bool force);
-  float getAngle(uint32_t dt);
-  float getVelocity(uint32_t dt);
-  float getCurrent(uint32_t dt);
+  void SetPower(const float power);
+  void Break();
+  float GetAngle(uint32_t dt);
+  float GetVelocity(uint32_t dt);
+  float GetCurrent(uint32_t dt);
+  bool CheckTarget(int16_t pos_error);
 
   bool enabled_;
   bool torque_enable_;
 
-  int16_t target_acceleration_;
+  float target_acceleration_;
   int16_t target_position_;
   int16_t target_time_;
-  int16_t target_velocity_;
+  float target_velocity_;
   float target_pwm_;
   float torque_limit_;
 
@@ -181,7 +183,7 @@ class Servo {
   LowPassFilter pos_lpf_;
 
   //
-  bool action_flag_;
+  bool action_;
   float position_set_;
   float current_set;
   float voltage_set_;

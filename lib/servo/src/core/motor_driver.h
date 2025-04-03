@@ -29,5 +29,10 @@ class MotorDriver : public ObjectInterface {
    * @param pwm (-1..1)
    */
   virtual void SetPWM(float pwm) = 0;
+
+  /**
+   * @brief 断电
+   */
+  virtual void Break() = 0;
 };
 }  // namespace hortor_servo

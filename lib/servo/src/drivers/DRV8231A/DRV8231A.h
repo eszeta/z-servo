@@ -38,10 +38,15 @@ class DRV8231A final : public MotorDriver {
    */
   void SetPWM(float pwm) override;
 
+  /**
+   * @brief 断电
+   */
+  void Break() override;
+
  private:
-  /** @brief PWMA输出引脚 */
+  /** @brief PWM A输出引脚 */
   uint8_t pin_a_;
-  /** @brief PWMB输出引脚 */
+  /** @brief PWM B输出引脚 */
   uint8_t pin_b_;
 };
 }  // namespace DRV8231A

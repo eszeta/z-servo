@@ -43,6 +43,11 @@ class MP6515 final : public MotorDriver {
    */
   void SetPWM(float pwm) override;
 
+  /**
+   * @brief 断电
+   */
+  void Break() override;
+
  private:
   /**
    * @brief 刹车引脚编号

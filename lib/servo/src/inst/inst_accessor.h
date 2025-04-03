@@ -694,19 +694,19 @@ class InstAccessor : public RegisterAccessor {
    * @brief 获取目标加速度 (0x29)
    * @return 目标加速度(100步/s²)
    */
-  uint16_t GetTargetAcceleration() {
+  float GetTargetAcceleration() {
     uint8_t acceleration;
     ReadRegField(Regs::kTargetAcceleration, &acceleration);
-    return acceleration * 100;
+    return static_cast<float>(acceleration) * 100.0f;
   }
 
   /**
    * @brief 设置目标加速度 (0x29)
    * @param acceleration 目标加速度(100步/s²)
    */
-  void SetTargetAcceleration(const uint16_t acceleration) {
+  void SetTargetAcceleration(const float acceleration) {
     WriteRegField(Regs::kTargetAcceleration,
-                  static_cast<uint8_t>(acceleration / 100));
+                  static_cast<uint8_t>(acceleration / 100.0f));
   }
 
   /**
@@ -771,20 +771,20 @@ class InstAccessor : public RegisterAccessor {
    * @brief 获取目标速度 (0x2E-0x2F)
    * @return 目标速度(步/s)
    */
-  int16_t GetTargetVelocity() {
+  float GetTargetVelocity() {
     uint16_t velocity;
     ReadRegField(Regs::kTargetVelocityH, Regs::kTargetVelocityL, &velocity);
-    return bit_utils::SignToTwos(velocity, 15);
+    return static_cast<float>(bit_utils::SignToTwos(velocity, 15));
   }
 
   /**
    * @brief 设置目标速度 (0x2E-0x2F)
    * @param velocity 目标速度(步/s)
    */
-  void SetTargetVelocity(const int16_t velocity) {
+  void SetTargetVelocity(const float velocity) {
     WriteRegField(Regs::kTargetVelocityH,
                   Regs::kTargetVelocityL,
-                  bit_utils::SignToTwos(velocity, 15));
+                  static_cast<uint16_t>(bit_utils::SignToTwos(velocity, 15)));
   }
 
   /**

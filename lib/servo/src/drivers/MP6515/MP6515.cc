@@ -35,12 +35,13 @@ void MP6515::Init(const uint8_t pin_phase,
   pinMode(pin_sleep_, OUTPUT);
 
   digitalWrite(pin_phase_, 0);
-  digitalWrite(pin_enbl_, 0);
+  analogWrite(pin_enbl_, 0);
   digitalWrite(pin_brake_, 0);
   digitalWrite(pin_sleep_, 1);
 }
 
 void MP6515::SetPWM(float pwm) {
+  digitalWrite(pin_brake_, LOW);
   if (pwm > 0.0f) {
     pwm = constrain(pwm, 0.0f, 1.0f);
     digitalWrite(pin_phase_, 1);
@@ -51,8 +52,10 @@ void MP6515::SetPWM(float pwm) {
     analogWrite(pin_enbl_, static_cast<uint32_t>(255 * pwm));
   } else {
     digitalWrite(pin_phase_, 0);
-    digitalWrite(pin_enbl_, 0);
+    analogWrite(pin_enbl_, 0);
   }
 }
+
+void MP6515::Break() { digitalWrite(pin_brake_, HIGH); }
 }  // namespace MP6515
 }  // namespace hortor_servo
