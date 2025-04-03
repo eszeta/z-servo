@@ -40,6 +40,11 @@ static constexpr uint8_t GetBufferId(const uint8_t *buffer) {
   return buffer[PacketIndex::kId];
 }
 
+/**
+ * @brief 获取指令包长度
+ * @param buffer 指令包
+ * @return 指令包长度（包括ID、长度、指令/错误和参数的总长度）
+ */
 static constexpr uint8_t GetLength(const uint8_t *buffer) {
   return buffer[PacketIndex::kLength];
 }
@@ -54,6 +59,11 @@ static constexpr uint8_t GetParameterSize(const uint8_t *buffer) {
   return GetLength(buffer) - 2;
 }
 
+/**
+ * @brief 设置参数长度
+ * @param buffer 指令包
+ * @param size 参数长度（不包括指令/错误和校验和）
+ */
 static constexpr void SetParameterSize(uint8_t *buffer, const uint8_t size) {
   buffer[PacketIndex::kLength] = size + 2;
 }
@@ -68,6 +78,11 @@ static constexpr uint8_t GetChecksum(const uint8_t *buffer) {
   return buffer[PacketIndex::kParameter + parameter_size];
 }
 
+/**
+ * @brief 获取指令包总大小
+ * @param buffer 指令包
+ * @return 指令包总大小（包括头部、ID、长度、指令/错误、参数和校验和）
+ */
 static constexpr size_t GetBufferSize(const uint8_t *buffer) {
   const uint8_t length = GetLength(buffer);
   // Header(2Byte) + ID + Length = 4
@@ -88,6 +103,15 @@ static constexpr uint8_t CalculateChecksum(const uint8_t *buffer) {
     checksum += buffer[i];
   }
   return ~(static_cast<uint8_t>(checksum));
+}
+
+/**
+ * @brief 校验和检查
+ * @param buffer 指令包
+ * @return true 如果校验和正确，false 如果校验和错误
+ */
+static constexpr bool CheckChecksum(const uint8_t *buffer) {
+  return GetChecksum(buffer) == CalculateChecksum(buffer);
 }
 
 /**
