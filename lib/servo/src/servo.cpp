@@ -33,14 +33,13 @@ void Servo::Process(uint32_t dt) {
   }
   switch (mode_) {
     case ServoMode::kPosition: {
-      position_set_ = target_position_;
-      auto pos_error = position_set_ - present_position_;
-      if (CheckTarget(pos_error)) {
+      const auto pos_error = target_position_ - present_position_;
+      if (IsPositionReached(pos_error)) {
         return;
       }
       moving_ = true;
-      pwm_set_ = pos_pid_.Compute(pos_error, dt);
-      SetPower(pwm_set_);
+      const auto pwm_set = pos_pid_.Compute(pos_error, dt);
+      SetPower(pwm_set);
       break;
     }
     // case MotorMode::kPositionTorque: {
@@ -56,7 +55,7 @@ void Servo::Process(uint32_t dt) {
   }
 }
 
-bool Servo::CheckTarget(int16_t pos_error) {
+bool Servo::IsPositionReached(int16_t pos_error) {
   if (pos_error > 0 && pos_error > cw_insensitive_area_) {
     return false;
   }
@@ -92,7 +91,6 @@ float Servo::GetCurrent(uint32_t dt) {
 
 void Servo::SetPower(const float power) {
   present_load_ = power;
-  voltage_set_ = std::abs(max_voltage_ * power);
   const auto direction = static_cast<float>(motor_direction_);
   driver_->SetPWM(direction * power);
 }

@@ -30,7 +30,7 @@ class Servo {
   float GetPresentCurrent() { return present_current_; }
   uint8_t GetErrorStatus() { return error_status_; }
   bool GetMoving() { return moving_; }
-  int16_t GetTargetPosition() { return target_position_; }
+  float GetTargetPosition() { return target_position_; }
   ServoMode GetMode() { return mode_; }
   PidController &GetPosPid() { return pos_pid_; }
   PidController &GetVelPid() { return velocity_pid_; }
@@ -89,7 +89,7 @@ class Servo {
   void SetTargetAcceleration(float target_acceleration) {
     target_acceleration_ = target_acceleration;
   }
-  void SetTargetPosition(int16_t target_position) {
+  void SetTargetPosition(float target_position) {
     target_position_ = target_position;
   }
   void SetTargetTime(int16_t target_time) { target_time_ = target_time; }
@@ -105,13 +105,13 @@ class Servo {
   float GetAngle(uint32_t dt);
   float GetVelocity(uint32_t dt);
   float GetCurrent(uint32_t dt);
-  bool CheckTarget(int16_t pos_error);
+  bool IsPositionReached(int16_t pos_error);
 
   bool enabled_;
   bool torque_enable_;
 
   float target_acceleration_;
-  int16_t target_position_;
+  float target_position_;
   int16_t target_time_;
   float target_velocity_;
   float target_pwm_;
@@ -153,27 +153,11 @@ class Servo {
   float velocity_proportional_gain_;
   float velocity_integral_gain_;
 
-  PidController pos_pid_{{.kp = 1.0f,
-                          .ki = 0.0f,
-                          .kd = 0.0f,
-                          .ff = 0.0f,
-                          .ramp = 0.0f,
-                          .limit = 0.0f,
-                          .deadband = 0.0f}};
-  PidController velocity_pid_{{.kp = 1.0f,
-                               .ki = 0.0f,
-                               .kd = 0.0f,
-                               .ff = 0.0f,
-                               .ramp = 0.0f,
-                               .limit = 0.0f,
-                               .deadband = 0.0f}};
-  PidController current_pid_{{.kp = 1.0f,
-                              .ki = 0.0f,
-                              .kd = 0.0f,
-                              .ff = 0.0f,
-                              .ramp = 0.0f,
-                              .limit = 0.0f,
-                              .deadband = 0.0f}};
+  PidController pos_pid_{
+      {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
+  // ServoMode::kSpeed模式专用
+  PidController velocity_pid_{
+      {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
 
   Direction motor_direction_;
   Direction sensor_direction_;
@@ -184,10 +168,6 @@ class Servo {
 
   //
   bool action_;
-  float position_set_;
-  float current_set;
-  float voltage_set_;
-  float pwm_set_;
 
   MotorDriver *driver_;
   Sensor *angle_sensor_;

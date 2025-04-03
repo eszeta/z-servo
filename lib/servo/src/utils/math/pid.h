@@ -23,46 +23,10 @@ struct PIDParam {
   float ki;
   float kd;
   float ff;
-  float ramp;
   float limit;
-  float deadband;
 };
 /**
  * @brief PID控制器类
- *
- * 实现了一个带有死区、限幅和变化率限制的PID控制器。
- *
- * 控制算法说明：
- * 1. 基本PID控制
- *    u(t) = Kp * e(t) + Ki * ∫e(t)dt + Kd * de(t)/dt + Kff * r(t)
- *    其中：
- *    - u(t): 控制输出
- *    - e(t): 控制误差
- *    - r(t): 前馈输入
- *    - Kp, Ki, Kd, Kff: 控制器参数
- *
- * 2. 离散化实现
- *    u(k) = Kp * e(k) + Ki * Ts * Σ(e(k)) + Kd * (e(k) - e(k-1))/Ts + Kff *
- * r(k) 其中：
- *    - Ts: 采样时间
- *    - k: 当前采样点
- *
- * 3. 特殊功能
- *    a) 死区控制：
- *       |e| < deadband 时，e = 0
- *       用于消除小误差引起的抖动
- *
- *    b) 输出限幅：
- *       |u| ≤ limit
- *       防止输出过大
- *
- *    d) 输出变化率限制：
- *       |du/dt| ≤ ramp
- *       限制输出变化速度
- *
- * 4. 抗积分饱和
- *    当输出达到限幅时，停止积分累加
- *    防止积分项继续累积导致系统响应变差
  */
 class PidController : public ObjectInterface {
  public:
@@ -104,14 +68,8 @@ class PidController : public ObjectInterface {
   void SetFf(float ff) { param_.ff = ff; }
   float GetFf() const { return param_.ff; }
 
-  void SetRamp(float ramp) { param_.ramp = ramp; }
-  float GetRamp() const { return param_.ramp; }
-
   void SetLimit(float limit) { param_.limit = limit; }
   float GetLimit() const { return param_.limit; }
-
-  void SetDeadband(float deadband) { param_.deadband = deadband; }
-  float GetDeadband() const { return param_.deadband; }
 
  private:
   // 控制器参数

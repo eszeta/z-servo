@@ -154,7 +154,6 @@ Error Inst::LoadEepromConfig() {
   pos_pid.SetKi(accessor_->GetPosPidKi());
   pos_pid.SetKd(accessor_->GetPosPidKd());
   pos_pid.SetFf(accessor_->GetPosPidFf());
-  pos_pid.SetRamp(accessor_->GetPosPidRamp());
   if (mode == ServoMode::kPosition || mode == ServoMode::kStep) {
     pos_pid.SetLimit(accessor_->GetPosPidLimit());
   } else {

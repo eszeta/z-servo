@@ -119,7 +119,6 @@ Error InstAccessor::RecoveryEeprom() {
 
   // 位置PID
   SetPosPidFf(Def::kDefPosPidFf);
-  SetPosPidRamp(Def::kDefPosPidRamp);
   return Error::kOk;
 }
 

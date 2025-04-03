@@ -713,20 +713,20 @@ class InstAccessor : public RegisterAccessor {
    * @brief 获取目标位置 (0x2A-0x2B)
    * @return 目标位置(步)
    */
-  int16_t GetTargetPosition() {
+  float GetTargetPosition() {
     uint16_t position;
     ReadRegField(Regs::kTargetPositionH, Regs::kTargetPositionL, &position);
-    return bit_utils::SignToTwos(position, 15);
+    return static_cast<float>(bit_utils::SignToTwos(position, 15));
   }
 
   /**
    * @brief 设置目标位置 (0x2A-0x2B)
    * @param position 目标位置(步)
    */
-  void SetTargetPosition(const int16_t position) {
+  void SetTargetPosition(const float position) {
     WriteRegField(Regs::kTargetPositionH,
                   Regs::kTargetPositionL,
-                  bit_utils::SignToTwos(position, 15));
+                  static_cast<uint16_t>(bit_utils::SignToTwos(position, 15)));
   }
 
   /**
@@ -1033,25 +1033,7 @@ class InstAccessor : public RegisterAccessor {
   void SetPosPidFf(const float ff) {
     WriteRegField(Regs::kPosPidKf, static_cast<uint8_t>(ff * 10));
   }
-
-  /**
-   * @brief 获取位置PID斜坡系数 (0x68)
-   * @return 位置PID斜坡系数(0.1)
-   */
-  float GetPosPidRamp() {
-    uint8_t ramp;
-    ReadRegField(Regs::kPosPidRamp, &ramp);
-    return ramp * 0.1f;
-  }
-
-  /**
-   * @brief 设置位置PID斜坡系数 (0x68)
-   * @param ramp 位置PID斜坡系数(0.1)
-   */
-  void SetPosPidRamp(const float ramp) {
-    WriteRegField(Regs::kPosPidRamp, static_cast<uint8_t>(ramp * 10));
-  }
-
+  
   /**
    * @brief 获取位置滤波系数 (0x6C)
    * @return 位置滤波系数(0.001)

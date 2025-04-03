@@ -366,30 +366,25 @@ struct ServoRegs {
    */
   static constexpr const Register kAdcCurrentFactor{0x63, 0, 8};
   /**
-   * @brief 位置滤波器
-   * 单位:0.001
-   */
-  static constexpr const Register kPosFilter{0x6C, 0, 8};
-  /**
-   * @brief 电流滤波器
-   * 单位:0.001
-   */
-  static constexpr const Register kCurrentFilter{0x70, 0, 8};
-  /**
-   * @brief 速度滤波器
-   * 单位:0.001
-   */
-  static constexpr const Register kVelocityFilter{0x74, 0, 8};
-  /**
    * @brief 位置PID控制器前馈增益
    * 单位:0.1
    */
   static constexpr const Register kPosPidKf{0x64, 0, 8};
   /**
-   * @brief 位置PID控制器斜坡增益
-   * 单位:0.1
+   * @brief 位置滤波器
+   * 单位:0.001
    */
-  static constexpr const Register kPosPidRamp{0x68, 0, 8};
+  static constexpr const Register kPosFilter{0x65, 0, 8};
+  /**
+   * @brief 电流滤波器
+   * 单位:0.001
+   */
+  static constexpr const Register kCurrentFilter{0x66, 0, 8};
+  /**
+   * @brief 速度滤波器
+   * 单位:0.001
+   */
+  static constexpr const Register kVelocityFilter{0x67, 0, 8};
 };
 
 struct RegsDefaultValues {
@@ -438,10 +433,9 @@ struct RegsDefaultValues {
   static constexpr uint16_t kDefAdcShuntResistor = 1000;           // 0x62
   static constexpr uint16_t kDefAdcCurrentFactor = 1500;           // 0x63
   static constexpr uint8_t kDefPosPidFf = 0;                       // 0x64
-  static constexpr uint8_t kDefPosPidRamp = 0;                     // 0x68
-  static constexpr uint8_t kDefPosFilter = 5;                      // 0x6C
-  static constexpr uint8_t kDefCurrentFilter = 5;                  // 0x70
-  static constexpr uint8_t kDefVelocityFilter = 0;                 // 0x74
+  static constexpr uint8_t kDefPosFilter = 5;                      // 0x65
+  static constexpr uint8_t kDefCurrentFilter = 5;                  // 0x66
+  static constexpr uint8_t kDefVelocityFilter = 0;                 // 0x67
 };
 
 struct RegsBlock {
@@ -463,12 +457,13 @@ struct RegsBlocks {
       ServoRegs::kPresentPositionL.address,
       static_cast<uint8_t>(ServoRegs::kPresentCurrentH.address + 1)};
   constexpr static RegsBlock kInternalEeprom = {
-      ServoRegs::kMotorDirection.address, ServoRegs::kPosPidRamp.address + 1};
+      ServoRegs::kMotorDirection.address,
+      ServoRegs::kVelocityFilter.address + 1};
   constexpr static RegsBlock kAction = {
       ServoRegs::kTargetAcceleration.address,
       ServoRegs::kTargetVelocityH.address + 1};
   constexpr static RegsBlock kTotal = {ServoRegs::kFirmwareMajor.address,
-                                       ServoRegs::kPosPidRamp.address + 1};
+                                       ServoRegs::kVelocityFilter.address + 1};
 };
 
 struct Instruction {
