@@ -78,7 +78,7 @@ class Sensor : public ObjectInterface {
    * @brief 获取传感器分辨率
    * @return 传感器分辨率（位数）
    */
-  uint8_t GetResolution() const { return resolution; }
+  uint8_t GetResolution() const { return kResolution; }
 
  protected:
   /**
@@ -106,13 +106,14 @@ class Sensor : public ObjectInterface {
    * 当角度变化超过阈值时，认为发生了一次完整旋转。
    */
   void CalculateFullRotations();
-
+  /** @brief 最小采样时间间隔（微秒），固定为100微秒（10kHz） */
+  static constexpr float kMinElapsedTime = 100.0f;
   /** @brief 满量程值 */
-  const uint16_t full_scale_;
+  const uint16_t kFullScale;
   /** @brief 溢出检测阈值，用于检测角度是否发生了溢出（通常为满量程的80%） */
-  const float overflow_threshold_;
+  const float kOverflowTh;
   /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
-  const uint8_t resolution;
+  const uint8_t kResolution;
   /** @brief 当前角速度值 */
   float velocity_ = 0.0f;
   /** @brief 当前原始角度值 */
@@ -127,7 +128,6 @@ class Sensor : public ObjectInterface {
   uint32_t vel_full_rotations_ = 0;
   /** @brief 累计时间间隔（微秒） */
   uint32_t accumulated_dt_ = 0;
-  /** @brief 最小采样时间间隔（微秒），固定为100微秒（10kHz） */
-  static constexpr float kMinElapsedTime = 100.0f;
+
 };
 }  // namespace hortor_servo

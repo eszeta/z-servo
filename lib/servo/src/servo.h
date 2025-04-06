@@ -99,12 +99,13 @@ class Servo {
   }
   void SetTorqueLimit(float torque_limit) { torque_limit_ = torque_limit; }
 
- private:
   void SetPower(const float power);
   void Break();
   float GetAngle(uint32_t dt);
   float GetVelocity(uint32_t dt);
   float GetCurrent(uint32_t dt);
+ private:
+
   bool IsPositionReached(int16_t pos_error);
 
   bool enabled_;
