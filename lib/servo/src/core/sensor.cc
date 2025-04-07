@@ -14,6 +14,8 @@
 
 #include "sensor.h"
 
+#include "../utils/math/math_types.h"
+
 namespace hortor_servo {
 
 Sensor::Sensor(const uint8_t resolution)
@@ -24,7 +26,7 @@ Sensor::Sensor(const uint8_t resolution)
 void Sensor::Init() {
   GetRaw();
   delay(10);  // 等待传感器稳定
-  const uint16_t raw = GetRaw();
+  const auto raw = GetRaw();
   vel_raw_prev_ = raw;
   raw_prev_ = raw;
   raw_val_ = raw;
@@ -37,7 +39,7 @@ void Sensor::Process(uint32_t dt) {
 }
 
 void Sensor::CalculateFullRotations() {
-  const uint16_t d_angle = raw_val_ - raw_prev_;
+  const auto d_angle = raw_val_ - raw_prev_;
   // 如果发生溢出，将其记录为一圈
   if (abs(d_angle) > kOverflowTh) {
     full_rotations_ += (d_angle > 0) ? -1 : 1;
@@ -52,12 +54,12 @@ void Sensor::CalculateVelocity(uint32_t dt) {
   if (accumulated_dt_ < kMinElapsedTime) return;
 
   // 计算角度变化
-  const float angle_diff =
-      static_cast<float>(full_rotations_ * kFullScale + raw_val_) -
-      static_cast<float>(vel_full_rotations_ * kFullScale + vel_raw_prev_);
+  const auto angle_diff =
+      static_cast<int32_t>(full_rotations_ - vel_full_rotations_) * kFullScale +
+      static_cast<int32_t>(raw_val_ - vel_raw_prev_);
 
   // 计算速度（单位：计数/秒）
-  const float time_seconds = accumulated_dt_ * 1e-6f;
+  const auto time_seconds = accumulated_dt_ * kMicroToSec;
   velocity_ = angle_diff / time_seconds;
 
   // 更新上一次的值

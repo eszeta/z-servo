@@ -22,16 +22,7 @@ LowPassFilter::LowPassFilter() {
 }
 
 float LowPassFilter::Compute(const float x, const uint32_t dt) {
-  // 将微秒转换为秒
-  float dt_sec = static_cast<float>(dt) * kMicroToSec;
-
-  if (dt_sec < 0.0f) {
-    dt_sec = kDefaultDt;
-  } else if (dt_sec > kMaxDt) {
-    y_prev_ = x;
-    return x;
-  }
-
+  float dt_sec = dt * kMicroToSec;
   const float alpha = time_constant_ / (time_constant_ + dt_sec);
   const float one_minus_alpha = 1.0f - alpha;
   const float y = alpha * y_prev_ + one_minus_alpha * x;

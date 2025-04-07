@@ -101,11 +101,11 @@ class Servo {
 
   void SetPower(const float power);
   void Break();
+
+ private:
   float GetAngle(uint32_t dt);
   float GetVelocity(uint32_t dt);
   float GetCurrent(uint32_t dt);
- private:
-
   bool IsPositionReached(int16_t pos_error);
 
   bool enabled_;

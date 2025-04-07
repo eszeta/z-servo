@@ -17,7 +17,4 @@ namespace hortor_servo {
 
 // 静态常量定义
 static constexpr float kMicroToSec = 1e-6f;
-static constexpr float kDefaultDt = 1e-3f;
-static constexpr float kMaxDt = 0.5f;
-static constexpr float kHalf = 0.5f;
 }  // namespace hortor_servo

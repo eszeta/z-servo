@@ -428,7 +428,7 @@ struct RegsDefaultValues {
   static constexpr float kDefVelPidKi = 0.0f;                      // 0x27
 
   // 内部EEPROM（读写）
-  static constexpr Direction kDefMotorDirection = Direction::CW;  // 0x60
+  static constexpr Direction kDefMotorDirection = Direction::CCW;  // 0x60
   static constexpr Direction kDefSensorDirection = Direction::CW;  // 0x61
   static constexpr uint16_t kDefAdcShuntResistor = 1000;           // 0x62
   static constexpr uint16_t kDefAdcCurrentFactor = 1500;           // 0x63

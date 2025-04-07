@@ -56,6 +56,7 @@ void setup() {
   inst.Init();
 
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
+  servo.SetPower(-1.0f);
 }
 
 void loop() {
@@ -66,4 +67,11 @@ void loop() {
   inst.Process(dt);
   servo.Process(dt);
   last_time = current_time;
+
+  static auto print_time = 0;
+  print_time += dt;
+  if (print_time > 100000) {
+    print_time = 0;
+    hortor_servo::DebugPrintln(servo.GetPresentVelocity());
+  }
 }

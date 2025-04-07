@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "inst_accessor.h"
 
-#ifdef ARDUINO_ARCH_STM32
+#ifndef EEPROM_DISABLE
 #include <EEPROM.h>
 #endif
 
@@ -27,7 +27,7 @@ Error InstAccessor::Init() {
   CHECK(local_transport_.Init(regs_, sizeof(regs_)));
   CHECK(local_transport_.LinkAccessor(*this));
   CHECK(LoadEeprom());
-  if (GetFirmwareMajor() == 0 && GetFirmwareMinor() == 0) {
+  if (GetFirmwareMajor() == 0) {
     CHECK(RecoveryEeprom());
     CHECK(StoreEeprom());
   }
@@ -123,7 +123,7 @@ Error InstAccessor::RecoveryEeprom() {
 }
 
 Error InstAccessor::LoadEeprom() {
-#ifdef ARDUINO_ARCH_STM32
+#ifndef EEPROM_DISABLE
   int pos = 0;
   for (uint8_t address = RegsBlocks::kEeprom.begin;
        address < RegsBlocks::kEeprom.end;
@@ -140,7 +140,7 @@ Error InstAccessor::LoadEeprom() {
 }
 
 Error InstAccessor::StoreEeprom() {
-#ifdef ARDUINO_ARCH_STM32
+#ifndef EEPROM_DISABLE
   int pos = 0;
   for (uint8_t address = RegsBlocks::kEeprom.begin;
        address < RegsBlocks::kEeprom.end;

@@ -17,10 +17,7 @@ inline float PidController::Compute(const float error,
                                     const float feed,
                                     const uint32_t dt) {
   // 1. 时间计算
-  float dt_sec = static_cast<float>(dt) * kMicroToSec;
-  if (dt_sec <= 0 || dt_sec > kMaxDt) {
-    dt_sec = kDefaultDt;
-  }
+  float dt_sec = dt * kMicroToSec;
 
   // 2. 误差变化率计算
   // 计算误差的导数 de = (e - error_prev) / dt，用于计算微分项
@@ -33,7 +30,7 @@ inline float PidController::Compute(const float error,
 
   // 3.2 积分项：i = integral_sum + Ki * dt * 0.5 * (e + error_prev)
   // 使用梯形积分方法，0.5 * (e + error_prev) 为梯形面积，用于消除静态误差
-  float i = integral_sum_ + param_.ki * dt_sec * kHalf * (error + error_prev_);
+  float i = integral_sum_ + param_.ki * dt_sec * 0.5f * (error + error_prev_);
 
   // 对积分项进行限幅，防止积分饱和
   if (param_.limit > 0) {
