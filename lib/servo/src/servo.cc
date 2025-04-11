@@ -15,11 +15,9 @@ void Servo::LinkCurrentSense(Current *current_sense) {
 void Servo::Init() {}
 
 void Servo::Action() {
-  if (target_position_ < min_position_ || target_position_ > max_position_) {
-    action_ = false;
-    return;
+  if (target_position_ >= min_position_ && target_position_ <= max_position_) {
+    moving_ = true;
   }
-  action_ = true;
 }
 
 void Servo::Process(uint32_t dt) {
@@ -27,19 +25,18 @@ void Servo::Process(uint32_t dt) {
   present_position_ = GetAngle(dt);
   present_velocity_ = GetVelocity(dt);
   present_current_ = GetCurrent(dt);
-  if (!enabled_ || !action_) {
-    SetPower(0);
-    return;
-  }
+  if (!enabled_) return;
   switch (mode_) {
     case ServoMode::kPosition: {
       const auto pos_error = target_position_ - present_position_;
       if (IsPositionReached(pos_error)) {
+        moving_ = false;
         return;
       }
-      moving_ = true;
-      const auto pwm_set = pos_pid_.Compute(pos_error, dt);
-      SetPower(pwm_set);
+      if (torque_enable_ || moving_) {
+        const auto pwm_set = pos_pid_.Compute(pos_error, dt);
+        SetPower(pwm_set);
+      }
       break;
     }
     // case MotorMode::kPositionTorque: {
@@ -62,13 +59,6 @@ bool Servo::IsPositionReached(int16_t pos_error) {
   if (pos_error < 0 && -pos_error > ccw_insensitive_area_) {
     return false;
   }
-  // 到达目标后是否保持扭矩
-  if (torque_enable_) {
-    SetPower(0);
-  } else {
-    Break();
-  }
-  moving_ = false;
   return true;
 }
 
@@ -91,8 +81,7 @@ float Servo::GetCurrent(uint32_t dt) {
 
 void Servo::SetPower(const float power) {
   present_load_ = power;
-  const auto direction = static_cast<float>(motor_direction_);
-  driver_->SetPWM(direction * power);
+  driver_->SetPWM(power);
 }
 
 void Servo::Break() { driver_->Break(); }

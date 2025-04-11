@@ -31,7 +31,7 @@ class Sensor : public ObjectInterface {
    * @brief 构造函数
    * @param resolution 传感器分辨率（位数），决定了传感器的精度和量程
    */
-  explicit Sensor(const uint8_t resolution);
+  explicit Sensor(const uint8_t resolution) : kResolution(resolution) {}
 
   /**
    * @brief 初始化传感器
@@ -74,11 +74,28 @@ class Sensor : public ObjectInterface {
    */
   virtual void Process(uint32_t dt);
 
+  /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
+  const uint8_t kResolution;
+  /** @brief 传感器满量程值 */
+  const uint16_t kFullScale = (1 << kResolution);
+  /** @brief 溢出检测阈值，用于检测角度是否发生了溢出（通常为满量程的80%） */
+  const float kOverflowTh = 0.8f * kFullScale;
   /**
-   * @brief 获取传感器分辨率
-   * @return 传感器分辨率（位数）
+   *  @brief
+   * 角度到原始值的转换系数，用于将角度（0-360度）转换为原始值（0-16383）
    */
-  uint8_t GetResolution() const { return kResolution; }
+  const float kAngleToRaw = kFullScale / 360.0f;
+  /**
+   *  @brief 弧度到原始值的转换系数，用于将弧度（0-2π）转换为原始值（0-16383）
+   */
+  const float kRadianToRaw = kFullScale / TWO_PI;
+  /**
+   * @brief 原始值到角度的转换系数，用于将原始值（0-16383）转换为角度（0-360度）
+   */
+  const float kRawToAngle = 360.0f / kFullScale;
+  /** @brief 原始值到弧度的转换系数，用于将原始值（0-16383）转换为弧度（0-2π）
+   */
+  const float kRawToRadian = TWO_PI / kFullScale;
 
  protected:
   /**
@@ -98,7 +115,6 @@ class Sensor : public ObjectInterface {
    * 计算结果单位为：计数/秒
    */
   void CalculateVelocity(uint32_t dt);
-
   /**
    * @brief 计算圈数
    *
@@ -108,12 +124,7 @@ class Sensor : public ObjectInterface {
   void CalculateFullRotations();
   /** @brief 最小采样时间间隔（微秒），固定为100微秒（10kHz） */
   static constexpr float kMinElapsedTime = 100.0f;
-  /** @brief 满量程值 */
-  const uint16_t kFullScale;
-  /** @brief 溢出检测阈值，用于检测角度是否发生了溢出（通常为满量程的80%） */
-  const float kOverflowTh;
-  /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
-  const uint8_t kResolution;
+
   /** @brief 当前角速度值 */
   float velocity_ = 0.0f;
   /** @brief 当前原始角度值 */
@@ -123,11 +134,10 @@ class Sensor : public ObjectInterface {
   /** @brief 上次速度计算时的原始角度值 */
   uint16_t vel_raw_prev_ = 0;
   /** @brief 圈数计数器 */
-  uint32_t full_rotations_ = 0;
+  int32_t full_rotations_ = 0;
   /** @brief 上次速度计算时的圈数 */
-  uint32_t vel_full_rotations_ = 0;
+  int32_t vel_full_rotations_ = 0;
   /** @brief 累计时间间隔（微秒） */
   uint32_t accumulated_dt_ = 0;
-
 };
 }  // namespace hortor_servo

@@ -77,10 +77,7 @@ class Servo {
   void SetOverloadTorque(float overload_torque) {
     overload_torque_ = overload_torque;
   }
-
-  void SetMotorDirection(Direction motor_direction) {
-    motor_direction_ = motor_direction;
-  }
+  
   void SetSensorDirection(Direction sensor_direction) {
     sensor_direction_ = sensor_direction;
   }
@@ -160,15 +157,11 @@ class Servo {
   PidController velocity_pid_{
       {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
 
-  Direction motor_direction_;
   Direction sensor_direction_;
 
   LowPassFilter current_lpf_;
   LowPassFilter velocity_lpf_;
   LowPassFilter pos_lpf_;
-
-  //
-  bool action_;
 
   MotorDriver *driver_;
   Sensor *angle_sensor_;

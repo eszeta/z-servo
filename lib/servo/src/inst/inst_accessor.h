@@ -944,24 +944,6 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
-   * @brief 获取电机方向 (0x60)
-   * @return 电机方向
-   */
-  Direction GetMotorDirection() {
-    uint8_t direction;
-    ReadRegField(Regs::kMotorDirection, &direction);
-    return direction == 1 ? Direction::CCW : Direction::CW;
-  }
-
-  /**
-   * @brief 设置电机方向 (0x60)
-   * @param direction 电机方向
-   */
-  void SetMotorDirection(const Direction direction) {
-    WriteRegField(Regs::kMotorDirection, direction == Direction::CCW ? 1 : 0);
-  }
-
-  /**
    * @brief 获取传感器方向 (0x61)
    * @return 传感器方向
    */

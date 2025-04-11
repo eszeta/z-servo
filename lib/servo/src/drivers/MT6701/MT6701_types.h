@@ -115,24 +115,6 @@ enum class Status : uint8_t {
 static constexpr uint32_t kSSIClock = 1000000;
 /** @brief I2C默认地址，MT6701传感器的7位I2C地址 */
 static constexpr uint8_t kI2CAddress = 0x06;
-/** @brief 传感器分辨率，14位 */
-static constexpr uint8_t kResolution = 14;
-/** @brief 传感器满量程值 */
-static constexpr float kFullScale = (1 << kResolution);
-/**
- *  @brief 角度到原始值的转换系数，用于将角度（0-360度）转换为原始值（0-16383）
- */
-static constexpr float kAngleToRaw = kFullScale / 360.0f;
-/**
- *  @brief 弧度到原始值的转换系数，用于将弧度（0-2π）转换为原始值（0-16383）
- */
-static constexpr float kRadianToRaw = kFullScale / TWO_PI;
-/**
- * @brief 原始值到角度的转换系数，用于将原始值（0-16383）转换为角度（0-360度）
- */
-static constexpr float kRawToAngle = 360.0f / kFullScale;
-/** @brief 原始值到弧度的转换系数，用于将原始值（0-16383）转换为弧度（0-2π） */
-static constexpr float kRawToRadian = TWO_PI / kFullScale;
 
 /**
  * @brief MT6701寄存器定义

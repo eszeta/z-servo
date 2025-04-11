@@ -19,8 +19,6 @@
 namespace hortor_servo {
 namespace MT6701 {
 
-MT6701::MT6701() : hortor_servo::Sensor(kResolution) {}
-
 Error MT6701::InitI2C(TwoWire *wire) {
   CHECK(i2c_transport_.Init(wire, kI2CAddress));
   CHECK(i2c_transport_.LinkAccessor(accessor_));

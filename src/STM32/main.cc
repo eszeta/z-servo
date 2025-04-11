@@ -56,7 +56,7 @@ void setup() {
   inst.Init();
 
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
-  servo.SetPower(-1.0f);
+  servo.SetPower(1.0f);
 }
 
 void loop() {
@@ -68,10 +68,9 @@ void loop() {
   servo.Process(dt);
   last_time = current_time;
 
-  static auto print_time = 0;
-  print_time += dt;
-  if (print_time > 100000) {
-    print_time = 0;
-    hortor_servo::DebugPrintln(servo.GetPresentVelocity());
-  }
+  volatile const auto present_velocity = servo.GetPresentVelocity();
+  hortor_servo::DebugPrint(F(">angle velocity:"));
+  hortor_servo::DebugPrintln(present_velocity);
+  hortor_servo::DebugPrint(F(">angle speed:"));
+  hortor_servo::DebugPrintln(present_velocity * angle_sensor.kRawToAngle);
 }

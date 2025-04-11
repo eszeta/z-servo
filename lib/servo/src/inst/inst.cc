@@ -164,9 +164,6 @@ Error Inst::LoadEepromConfig() {
   vel_pid.SetKp(accessor_->GetVelPidKp());
   vel_pid.SetKi(accessor_->GetVelPidKi());
 
-  const auto motor_direction = accessor_->GetMotorDirection();
-  servo_->SetMotorDirection(motor_direction);
-
   const auto sensor_direction = accessor_->GetSensorDirection();
   servo_->SetSensorDirection(sensor_direction);
 

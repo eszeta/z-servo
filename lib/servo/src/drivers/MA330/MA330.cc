@@ -18,7 +18,7 @@
 namespace hortor_servo {
 namespace MA330 {
 
-MA330::MA330() : Sensor(kResolution) {}
+MA330::MA330() : Sensor(14) {}
 
 Error MA330::InitSPI(SPIClass *spi, const uint8_t cs_pin) {
   CHECK(spi_transport_.Init(

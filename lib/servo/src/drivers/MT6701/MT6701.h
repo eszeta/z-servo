@@ -18,8 +18,9 @@
 
 #include "../../core/sensor.h"
 #include "../../servo_types.h"
-#include "MT6701_accessor.h"
-#include "MT6701_i2c_transport.h"
+#include "./MT6701_accessor.h"
+#include "./MT6701_i2c_transport.h"
+#include "./MT6701_types.h"
 
 namespace hortor_servo {
 namespace MT6701 {
@@ -38,7 +39,7 @@ class MT6701 final : public hortor_servo::Sensor {
    *
    * 初始化MT6701传感器对象，设置分辨率为14位（0-16383范围）。
    */
-  explicit MT6701();
+  explicit MT6701() : hortor_servo::Sensor(14) {}
 
   /**
    * @brief 初始化传感器

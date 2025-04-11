@@ -44,31 +44,6 @@ class MT6701Accessor : public RegisterAccessor {
                                           bool* track_loss)>;
 
   Error Init() { return Error::kOk; }
-  /**
-   * @brief 读取角度值
-   * @return 角度值 [0...360.0)度
-   *
-   * 从MT6701传感器读取当前角度，并转换为度数（0-360度范围）。
-   * 此方法提供最常用的角度读取功能。
-   */
-  float ReadAngle() {
-    uint16_t angle;
-    ReadRaw(&angle, nullptr, nullptr, nullptr);
-    return static_cast<float>(angle) * kRawToAngle;
-  }
-
-  /**
-   * @brief 读取弧度值
-   * @return 弧度值 [0...2π)弧度
-   *
-   * 从MT6701传感器读取当前角度，并转换为弧度（0-2π范围）。
-   * 适用于需要弧度制的应用场景。
-   */
-  float ReadRadian() {
-    uint16_t angle;
-    ReadRaw(&angle, nullptr, nullptr, nullptr);
-    return static_cast<float>(angle) * kRawToRadian;
-  }
 
   /**
    * @brief 读取原始位置和状态值

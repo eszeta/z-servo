@@ -107,7 +107,6 @@ Error InstAccessor::RecoveryEeprom() {
 
   //-----------内部EEPROM（读写）-------------------
   //
-  SetMotorDirection(Def::kDefMotorDirection);
   SetSensorDirection(Def::kDefSensorDirection);
   SetAdcShuntResistor(Def::kDefAdcShuntResistor);
   SetAdcCurrentFactor(Def::kDefAdcCurrentFactor);
