@@ -19,8 +19,6 @@
 namespace hortor_servo {
 namespace MA330 {
 
-static constexpr uint8_t kResolution = 14;
-
 enum class FieldStrength : uint8_t {
   kNormal = 0x00,
   kLow = 0x01,

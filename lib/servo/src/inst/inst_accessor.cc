@@ -106,9 +106,13 @@ Error InstAccessor::RecoveryEeprom() {
   SetVelPidKi(Def::kDefVelPidKi);
 
   //-----------内部EEPROM（读写）-------------------
-  //
+  // 传感器方向
   SetSensorDirection(Def::kDefSensorDirection);
+  // 电机旋转方向
+  SetMotorDirection(Def::kDefMotorDirection);
+  // ADC采样电阻
   SetAdcShuntResistor(Def::kDefAdcShuntResistor);
+  // ADC电流镜系数
   SetAdcCurrentFactor(Def::kDefAdcCurrentFactor);
 
   // 位置滤波器
@@ -127,12 +131,12 @@ Error InstAccessor::LoadEeprom() {
   for (uint8_t address = RegsBlocks::kEeprom.begin;
        address < RegsBlocks::kEeprom.end;
        address++) {
-    this->regs_[address] = EEPROM.read(pos++);
+    regs_[address] = EEPROM.read(pos++);
   }
   for (uint8_t address = RegsBlocks::kInternalEeprom.begin;
        address < RegsBlocks::kInternalEeprom.end;
        address++) {
-    this->regs_[address] = EEPROM.read(pos++);
+    regs_[address] = EEPROM.read(pos++);
   }
 #endif
   return Error::kOk;
@@ -144,12 +148,12 @@ Error InstAccessor::StoreEeprom() {
   for (uint8_t address = RegsBlocks::kEeprom.begin;
        address < RegsBlocks::kEeprom.end;
        address++) {
-    EEPROM.update(pos++, this->regs_[address]);
+    EEPROM.update(pos++, regs_[address]);
   }
   for (uint8_t address = RegsBlocks::kInternalEeprom.begin;
        address < RegsBlocks::kInternalEeprom.end;
        address++) {
-    EEPROM.update(pos++, this->regs_[address]);
+    EEPROM.update(pos++, regs_[address]);
   }
 #endif
   return Error::kOk;

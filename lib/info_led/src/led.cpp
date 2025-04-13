@@ -32,19 +32,19 @@ void LED::Init(const PinName pinName, const Mode mode) {
 }
 
 void LED::Turn(const bool value) {
-  switch (this->mode_) {
+  switch (mode_) {
     case Mode::kOpenDrain:
-      digitalWrite(this->pin_name_, value ? LOW : HIGH);
+      digitalWrite(pin_name_, value ? LOW : HIGH);
       break;
     case Mode::kPushPull:
-      digitalWrite(this->pin_name_, value ? HIGH : LOW);
+      digitalWrite(pin_name_, value ? HIGH : LOW);
       break;
   }
   state_ = value ? State::kOn : State::kOff;
 }
 
 void LED::Toggle() {
-  switch (this->state_) {
+  switch (state_) {
     case State::kOff:
       Turn(true);
       break;

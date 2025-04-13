@@ -1,15 +1,16 @@
 #include "servo.h"
 
+#include "utils/math/math.h"
 #include "utils/math/math_types.h"
 
 namespace hortor_servo {
 
-void Servo::LinkDriver(MotorDriver *driver) { this->driver_ = driver; }
+void Servo::LinkDriver(MotorDriver *driver) { driver_ = driver; }
 
-void Servo::LinkAngleSensor(Sensor *sensor) { this->angle_sensor_ = sensor; }
+void Servo::LinkAngleSensor(Sensor *sensor) { angle_sensor_ = sensor; }
 
 void Servo::LinkCurrentSense(Current *current_sense) {
-  this->current_sense_ = current_sense;
+  current_sense_ = current_sense;
 }
 
 void Servo::Init() {}
@@ -28,15 +29,24 @@ void Servo::Process(uint32_t dt) {
   if (!enabled_) return;
   switch (mode_) {
     case ServoMode::kPosition: {
-      const auto pos_error = target_position_ - present_position_;
-      if (IsPositionReached(pos_error)) {
-        moving_ = false;
-        return;
-      }
-      if (torque_enable_ || moving_) {
-        const auto pwm_set = pos_pid_.Compute(pos_error, dt);
-        SetPower(pwm_set);
-      }
+      // const auto pos_error = target_position_ - present_position_;
+      // if (IsPositionReached(pos_error)) {
+      //   moving_ = false;
+      //   return;
+      // }
+      // if (torque_enable_ || moving_) {
+      //   const auto pwm_set = pos_pid_.Compute(pos_error, dt);
+      //   SetPower(pwm_set);
+      // }
+      break;
+    }
+    case ServoMode::kVelocity: {
+      const auto vel_error = target_velocity_ - present_velocity_;
+      velocity_pid_.SetKp(0.01f);
+      velocity_pid_.SetKi(0.1);
+      velocity_pid_.SetLimit(1.0f);
+      const auto pwm_set = velocity_pid_.Compute(vel_error, dt);
+      SetPower(pwm_set);
       break;
     }
     // case MotorMode::kPositionTorque: {
@@ -64,14 +74,22 @@ bool Servo::IsPositionReached(int16_t pos_error) {
 
 float Servo::GetAngle(uint32_t dt) {
   const auto direction = static_cast<float>(sensor_direction_);
-  const auto angle = pos_lpf_.Compute(angle_sensor_->GetAngle(), dt);
-  return direction * angle + position_correction_;
+  const auto raw = angle_sensor_->GetAngle();
+  const auto filtered = pos_lpf_.Compute(raw, dt);
+  const auto corrected = direction * filtered + position_correction_;
+  const auto scaled =
+      mapResolution(corrected, angle_sensor_->kResolution, kResolution);
+  return scaled;
 }
 
 float Servo::GetVelocity(uint32_t dt) {
   const auto direction = static_cast<float>(sensor_direction_);
-  const auto velocity = velocity_lpf_.Compute(angle_sensor_->GetVelocity(), dt);
-  return direction * velocity;
+  const auto raw = angle_sensor_->GetVelocity();
+  const auto filtered = velocity_lpf_.Compute(raw, dt);
+  const auto corrected = direction * filtered;
+  const auto scaled =
+      mapResolution(corrected, angle_sensor_->kResolution, kResolution);
+  return scaled;
 }
 
 float Servo::GetCurrent(uint32_t dt) {
@@ -81,7 +99,8 @@ float Servo::GetCurrent(uint32_t dt) {
 
 void Servo::SetPower(const float power) {
   present_load_ = power;
-  driver_->SetPWM(power);
+  const auto direction = static_cast<float>(motor_direction_);
+  driver_->SetPWM(direction * power);
 }
 
 void Servo::Break() { driver_->Break(); }

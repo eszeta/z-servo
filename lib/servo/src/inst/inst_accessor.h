@@ -962,6 +962,24 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
+   * @brief 获取电机旋转方向 (0x61)
+   * @return 电机旋转方向
+   */
+  Direction GetMotorDirection() {
+    uint8_t direction;
+    ReadRegField(Regs::kMotorDirection, &direction);
+    return direction == 1 ? Direction::CCW : Direction::CW;
+  }
+
+  /**
+   * @brief 设置电机旋转方向 (0x61)
+   * @param direction 电机旋转方向
+   */
+  void SetMotorDirection(const Direction direction) {
+    WriteRegField(Regs::kMotorDirection, direction == Direction::CCW ? 1 : 0);
+  }
+
+  /**
    * @brief 获取ADC分流电阻 (0x62)
    * @return ADC分流电阻(100Ω)
    */
@@ -1015,7 +1033,7 @@ class InstAccessor : public RegisterAccessor {
   void SetPosPidFf(const float ff) {
     WriteRegField(Regs::kPosPidKf, static_cast<uint8_t>(ff * 10));
   }
-  
+
   /**
    * @brief 获取位置滤波系数 (0x6C)
    * @return 位置滤波系数(0.001)

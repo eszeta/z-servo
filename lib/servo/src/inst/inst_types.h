@@ -351,35 +351,40 @@ struct ServoRegs {
    */
   static constexpr const Register kSensorDirection{0x60, 0, 8};
   /**
+   * @brief 电机旋转方向
+   * 0:正转 1:反转
+   */
+  static constexpr const Register kMotorDirection{0x61, 0, 8};
+  /**
    * @brief ADC采样电阻
    * 单位:100Ω
    */
-  static constexpr const Register kAdcShuntResistor{0x61, 0, 8};
+  static constexpr const Register kAdcShuntResistor{0x62, 0, 8};
   /**
    * @brief ADC电流镜系数
    * 单位:100
    */
-  static constexpr const Register kAdcCurrentFactor{0x62, 0, 8};
+  static constexpr const Register kAdcCurrentFactor{0x63, 0, 8};
   /**
    * @brief 位置PID控制器前馈增益
    * 单位:0.1
    */
-  static constexpr const Register kPosPidKf{0x63, 0, 8};
+  static constexpr const Register kPosPidKf{0x64, 0, 8};
   /**
    * @brief 位置滤波器
    * 单位:0.001
    */
-  static constexpr const Register kPosFilter{0x64, 0, 8};
+  static constexpr const Register kPosFilter{0x65, 0, 8};
   /**
    * @brief 电流滤波器
    * 单位:0.001
    */
-  static constexpr const Register kCurrentFilter{0x65, 0, 8};
+  static constexpr const Register kCurrentFilter{0x66, 0, 8};
   /**
    * @brief 速度滤波器
    * 单位:0.001
    */
-  static constexpr const Register kVelocityFilter{0x66, 0, 8};
+  static constexpr const Register kVelocityFilter{0x67, 0, 8};
 };
 
 struct RegsDefaultValues {
@@ -423,13 +428,14 @@ struct RegsDefaultValues {
   static constexpr float kDefVelPidKi = 0.0f;                      // 0x27
 
   // 内部EEPROM（读写）
-  static constexpr Direction kDefSensorDirection = Direction::CCW;  // 0x60
-  static constexpr uint16_t kDefAdcShuntResistor = 1000;            // 0x61
-  static constexpr uint16_t kDefAdcCurrentFactor = 1500;            // 0x62
-  static constexpr uint8_t kDefPosPidFf = 0;                        // 0x63
-  static constexpr uint8_t kDefPosFilter = 5;                       // 0x64
-  static constexpr uint8_t kDefCurrentFilter = 5;                   // 0x65
-  static constexpr uint8_t kDefVelocityFilter = 0;                  // 0x66
+  static constexpr Direction kDefSensorDirection = Direction::CW;  // 0x60
+  static constexpr Direction kDefMotorDirection = Direction::CCW;   // 0x61
+  static constexpr uint16_t kDefAdcShuntResistor = 1000;           // 0x62
+  static constexpr uint16_t kDefAdcCurrentFactor = 1500;           // 0x63
+  static constexpr uint8_t kDefPosPidFf = 0;                       // 0x64
+  static constexpr uint8_t kDefPosFilter = 0;                      // 0x65
+  static constexpr uint8_t kDefCurrentFilter = 0;                  // 0x66
+  static constexpr uint8_t kDefVelocityFilter = 0;                 // 0x67
 };
 
 struct RegsBlock {

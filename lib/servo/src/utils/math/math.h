@@ -11,22 +11,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "lowpass_filter.h"
-
+#pragma once
 #include <Arduino.h>
 
 namespace hortor_servo {
-LowPassFilter::LowPassFilter() {
-  time_constant_ = 0.0f;
-  y_prev_ = 0.0f;
-}
-
-float LowPassFilter::Compute(const float x, const uint32_t dt) {
-  float dt_sec = dt * kMicroToSec;
-  const float alpha = time_constant_ / (time_constant_ + dt_sec);
-  const float one_minus_alpha = 1.0f - alpha;
-  const float y = alpha * y_prev_ + one_minus_alpha * x;
-  y_prev_ = y;
-  return y;
+static constexpr uint32_t mapResolution(uint32_t value,
+                                        uint32_t from,
+                                        uint32_t to) {
+  if (from != to) {
+    if (from > to) {
+      value = (value < (uint32_t)(1 << (from - to)))
+                  ? 0
+                  : ((value + 1) >> (from - to)) - 1;
+    } else {
+      if (value != 0) {
+        value = ((value + 1) << (to - from)) - 1;
+      }
+    }
+  }
+  return value;
 }
 }  // namespace hortor_servo

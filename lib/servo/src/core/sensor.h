@@ -51,7 +51,7 @@ class Sensor : public ObjectInterface {
    * @brief 获取累积角度
    * @return 当前累积角度（机械角度 + 圈数 * 满量程）
    */
-  virtual uint16_t GetAngle();
+  virtual uint32_t GetAngle();
 
   /**
    * @brief 获取角速度
@@ -82,18 +82,18 @@ class Sensor : public ObjectInterface {
   const float kOverflowTh = 0.8f * kFullScale;
   /**
    *  @brief
-   * 角度到原始值的转换系数，用于将角度（0-360度）转换为原始值（0-16383）
+   * 角度到原始值的转换系数，用于将角度转换为原始值
    */
   const float kAngleToRaw = kFullScale / 360.0f;
   /**
-   *  @brief 弧度到原始值的转换系数，用于将弧度（0-2π）转换为原始值（0-16383）
+   *  @brief 弧度到原始值的转换系数，用于将弧度转换为原始值
    */
   const float kRadianToRaw = kFullScale / TWO_PI;
   /**
-   * @brief 原始值到角度的转换系数，用于将原始值（0-16383）转换为角度（0-360度）
+   * @brief 原始值到角度的转换系数，用于将原始值转换为角度
    */
   const float kRawToAngle = 360.0f / kFullScale;
-  /** @brief 原始值到弧度的转换系数，用于将原始值（0-16383）转换为弧度（0-2π）
+  /** @brief 原始值到弧度的转换系数，用于将原始值转换为弧度
    */
   const float kRawToRadian = TWO_PI / kFullScale;
 
@@ -134,9 +134,9 @@ class Sensor : public ObjectInterface {
   /** @brief 上次速度计算时的原始角度值 */
   uint16_t vel_raw_prev_ = 0;
   /** @brief 圈数计数器 */
-  int32_t full_rotations_ = 0;
+  uint32_t full_rotations_ = 0;
   /** @brief 上次速度计算时的圈数 */
-  int32_t vel_full_rotations_ = 0;
+  uint32_t vel_full_rotations_ = 0;
   /** @brief 累计时间间隔（微秒） */
   uint32_t accumulated_dt_ = 0;
 };

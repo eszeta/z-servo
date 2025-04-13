@@ -77,9 +77,12 @@ class Servo {
   void SetOverloadTorque(float overload_torque) {
     overload_torque_ = overload_torque;
   }
-  
+
   void SetSensorDirection(Direction sensor_direction) {
     sensor_direction_ = sensor_direction;
+  }
+  void SetMotorDirection(Direction motor_direction) {
+    motor_direction_ = motor_direction;
   }
 
   void SetTorqueEnable(bool torque_enable) { torque_enable_ = torque_enable; }
@@ -99,13 +102,17 @@ class Servo {
   void SetPower(const float power);
   void Break();
 
+  // 分辨率（位数），决定了传感器的精度和量程
+  static constexpr uint8_t kResolution = 11;
+  static constexpr uint16_t kFullScale = (1 << kResolution);
+
  private:
   float GetAngle(uint32_t dt);
   float GetVelocity(uint32_t dt);
   float GetCurrent(uint32_t dt);
   bool IsPositionReached(int16_t pos_error);
 
-  bool enabled_;
+  bool enabled_ = true;
   bool torque_enable_;
 
   float target_acceleration_;
@@ -158,6 +165,7 @@ class Servo {
       {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
 
   Direction sensor_direction_;
+  Direction motor_direction_;
 
   LowPassFilter current_lpf_;
   LowPassFilter velocity_lpf_;

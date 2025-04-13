@@ -25,8 +25,8 @@ Error RegisterI2cTransport::Init(TwoWire* wire, const int address) {
   if (!wire) {
     return Error::kInvalidParameter;
   }
-  this->wire_ = wire;
-  this->address_ = address;
+  wire_ = wire;
+  address_ = address;
   return Error::kOk;
 }
 

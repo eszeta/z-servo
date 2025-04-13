@@ -83,6 +83,7 @@ constexpr Register Regs::kMoving;
 constexpr Register Regs::kPresentCurrentL;
 constexpr Register Regs::kPresentCurrentH;
 constexpr Register Regs::kSensorDirection;
+constexpr Register Regs::kMotorDirection;
 constexpr Register Regs::kAdcShuntResistor;
 constexpr Register Regs::kAdcCurrentFactor;
 constexpr Register Regs::kPosPidKf;

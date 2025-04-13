@@ -35,7 +35,7 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
 Error Inst::LinkTransport(InstTransportInterface *transport) {
   transport_ = transport;
   CHECK(transport_->SetExecute(
-      [this](uint8_t *data) -> Error { return this->Execute(data); }));
+      [this](uint8_t *data) -> Error { return Execute(data); }));
   return Error::kOk;
 }
 
@@ -166,6 +166,9 @@ Error Inst::LoadEepromConfig() {
 
   const auto sensor_direction = accessor_->GetSensorDirection();
   servo_->SetSensorDirection(sensor_direction);
+
+  const auto motor_direction = accessor_->GetMotorDirection();
+  servo_->SetMotorDirection(motor_direction);
 
   const auto pos_filter = accessor_->GetPosFilter();
   servo_->GetPosLpf().SetTimeConstant(pos_filter);

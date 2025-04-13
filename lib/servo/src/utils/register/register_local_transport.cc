@@ -25,8 +25,8 @@ Error RegisterLocalTransport::Init(uint8_t* regs, const size_t size) {
   if (!regs || size == 0) {
     return Error::kInvalidParameter;
   }
-  this->regs_ = regs;
-  this->size_ = size;
+  regs_ = regs;
+  size_ = size;
   return Error::kOk;
 }
 

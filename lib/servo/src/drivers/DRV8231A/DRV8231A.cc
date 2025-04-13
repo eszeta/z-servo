@@ -30,12 +30,12 @@ void DRV8231A::Init(const uint8_t pin_a, const uint8_t pin_b) {
 void DRV8231A::SetPWM(float pwm) {
   if (pwm > 0.0f) {
     pwm = constrain(pwm, 0.0f, 1.0f);
-    digitalWrite(pin_a_, HIGH);
-    analogWrite(pin_b_, static_cast<uint32_t>(255 - 255 * pwm));
+    analogWrite(pin_a_, 255 * pwm);
+    analogWrite(pin_b_, 0);
   } else if (pwm < 0.0f) {
     pwm = constrain(-pwm, 0.0f, 1.0f);
-    analogWrite(pin_a_, static_cast<uint32_t>(255 - 255 * pwm));
-    digitalWrite(pin_b_, HIGH);
+    analogWrite(pin_a_, 0);
+    analogWrite(pin_b_, 255 * pwm);
   } else {
     digitalWrite(pin_a_, HIGH);
     digitalWrite(pin_b_, HIGH);

@@ -14,7 +14,6 @@
 #pragma once
 #include "Arduino.h"
 
-// #define DISABLE_DEBUG
 namespace hortor_servo {
 #ifndef DISABLE_DEBUG
 /**

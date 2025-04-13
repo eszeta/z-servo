@@ -34,7 +34,7 @@ void Sensor::Process(uint32_t dt) {
 }
 
 void Sensor::CalculateFullRotations() {
-  const auto d_angle = raw_val_ - raw_prev_;
+  const auto d_angle = static_cast<int16_t>(raw_val_ - raw_prev_);
   // 如果发生溢出，将其记录为一圈
   if (std::abs(d_angle) > kOverflowTh) {
     full_rotations_ += (d_angle > 0) ? -1 : 1;
@@ -49,12 +49,14 @@ void Sensor::CalculateVelocity(uint32_t dt) {
   if (accumulated_dt_ < kMinElapsedTime) return;
 
   // 计算角度变化
-  const auto angle_diff = (full_rotations_ - vel_full_rotations_) * kFullScale +
-                          (raw_val_ - vel_raw_prev_);
+  const auto angle_diff =
+      static_cast<int32_t>(full_rotations_ - vel_full_rotations_) *
+          static_cast<int32_t>(kFullScale) +
+      static_cast<int32_t>(raw_val_ - vel_raw_prev_);
 
   // 计算速度（单位：计数/秒）
   const auto time_seconds = accumulated_dt_ * kMicroToSec;
-  velocity_ = angle_diff / time_seconds;
+  velocity_ = static_cast<float>(angle_diff) / time_seconds;
 
   // 更新上一次的值
   vel_raw_prev_ = raw_val_;
@@ -66,7 +68,7 @@ float Sensor::GetVelocity() { return velocity_; }
 
 uint16_t Sensor::GetMechanicalAngle() { return raw_val_; }
 
-uint16_t Sensor::GetAngle() { return full_rotations_ * kFullScale + raw_val_; }
+uint32_t Sensor::GetAngle() { return full_rotations_ * kFullScale + raw_val_; }
 
 int32_t Sensor::GetFullRotations() { return full_rotations_; }
 }  // namespace hortor_servo

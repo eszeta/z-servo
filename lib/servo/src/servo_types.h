@@ -75,7 +75,7 @@ enum class ServoMode : uint8_t {
   /**
    * @brief 恒速模式
    */
-  kSpeed = 1,
+  kVelocity = 1,
   /**
    * @brief PWM开环调速度模式
    */

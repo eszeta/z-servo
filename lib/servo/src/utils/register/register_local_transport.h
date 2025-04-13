@@ -82,7 +82,7 @@ class RegisterLocalTransport : public ObjectInterface {
 
  protected:
   /** @brief 寄存器地址 */
-  volatile uint8_t* regs_{};
+  uint8_t* regs_{};
   /** @brief 寄存器大小 */
   size_t size_{};
 };

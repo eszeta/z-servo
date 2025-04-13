@@ -24,9 +24,9 @@ Error RegisterSpiTransport::Init(SPIClass *spi,
   if (!spi_) {
     return Error::kInvalidParameter;
   }
-  this->spi_ = spi;
-  this->cs_pin_ = cs_pin;
-  this->spi_settings_ = spi_settings;
+  spi_ = spi;
+  cs_pin_ = cs_pin;
+  spi_settings_ = spi_settings;
   pinMode(cs_pin, OUTPUT);
   digitalWrite(cs_pin, HIGH);
   return Error::kOk;

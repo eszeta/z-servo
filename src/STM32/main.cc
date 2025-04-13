@@ -13,6 +13,9 @@
 #include "servo.h"
 
 static constexpr auto kInfoLedPin = PA12;
+static constexpr uint32_t kTargetLoopRateHz = 500;  // 目标帧率500Hz
+static constexpr uint32_t kTargetLoopPeriodUs =
+    1000000 / kTargetLoopRateHz;  // 目标周期(微秒)
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
@@ -27,11 +30,16 @@ hortor_servo::MT6701::MT6701 angle_sensor;
 hortor_servo::generic_current::GenericCurrent current_sensor;
 hortor_servo::Servo servo;
 
+uint32_t last_time;
+
 void receiveEvent(int howMany) { inst_transport.OnReceive(howMany); }
 void requestEvent() { inst_transport.OnRequest(); }
 
 void setup() {
-  serial_debug.begin(9600);
+  // 设置PWM频率为10kHz
+  analogWriteFrequency(10 * 1000);
+
+  serial_debug.begin(921600);
   hortor_servo::DebugEnable(&serial_debug);
   hortor_servo::DebugPrintln(F("setup"));
 
@@ -56,21 +64,35 @@ void setup() {
   inst.Init();
 
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
+  servo.SetMode(hortor_servo::ServoMode::kVelocity);
+  servo.SetTargetVelocity(1000);
   servo.SetPower(1.0f);
+  last_time = micros();
 }
 
 void loop() {
-  static uint32_t last_time = micros();
   const uint32_t current_time = micros();
   const uint32_t dt = current_time - last_time;
+  last_time = current_time;
+
   info_led.Process(dt);
   inst.Process(dt);
   servo.Process(dt);
-  last_time = current_time;
 
-  volatile const auto present_velocity = servo.GetPresentVelocity();
-  hortor_servo::DebugPrint(F(">angle velocity:"));
+  hortor_servo::DebugPrint(F(">dt:"));
+  hortor_servo::DebugPrintln(dt);
+  hortor_servo::DebugPrint(F(">pwm:"));
+  hortor_servo::DebugPrintln(servo.GetPresentLoad());
+  auto present_velocity = servo.GetPresentVelocity();
+  hortor_servo::DebugPrint(F(">raw:"));
   hortor_servo::DebugPrintln(present_velocity);
-  hortor_servo::DebugPrint(F(">angle speed:"));
-  hortor_servo::DebugPrintln(present_velocity * angle_sensor.kRawToAngle);
+  auto present_position = servo.GetPresentPosition();
+  hortor_servo::DebugPrint(F(">position:"));
+  hortor_servo::DebugPrintln(present_position);
+
+  // 固定帧率控制
+  uint32_t elapsed_time = micros() - last_time;
+  if (elapsed_time < kTargetLoopPeriodUs) {
+    delayMicroseconds(kTargetLoopPeriodUs - elapsed_time);
+  }
 }
