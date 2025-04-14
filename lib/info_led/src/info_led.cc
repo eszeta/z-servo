@@ -43,7 +43,7 @@ void InfoLED::Stop() {
 }
 
 void InfoLED::Process(uint32_t dt) {
-  elapsed_time_ms_ += dt;
+  elapsed_time_ms_ += dt * 1e-3f;
   if (elapsed_time_ms_ >= (*current_pattern_)[current_step_].duration_ms) {
     current_step_ = (current_step_ + 1) % current_pattern_->size();
     elapsed_time_ms_ = 0;
