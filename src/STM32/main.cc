@@ -13,24 +13,22 @@
 #include "servo.h"
 
 static constexpr auto kInfoLedPin = PA12;
-static constexpr uint32_t kTargetLoopRateHz = 500;  // 目标帧率500Hz
-static constexpr uint32_t kTargetLoopPeriodUs =
+static constexpr auto kTargetLoopRateHz = 500;  // 目标帧率500Hz
+static constexpr auto kTargetLoopPeriodUs =
     1000000 / kTargetLoopRateHz;  // 目标周期(微秒)
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_inst(PB7, PA15);
 
-hortor_servo::InfoLED::InfoLED info_led;
-hortor_servo::InstI2cTransport inst_transport;
-hortor_servo::InstAccessor inst_accessor;
-hortor_servo::Inst inst;
-hortor_servo::DRV8231A::DRV8231A motor_driver;
-hortor_servo::MT6701::MT6701 angle_sensor;
-hortor_servo::generic_current::GenericCurrent current_sensor;
-hortor_servo::Servo servo;
-
-uint32_t last_time;
+hortor_servo::InfoLED::InfoLED info_led{};
+hortor_servo::InstI2cTransport inst_transport{};
+hortor_servo::InstAccessor inst_accessor{};
+hortor_servo::Inst inst{};
+hortor_servo::DRV8231A::DRV8231A motor_driver{};
+hortor_servo::MT6701::MT6701 angle_sensor{};
+hortor_servo::generic_current::GenericCurrent current_sensor{};
+hortor_servo::Servo servo{};
 
 void receiveEvent(int howMany) { inst_transport.OnReceive(howMany); }
 void requestEvent() { inst_transport.OnRequest(); }
@@ -56,6 +54,11 @@ void setup() {
   servo.Init();
 
   inst_accessor.Init();
+  inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
+  inst_accessor.SetTargetVelocity(1000);
+  inst_accessor.SetVelPidKp(0.01f);
+  inst_accessor.SetVelPidKi(0.1f);
+
   inst_transport.Init(&wire_inst);
 
   inst.LinkAccessor(&inst_accessor);
@@ -64,15 +67,12 @@ void setup() {
   inst.Init();
 
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
-  servo.SetMode(hortor_servo::ServoMode::kVelocity);
-  servo.SetTargetVelocity(1000);
-  servo.SetPower(1.0f);
-  last_time = micros();
 }
 
 void loop() {
-  const uint32_t current_time = micros();
-  const uint32_t dt = current_time - last_time;
+  static auto last_time = micros() - kTargetLoopPeriodUs;
+  const auto current_time = micros();
+  const auto dt = current_time - last_time;
   last_time = current_time;
 
   info_led.Process(dt);
@@ -91,7 +91,7 @@ void loop() {
   hortor_servo::DebugPrintln(present_position);
 
   // 固定帧率控制
-  uint32_t elapsed_time = micros() - last_time;
+  const auto elapsed_time = micros() - last_time;
   if (elapsed_time < kTargetLoopPeriodUs) {
     delayMicroseconds(kTargetLoopPeriodUs - elapsed_time);
   }

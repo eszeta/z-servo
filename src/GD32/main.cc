@@ -57,9 +57,9 @@ void setup() {
 }
 
 void loop() {
-  static uint32_t last_time = micros();
-  const uint32_t current_time = micros();
-  const uint32_t dt = current_time - last_time;
+  static auto last_time = micros() - 1;
+  const auto current_time = micros();
+  const auto dt = current_time - last_time;
   info_led.Process(dt);
   inst.Process(dt);
   servo.Process(dt);

@@ -162,7 +162,7 @@ class Servo {
       {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
   // ServoMode::kSpeed模式专用
   PidController velocity_pid_{
-      {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
+      {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 1.0f}};
 
   Direction sensor_direction_;
   Direction motor_direction_;
