@@ -29,34 +29,50 @@ void Servo::Process(uint32_t dt) {
   if (!enabled_) return;
   switch (mode_) {
     case ServoMode::kPosition: {
-      // const auto pos_error = target_position_ - present_position_;
-      // if (IsPositionReached(pos_error)) {
-      //   moving_ = false;
-      //   return;
-      // }
-      // if (torque_enable_ || moving_) {
-      //   const auto pwm_set = pos_pid_.Compute(pos_error, dt);
-      //   SetPower(pwm_set);
-      // }
+      const auto pos_error = target_position_ - present_position_;
+
+      if (IsPositionReached(pos_error)) {
+        moving_ = false;
+      }
+
+      if (torque_enable_ || moving_) {
+        // 始终计算位置PID输出作为速度上限
+        const auto pos_pid_vel = pos_pid_.Compute(pos_error, dt);
+
+        auto target_vel = pos_pid_vel;
+        const auto target_vel_abs = std::abs(target_velocity_);
+        if (target_vel_abs > 0.001f) {
+          // 目标速度不为0时，取位置PID输出和目标速度中较小的那个
+          const auto speed_limit = std::abs(pos_pid_vel);
+          const auto limited_speed = std::min(target_vel_abs, speed_limit);
+          target_vel = std::copysign(limited_speed, pos_error);
+        }
+
+        // 加速度限制
+        if (target_acceleration_ > 0.001f) {
+          const auto dt_s = dt * kMicroToSec;
+          const auto delta_v = std::abs(target_acceleration_ * dt_s);
+          target_vel = present_velocity_ + std::copysign(delta_v, pos_error);
+        }
+        const auto vel_error = target_vel - present_velocity_;
+        const auto pwm_set = velocity_pid_.Compute(vel_error, dt);
+        SetPower(pwm_set);
+      }
       break;
     }
     case ServoMode::kVelocity: {
-      const auto vel_error = target_velocity_ - present_velocity_;
-      velocity_pid_.SetKp(0.01f);
-      velocity_pid_.SetKi(0.1);
-      velocity_pid_.SetLimit(1.0f);
+      auto target_vel = target_velocity_;
+      // 加速度限制
+      if (target_acceleration_ > 0.001f) {
+        const auto dt_s = dt * kMicroToSec;
+        const auto delta_v = std::abs(target_acceleration_ * dt_s);
+        target_vel = present_velocity_ + std::copysign(delta_v, target_vel);
+      }
+      const auto vel_error = target_vel - present_velocity_;
       const auto pwm_set = velocity_pid_.Compute(vel_error, dt);
       SetPower(pwm_set);
       break;
     }
-    // case MotorMode::kPositionTorque: {
-    //   position_set_ = constrain(target_, min_position_, max_position_);
-    //   const float posPidOutput = pos_pid_.Compute(position_set_ -
-    //   present_position_); current_set = maxCurrent_ * posPidOutput *
-    //   torque_; pwm_set_ = current_pid_.Compute(current_set -
-    //   present_current_, current_set); voltage_set_ = maxVoltage_ *
-    //   pwm_set_; present_load_ = voltage_set_; setPower(pwm_set_); break;
-    // }
     default:
       SetPower(0);
   }

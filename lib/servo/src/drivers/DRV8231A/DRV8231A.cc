@@ -37,14 +37,14 @@ void DRV8231A::SetPWM(float pwm) {
     analogWrite(pin_a_, 0);
     analogWrite(pin_b_, 255 * pwm);
   } else {
-    digitalWrite(pin_a_, HIGH);
-    digitalWrite(pin_b_, HIGH);
+    analogWrite(pin_a_, 0);
+    analogWrite(pin_b_, 0);
   }
 }
 
 void DRV8231A::Break() {
-  digitalWrite(pin_a_, LOW);
-  digitalWrite(pin_b_, LOW);
+  analogWrite(pin_a_, 255);
+  analogWrite(pin_b_, 255);
 }
 }  // namespace DRV8231A
 }  // namespace hortor_servo
