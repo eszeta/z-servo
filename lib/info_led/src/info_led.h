@@ -93,17 +93,22 @@ class InfoLED {
   /**
    * @brief 当前步骤已运行时间(秒)
    */
-  uint32_t elapsed_time_;
+  float elapsed_time_;
   /**
    * @brief 预定义的信息类型
    */
   std::vector<std::vector<BlinkUnit>> patterns_ = {
-      // OK - 持续亮
-      {{1, true}, {1, true}},
-      // WARNING - 慢闪
+      // OK - 慢闪
       {{0.5, true}, {0.5, false}},
-      // ERROR - 快闪
+      // WARNING - 快闪
       {{0.2, true}, {0.2, false}},
+      // ERROR - 一长两闪
+      {{1.0, true},
+       {0.5, false},
+       {0.2, true},
+       {0.2, false},
+       {0.2, true},
+       {0.2, false}},
       // FATAL_ERROR - 三闪一长
       {{0.2, true},
        {0.2, false},

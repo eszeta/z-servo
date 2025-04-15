@@ -44,10 +44,11 @@ void InfoLED::Stop() {
 
 void InfoLED::Process(float dt) {
   elapsed_time_ += dt;
-  if (elapsed_time_ >= (*current_pattern_)[current_step_].duration) {
+  const auto& pattern = (*current_pattern_)[current_step_];
+  if (elapsed_time_ >= pattern.duration) {
     current_step_ = (current_step_ + 1) % current_pattern_->size();
     elapsed_time_ = 0;
-    led_.Turn((*current_pattern_)[current_step_].state);
+    led_.Turn(pattern.state);
   }
 }
 
