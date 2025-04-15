@@ -80,7 +80,7 @@ class Sensor : public ObjectInterface {
   /** @brief 目标分辨率（位数），决定了传感器的精度和量程 */
   const uint8_t kTargetResolution = 11;
   /** @brief Counts Per Revolution */
-  const uint16_t kEncoderCpr = (1 << kTargetResolution) - 1;
+  const uint16_t kEncoderCpr = (1 << kTargetResolution);
   /** @brief 溢出检测阈值，用于检测角度是否发生了溢出（通常为满量程的80%） */
   const float kOverflowTh = 0.8f * kEncoderCpr;
   /**
