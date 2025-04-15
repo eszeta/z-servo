@@ -19,9 +19,9 @@ void Monitor::UseMonitoring(Print &serial) { monitorPort_ = &serial; }
 
 void Monitor::LinkMotor(Servo *servo) { servo_ = servo; }
 
-void Monitor::Process(uint32_t dt) {
+void Monitor::Process(float dt) {
   if (!monitorPort_) return;
-  static uint32_t accumulated_time = 0;
+  static float accumulated_time = 0;
   accumulated_time += dt;
   if (accumulated_time < period_) return;
   accumulated_time = 0;

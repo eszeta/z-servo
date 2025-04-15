@@ -37,18 +37,18 @@ class PidController : public ObjectInterface {
    * @brief 计算PID控制器输出
    * @param error - 控制误差
    * @param feed - 前馈输入
-   * @param dt - 时间间隔(微秒)
+   * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(float error, float feed, uint32_t dt);
+  float Compute(float error, float feed, float dt);
 
   /**
    * @brief 计算PID控制器输出（无前馈）
    * @param error - 控制误差
-   * @param dt - 时间间隔(微秒)
+   * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(float error, uint32_t dt);
+  float Compute(float error, float dt);
 
   /**
    * @brief 重置PID控制器状态

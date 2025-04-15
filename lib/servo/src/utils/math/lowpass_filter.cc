@@ -21,9 +21,8 @@ LowPassFilter::LowPassFilter() {
   y_prev_ = 0.0f;
 }
 
-float LowPassFilter::Compute(const float x, const uint32_t dt) {
-  float dt_sec = dt * kMicroToSec;
-  const float alpha = time_constant_ / (time_constant_ + dt_sec);
+float LowPassFilter::Compute(const float x, const float dt) {
+  const float alpha = time_constant_ / (time_constant_ + dt);
   const float one_minus_alpha = 1.0f - alpha;
   const float y = alpha * y_prev_ + one_minus_alpha * x;
   y_prev_ = y;

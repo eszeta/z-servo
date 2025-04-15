@@ -24,11 +24,13 @@
 #include "inst/inst_accessor.h"
 #include "inst/inst_i2c_transport.h"
 #include "servo.h"
+#include "utils/math/math_types.h"
 
 static constexpr auto kInfoLedPin = PA12;
-static constexpr auto kTargetLoopRateHz = 500;  // 目标帧率500Hz
-static constexpr auto kTargetLoopPeriodUs =
-    1000000 / kTargetLoopRateHz;  // 目标周期(微秒)
+// 目标帧率500Hz
+static constexpr auto kTargetLoopRateHz = 500;
+// 目标周期(微秒)
+static constexpr auto kTargetLoopPeriodUs = 1000000 / kTargetLoopRateHz;
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
@@ -85,7 +87,7 @@ void setup() {
 void loop() {
   static auto last_time = micros() - kTargetLoopPeriodUs;
   const auto current_time = micros();
-  const auto dt = current_time - last_time;
+  const auto dt = (current_time - last_time) * hortor_servo::kMicroToSec;
   last_time = current_time;
 
   info_led.Process(dt);

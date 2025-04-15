@@ -40,8 +40,9 @@ class Monitor : public ObjectInterface {
 
   /**
    * @brief 处理监控
+   * @param dt 时间间隔(秒)
    */
-  void Process(uint32_t dt);
+  void Process(float dt);
 
   /**·
    * @brief 链接电机
@@ -74,9 +75,9 @@ class Monitor : public ObjectInterface {
    */
   uint8_t decimals_ = 4;  // 监控输出数据的小数位数
   /**
-   * @brief 监控周期（单位：微秒）
-   * @note 默认值为100ms（100000微秒）
+   * @brief 监控周期（单位：秒）
+   * @note 默认值为0.1秒（100ms）
    */
-  uint32_t period_ = 100 * 1000;
+  float period_ = 0.1f;
 };
 }  // namespace hortor_servo

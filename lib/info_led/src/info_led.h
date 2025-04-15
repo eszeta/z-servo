@@ -25,8 +25,8 @@ namespace InfoLED {
  * @brief LED闪烁模式的基本单元
  */
 struct BlinkUnit {
-  uint32_t duration_ms;  // 持续时间(毫秒)
-  bool state;            // true表示亮，false表示灭
+  float duration;  // 持续时间(秒)
+  bool state;      // true表示亮，false表示灭
 };
 
 /**
@@ -73,9 +73,9 @@ class InfoLED {
 
   /**
    * @brief 需要在主循环中调用以更新LED状态
-   * @param dt 时间间隔(微秒)
+   * @param dt 时间间隔(秒)
    */
-  void Process(uint32_t dt);
+  void Process(float dt);
 
  private:
   /**
@@ -91,28 +91,28 @@ class InfoLED {
    */
   size_t current_step_;
   /**
-   * @brief 当前步骤已运行时间(毫秒)
+   * @brief 当前步骤已运行时间(秒)
    */
-  uint32_t elapsed_time_ms_;
+  uint32_t elapsed_time_;
   /**
    * @brief 预定义的信息类型
    */
   std::vector<std::vector<BlinkUnit>> patterns_ = {
       // OK - 持续亮
-      {{1000, true}, {1000, true}},
+      {{1, true}, {1, true}},
       // WARNING - 慢闪
-      {{500, true}, {500, false}},
+      {{0.5, true}, {0.5, false}},
       // ERROR - 快闪
-      {{200, true}, {200, false}},
+      {{0.2, true}, {0.2, false}},
       // FATAL_ERROR - 三闪一长
-      {{200, true},
-       {200, false},
-       {200, true},
-       {200, false},
-       {200, true},
-       {200, false},
-       {1000, true},
-       {1000, false}},
+      {{0.2, true},
+       {0.2, false},
+       {0.2, true},
+       {0.2, false},
+       {0.2, true},
+       {0.2, false},
+       {1, true},
+       {1, false}},
   };
 };
 

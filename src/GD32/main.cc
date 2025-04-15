@@ -24,6 +24,7 @@
 #include "inst/inst_accessor.h"
 #include "inst/inst_serial_transport.h"
 #include "servo.h"
+#include "utils/math/math_types.h"
 
 static constexpr auto kInfoLedPin = PB1;
 HardwareSerial serial_debug(PB4, PB3, 0);
@@ -72,7 +73,7 @@ void setup() {
 void loop() {
   static auto last_time = micros() - 1;
   const auto current_time = micros();
-  const auto dt = current_time - last_time;
+  const auto dt = (current_time - last_time) * hortor_servo::kMicroToSec;
   info_led.Process(dt);
   inst.Process(dt);
   servo.Process(dt);

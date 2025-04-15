@@ -32,10 +32,10 @@ class LowPassFilter : public ObjectInterface {
   /**
    * @brief 计算滤波值
    * @param x - 输入值
-   * @param dt - 时间间隔(微秒)
+   * @param dt - 时间间隔(秒)
    * @return 滤波值
    */
-  float Compute(float x, uint32_t dt);
+  float Compute(float x, float dt);
 
   /**
    * @brief 设置时间常数

@@ -35,10 +35,10 @@ class InstI2cTransport : public InstTransportInterface {
 
   /**
    * @brief 处理数据
-   * @param dt 时间间隔(微秒)
+   * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  Error Process(const uint32_t dt) override;
+  Error Process(const float dt) override;
 
   /**
    * @brief 发送数据

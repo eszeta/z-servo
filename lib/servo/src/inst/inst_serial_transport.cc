@@ -15,6 +15,7 @@
 
 #include <Arduino.h>
 
+#include "../utils/math/math_types.h"
 #include "./inst_types.h"
 
 #ifdef ARDUINO_ARCH_STM32
@@ -23,7 +24,7 @@
 
 namespace hortor_servo {
 
-Error InstSerialTransport::Process(uint32_t dt) {
+Error InstSerialTransport::Process(float dt) {
   // 延时回包
   delay_time_ -= dt;
   if (delay_time_ <= 0 && is_dirty_) {
@@ -108,7 +109,7 @@ Error InstSerialTransport::Response(const uint8_t reply_idx,
                                     const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);
   memcpy(tx_buffer_, data, size);
-  delay_time_ = response_delay_ * (reply_idx + 1);
+  delay_time_ = response_delay_ * (reply_idx + 1) * kMilliToSec;  // 毫秒转秒
   is_dirty_ = true;
   return Error::kOk;
 }

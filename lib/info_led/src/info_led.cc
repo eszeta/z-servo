@@ -25,28 +25,28 @@ void InfoLED::Init(const uint32_t pin, const Mode mode) {
 void InfoLED::Init(const PinName pinName, const Mode mode) {
   current_step_ = 0;
   current_pattern_ = nullptr;
-  elapsed_time_ms_ = 0;
+  elapsed_time_ = 0;
   led_.Init(pinName, mode);
 }
 
 void InfoLED::SetInfo(InfoType type) {
   current_pattern_ = &patterns_[static_cast<size_t>(type)];
   current_step_ = 0;
-  elapsed_time_ms_ = 0;
+  elapsed_time_ = 0;
   led_.Turn((*current_pattern_)[current_step_].state);
 }
 
 void InfoLED::Stop() {
   current_pattern_ = nullptr;
-  elapsed_time_ms_ = 0;
+  elapsed_time_ = 0;
   led_.Turn(false);
 }
 
-void InfoLED::Process(uint32_t dt) {
-  elapsed_time_ms_ += dt * 1e-3f;
-  if (elapsed_time_ms_ >= (*current_pattern_)[current_step_].duration_ms) {
+void InfoLED::Process(float dt) {
+  elapsed_time_ += dt;
+  if (elapsed_time_ >= (*current_pattern_)[current_step_].duration) {
     current_step_ = (current_step_ + 1) % current_pattern_->size();
-    elapsed_time_ms_ = 0;
+    elapsed_time_ = 0;
     led_.Turn((*current_pattern_)[current_step_].state);
   }
 }

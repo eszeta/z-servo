@@ -44,7 +44,7 @@ Error Inst::LinkServo(Servo *servo) {
   return Error::kOk;
 }
 
-Error Inst::Process(uint32_t dt) {
+Error Inst::Process(float dt) {
   CHECK(transport_->Process(dt));
   CHECK(UpdateStatusRegs());
   return Error::kOk;

@@ -40,7 +40,7 @@ void setup() {
 void loop() {
   static auto last_time = micros() - kTargetLoopPeriodUs;
   const auto current_time = micros();
-  const auto dt = current_time - last_time;
+  const auto dt = (current_time - last_time) * hortor_servo::kMicroToSec;
   last_time = current_time;
 
   info_led.Process(dt);

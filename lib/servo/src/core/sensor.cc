@@ -14,8 +14,6 @@
 
 #include "sensor.h"
 
-#include "../utils/math/math_types.h"
-
 namespace hortor_servo {
 
 void Sensor::Init() {
@@ -27,7 +25,7 @@ void Sensor::Init() {
   raw_val_ = raw;
 }
 
-void Sensor::Process(uint32_t dt) {
+void Sensor::Process(float dt) {
   raw_val_ = GetRaw();
   CalculateFullRotations();
   CalculateVelocity(dt);
@@ -42,7 +40,7 @@ void Sensor::CalculateFullRotations() {
   raw_prev_ = raw_val_;
 }
 
-void Sensor::CalculateVelocity(uint32_t dt) {
+void Sensor::CalculateVelocity(float dt) {
   accumulated_dt_ += dt;
 
   // 确保累积时间达到最小采样间隔
@@ -55,8 +53,7 @@ void Sensor::CalculateVelocity(uint32_t dt) {
       static_cast<int32_t>(raw_val_ - vel_raw_prev_);
 
   // 计算速度（单位：计数/秒）
-  const auto time_seconds = accumulated_dt_ * kMicroToSec;
-  velocity_ = static_cast<float>(angle_diff) / time_seconds;
+  velocity_ = static_cast<float>(angle_diff) / accumulated_dt_;
 
   // 更新上一次的值
   vel_raw_prev_ = raw_val_;

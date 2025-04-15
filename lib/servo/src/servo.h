@@ -20,7 +20,7 @@ class Servo {
   void LinkAngleSensor(Sensor *sensor);
   void LinkCurrentSense(Current *current_sense);
   void Action();
-  void Process(uint32_t dt);
+  void Process(float dt);
 
   float GetPresentPosition() { return present_position_; }
   float GetPresentVelocity() { return present_velocity_; }
@@ -99,7 +99,7 @@ class Servo {
   }
   void SetTorqueLimit(float torque_limit) { torque_limit_ = torque_limit; }
 
-  void SetPower(const float power);
+  void SetPower(const float pwm);
   void Break();
 
   // 分辨率（位数），决定了传感器的精度和量程
@@ -107,9 +107,9 @@ class Servo {
   static constexpr uint16_t kFullScale = (1 << kResolution);
 
  private:
-  float GetAngle(uint32_t dt);
-  float GetVelocity(uint32_t dt);
-  float GetCurrent(uint32_t dt);
+  float GetAngle(float dt);
+  float GetVelocity(float dt);
+  float GetCurrent(float dt);
   bool IsPositionReached(int16_t pos_error);
 
   bool enabled_ = true;

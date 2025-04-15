@@ -16,6 +16,7 @@
 
 #include <Arduino.h>
 
+#include "../utils/math/math_types.h"
 #include "./object_interface.h"
 
 namespace hortor_servo {
@@ -68,11 +69,11 @@ class Sensor : public ObjectInterface {
 
   /**
    * @brief 更新传感器数据
-   * @param dt 时间间隔(微秒)
+   * @param dt 时间间隔(秒)
    * 读取最新的传感器值并计算相关参数，包括圈数和角速度。
    * 此方法应在主循环中定期调用以保持数据更新。
    */
-  virtual void Process(uint32_t dt);
+  virtual void Process(float dt);
 
   /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
   const uint8_t kResolution;
@@ -108,13 +109,13 @@ class Sensor : public ObjectInterface {
 
   /**
    * @brief 计算角速度
-   * @param dt 时间间隔(微秒)
+   * @param dt 时间间隔(秒)
    *
    * 基于当前角度和上次记录的角度计算角速度。
    * 考虑了时间间隔和圈数的变化。
    * 计算结果单位为：计数/秒
    */
-  void CalculateVelocity(uint32_t dt);
+  void CalculateVelocity(float dt);
   /**
    * @brief 计算圈数
    *
@@ -122,8 +123,8 @@ class Sensor : public ObjectInterface {
    * 当角度变化超过阈值时，认为发生了一次完整旋转。
    */
   void CalculateFullRotations();
-  /** @brief 最小采样时间间隔（微秒），固定为100微秒（10kHz） */
-  static constexpr float kMinElapsedTime = 100.0f;
+  /** @brief 最小采样时间间隔（秒），固定为100微秒（10kHz） */
+  static constexpr float kMinElapsedTime = 100.0f * kMicroToSec;
 
   /** @brief 当前角速度值 */
   float velocity_ = 0.0f;

@@ -21,7 +21,7 @@
 
 namespace hortor_servo {
 
-Error InstI2cTransport::Process(uint32_t dt) { return Error::kOk; }
+Error InstI2cTransport::Process(float dt) { return Error::kOk; }
 
 Error InstI2cTransport::Response(const uint8_t reply_idx, const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);

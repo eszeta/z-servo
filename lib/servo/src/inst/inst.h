@@ -46,10 +46,10 @@ class Inst {
 
   /**
    * @brief 处理指令
-   * @param dt 时间间隔(微秒)
+   * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  Error Process(uint32_t dt);
+  Error Process(float dt);
 
  private:
   /**
