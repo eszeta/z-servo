@@ -102,10 +102,6 @@ class Servo {
   void SetPower(const float pwm);
   void Break();
 
-  // 分辨率（位数），决定了传感器的精度和量程
-  static constexpr uint8_t kResolution = 11;
-  static constexpr uint16_t kFullScale = (1 << kResolution);
-
  private:
   float GetAngle(float dt);
   float GetVelocity(float dt);

@@ -1,7 +1,6 @@
 #include "servo.h"
 
 #include "utils/math/math.h"
-#include "utils/math/math_types.h"
 
 namespace hortor_servo {
 
@@ -40,17 +39,17 @@ void Servo::Process(float dt) {
         const auto pos_pid_vel = pos_pid_.Compute(pos_error, dt);
 
         auto target_vel = pos_pid_vel;
-        const auto target_vel_abs = std::abs(target_velocity_);
+        const auto target_vel_abs = std::fabs(target_velocity_);
         if (target_vel_abs > 0.001f) {
           // 目标速度不为0时，取位置PID输出和目标速度中较小的那个
-          const auto speed_limit = std::abs(pos_pid_vel);
-          const auto limited_speed = std::min(target_vel_abs, speed_limit);
+          const auto speed_limit = std::fabs(pos_pid_vel);
+          const auto limited_speed = std::fmin(target_vel_abs, speed_limit);
           target_vel = std::copysign(limited_speed, pos_error);
         }
 
         // 加速度限制
         if (target_acceleration_ > 0.001f) {
-          const auto delta_v = std::abs(target_acceleration_ * dt);
+          const auto delta_v = std::fabs(target_acceleration_ * dt);
           target_vel = present_velocity_ + std::copysign(delta_v, pos_error);
         }
         const auto vel_error = target_vel - present_velocity_;
@@ -63,7 +62,7 @@ void Servo::Process(float dt) {
       auto target_vel = target_velocity_;
       // 加速度限制
       if (target_acceleration_ > 0.001f) {
-        const auto delta_v = std::abs(target_acceleration_ * dt);
+        const auto delta_v = std::fabs(target_acceleration_ * dt);
         target_vel = present_velocity_ + std::copysign(delta_v, target_vel);
       }
       const auto vel_error = target_vel - present_velocity_;
@@ -91,9 +90,7 @@ float Servo::GetAngle(float dt) {
   const auto raw = angle_sensor_->GetAngle();
   const auto filtered = pos_lpf_.Compute(raw, dt);
   const auto corrected = direction * filtered + position_correction_;
-  const auto scaled =
-      mapResolution(corrected, angle_sensor_->kResolution, kResolution);
-  return scaled;
+  return corrected;
 }
 
 float Servo::GetVelocity(float dt) {
@@ -101,9 +98,7 @@ float Servo::GetVelocity(float dt) {
   const auto raw = angle_sensor_->GetVelocity();
   const auto filtered = velocity_lpf_.Compute(raw, dt);
   const auto corrected = direction * filtered;
-  const auto scaled =
-      mapResolution(corrected, angle_sensor_->kResolution, kResolution);
-  return scaled;
+  return corrected;
 }
 
 float Servo::GetCurrent(float dt) {

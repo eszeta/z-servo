@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "sensor.h"
-
+#include "../utils/math/math.h"
 namespace hortor_servo {
 
 void Sensor::Init() {
@@ -26,7 +26,8 @@ void Sensor::Init() {
 }
 
 void Sensor::Process(float dt) {
-  raw_val_ = GetRaw();
+  const auto raw = GetRaw();
+  raw_val_ = mapResolution(raw, kResolution, kTargetResolution);
   CalculateFullRotations();
   CalculateVelocity(dt);
 }
@@ -49,7 +50,7 @@ void Sensor::CalculateVelocity(float dt) {
   // 计算角度变化
   const auto angle_diff =
       static_cast<int32_t>(full_rotations_ - vel_full_rotations_) *
-          static_cast<int32_t>(kFullScale) +
+          static_cast<int32_t>(kEncoderCpr) +
       static_cast<int32_t>(raw_val_ - vel_raw_prev_);
 
   // 计算速度（单位：计数/秒）
@@ -65,7 +66,7 @@ float Sensor::GetVelocity() { return velocity_; }
 
 uint16_t Sensor::GetMechanicalAngle() { return raw_val_; }
 
-uint32_t Sensor::GetAngle() { return full_rotations_ * kFullScale + raw_val_; }
+uint32_t Sensor::GetAngle() { return full_rotations_ * kEncoderCpr + raw_val_; }
 
 int32_t Sensor::GetFullRotations() { return full_rotations_; }
 }  // namespace hortor_servo

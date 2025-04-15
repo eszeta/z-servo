@@ -15,7 +15,7 @@
 #include <Arduino.h>
 
 #include "../../core/object_interface.h"
-#include "./math_types.h"
+#include "./math.h"
 namespace hortor_servo {
 
 struct PIDParam {

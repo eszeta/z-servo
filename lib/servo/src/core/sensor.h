@@ -16,7 +16,7 @@
 
 #include <Arduino.h>
 
-#include "../utils/math/math_types.h"
+#include "../utils/math/math.h"
 #include "./object_interface.h"
 
 namespace hortor_servo {
@@ -77,26 +77,28 @@ class Sensor : public ObjectInterface {
 
   /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
   const uint8_t kResolution;
-  /** @brief 传感器满量程值 */
-  const uint16_t kFullScale = (1 << kResolution);
+  /** @brief 目标分辨率（位数），决定了传感器的精度和量程 */
+  const uint8_t kTargetResolution = 11;
+  /** @brief Counts Per Revolution */
+  const uint16_t kEncoderCpr = (1 << kTargetResolution) - 1;
   /** @brief 溢出检测阈值，用于检测角度是否发生了溢出（通常为满量程的80%） */
-  const float kOverflowTh = 0.8f * kFullScale;
+  const float kOverflowTh = 0.8f * kEncoderCpr;
   /**
    *  @brief
    * 角度到原始值的转换系数，用于将角度转换为原始值
    */
-  const float kAngleToRaw = kFullScale / 360.0f;
+  const float kAngleToRaw = kEncoderCpr / 360.0f;
   /**
    *  @brief 弧度到原始值的转换系数，用于将弧度转换为原始值
    */
-  const float kRadianToRaw = kFullScale / TWO_PI;
+  const float kRadianToRaw = kEncoderCpr / TWO_PI;
   /**
    * @brief 原始值到角度的转换系数，用于将原始值转换为角度
    */
-  const float kRawToAngle = 360.0f / kFullScale;
+  const float kRawToAngle = 360.0f / kEncoderCpr;
   /** @brief 原始值到弧度的转换系数，用于将原始值转换为弧度
    */
-  const float kRawToRadian = TWO_PI / kFullScale;
+  const float kRawToRadian = TWO_PI / kEncoderCpr;
 
  protected:
   /**

@@ -24,7 +24,7 @@
 #include "inst/inst_accessor.h"
 #include "inst/inst_i2c_transport.h"
 #include "servo.h"
-#include "utils/math/math_types.h"
+#include "utils/math/math.h"
 
 static constexpr auto kInfoLedPin = PA12;
 // 目标帧率500Hz

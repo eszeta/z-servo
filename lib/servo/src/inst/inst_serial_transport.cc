@@ -15,7 +15,7 @@
 
 #include <Arduino.h>
 
-#include "../utils/math/math_types.h"
+#include "../utils/math/math.h"
 #include "./inst_types.h"
 
 #ifdef ARDUINO_ARCH_STM32

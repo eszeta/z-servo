@@ -24,7 +24,7 @@
 #include "inst/inst_accessor.h"
 #include "inst/inst_serial_transport.h"
 #include "servo.h"
-#include "utils/math/math_types.h"
+#include "utils/math/math.h"
 
 static constexpr auto kInfoLedPin = PB1;
 HardwareSerial serial_debug(PB4, PB3, 0);

@@ -15,6 +15,17 @@
 #include <Arduino.h>
 
 namespace hortor_servo {
+/// @brief 微秒转换为秒
+static constexpr float kMicroToSec = 1e-6f;
+
+/// @brief 毫秒转换为秒
+static constexpr float kMilliToSec = 1e-3f;
+
+/// @brief 将一个值从一个分辨率映射到另一个分辨率
+/// @param value 需要映射的值
+/// @param from 源分辨率
+/// @param to 目标分辨率
+/// @return 映射后的值
 static constexpr uint32_t mapResolution(uint32_t value,
                                         uint32_t from,
                                         uint32_t to) {
