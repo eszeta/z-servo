@@ -159,7 +159,7 @@ struct ServoRegs {
    * @brief 积分限制值 [0-254]
    * 最大积分值=积分限制值*4,0表示关闭积分限制功能，位置模式0与步进模式3生效
    */
-  static constexpr const Register kPosPidLimit{0x19, 0, 8};
+  static constexpr const Register kPosPidILimit{0x19, 0, 8};
   /**
    * @brief 顺时针不灵敏区 [0-32]
    * 单位:步
@@ -413,7 +413,7 @@ struct RegsDefaultValues {
   static constexpr float kDefPosPidKd = 0.0f;                      // 0x16
   static constexpr float kDefPosPidKi = 0.0f;                      // 0x17
   static constexpr float kDefMinStartupForce = 0.0f;               // 0x18
-  static constexpr float kDefPosPidLimit = 0.0f;                   // 0x19
+  static constexpr float kDefPosPidILimit = 0.0f;              // 0x19
   static constexpr uint8_t kDefCWInsensitiveArea = 1;              // 0x1A
   static constexpr uint8_t kDefCCWInsensitiveArea = 1;             // 0x1B
   static constexpr float kDefCurrentProtectionTh = 0.0f;           // 0x1C-0x1D

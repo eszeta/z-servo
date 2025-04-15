@@ -74,7 +74,7 @@ Error InstAccessor::RecoveryEeprom() {
   SetPosPidKp(Def::kDefPosPidKp);
   SetPosPidKd(Def::kDefPosPidKd);
   SetPosPidKi(Def::kDefPosPidKi);
-  SetPosPidLimit(Def::kDefPosPidLimit);
+  SetPosPidILimit(Def::kDefPosPidILimit);
 
   // 最小启动力
   SetMinStartupForce(Def::kDefMinStartupForce);

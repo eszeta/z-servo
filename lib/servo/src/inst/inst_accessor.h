@@ -431,21 +431,21 @@ class InstAccessor : public RegisterAccessor {
   }
 
   /**
-   * @brief 获取位置PID限制值 (0x19)
-   * @return 位置PID限制值(4)
+   * @brief 获取积分限制值 (0x19)
+   * @return 积分限制值(4)
    */
-  float GetPosPidLimit() {
+  float GetPosPidILimit() {
     uint8_t limit;
-    ReadRegField(Regs::kPosPidLimit, &limit);
+    ReadRegField(Regs::kPosPidILimit, &limit);
     return limit * 4.0f;
   }
 
   /**
-   * @brief 设置位置PID限制值 (0x19)
-   * @param limit 位置PID限制值(4)
+   * @brief 设置积分限制值 (0x19)
+   * @param limit 积分限制值(4)
    */
-  void SetPosPidLimit(const float limit) {
-    WriteRegField(Regs::kPosPidLimit, static_cast<uint8_t>(limit / 4));
+  void SetPosPidILimit(const float limit) {
+    WriteRegField(Regs::kPosPidILimit, static_cast<uint8_t>(limit / 4));
   }
 
   /**

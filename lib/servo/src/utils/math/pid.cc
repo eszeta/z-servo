@@ -29,8 +29,8 @@ inline float PidController::Compute(const float error,
   float i = integral_sum_ + param_.ki * dt_sec * 0.5f * (error + error_prev_);
 
   // 对积分项进行限幅，防止积分饱和
-  if (param_.limit > 0) {
-    i = constrain(i, -param_.limit, param_.limit);
+  if (param_.i_limit > 0) {
+    i = constrain(i, -param_.i_limit, param_.i_limit);
   }
 
   // 2.3 微分项：d = Kd * de

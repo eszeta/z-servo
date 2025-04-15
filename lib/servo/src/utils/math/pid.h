@@ -23,6 +23,7 @@ struct PIDParam {
   float ki;
   float kd;
   float ff;
+  float i_limit;
   float limit;
 };
 /**
@@ -70,6 +71,9 @@ class PidController : public ObjectInterface {
 
   void SetLimit(float limit) { param_.limit = limit; }
   float GetLimit() const { return param_.limit; }
+
+  void SetIlimit(float ilimit) { param_.i_limit = ilimit; }
+  float GetIlimit() const { return param_.i_limit; }
 
  private:
   // 控制器参数
