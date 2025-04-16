@@ -16,6 +16,7 @@
 
 #include <Arduino.h>
 
+#include "../utils/math/lowpass_filter.h"
 #include "../utils/math/math.h"
 #include "./object_interface.h"
 
@@ -32,7 +33,10 @@ class Sensor : public ObjectInterface {
    * @brief 构造函数
    * @param resolution 传感器分辨率（位数），决定了传感器的精度和量程
    */
-  explicit Sensor(const uint8_t resolution) : kResolution(resolution) {}
+  explicit Sensor(const uint8_t resolution) : kResolution(resolution) {
+    velocity_lpf_.SetTimeConstant(0.01f);
+    pos_lpf_.SetTimeConstant(0.01f);
+  }
 
   /**
    * @brief 初始化传感器
@@ -46,26 +50,33 @@ class Sensor : public ObjectInterface {
    * @brief 获取机械角度
    * @return 当前机械角度（原始值，未考虑圈数）
    */
-  virtual uint16_t GetMechanicalAngle();
+  virtual uint16_t GetRawAngle() { return raw_; }
 
   /**
    * @brief 获取累积角度
    * @return 当前累积角度（机械角度 + 圈数 * 满量程）
    */
-  virtual uint32_t GetAngle();
+  virtual int32_t GetAngle() {
+    return full_rotations_ * kEncoderCpr + raw_filtered_;
+  }
 
   /**
    * @brief 获取角速度
    * @return 当前角速度（单位：计数/秒）
    */
-  virtual float GetVelocity();
+  virtual float GetVelocity() { return velocity_filtered_; }
 
   /**
    * @brief 获取圈数
    * @return 圈数（正值表示顺时针，负值表示逆时针）
-   * @note 由于使用uint16_t类型，实际圈数范围受限
    */
-  virtual int32_t GetFullRotations();
+  virtual int32_t GetFullRotations() { return full_rotations_; }
+
+  /** @brief 获取角速度滤波器 */
+  LowPassFilter &GetVelocityLpf() { return velocity_lpf_; }
+  
+  /** @brief 获取位置滤波器 */
+  LowPassFilter &GetPosLpf() { return pos_lpf_; }
 
   /**
    * @brief 更新传感器数据
@@ -109,38 +120,27 @@ class Sensor : public ObjectInterface {
    */
   virtual uint16_t GetRaw() = 0;
 
-  /**
-   * @brief 计算角速度
-   * @param dt 时间间隔(秒)
-   *
-   * 基于当前角度和上次记录的角度计算角速度。
-   * 考虑了时间间隔和圈数的变化。
-   * 计算结果单位为：计数/秒
-   */
-  void CalculateVelocity(float dt);
-  /**
-   * @brief 计算圈数
-   *
-   * 通过检测角度变化中的溢出来计算圈数。
-   * 当角度变化超过阈值时，认为发生了一次完整旋转。
-   */
-  void CalculateFullRotations();
   /** @brief 最小采样时间间隔（秒），固定为100微秒（10kHz） */
   static constexpr float kMinElapsedTime = 100.0f * kMicroToSec;
 
   /** @brief 当前角速度值 */
   float velocity_ = 0.0f;
+  /** @brief 当前滤波后的角速度值 */
+  float velocity_filtered_ = 0.0f;
   /** @brief 当前原始角度值 */
-  uint16_t raw_val_ = 0;
-  /** @brief 上次更新的原始角度值，用于检测溢出 */
+  uint16_t raw_ = 0;
+  /** @brief 当前滤波后的原始角度值 */
+  uint16_t raw_filtered_ = 0;
+  /** @brief 上次更新的原始角度值 */
   uint16_t raw_prev_ = 0;
-  /** @brief 上次速度计算时的原始角度值 */
-  uint16_t vel_raw_prev_ = 0;
   /** @brief 圈数计数器 */
-  uint32_t full_rotations_ = 0;
+  int32_t full_rotations_ = 0;
   /** @brief 上次速度计算时的圈数 */
-  uint32_t vel_full_rotations_ = 0;
+  int32_t full_rotations_prev_ = 0;
   /** @brief 累计时间间隔（微秒） */
   uint32_t accumulated_dt_ = 0;
+
+  LowPassFilter velocity_lpf_;
+  LowPassFilter pos_lpf_;
 };
 }  // namespace hortor_servo

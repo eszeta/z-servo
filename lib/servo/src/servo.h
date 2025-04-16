@@ -22,6 +22,8 @@ class Servo {
   void Action();
   void Process(float dt);
 
+  Sensor *GetSensor() { return angle_sensor_; }
+
   float GetPresentPosition() { return present_position_; }
   float GetPresentVelocity() { return present_velocity_; }
   float GetPresentLoad() { return present_load_; }
@@ -35,8 +37,6 @@ class Servo {
   PidController &GetPosPid() { return pos_pid_; }
   PidController &GetVelPid() { return velocity_pid_; }
   LowPassFilter &GetCurrentLpf() { return current_lpf_; }
-  LowPassFilter &GetVelocityLpf() { return velocity_lpf_; }
-  LowPassFilter &GetPosLpf() { return pos_lpf_; }
 
   void SetMode(ServoMode mode) { mode_ = mode; }
   void SetMinPosition(uint16_t min_position) { min_position_ = min_position; }
@@ -164,8 +164,6 @@ class Servo {
   Direction motor_direction_;
 
   LowPassFilter current_lpf_;
-  LowPassFilter velocity_lpf_;
-  LowPassFilter pos_lpf_;
 
   MotorDriver *driver_;
   Sensor *angle_sensor_;

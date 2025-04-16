@@ -88,16 +88,14 @@ bool Servo::IsPositionReached(int16_t pos_error) {
 float Servo::GetAngle(float dt) {
   const auto direction = static_cast<float>(sensor_direction_);
   const auto raw = angle_sensor_->GetAngle();
-  const auto filtered = pos_lpf_.Compute(raw, dt);
-  const auto corrected = direction * filtered + position_correction_;
+  const auto corrected = direction * raw + position_correction_;
   return corrected;
 }
 
 float Servo::GetVelocity(float dt) {
   const auto direction = static_cast<float>(sensor_direction_);
   const auto raw = angle_sensor_->GetVelocity();
-  const auto filtered = velocity_lpf_.Compute(raw, dt);
-  const auto corrected = direction * filtered;
+  const auto corrected = direction * raw;
   return corrected;
 }
 

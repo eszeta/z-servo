@@ -167,13 +167,13 @@ Error Inst::LoadEepromConfig() {
   servo_->SetMotorDirection(motor_direction);
 
   const auto pos_filter = accessor_->GetPosFilter();
-  servo_->GetPosLpf().SetTimeConstant(pos_filter);
+  servo_->GetSensor()->GetPosLpf().SetTimeConstant(pos_filter);
 
   const auto current_filter = accessor_->GetCurrentFilter();
   servo_->GetCurrentLpf().SetTimeConstant(current_filter);
 
   const auto vel_filter = accessor_->GetVelFilter();
-  servo_->GetVelocityLpf().SetTimeConstant(vel_filter);
+  servo_->GetSensor()->GetVelocityLpf().SetTimeConstant(vel_filter);
   return Error::kOk;
 }
 
