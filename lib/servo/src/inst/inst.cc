@@ -44,6 +44,12 @@ Error Inst::LinkServo(Servo *servo) {
   return Error::kOk;
 }
 
+Error Inst::Refresh() {
+  CHECK(LoadEepromConfig());
+  CHECK(LoadRamConfig());
+  return Error::kOk;
+}
+
 Error Inst::Process(float dt) {
   CHECK(transport_->Process(dt));
   CHECK(UpdateStatusRegs());
@@ -167,13 +173,13 @@ Error Inst::LoadEepromConfig() {
   servo_->SetMotorDirection(motor_direction);
 
   const auto pos_filter = accessor_->GetPosFilter();
-  servo_->GetSensor()->GetPosLpf().SetTimeConstant(pos_filter);
+  servo_->GetPosLpf().SetTimeConstant(pos_filter);
 
   const auto current_filter = accessor_->GetCurrentFilter();
   servo_->GetCurrentLpf().SetTimeConstant(current_filter);
 
   const auto vel_filter = accessor_->GetVelFilter();
-  servo_->GetSensor()->GetVelocityLpf().SetTimeConstant(vel_filter);
+  servo_->GetVelocityLpf().SetTimeConstant(vel_filter);
   return Error::kOk;
 }
 

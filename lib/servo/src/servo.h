@@ -37,6 +37,8 @@ class Servo {
   PidController &GetPosPid() { return pos_pid_; }
   PidController &GetVelPid() { return velocity_pid_; }
   LowPassFilter &GetCurrentLpf() { return current_lpf_; }
+  LowPassFilter &GetPosLpf() { return pos_lpf_; }
+  LowPassFilter &GetVelocityLpf() { return velocity_lpf_; }
 
   void SetMode(ServoMode mode) { mode_ = mode; }
   void SetMinPosition(uint16_t min_position) { min_position_ = min_position; }
@@ -99,13 +101,15 @@ class Servo {
   }
   void SetTorqueLimit(float torque_limit) { torque_limit_ = torque_limit; }
 
-  void SetPower(const float pwm);
-  void Break();
+  /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
+  const Resolution kResolution{11};
 
  private:
   float GetAngle(float dt);
   float GetVelocity(float dt);
   float GetCurrent(float dt);
+  void SetPower(const float pwm);
+  void Break();
   bool IsPositionReached(int16_t pos_error);
 
   bool enabled_ = true;
@@ -164,6 +168,8 @@ class Servo {
   Direction motor_direction_;
 
   LowPassFilter current_lpf_;
+  LowPassFilter pos_lpf_;
+  LowPassFilter velocity_lpf_;
 
   MotorDriver *driver_;
   Sensor *angle_sensor_;

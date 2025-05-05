@@ -16,43 +16,37 @@
 
 #include "../utils/math/math.h"
 namespace hortor_servo {
-
 void Sensor::Init() {
   GetRaw();
   delay(10);  // 等待传感器稳定
-  const auto raw = GetRaw();
-  raw_prev_ = raw;
-  raw_ = raw;
+  raw_ = GetRaw();
+  raw_prev_ = raw_;
 }
 
 void Sensor::Process(float dt) {
-  const auto raw = GetRaw();
-  raw_ = mapResolution(raw, kResolution, kTargetResolution);
-  raw_filtered_ = pos_lpf_.Compute(raw, dt);
+  raw_ = GetRaw();
 
-  const auto d_angle = static_cast<int16_t>(raw_filtered_ - raw_prev_);
+  const auto d_angle = static_cast<int16_t>(raw_ - raw_prev_);
   // 如果发生溢出，将其记录为一圈
-  if (std::abs(d_angle) > kOverflowTh) {
+  if (std::abs(d_angle) > 0.8f * kResolution.kEncoderCpr) {
     full_rotations_ += (d_angle > 0) ? -1 : 1;
   }
+  raw_prev_ = raw_;
 
   accumulated_dt_ += dt;
-
   // 确保累积时间达到最小采样间隔
   if (accumulated_dt_ >= kMinElapsedTime) {
     // 计算角度变化
     const auto angle_diff =
-        (full_rotations_ - full_rotations_prev_) * kEncoderCpr + d_angle;
+        (full_rotations_ - full_rotations_prev_) * kResolution.kEncoderCpr +
+        d_angle;
 
     // 计算速度（单位：计数/秒）
     velocity_ = static_cast<float>(angle_diff) / accumulated_dt_;
-    velocity_filtered_ = velocity_lpf_.Compute(velocity_, accumulated_dt_);
-    
+
     // 更新上一次的值
     full_rotations_prev_ = full_rotations_;
     accumulated_dt_ = 0;  // 重置累计时间
   }
-
-  raw_prev_ = raw_filtered_;
 }
 }  // namespace hortor_servo

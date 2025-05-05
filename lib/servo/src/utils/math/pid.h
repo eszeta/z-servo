@@ -14,7 +14,6 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../../core/object_interface.h"
 #include "./math.h"
 namespace hortor_servo {
 
@@ -29,7 +28,7 @@ struct PIDParam {
 /**
  * @brief PID控制器类
  */
-class PidController : public ObjectInterface {
+class PidController {
  public:
   PidController(const PIDParam param);
 

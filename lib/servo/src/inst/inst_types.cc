@@ -129,10 +129,10 @@ constexpr float Def::kDefVelPidKi;
 constexpr Direction Def::kDefSensorDirection;
 constexpr uint16_t Def::kDefAdcShuntResistor;
 constexpr uint16_t Def::kDefAdcCurrentFactor;
-constexpr uint8_t Def::kDefPosPidFf;
-constexpr uint8_t Def::kDefPosFilter;
-constexpr uint8_t Def::kDefCurrentFilter;
-constexpr uint8_t Def::kDefVelocityFilter;
+constexpr float Def::kDefPosPidFf;
+constexpr float Def::kDefPosFilter;
+constexpr float Def::kDefCurrentFilter;
+constexpr float Def::kDefVelocityFilter;
 
 constexpr RegsBlock RegsBlocks::kEeprom;
 constexpr RegsBlock RegsBlocks::kNormalRam;

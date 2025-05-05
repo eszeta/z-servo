@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include "../../core/object_interface.h"
 #include "../../servo_types.h"
 #include "../../utils/register/register_accessor.h"
 #include "LSM6DSOW_types.h"

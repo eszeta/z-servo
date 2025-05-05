@@ -413,7 +413,7 @@ struct RegsDefaultValues {
   static constexpr float kDefPosPidKd = 0.0f;                      // 0x16
   static constexpr float kDefPosPidKi = 0.0f;                      // 0x17
   static constexpr float kDefMinStartupForce = 0.0f;               // 0x18
-  static constexpr float kDefPosPidILimit = 0.0f;              // 0x19
+  static constexpr float kDefPosPidILimit = 0.0f;                  // 0x19
   static constexpr uint8_t kDefCWInsensitiveArea = 1;              // 0x1A
   static constexpr uint8_t kDefCCWInsensitiveArea = 1;             // 0x1B
   static constexpr float kDefCurrentProtectionTh = 0.0f;           // 0x1C-0x1D
@@ -429,13 +429,13 @@ struct RegsDefaultValues {
 
   // 内部EEPROM（读写）
   static constexpr Direction kDefSensorDirection = Direction::CW;  // 0x60
-  static constexpr Direction kDefMotorDirection = Direction::CCW;   // 0x61
+  static constexpr Direction kDefMotorDirection = Direction::CCW;  // 0x61
   static constexpr uint16_t kDefAdcShuntResistor = 1000;           // 0x62
   static constexpr uint16_t kDefAdcCurrentFactor = 1500;           // 0x63
-  static constexpr uint8_t kDefPosPidFf = 0;                       // 0x64
-  static constexpr uint8_t kDefPosFilter = 0;                      // 0x65
-  static constexpr uint8_t kDefCurrentFilter = 0;                  // 0x66
-  static constexpr uint8_t kDefVelocityFilter = 0;                 // 0x67
+  static constexpr float kDefPosPidFf = 0;                         // 0x64
+  static constexpr float kDefPosFilter = 0.01f;                    // 0x65
+  static constexpr float kDefCurrentFilter = 0;                    // 0x66
+  static constexpr float kDefVelocityFilter = 0.01f;                // 0x67
 };
 
 struct RegsBlock {

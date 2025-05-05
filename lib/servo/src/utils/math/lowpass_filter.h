@@ -14,20 +14,22 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../../core/object_interface.h"
 #include "./math.h"
 
 namespace hortor_servo {
 /**
  * @brief 低通滤波器类
  */
-class LowPassFilter : public ObjectInterface {
+class LowPassFilter {
  public:
   /**
    * @brief 构造函数
    * @param time_constant - 低通滤波器时间常数
    */
-  explicit LowPassFilter();
+  explicit LowPassFilter() {
+    time_constant_ = 0.00f;
+    y_prev_ = 0.0f;
+  }
 
   /**
    * @brief 计算滤波值
@@ -35,7 +37,13 @@ class LowPassFilter : public ObjectInterface {
    * @param dt - 时间间隔(秒)
    * @return 滤波值
    */
-  float Compute(float x, float dt);
+  float Compute(float x, float dt) {
+    const float alpha = time_constant_ / (time_constant_ + dt);
+    const float one_minus_alpha = 1.0f - alpha;
+    const float y = alpha * y_prev_ + one_minus_alpha * x;
+    y_prev_ = y;
+    return y;
+  }
 
   /**
    * @brief 设置时间常数

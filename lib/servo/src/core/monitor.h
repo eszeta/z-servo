@@ -16,7 +16,6 @@
 #include <Arduino.h>
 
 #include "../servo.h"
-#include "./object_interface.h"
 
 namespace hortor_servo {
 enum class MonitorBitmap : uint8_t {
@@ -30,7 +29,7 @@ enum class MonitorBitmap : uint8_t {
 /**
  * @brief 监控类，用于监控电机状态
  */
-class Monitor : public ObjectInterface {
+class Monitor {
  public:
   /**
    * @brief 使用监控

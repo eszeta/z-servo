@@ -20,7 +20,7 @@
 #include "register_accessor.h"
 
 namespace hortor_servo {
-class RegisterSpiTransport : public ObjectInterface {
+class RegisterSpiTransport {
  public:
   /**
    * @brief 初始化SPI通信

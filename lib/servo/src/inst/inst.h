@@ -51,6 +51,12 @@ class Inst {
    */
   Error Process(float dt);
 
+  /**
+   * @brief 刷新
+   * @return 错误码
+   */
+  Error Refresh();
+
  private:
   /**
    * @brief 执行指令

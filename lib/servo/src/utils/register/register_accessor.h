@@ -15,7 +15,6 @@
 #pragma once
 #include <functional>
 
-#include "../../core/object_interface.h"
 #include "../../core/register.h"
 #include "../../servo_types.h"
 namespace hortor_servo {
@@ -24,7 +23,7 @@ namespace hortor_servo {
  *
  * 提供寄存器读写功能。
  */
-class RegisterAccessor : public ObjectInterface {
+class RegisterAccessor {
  public:
   /** @brief 写寄存器函数类型 */
   using WriteFunc =

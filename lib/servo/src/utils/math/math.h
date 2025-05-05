@@ -14,6 +14,9 @@
 #pragma once
 #include <Arduino.h>
 
+#include <cmath>
+#include <type_traits>
+
 namespace hortor_servo {
 /// @brief 微秒转换为秒
 static constexpr float kMicroToSec = 1e-6f;
@@ -26,20 +29,13 @@ static constexpr float kMilliToSec = 1e-3f;
 /// @param from 源分辨率
 /// @param to 目标分辨率
 /// @return 映射后的值
-static constexpr uint32_t mapResolution(uint32_t value,
-                                        uint32_t from,
-                                        uint32_t to) {
-  if (from != to) {
-    if (from > to) {
-      value = (value < (uint32_t)(1 << (from - to)))
-                  ? 0
-                  : ((value + 1) >> (from - to)) - 1;
-    } else {
-      if (value != 0) {
-        value = ((value + 1) << (to - from)) - 1;
-      }
-    }
-  }
-  return value;
+template <typename T>
+static constexpr T mapResolution(T value, uint8_t from, uint8_t to) {
+  static_assert(std::is_arithmetic_v<T>,
+                "mapResolution only works with arithmetic types");
+  const float max_from = static_cast<float>((1ULL << from) - 1);
+  const float max_to = static_cast<float>((1ULL << to) - 1);
+  const float scale = max_to / max_from;
+  return static_cast<T>(value * scale);
 }
 }  // namespace hortor_servo

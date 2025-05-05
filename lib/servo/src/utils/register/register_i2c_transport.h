@@ -16,7 +16,6 @@
 
 #include <Wire.h>
 
-#include "../../core/object_interface.h"
 #include "../../servo_types.h"
 #include "register_accessor.h"
 
@@ -36,7 +35,7 @@ namespace hortor_servo {
  * - kInvalidParamErr: 参数无效（wire_为空或address_无效）
  * - kIOErr: I2C通信错误（如设备无响应、通信超时等）
  */
-class RegisterI2cTransport : public ObjectInterface {
+class RegisterI2cTransport {
  public:
   /**
    * @brief 初始化I2C通信

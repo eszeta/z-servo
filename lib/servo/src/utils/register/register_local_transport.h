@@ -16,7 +16,6 @@
 
 #include <Wire.h>
 
-#include "../../core/object_interface.h"
 #include "../../servo_types.h"
 #include "register_accessor.h"
 
@@ -27,7 +26,7 @@ namespace hortor_servo {
  *
  * I2C模式支持完整的寄存器读写操作，适用于配置和数据读取。
  */
-class RegisterLocalTransport : public ObjectInterface {
+class RegisterLocalTransport {
  public:
   /**
    * @brief 初始化I2C通信

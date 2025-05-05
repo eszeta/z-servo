@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "./object_interface.h"
-
 namespace hortor_servo {
 
 /**
@@ -23,7 +21,7 @@ namespace hortor_servo {
  * @details
  * 所有具体的电流传感器实现都必须继承自此类。该类提供了电流检测的基本接口定义。
  */
-class Current : public ObjectInterface {
+class Current {
  public:
   /**
    * @brief 获取当前电流读数

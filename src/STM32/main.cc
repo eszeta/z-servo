@@ -69,17 +69,19 @@ void setup() {
   servo.Init();
 
   inst_accessor.Init();
-  inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
-  inst_accessor.SetTargetVelocity(1000);
-  inst_accessor.SetVelPidKp(0.01f);
-  inst_accessor.SetVelPidKi(0.1f);
-
   inst_transport.Init(&wire_inst);
 
   inst.LinkAccessor(&inst_accessor);
   inst.LinkTransport(&inst_transport);
   inst.LinkServo(&servo);
   inst.Init();
+
+  inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
+  inst_accessor.SetTargetVelocity(1000.0f);
+  inst_accessor.SetVelPidKp(0.0f);
+  inst_accessor.SetVelPidKi(0.0f);
+
+  inst.Refresh();
 
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
 }
@@ -98,9 +100,11 @@ void loop() {
   hortor_servo::DebugPrintln(dt);
   hortor_servo::DebugPrint(F(">pwm:"));
   hortor_servo::DebugPrintln(servo.GetPresentLoad());
+
   auto present_velocity = servo.GetPresentVelocity();
-  hortor_servo::DebugPrint(F(">raw:"));
+  hortor_servo::DebugPrint(F(">velocity:"));
   hortor_servo::DebugPrintln(present_velocity);
+
   auto present_position = servo.GetPresentPosition();
   hortor_servo::DebugPrint(F(">position:"));
   hortor_servo::DebugPrintln(present_position);

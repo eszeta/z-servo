@@ -16,14 +16,13 @@
 #include <Arduino.h>
 
 #include "../servo_types.h"
-#include "./object_interface.h"
 
 namespace hortor_servo {
 /**
  * @brief IMU类
  * @details 定义了IMU的基本接口
  */
-class IMU : public ObjectInterface {
+class IMU {
  public:
   /**
    * @brief 读取加速度

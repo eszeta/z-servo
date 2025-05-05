@@ -70,6 +70,11 @@ void Servo::Process(float dt) {
       SetPower(pwm_set);
       break;
     }
+    case ServoMode::kPwm: {
+      const auto pwm_set = target_pwm_;
+      SetPower(pwm_set);
+      break;
+    }
     default:
       SetPower(0);
   }
@@ -88,14 +93,20 @@ bool Servo::IsPositionReached(int16_t pos_error) {
 float Servo::GetAngle(float dt) {
   const auto direction = static_cast<float>(sensor_direction_);
   const auto raw = angle_sensor_->GetAngle();
-  const auto corrected = direction * raw + position_correction_;
+  const auto raw_mapped =
+      mapResolution(raw, angle_sensor_->kResolution.kBits, kResolution.kBits);
+  const auto filtered = pos_lpf_.Compute(raw_mapped, dt);
+  const auto corrected = direction * filtered + position_correction_;
   return corrected;
 }
 
 float Servo::GetVelocity(float dt) {
   const auto direction = static_cast<float>(sensor_direction_);
   const auto raw = angle_sensor_->GetVelocity();
-  const auto corrected = direction * raw;
+  const auto raw_mapped =
+      mapResolution(raw, angle_sensor_->kResolution.kBits, kResolution.kBits);
+  const auto filtered = velocity_lpf_.Compute(raw_mapped, dt);
+  const auto corrected = direction * filtered;
   return corrected;
 }
 
