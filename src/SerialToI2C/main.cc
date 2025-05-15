@@ -12,18 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <Arduino.h>
-#include <SPI.h>
 #include <Wire.h>
 
 #include "debug_print.h"
-#include "drivers/DRV8231A/DRV8231A.h"
-#include "drivers/MT6701/MT6701.h"
-#include "drivers/generic_current/generic_current.h"
 #include "info_led.h"
-#include "inst/inst.h"
-#include "inst/inst_accessor.h"
-#include "inst/inst_i2c_transport.h"
-#include "servo.h"
+#include "utils/math/math.h"
 
 static constexpr auto kInfoLedPin = PB1;
 static constexpr auto kTargetLoopRateHz = 500;  // 目标帧率500Hz
@@ -31,10 +24,14 @@ static constexpr auto kTargetLoopPeriodUs =
     1000000 / kTargetLoopRateHz;  // 目标周期(微秒)
 
 hortor_servo::InfoLED::InfoLED info_led{};
+HardwareSerial serial(PB4, PB3);
+TwoWire wire(PA8, PA9);
 
 void setup() {
   info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
+  serial.begin(115200);
+  wire.begin();
 }
 
 void loop() {
