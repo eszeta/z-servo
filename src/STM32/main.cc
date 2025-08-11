@@ -22,7 +22,7 @@
 #include "info_led.h"
 #include "inst/inst.h"
 #include "inst/inst_accessor.h"
-#include "inst/inst_i2c_transport.h"
+#include "inst/inst_i2c_adapter.h"
 #include "servo.h"
 #include "utils/math/math.h"
 
@@ -37,7 +37,7 @@ TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_inst(PB7, PA15);
 
 hortor_servo::InfoLED::InfoLED info_led{};
-hortor_servo::InstI2cTransport inst_transport{};
+hortor_servo::InstI2cAdapter inst_transport{};
 hortor_servo::InstAccessor inst_accessor{};
 hortor_servo::Inst inst{};
 hortor_servo::DRV8231A::DRV8231A motor_driver{};

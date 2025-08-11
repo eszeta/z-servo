@@ -16,7 +16,7 @@
 
 #include "../servo.h"
 #include "./inst_accessor.h"
-#include "./inst_transport_interface.h"
+#include "./inst_adapter_interface.h"
 namespace hortor_servo {
 class Inst {
  public:
@@ -36,7 +36,7 @@ class Inst {
    * @brief 链接传输接口
    * @param transport 指令传输接口
    */
-  Error LinkTransport(InstTransportInterface *transport);
+  Error LinkTransport(InstAdapterInterface *transport);
 
   /**
    * @brief 链接伺服电机
@@ -178,7 +178,7 @@ class Inst {
   /**
    * @brief 指令传输接口
    */
-  InstTransportInterface *transport_;
+  InstAdapterInterface *transport_;
   /**
    * @brief 伺服电机
    */

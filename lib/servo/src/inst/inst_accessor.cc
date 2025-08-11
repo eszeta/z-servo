@@ -24,8 +24,8 @@ namespace hortor_servo {
 using Regs = ServoRegs;
 using Def = RegsDefaultValues;
 Error InstAccessor::Init() {
-  CHECK(local_transport_.Init(regs_, sizeof(regs_)));
-  CHECK(local_transport_.LinkAccessor(*this));
+  CHECK(raw_adapter_.Init(regs_, sizeof(regs_)));
+  CHECK(raw_adapter_.LinkAccessor(*this));
   CHECK(LoadEeprom());
   if (GetFirmwareMajor() == 0) {
     CHECK(RecoveryEeprom());

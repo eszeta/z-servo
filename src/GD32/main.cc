@@ -34,7 +34,7 @@ SPIClass spi_sensor(DIGITAL_TO_PINNAME(PA8),
                     DIGITAL_TO_PINNAME(PA10));
 
 hortor_servo::InfoLED::InfoLED info_led;
-hortor_servo::InstSerialTransport inst_transport;
+hortor_servo::InstSerialAdapter inst_transport;
 hortor_servo::InstAccessor inst_accessor;
 hortor_servo::Inst inst;
 hortor_servo::MP6515::MP6515 motor_driver;

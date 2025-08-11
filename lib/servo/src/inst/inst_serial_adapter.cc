@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "inst_serial_transport.h"
+#include "inst_serial_adapter.h"
 
 #include <Arduino.h>
 
@@ -24,7 +24,7 @@
 
 namespace hortor_servo {
 
-Error InstSerialTransport::Process(float dt) {
+Error InstSerialAdapter::Process(float dt) {
   // 延时回包
   delay_time_ -= dt;
   if (delay_time_ <= 0 && is_dirty_) {
@@ -44,7 +44,7 @@ Error InstSerialTransport::Process(float dt) {
   return Error::kOk;
 }
 
-Error InstSerialTransport::Receive(uint8_t data) {
+Error InstSerialAdapter::Receive(uint8_t data) {
   switch (packet_state_) {
     case PacketState::kHeader1: {
       if (data == 0xff) {
@@ -105,7 +105,7 @@ Error InstSerialTransport::Receive(uint8_t data) {
   return Error::kOk;
 }
 
-Error InstSerialTransport::Response(const uint8_t reply_idx,
+Error InstSerialAdapter::Response(const uint8_t reply_idx,
                                     const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);
   memcpy(tx_buffer_, data, size);

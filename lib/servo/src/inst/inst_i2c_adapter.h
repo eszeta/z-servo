@@ -13,24 +13,23 @@
 // limitations under the License.
 #pragma once
 #include <Arduino.h>
+#include <Wire.h>
 
-#include "./inst_transport_interface.h"
-#include "./inst_types.h"
+#include "../servo_types.h"
+#include "./inst_adapter_interface.h"
 
-#ifdef ARDUINO_ARCH_STM32
-#include <HardwareSerial.h>
-#endif
 namespace hortor_servo {
 
-class InstSerialTransport : public InstTransportInterface {
+class InstI2cAdapter : public InstAdapterInterface {
  public:
   /**
    * @brief 初始化
-   * @param serial 串口
+   * @param wire I2C对象
+   * @param address I2C地址
    * @return 错误码
    */
-  Error Init(HardwareSerial *serial) {
-    serial_ = serial;
+  Error Init(TwoWire *wire) {
+    wire_ = wire;
     return Error::kOk;
   }
 
@@ -49,19 +48,13 @@ class InstSerialTransport : public InstTransportInterface {
    */
   Error Response(const uint8_t reply_idx, const uint8_t *data) override;
 
+  void OnReceive(int howMany);
+
+  void OnRequest();
+
  private:
-  /**
-   * @brief 接收数据
-   * @param data 数据
-   * @return 错误码
-   */
-  Error Receive(uint8_t data);
-  HardwareSerial *serial_;
+  TwoWire *wire_;
   uint8_t rx_buffer_[128];
   uint8_t tx_buffer_[128];
-  uint8_t param_pos_ = 0;
-  PacketState packet_state_ = PacketState::kHeader1;
-  uint32_t delay_time_ = 0;
-  bool is_dirty_ = false;
 };
 }  // namespace hortor_servo

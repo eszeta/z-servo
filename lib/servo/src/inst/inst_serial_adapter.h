@@ -12,25 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-
 #include <Arduino.h>
 
-#include <functional>
+#include "./inst_adapter_interface.h"
+#include "./inst_types.h"
 
-#include "../servo_types.h"
-
+#ifdef ARDUINO_ARCH_STM32
+#include <HardwareSerial.h>
+#endif
 namespace hortor_servo {
 
-class InstTransportInterface {
+class InstSerialAdapter : public InstAdapterInterface {
  public:
-  using ExecuteFunc = std::function<Error(uint8_t *data)>;
+  /**
+   * @brief 初始化
+   * @param serial 串口
+   * @return 错误码
+   */
+  Error Init(HardwareSerial *serial) {
+    serial_ = serial;
+    return Error::kOk;
+  }
 
   /**
    * @brief 处理数据
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  virtual Error Process(const float dt) = 0;
+  Error Process(const float dt) override;
 
   /**
    * @brief 发送数据
@@ -38,29 +47,21 @@ class InstTransportInterface {
    * @param data 数据
    * @return 错误码
    */
-  virtual Error Response(const uint8_t reply_idx, const uint8_t *data) = 0;
+  Error Response(const uint8_t reply_idx, const uint8_t *data) override;
 
+ private:
   /**
-   * @brief 设置响应延迟
-   * 单位: 毫秒
-   */
-  void SetResponseDelay(const uint16_t response_delay) {
-    response_delay_ = response_delay;
-  }
-
-  /**
-   * @brief 设置执行函数
-   * @param execute 执行函数
+   * @brief 接收数据
+   * @param data 数据
    * @return 错误码
    */
-  Error SetExecute(ExecuteFunc execute) {
-    execute_ = execute;
-    return Error::kOk;
-  }
-
- protected:
-  ExecuteFunc execute_;
-  uint16_t response_delay_ = 0;
+  Error Receive(uint8_t data);
+  HardwareSerial *serial_;
+  uint8_t rx_buffer_[128];
+  uint8_t tx_buffer_[128];
+  uint8_t param_pos_ = 0;
+  PacketState packet_state_ = PacketState::kHeader1;
+  uint32_t delay_time_ = 0;
+  bool is_dirty_ = false;
 };
-
 }  // namespace hortor_servo

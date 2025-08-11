@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "inst_i2c_transport.h"
+#include "inst_i2c_adapter.h"
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -21,15 +21,15 @@
 
 namespace hortor_servo {
 
-Error InstI2cTransport::Process(float dt) { return Error::kOk; }
+Error InstI2cAdapter::Process(float dt) { return Error::kOk; }
 
-Error InstI2cTransport::Response(const uint8_t reply_idx, const uint8_t *data) {
+Error InstI2cAdapter::Response(const uint8_t reply_idx, const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);
   memcpy(tx_buffer_, data, size);
   return Error::kOk;
 }
 
-void InstI2cTransport::OnReceive(int howMany) {
+void InstI2cAdapter::OnReceive(int howMany) {
   size_t pos = 0;
   while (wire_->available()) {
     rx_buffer_[pos++] = wire_->read();
@@ -39,7 +39,7 @@ void InstI2cTransport::OnReceive(int howMany) {
   }
 }
 
-void InstI2cTransport::OnRequest() {
+void InstI2cAdapter::OnRequest() {
   wire_->write(tx_buffer_, inst_utils::GetBufferSize(tx_buffer_));
 }
 }  // namespace hortor_servo

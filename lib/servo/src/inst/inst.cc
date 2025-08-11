@@ -32,7 +32,7 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
   return Error::kOk;
 }
 
-Error Inst::LinkTransport(InstTransportInterface *transport) {
+Error Inst::LinkTransport(InstAdapterInterface *transport) {
   transport_ = transport;
   CHECK(transport_->SetExecute(
       [this](uint8_t *data) -> Error { return Execute(data); }));

@@ -1089,7 +1089,7 @@ class InstAccessor : public RegisterAccessor {
   }
 
  private:
-  RegisterRawAdapter local_transport_;
+  RegisterRawAdapter raw_adapter_;
   uint8_t regs_[RegsBlocks::kTotal.size()] = {};
 };
 }  // namespace hortor_servo
