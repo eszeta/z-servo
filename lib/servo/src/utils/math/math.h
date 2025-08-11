@@ -31,8 +31,6 @@ static constexpr float kMilliToSec = 1e-3f;
 /// @return 映射后的值
 template <typename T>
 static constexpr T mapResolution(T value, uint8_t from, uint8_t to) {
-  static_assert(std::is_arithmetic_v<T>,
-                "mapResolution only works with arithmetic types");
   const float max_from = static_cast<float>((1ULL << from) - 1);
   const float max_to = static_cast<float>((1ULL << to) - 1);
   const float scale = max_to / max_from;

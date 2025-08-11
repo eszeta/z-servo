@@ -19,7 +19,7 @@
 #include "../../core/sensor.h"
 #include "../../servo_types.h"
 #include "MA330_accessor.h"
-#include "MA330_spi_transport.h"
+#include "MA330_spi_adapter.h"
 
 namespace hortor_servo {
 namespace MA330 {
@@ -66,7 +66,7 @@ class MA330 final : public Sensor {
   MA330Accessor accessor_;
 
   /** @brief SPI通信实例，提供底层SPI接口 */
-  MA330SpiTransport spi_transport_;
+  MA330SpiAdapter spi_transport_;
 };
 
 }  // namespace MA330

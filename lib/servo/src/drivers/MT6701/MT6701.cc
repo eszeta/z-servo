@@ -19,7 +19,7 @@
 namespace hortor_servo {
 namespace MT6701 {
 
-Error MT6701::InitI2C(TwoWire *wire) {
+Error MT6701::Init(TwoWire *wire) {
   CHECK(i2c_transport_.Init(wire, kI2CAddress));
   CHECK(i2c_transport_.LinkAccessor(accessor_));
   CHECK(accessor_.Init());

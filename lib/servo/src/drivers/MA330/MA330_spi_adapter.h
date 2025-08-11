@@ -16,7 +16,7 @@
 
 #include <Arduino.h>
 
-#include "../../utils/register/register_spi_transport.h"
+#include "../../utils/register/register_spi_adapter.h"
 #include "MA330_accessor.h"
 
 namespace hortor_servo {
@@ -28,7 +28,7 @@ namespace MA330 {
  * 实现通过SPI协议与MA330传感器通信的功能。
  * SPI模式提供更高的通信速度，但功能有限，主要用于角度读取。
  */
-class MA330SpiTransport : public RegisterSpiTransport {
+class MA330SpiAdapter : public RegisterSpiAdapter {
  public:
   /**
    * @brief 设置寄存器访问器函数

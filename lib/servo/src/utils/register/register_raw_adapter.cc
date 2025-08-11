@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "register_local_transport.h"
-
-#include <Wire.h>
+#include "register_raw_adapter.h"
 
 #include "../../servo_types.h"
 #include "register_accessor.h"
 
 namespace hortor_servo {
 
-Error RegisterLocalTransport::Init(uint8_t* regs, const size_t size) {
+Error RegisterRawAdapter::Init(uint8_t* regs, const size_t size) {
   if (!regs || size == 0) {
     return Error::kInvalidParameter;
   }
@@ -30,7 +28,7 @@ Error RegisterLocalTransport::Init(uint8_t* regs, const size_t size) {
   return Error::kOk;
 }
 
-Error RegisterLocalTransport::LinkAccessor(RegisterAccessor& accessor) {
+Error RegisterRawAdapter::LinkAccessor(RegisterAccessor& accessor) {
   accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
     return Write(address, data);
   });
@@ -48,7 +46,7 @@ Error RegisterLocalTransport::LinkAccessor(RegisterAccessor& accessor) {
   return Error::kOk;
 }
 
-Error RegisterLocalTransport::Write(const uint8_t address, const uint8_t data) {
+Error RegisterRawAdapter::Write(const uint8_t address, const uint8_t data) {
   if (address >= size_) {
     return Error::kInvalidParameter;
   }
@@ -56,7 +54,7 @@ Error RegisterLocalTransport::Write(const uint8_t address, const uint8_t data) {
   return Error::kOk;
 }
 
-Error RegisterLocalTransport::WriteMultiple(const uint8_t address,
+Error RegisterRawAdapter::WriteMultiple(const uint8_t address,
                                             const uint8_t* data,
                                             const size_t size) {
   if (address + size > size_) {
@@ -68,7 +66,7 @@ Error RegisterLocalTransport::WriteMultiple(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegisterLocalTransport::Read(const uint8_t address, uint8_t* data) {
+Error RegisterRawAdapter::Read(const uint8_t address, uint8_t* data) {
   if (address >= size_) {
     return Error::kInvalidParameter;
   }
@@ -76,7 +74,7 @@ Error RegisterLocalTransport::Read(const uint8_t address, uint8_t* data) {
   return Error::kOk;
 }
 
-Error RegisterLocalTransport::ReadMultiple(const uint8_t address,
+Error RegisterRawAdapter::ReadMultiple(const uint8_t address,
                                            const size_t size,
                                            uint8_t* data) {
   if (address + size > size_) {

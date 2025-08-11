@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "register_i2c_transport.h"
+#include "register_i2c_adapter.h"
 
 #include <Wire.h>
 
@@ -21,7 +21,7 @@
 
 namespace hortor_servo {
 
-Error RegisterI2cTransport::Init(TwoWire* wire, const int address) {
+Error RegisterI2CAdapter::Init(TwoWire* wire, const int address) {
   if (!wire) {
     return Error::kInvalidParameter;
   }
@@ -30,7 +30,7 @@ Error RegisterI2cTransport::Init(TwoWire* wire, const int address) {
   return Error::kOk;
 }
 
-Error RegisterI2cTransport::LinkAccessor(RegisterAccessor& accessor) {
+Error RegisterI2CAdapter::LinkAccessor(RegisterAccessor& accessor) {
   accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
     return Write(address, data);
   });
@@ -48,7 +48,7 @@ Error RegisterI2cTransport::LinkAccessor(RegisterAccessor& accessor) {
   return Error::kOk;
 }
 
-Error RegisterI2cTransport::Write(const uint8_t address, const uint8_t data) {
+Error RegisterI2CAdapter::Write(const uint8_t address, const uint8_t data) {
   if (!wire_) {
     return Error::kInvalidParameter;
   }
@@ -61,7 +61,7 @@ Error RegisterI2cTransport::Write(const uint8_t address, const uint8_t data) {
   return Error::kOk;
 }
 
-Error RegisterI2cTransport::WriteMultiple(const uint8_t address,
+Error RegisterI2CAdapter::WriteMultiple(const uint8_t address,
                                           const uint8_t* data,
                                           const size_t size) {
   if (!wire_ || !data) {
@@ -76,7 +76,7 @@ Error RegisterI2cTransport::WriteMultiple(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegisterI2cTransport::Read(const uint8_t address, uint8_t* data) {
+Error RegisterI2CAdapter::Read(const uint8_t address, uint8_t* data) {
   if (!wire_ || !data) {
     return Error::kInvalidParameter;
   }
@@ -92,7 +92,7 @@ Error RegisterI2cTransport::Read(const uint8_t address, uint8_t* data) {
   return Error::kOk;
 }
 
-Error RegisterI2cTransport::ReadMultiple(const uint8_t address,
+Error RegisterI2CAdapter::ReadMultiple(const uint8_t address,
                                          const size_t size,
                                          uint8_t* data) {
   if (!wire_ || !data) {

@@ -20,7 +20,7 @@ namespace hortor_servo {
  * @details
  * 所有具体的电机驱动器实现都必须继承自此类。该类提供了电机驱动器的基本接口定义。
  */
-class MotorDriver {
+class Motor {
  public:
   /**
    * @brief 设置电机PWM

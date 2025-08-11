@@ -17,7 +17,7 @@
 #include <Arduino.h>
 
 #include "../../servo_types.h"
-#include "../../utils/register/register_i2c_transport.h"
+#include "../../utils/register/register_i2c_adapter.h"
 #include "MT6701_accessor.h"
 #include "MT6701_types.h"
 
@@ -30,7 +30,7 @@ namespace MT6701 {
  * 实现通过I2C协议与MT6701传感器通信的功能。
  * I2C模式支持完整的寄存器读写操作，适用于配置和数据读取。
  */
-class MT6701I2cTransport : public RegisterI2cTransport {
+class MT6701I2cAdapter : public RegisterI2CAdapter {
  public:
   /**
    * @brief 设置寄存器访问器函数

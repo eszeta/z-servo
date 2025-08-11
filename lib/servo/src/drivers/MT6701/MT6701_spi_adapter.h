@@ -17,7 +17,7 @@
 #include <Arduino.h>
 
 #include "../../servo_types.h"
-#include "../../utils/register/register_spi_transport.h"
+#include "../../utils/register/register_spi_adapter.h"
 #include "MT6701_accessor.h"
 #include "MT6701_types.h"
 
@@ -30,7 +30,7 @@ namespace MT6701 {
  * 实现通过SPI协议与MT6701传感器通信的功能。
  * SPI模式提供更高的通信速度，但功能有限，主要用于角度读取。
  */
-class MT6701SpiTransport : public RegisterSpiTransport {
+class MT6701SpiAdapter : public RegisterSpiAdapter {
  public:
   /**
    * @brief 设置寄存器访问器函数

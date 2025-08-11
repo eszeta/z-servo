@@ -18,7 +18,7 @@
 
 #include "../../core/imu.h"
 #include "../../utils/register/register_accessor.h"
-#include "../../utils/register/register_i2c_transport.h"
+#include "../../utils/register/register_i2c_adapter.h"
 #include "LSM6DSOW_accessor.h"
 #include "LSM6DSOW_types.h"
 
@@ -99,7 +99,7 @@ class LSM6DSOW final : public IMU {
   /** @brief 访问器实例，负责与传感器的具体通信操作 */
   LSM6DSOW_accessor accessor_;
   /** @brief I2C通信实例，提供底层I2C接口 */
-  RegisterI2cTransport i2c_transport_;
+  RegisterI2CAdapter i2c_transport_;
 };
 }  // namespace LSM6DSOW
 }  // namespace hortor_servo

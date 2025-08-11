@@ -60,7 +60,7 @@ void setup() {
 
   motor_driver.Init(PA0, PA2);
   wire_sensor.begin();
-  angle_sensor.InitI2C(&wire_sensor);
+  angle_sensor.Init(&wire_sensor);
   current_sensor.Init(PA3, 1000, 1500);
 
   servo.LinkDriver(&motor_driver);

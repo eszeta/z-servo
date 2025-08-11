@@ -4,7 +4,7 @@
 
 namespace hortor_servo {
 
-void Servo::LinkDriver(MotorDriver *driver) { driver_ = driver; }
+void Servo::LinkDriver(Motor *driver) { driver_ = driver; }
 
 void Servo::LinkAngleSensor(Sensor *sensor) { angle_sensor_ = sensor; }
 

@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #include "./core/current.h"
-#include "./core/motor_driver.h"
+#include "./core/motor.h"
 #include "./core/sensor.h"
 #include "./servo_types.h"
 #include "./utils/math/lowpass_filter.h"
@@ -16,7 +16,7 @@ class Servo {
   Servo() = default;
 
   void Init();
-  void LinkDriver(MotorDriver *driver);
+  void LinkDriver(Motor *driver);
   void LinkAngleSensor(Sensor *sensor);
   void LinkCurrentSense(Current *current_sense);
   void Action();
@@ -171,7 +171,7 @@ class Servo {
   LowPassFilter pos_lpf_;
   LowPassFilter velocity_lpf_;
 
-  MotorDriver *driver_;
+  Motor *driver_;
   Sensor *angle_sensor_;
   Current *current_sense_;
 };

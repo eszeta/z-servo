@@ -19,7 +19,7 @@
 #include "../../core/sensor.h"
 #include "../../servo_types.h"
 #include "./MT6701_accessor.h"
-#include "./MT6701_i2c_transport.h"
+#include "./MT6701_i2c_adapter.h"
 #include "./MT6701_types.h"
 
 namespace hortor_servo {
@@ -49,7 +49,7 @@ class MT6701 final : public hortor_servo::Sensor {
    * 配置并初始化MT6701传感器，建立I2C通信，并执行基类初始化。
    * 必须在使用传感器前调用此方法。
    */
-  Error InitI2C(TwoWire *wire);
+  Error Init(TwoWire *wire);
 
   /**
    * @brief 获取原始角度值
@@ -73,7 +73,7 @@ class MT6701 final : public hortor_servo::Sensor {
   MT6701Accessor accessor_;
 
   /** @brief I2C通信实例，提供底层I2C接口 */
-  MT6701I2cTransport i2c_transport_;
+  MT6701I2cAdapter i2c_transport_;
 };
 
 }  // namespace MT6701

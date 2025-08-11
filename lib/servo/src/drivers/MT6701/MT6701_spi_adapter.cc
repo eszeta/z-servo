@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MT6701_i2c_transport.h"
+#include "MT6701_spi_adapter.h"
 
 #include "MT6701_accessor.h"
 
 namespace hortor_servo {
 namespace MT6701 {
 
-using Regs = MT6701Regs;
-
-Error MT6701I2cTransport::LinkAccessor(MT6701Accessor& accessor) {
+Error MT6701SpiAdapter::LinkAccessor(MT6701Accessor& accessor) {
   accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
     return Write(address, data);
   });
@@ -45,23 +43,36 @@ Error MT6701I2cTransport::LinkAccessor(MT6701Accessor& accessor) {
   return Error::kOk;
 }
 
-Error MT6701I2cTransport::ReadRaw(uint16_t* angle_raw,
+Error MT6701SpiAdapter::ReadRaw(uint16_t* angle_raw,
                                   Status* field_status,
                                   bool* button_pushed,
                                   bool* track_loss) {
-  uint8_t angle6, angle0;
-  CHECK(Read(Regs::kANGLE_6.address, &angle6));
-  CHECK(Read(Regs::kANGLE_0.address, &angle0));
-
-  if (angle_raw) {
-    *angle_raw = Register::GetCombinedValue(
-        Regs::kANGLE_6, Regs::kANGLE_0, angle6, angle0);
+  if (!spi_) {
+    return Error::kInvalidParameter;
   }
 
-  // I2C模式下不支持这些状态读取
-  (void)field_status;
-  (void)button_pushed;
-  (void)track_loss;
+  uint8_t data[3];
+  digitalWrite(cs_pin_, LOW);
+  spi_->beginTransaction(spi_settings_);
+
+  data[0] = spi_->transfer(0xFF);
+  data[1] = spi_->transfer(0xFF);
+  data[2] = spi_->transfer(0xFF);
+
+  spi_->endTransaction();
+  digitalWrite(cs_pin_, HIGH);
+
+  struct {
+    uint16_t angle : 14;  // 14位角度数据，范围0-16383
+    uint8_t status : 2;   // 2位磁场状态，指示磁场强度
+    uint8_t button : 1;   // 1位按钮状态，指示按钮是否被按下
+    uint8_t track : 1;    // 1位跟踪丢失状态，指示是否丢失跟踪
+  } __attribute__((packed))* raw = reinterpret_cast<decltype(raw)>(data);
+
+  if (angle_raw) *angle_raw = raw->angle;
+  if (field_status) *field_status = static_cast<Status>(raw->status);
+  if (button_pushed) *button_pushed = raw->button;
+  if (track_loss) *track_loss = raw->track;
 
   return Error::kOk;
 }

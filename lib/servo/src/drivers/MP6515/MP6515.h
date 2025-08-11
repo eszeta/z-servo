@@ -16,7 +16,7 @@
 #include <Arduino.h>
 
 #include "../../core/current.h"
-#include "../../core/motor_driver.h"
+#include "../../core/motor.h"
 
 namespace hortor_servo {
 namespace MP6515 {
@@ -24,7 +24,7 @@ namespace MP6515 {
  * @brief MP6515电机驱动器
  * @details 使用两个PWM输出控制电机正反转
  */
-class MP6515 final : public MotorDriver {
+class MP6515 final : public Motor {
  public:
   /**
    * @brief 初始化电机驱动器

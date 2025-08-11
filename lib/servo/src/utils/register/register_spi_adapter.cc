@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "register_spi_transport.h"
+#include "register_spi_adapter.h"
 
 #include "../../servo_types.h"
 #include "register_accessor.h"
 
 namespace hortor_servo {
-Error RegisterSpiTransport::Init(SPIClass *spi,
+Error RegisterSpiAdapter::Init(SPIClass *spi,
                                  const int cs_pin,
                                  const SPISettings &spi_settings) {
   if (!spi_) {
@@ -32,7 +32,7 @@ Error RegisterSpiTransport::Init(SPIClass *spi,
   return Error::kOk;
 }
 
-Error RegisterSpiTransport::LinkAccessor(RegisterAccessor &accessor) {
+Error RegisterSpiAdapter::LinkAccessor(RegisterAccessor &accessor) {
   accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
     return Write(address, data);
   });
@@ -50,7 +50,7 @@ Error RegisterSpiTransport::LinkAccessor(RegisterAccessor &accessor) {
   return Error::kOk;
 }
 
-Error RegisterSpiTransport::Write(const uint8_t address, const uint8_t data) {
+Error RegisterSpiAdapter::Write(const uint8_t address, const uint8_t data) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }
@@ -63,7 +63,7 @@ Error RegisterSpiTransport::Write(const uint8_t address, const uint8_t data) {
   return Error::kOk;
 }
 
-Error RegisterSpiTransport::WriteMultiple(const uint8_t address,
+Error RegisterSpiAdapter::WriteMultiple(const uint8_t address,
                                           const uint8_t *data,
                                           const size_t size) {
   if (!spi_ || !data) {
@@ -78,7 +78,7 @@ Error RegisterSpiTransport::WriteMultiple(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegisterSpiTransport::Read(const uint8_t address, uint8_t *data) {
+Error RegisterSpiAdapter::Read(const uint8_t address, uint8_t *data) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }
@@ -91,7 +91,7 @@ Error RegisterSpiTransport::Read(const uint8_t address, uint8_t *data) {
   return Error::kOk;
 }
 
-Error RegisterSpiTransport::ReadMultiple(const uint8_t address,
+Error RegisterSpiAdapter::ReadMultiple(const uint8_t address,
                                          const size_t size,
                                          uint8_t *data) {
   if (!spi_) {

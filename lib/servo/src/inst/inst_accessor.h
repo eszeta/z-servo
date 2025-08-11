@@ -15,7 +15,7 @@
 #include <Arduino.h>
 
 #include "../utils/register/register_accessor.h"
-#include "../utils/register/register_local_transport.h"
+#include "../utils/register/register_raw_adapter.h"
 #include "./inst_types.h"
 
 namespace hortor_servo {
@@ -1089,7 +1089,7 @@ class InstAccessor : public RegisterAccessor {
   }
 
  private:
-  RegisterLocalTransport local_transport_;
+  RegisterRawAdapter local_transport_;
   uint8_t regs_[RegsBlocks::kTotal.size()] = {};
 };
 }  // namespace hortor_servo

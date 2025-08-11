@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MA330_spi_transport.h"
+#include "MT6701_i2c_adapter.h"
 
-#include "MA330_accessor.h"
+#include "MT6701_accessor.h"
 
 namespace hortor_servo {
-namespace MA330 {
+namespace MT6701 {
 
-Error MA330SpiTransport::LinkAccessor(MA330Accessor& accessor) {
+using Regs = MT6701Regs;
+
+Error MT6701I2cAdapter::LinkAccessor(MT6701Accessor& accessor) {
   accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
     return Write(address, data);
   });
@@ -34,40 +36,35 @@ Error MA330SpiTransport::LinkAccessor(MA330Accessor& accessor) {
       [this](const uint8_t address, const size_t size, uint8_t* data) {
         return ReadMultiple(address, size, data);
       });
-  accessor.SetReadRaw(
-      [this](uint16_t* angle_raw) { return ReadRaw(angle_raw); });
+  accessor.SetReadRaw([this](uint16_t* angle_raw,
+                             Status* field_status,
+                             bool* button_pushed,
+                             bool* track_loss) {
+    return ReadRaw(angle_raw, field_status, button_pushed, track_loss);
+  });
   return Error::kOk;
 }
 
-Error MA330SpiTransport::ReadRaw(uint16_t* angle_raw) {
-  *angle_raw = transfer16(0x0000);
+Error MT6701I2cAdapter::ReadRaw(uint16_t* angle_raw,
+                                  Status* field_status,
+                                  bool* button_pushed,
+                                  bool* track_loss) {
+  uint8_t angle6, angle0;
+  CHECK(Read(Regs::kANGLE_6.address, &angle6));
+  CHECK(Read(Regs::kANGLE_0.address, &angle0));
+
+  if (angle_raw) {
+    *angle_raw = Register::GetCombinedValue(
+        Regs::kANGLE_6, Regs::kANGLE_0, angle6, angle0);
+  }
+
+  // I2C模式下不支持这些状态读取
+  (void)field_status;
+  (void)button_pushed;
+  (void)track_loss;
+
   return Error::kOk;
 }
 
-Error MA330SpiTransport::Write(const uint8_t address, const uint8_t data) {
-  uint16_t cmd = 0x8000 | ((address & 0x1F) << 8) | data;
-  transfer16(cmd);
-  delay(20);  // 20ms delay required
-  transfer16(0x0000);
-  return Error::kOk;
-}
-
-Error MA330SpiTransport::Read(const uint8_t address, uint8_t* data) {
-  uint16_t cmd = 0x4000 | ((address & 0x001F) << 8);
-  uint16_t value = transfer16(cmd);
-  delayMicroseconds(1);
-  value = transfer16(0x0000);
-  *data = value >> 8;
-  return Error::kOk;
-};
-
-uint16_t MA330SpiTransport::transfer16(uint16_t outValue) {
-  spi_->beginTransaction(spi_settings_);
-  if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
-  uint16_t value = spi_->transfer16(outValue);
-  if (cs_pin_ >= 0) digitalWrite(cs_pin_, HIGH);
-  spi_->endTransaction();
-  return value;
-}
-}  // namespace MA330
+}  // namespace MT6701
 }  // namespace hortor_servo
