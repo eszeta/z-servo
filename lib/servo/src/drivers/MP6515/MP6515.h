@@ -15,8 +15,8 @@
 
 #include <Arduino.h>
 
-#include "../../core/current.h"
-#include "../../core/motor.h"
+#include "core/current.h"
+#include "core/motor.h"
 
 namespace hortor_servo {
 namespace MP6515 {

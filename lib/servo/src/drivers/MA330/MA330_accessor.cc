@@ -13,7 +13,8 @@
 // limitations under the License.
 #include "MA330_accessor.h"
 
-#include "./MA330_types.h"
+#include "MA330_types.h"
+
 namespace hortor_servo {
 namespace MA330 {
 using Regs = MA330Regs;

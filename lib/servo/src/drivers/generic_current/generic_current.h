@@ -15,7 +15,7 @@
 
 #include <Arduino.h>
 
-#include "../../core/current.h"
+#include "core/current.h"
 
 namespace hortor_servo {
 namespace generic_current {

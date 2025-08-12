@@ -44,9 +44,9 @@ Error MT6701SpiAdapter::LinkAccessor(MT6701Accessor& accessor) {
 }
 
 Error MT6701SpiAdapter::ReadRaw(uint16_t* angle_raw,
-                                  Status* field_status,
-                                  bool* button_pushed,
-                                  bool* track_loss) {
+                                Status* field_status,
+                                bool* button_pushed,
+                                bool* track_loss) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }

@@ -15,7 +15,7 @@
 
 #include <Arduino.h>
 
-#include "../../servo_types.h"
+#include "core/types.h"
 
 namespace hortor_servo {
 namespace MP6515 {

@@ -16,11 +16,11 @@
 
 #include <Wire.h>
 
-#include "../../core/sensor.h"
-#include "../../servo_types.h"
-#include "./MT6701_accessor.h"
-#include "./MT6701_i2c_adapter.h"
-#include "./MT6701_types.h"
+#include "MT6701_accessor.h"
+#include "MT6701_i2c_adapter.h"
+#include "MT6701_types.h"
+#include "core/sensor.h"
+#include "core/types.h"
 
 namespace hortor_servo {
 namespace MT6701 {

@@ -14,9 +14,9 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../servo.h"
-#include "./inst_accessor.h"
-#include "./inst_adapter_interface.h"
+#include "core/servo.h"
+#include "inst/inst_accessor.h"
+#include "inst/inst_adapter_interface.h"
 namespace hortor_servo {
 class Inst {
  public:

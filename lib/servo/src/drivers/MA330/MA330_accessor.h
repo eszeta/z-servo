@@ -18,8 +18,8 @@
 
 #include <functional>
 
-#include "../../utils/register/register_accessor.h"
 #include "MA330_types.h"
+#include "register/register_accessor.h"
 
 namespace hortor_servo {
 namespace MA330 {

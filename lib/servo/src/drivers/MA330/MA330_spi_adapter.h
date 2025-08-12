@@ -16,8 +16,8 @@
 
 #include <Arduino.h>
 
-#include "../../utils/register/register_spi_adapter.h"
 #include "MA330_accessor.h"
+#include "register/register_spi_adapter.h"
 
 namespace hortor_servo {
 namespace MA330 {

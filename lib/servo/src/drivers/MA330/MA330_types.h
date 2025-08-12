@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "../../core/register.h"
+#include "register/register.h"
 
 namespace hortor_servo {
 namespace MA330 {

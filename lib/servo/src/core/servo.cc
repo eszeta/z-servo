@@ -1,6 +1,6 @@
 #include "servo.h"
 
-#include "utils/math/math.h"
+#include "math/math.h"
 
 namespace hortor_servo {
 

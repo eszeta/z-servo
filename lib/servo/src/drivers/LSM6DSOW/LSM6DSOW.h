@@ -16,11 +16,11 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include "../../core/imu.h"
-#include "../../utils/register/register_accessor.h"
-#include "../../utils/register/register_i2c_adapter.h"
 #include "LSM6DSOW_accessor.h"
 #include "LSM6DSOW_types.h"
+#include "core/imu.h"
+#include "register/register_accessor.h"
+#include "register/register_i2c_adapter.h"
 
 namespace hortor_servo {
 namespace LSM6DSOW {

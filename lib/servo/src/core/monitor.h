@@ -15,7 +15,7 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../servo.h"
+#include "servo.h"
 
 namespace hortor_servo {
 enum class MonitorBitmap : uint8_t {

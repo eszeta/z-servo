@@ -15,7 +15,7 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../servo_types.h"
+#include "types.h"
 
 namespace hortor_servo {
 /**

@@ -15,8 +15,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include "../servo_types.h"
-#include "./inst_adapter_interface.h"
+#include "core/types.h"
+#include "inst/inst_adapter_interface.h"
 
 namespace hortor_servo {
 

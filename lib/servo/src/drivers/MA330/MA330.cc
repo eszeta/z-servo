@@ -14,7 +14,8 @@
 
 #include "MA330.h"
 
-#include "./MA330_types.h"
+#include "MA330_types.h"
+
 namespace hortor_servo {
 namespace MA330 {
 

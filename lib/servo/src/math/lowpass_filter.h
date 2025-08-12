@@ -14,7 +14,7 @@
 #pragma once
 #include <Arduino.h>
 
-#include "./math.h"
+#include "math/math.h"
 
 namespace hortor_servo {
 /**

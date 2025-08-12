@@ -46,9 +46,9 @@ Error MT6701I2cAdapter::LinkAccessor(MT6701Accessor& accessor) {
 }
 
 Error MT6701I2cAdapter::ReadRaw(uint16_t* angle_raw,
-                                  Status* field_status,
-                                  bool* button_pushed,
-                                  bool* track_loss) {
+                                Status* field_status,
+                                bool* button_pushed,
+                                bool* track_loss) {
   uint8_t angle6, angle0;
   CHECK(Read(Regs::kANGLE_6.address, &angle6));
   CHECK(Read(Regs::kANGLE_0.address, &angle0));

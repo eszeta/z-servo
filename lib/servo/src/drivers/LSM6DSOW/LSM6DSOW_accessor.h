@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include "../../servo_types.h"
-#include "../../utils/register/register_accessor.h"
 #include "LSM6DSOW_types.h"
+#include "core/types.h"
+#include "register/register_accessor.h"
 
 namespace hortor_servo {
 namespace LSM6DSOW {

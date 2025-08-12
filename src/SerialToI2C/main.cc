@@ -16,7 +16,7 @@
 
 #include "debug_print.h"
 #include "info_led.h"
-#include "utils/math/math.h"
+#include "math/math.h"
 
 static constexpr auto kInfoLedPin = PB1;
 static constexpr auto kTargetLoopRateHz = 500;  // 目标帧率500Hz

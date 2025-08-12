@@ -14,9 +14,9 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../utils/register/register_accessor.h"
-#include "../utils/register/register_raw_adapter.h"
-#include "./inst_types.h"
+#include "inst/inst_types.h"
+#include "register/register_accessor.h"
+#include "register/register_raw_adapter.h"
 
 namespace hortor_servo {
 

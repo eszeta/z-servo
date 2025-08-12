@@ -16,9 +16,9 @@
 
 #include <Arduino.h>
 
-#include "../utils/math/lowpass_filter.h"
-#include "../utils/math/math.h"
-#include "../utils/math/resolution.h"
+#include "math/lowpass_filter.h"
+#include "math/math.h"
+#include "math/resolution.h"
 
 namespace hortor_servo {
 /**

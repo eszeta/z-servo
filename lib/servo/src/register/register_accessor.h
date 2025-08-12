@@ -15,8 +15,8 @@
 #pragma once
 #include <functional>
 
-#include "../../core/register.h"
-#include "../../servo_types.h"
+#include "core/types.h"
+#include "register/register.h"
 namespace hortor_servo {
 /**
  * @brief 寄存器访问器基类

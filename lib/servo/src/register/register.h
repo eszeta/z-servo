@@ -15,7 +15,7 @@
 
 #include <Arduino.h>
 
-#include "../utils/bit_utils.h"
+#include "utils/bit_utils.h"
 
 namespace hortor_servo {
 

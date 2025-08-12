@@ -15,9 +15,9 @@
 
 #include <Arduino.h>
 
-#include "../utils/bit_utils.h"
-#include "./inst_accessor.h"
-#include "./inst_types.h"
+#include "inst/inst_accessor.h"
+#include "inst/inst_types.h"
+#include "utils/bit_utils.h"
 namespace hortor_servo {
 
 Error Inst::Init() {

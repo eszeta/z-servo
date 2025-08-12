@@ -18,9 +18,9 @@
 
 #include <functional>
 
-#include "../../servo_types.h"
-#include "../../utils/register/register_accessor.h"
 #include "MT6701_types.h"
+#include "core/types.h"
+#include "register/register_accessor.h"
 namespace hortor_servo {
 namespace MT6701 {
 

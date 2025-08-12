@@ -17,7 +17,7 @@
 
 #include <functional>
 
-#include "../servo_types.h"
+#include "core/types.h"
 
 namespace hortor_servo {
 

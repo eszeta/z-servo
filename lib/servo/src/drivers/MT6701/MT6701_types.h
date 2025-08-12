@@ -15,7 +15,7 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../../core/register.h"
+#include "register/register.h"
 
 namespace hortor_servo {
 namespace MT6701 {

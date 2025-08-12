@@ -15,6 +15,7 @@
 #include <SPI.h>
 #include <Wire.h>
 
+#include "core/servo.h"
 #include "debug_print.h"
 #include "drivers/MA330/MA330.h"
 #include "drivers/MP6515/MP6515.h"
@@ -22,9 +23,8 @@
 #include "info_led.h"
 #include "inst/inst.h"
 #include "inst/inst_accessor.h"
-#include "inst/inst_serial_transport.h"
-#include "servo.h"
-#include "utils/math/math.h"
+#include "inst/inst_serial_adapter.h"
+#include "math/math.h"
 
 static constexpr auto kInfoLedPin = PB1;
 HardwareSerial serial_debug(PB4, PB3, 0);

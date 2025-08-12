@@ -14,13 +14,13 @@
 
 #include "register_spi_adapter.h"
 
-#include "../../servo_types.h"
+#include "core/types.h"
 #include "register_accessor.h"
 
 namespace hortor_servo {
 Error RegisterSpiAdapter::Init(SPIClass *spi,
-                                 const int cs_pin,
-                                 const SPISettings &spi_settings) {
+                               const int cs_pin,
+                               const SPISettings &spi_settings) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }
@@ -64,8 +64,8 @@ Error RegisterSpiAdapter::Write(const uint8_t address, const uint8_t data) {
 }
 
 Error RegisterSpiAdapter::WriteMultiple(const uint8_t address,
-                                          const uint8_t *data,
-                                          const size_t size) {
+                                        const uint8_t *data,
+                                        const size_t size) {
   if (!spi_ || !data) {
     return Error::kInvalidParameter;
   }
@@ -92,8 +92,8 @@ Error RegisterSpiAdapter::Read(const uint8_t address, uint8_t *data) {
 }
 
 Error RegisterSpiAdapter::ReadMultiple(const uint8_t address,
-                                         const size_t size,
-                                         uint8_t *data) {
+                                       const size_t size,
+                                       uint8_t *data) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }

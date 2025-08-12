@@ -14,7 +14,7 @@
 
 #include "register_raw_adapter.h"
 
-#include "../../servo_types.h"
+#include "core/types.h"
 #include "register_accessor.h"
 
 namespace hortor_servo {
@@ -55,8 +55,8 @@ Error RegisterRawAdapter::Write(const uint8_t address, const uint8_t data) {
 }
 
 Error RegisterRawAdapter::WriteMultiple(const uint8_t address,
-                                            const uint8_t* data,
-                                            const size_t size) {
+                                        const uint8_t* data,
+                                        const size_t size) {
   if (address + size > size_) {
     return Error::kInvalidParameter;
   }
@@ -75,8 +75,8 @@ Error RegisterRawAdapter::Read(const uint8_t address, uint8_t* data) {
 }
 
 Error RegisterRawAdapter::ReadMultiple(const uint8_t address,
-                                           const size_t size,
-                                           uint8_t* data) {
+                                       const size_t size,
+                                       uint8_t* data) {
   if (address + size > size_) {
     return Error::kInvalidParameter;
   }

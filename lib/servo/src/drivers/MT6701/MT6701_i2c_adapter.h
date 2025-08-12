@@ -16,10 +16,10 @@
 
 #include <Arduino.h>
 
-#include "../../servo_types.h"
-#include "../../utils/register/register_i2c_adapter.h"
 #include "MT6701_accessor.h"
 #include "MT6701_types.h"
+#include "core/types.h"
+#include "register/register_i2c_adapter.h"
 
 namespace hortor_servo {
 namespace MT6701 {

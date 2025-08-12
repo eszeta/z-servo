@@ -15,9 +15,9 @@
 #pragma once
 #include <Arduino.h>
 
-#include "../core/register.h"
-#include "../servo_types.h"
-#include "./inst_utils.h"
+#include "core/types.h"
+#include "inst/inst_utils.h"
+#include "register/register.h"
 
 namespace hortor_servo {
 
@@ -435,7 +435,7 @@ struct RegsDefaultValues {
   static constexpr float kDefPosPidFf = 0;                         // 0x64
   static constexpr float kDefPosFilter = 0.01f;                    // 0x65
   static constexpr float kDefCurrentFilter = 0;                    // 0x66
-  static constexpr float kDefVelocityFilter = 0.01f;                // 0x67
+  static constexpr float kDefVelocityFilter = 0.01f;               // 0x67
 };
 
 struct RegsBlock {

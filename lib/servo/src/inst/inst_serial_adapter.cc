@@ -15,8 +15,8 @@
 
 #include <Arduino.h>
 
-#include "../utils/math/math.h"
-#include "./inst_types.h"
+#include "inst/inst_types.h"
+#include "math/math.h"
 
 #ifdef ARDUINO_ARCH_STM32
 #include <HardwareSerial.h>
@@ -106,7 +106,7 @@ Error InstSerialAdapter::Receive(uint8_t data) {
 }
 
 Error InstSerialAdapter::Response(const uint8_t reply_idx,
-                                    const uint8_t *data) {
+                                  const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);
   memcpy(tx_buffer_, data, size);
   delay_time_ = response_delay_ * (reply_idx + 1) * kMilliToSec;  // 毫秒转秒

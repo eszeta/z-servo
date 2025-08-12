@@ -16,10 +16,10 @@
 
 #include <SPI.h>
 
-#include "../../core/sensor.h"
-#include "../../servo_types.h"
 #include "MA330_accessor.h"
 #include "MA330_spi_adapter.h"
+#include "core/sensor.h"
+#include "core/types.h"
 
 namespace hortor_servo {
 namespace MA330 {

@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#include "./utils/math/pid.h"
+#include "math/pid.h"
 
 namespace hortor_servo {
 

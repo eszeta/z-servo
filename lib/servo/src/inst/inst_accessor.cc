@@ -17,8 +17,8 @@
 #include <EEPROM.h>
 #endif
 
-#include "../core/register.h"
-#include "./inst_types.h"
+#include "inst/inst_types.h"
+#include "register/register.h"
 
 namespace hortor_servo {
 using Regs = ServoRegs;

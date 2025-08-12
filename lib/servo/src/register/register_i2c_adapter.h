@@ -16,23 +16,34 @@
 
 #include <Wire.h>
 
-#include "../../servo_types.h"
+#include "core/types.h"
 #include "register_accessor.h"
 
 namespace hortor_servo {
 
 /**
- * @brief 原始寄存器实现
+ * @brief I2C通信实现
+ *
+ * I2C模式支持完整的寄存器读写操作，适用于配置和数据读取。
+ * 通信时序：
+ * 1. 写操作：START -> 从机地址(写) -> 寄存器地址 -> 数据 -> STOP
+ * 2. 读操作：START -> 从机地址(写) -> 寄存器地址 -> START -> 从机地址(读) ->
+ * 数据 -> STOP
+ *
+ * 错误码说明：
+ * - kOk: 操作成功
+ * - kInvalidParamErr: 参数无效（wire_为空或address_无效）
+ * - kIOErr: I2C通信错误（如设备无响应、通信超时等）
  */
-class RegisterRawAdapter {
+class RegisterI2CAdapter {
  public:
   /**
    * @brief 初始化I2C通信
    * @param wire Arduino Wire对象指针
-   * @param address
+   * @param address 从机地址
    * @return 错误码，成功返回OK
    */
-  Error Init(uint8_t* regs, const size_t size);
+  Error Init(TwoWire* wire, const int address);
 
   /**
    * @brief 设置寄存器访问器函数
@@ -78,9 +89,9 @@ class RegisterRawAdapter {
   Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data);
 
  protected:
-  /** @brief 寄存器地址 */
-  uint8_t* regs_{};
-  /** @brief 寄存器大小 */
-  size_t size_{};
+  /** @brief I2C通信接口指针，指向Arduino Wire对象 */
+  TwoWire* wire_{};
+  /** @brief I2C地址 */
+  int address_{};
 };
 }  // namespace hortor_servo

@@ -14,7 +14,7 @@
 
 #include "register_accessor.h"
 
-#include "../../core/register.h"
+#include "register/register.h"
 
 namespace hortor_servo {
 

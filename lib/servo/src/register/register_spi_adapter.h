@@ -16,7 +16,7 @@
 
 #include <SPI.h>
 
-#include "../../servo_types.h"
+#include "core/types.h"
 #include "register_accessor.h"
 
 namespace hortor_servo {

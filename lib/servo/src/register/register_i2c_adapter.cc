@@ -16,7 +16,7 @@
 
 #include <Wire.h>
 
-#include "../../servo_types.h"
+#include "core/types.h"
 #include "register_accessor.h"
 
 namespace hortor_servo {
@@ -62,8 +62,8 @@ Error RegisterI2CAdapter::Write(const uint8_t address, const uint8_t data) {
 }
 
 Error RegisterI2CAdapter::WriteMultiple(const uint8_t address,
-                                          const uint8_t* data,
-                                          const size_t size) {
+                                        const uint8_t* data,
+                                        const size_t size) {
   if (!wire_ || !data) {
     return Error::kInvalidParameter;
   }
@@ -93,8 +93,8 @@ Error RegisterI2CAdapter::Read(const uint8_t address, uint8_t* data) {
 }
 
 Error RegisterI2CAdapter::ReadMultiple(const uint8_t address,
-                                         const size_t size,
-                                         uint8_t* data) {
+                                       const size_t size,
+                                       uint8_t* data) {
   if (!wire_ || !data) {
     return Error::kInvalidParameter;
   }

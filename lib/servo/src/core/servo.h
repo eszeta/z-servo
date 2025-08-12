@@ -2,12 +2,12 @@
 
 #include <Arduino.h>
 
-#include "./core/current.h"
-#include "./core/motor.h"
-#include "./core/sensor.h"
-#include "./servo_types.h"
-#include "./utils/math/lowpass_filter.h"
-#include "./utils/math/pid.h"
+#include "core/current.h"
+#include "core/motor.h"
+#include "core/sensor.h"
+#include "core/types.h"
+#include "math/lowpass_filter.h"
+#include "math/pid.h"
 
 namespace hortor_servo {
 

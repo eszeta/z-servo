@@ -14,17 +14,16 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
-
-#include "debug_print.h"
-#include "drivers/DRV8231A/DRV8231A.h"
-#include "drivers/MT6701/MT6701.h"
-#include "drivers/generic_current/generic_current.h"
-#include "info_led.h"
-#include "inst/inst.h"
-#include "inst/inst_accessor.h"
-#include "inst/inst_i2c_adapter.h"
-#include "servo.h"
-#include "utils/math/math.h"
+#include <core/servo.h>
+#include <debug_print.h>
+#include <drivers/DRV8231A/DRV8231A.h>
+#include <drivers/MT6701/MT6701.h>
+#include <drivers/generic_current/generic_current.h>
+#include <info_led.h>
+#include <inst/inst.h>
+#include <inst/inst_accessor.h>
+#include <inst/inst_i2c_adapter.h>
+#include <math/math.h>
 
 static constexpr auto kInfoLedPin = PA12;
 // 目标帧率500Hz
