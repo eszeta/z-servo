@@ -85,15 +85,15 @@ class InfoLED {
   /**
    * @brief 当前模式
    */
-  std::vector<BlinkUnit>* current_pattern_;
+  std::vector<BlinkUnit>* current_pattern_ = nullptr;
   /**
    * @brief 当前步骤
    */
-  size_t current_step_;
+  size_t current_step_ = 0;
   /**
    * @brief 当前步骤已运行时间(秒)
    */
-  float elapsed_time_;
+  float elapsed_time_ = 0.0f;
   /**
    * @brief 预定义的信息类型
    */

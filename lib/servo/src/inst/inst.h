@@ -21,6 +21,11 @@ namespace hortor_servo {
 class Inst {
  public:
   /**
+   * @brief 构造函数
+   */
+  Inst() = default;
+  
+  /**
    * @brief 初始化
    * @return 错误码
    */
@@ -174,15 +179,15 @@ class Inst {
   /**
    * @brief 指令访问器
    */
-  InstAccessor *accessor_;
+  InstAccessor *accessor_ = nullptr;
   /**
    * @brief 指令传输接口
    */
-  InstAdapterInterface *transport_;
+  InstAdapterInterface *transport_ = nullptr;
   /**
    * @brief 伺服电机
    */
-  Servo *servo_;
+  Servo *servo_ = nullptr;
   /**
    * @brief 异步写缓冲区
    */
@@ -190,7 +195,7 @@ class Inst {
   /**
    * @brief 异步写缓冲区大小
    */
-  size_t buffer_size_;
+  size_t buffer_size_ = 0;
   union {
     /**
      * @brief 发送缓冲区

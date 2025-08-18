@@ -42,6 +42,7 @@ hortor_servo::MA330::MA330 angle_sensor;
 hortor_servo::generic_current::GenericCurrent current_sensor;
 hortor_servo::Servo servo;
 
+// cppcheck-suppress unusedFunction
 void setup() {
   serial_debug.begin(9600);
   hortor_servo::DebugEnable(&serial_debug);
@@ -70,6 +71,7 @@ void setup() {
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
 }
 
+// cppcheck-suppress unusedFunction
 void loop() {
   static auto last_time = micros() - 1;
   const auto current_time = micros();

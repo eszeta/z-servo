@@ -32,7 +32,7 @@ struct PIDParam {
  */
 class PidController {
  public:
-  PidController(const PIDParam param);
+  explicit PidController(const PIDParam& param);
 
   /**
    * @brief 计算PID控制器输出
@@ -41,7 +41,7 @@ class PidController {
    * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(float error, float feed, float dt);
+  float Compute(const float& error, const float& feed, const float& dt);
 
   /**
    * @brief 计算PID控制器输出（无前馈）
@@ -49,7 +49,7 @@ class PidController {
    * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(float error, float dt);
+  float Compute(const float& error, const float& dt);
 
   /**
    * @brief 重置PID控制器状态

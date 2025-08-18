@@ -18,18 +18,18 @@
 
 namespace hortor_servo {
 
-PidController::PidController(const PIDParam param) : param_(param) {}
+PidController::PidController(const PIDParam &param) : param_(param) {}
 
-float PidController::Compute(const float error, const float dt) {
+float PidController::Compute(const float& error, const float& dt) {
   return Compute(error, 0, dt);
 }
 
 /**
  * @brief 计算PID控制器输出
  */
-inline float PidController::Compute(const float error,
-                                    const float feed,
-                                    const float dt) {
+float PidController::Compute(const float& error,
+                                    const float& feed,
+                                    const float& dt) {
   // 比例项：p = Kp * e
   // 直接响应当前误差，提供基本的控制作用
   const float p = param_.kp * error;

@@ -44,9 +44,12 @@ hortor_servo::MT6701::MT6701 angle_sensor{};
 hortor_servo::generic_current::GenericCurrent current_sensor{};
 hortor_servo::Servo servo{};
 
+// cppcheck-suppress unusedFunction
 void receiveEvent(int howMany) { inst_transport.OnReceive(howMany); }
+// cppcheck-suppress unusedFunction
 void requestEvent() { inst_transport.OnRequest(); }
 
+// cppcheck-suppress unusedFunction
 void setup() {
   // 设置PWM频率为10kHz
   analogWriteFrequency(10 * 1000);
@@ -85,6 +88,7 @@ void setup() {
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
 }
 
+// cppcheck-suppress unusedFunction
 void loop() {
   static auto last_time = micros() - kTargetLoopPeriodUs;
   const auto current_time = micros();

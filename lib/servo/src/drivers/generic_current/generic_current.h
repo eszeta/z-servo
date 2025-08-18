@@ -21,6 +21,11 @@ namespace hortor_servo {
 namespace generic_current {
 class GenericCurrent : public Current {
  public:
+  /**
+   * @brief 构造函数
+   */
+  GenericCurrent() = default;
+  
   void Init(const uint8_t pin_adc,
             const uint16_t shunt_resistor,
             const float factor);
@@ -45,11 +50,11 @@ class GenericCurrent : public Current {
   float ReadADCVoltage();
 
   /** @brief ADC引脚编号 */
-  uint8_t pin_adc_;
+  uint8_t pin_adc_ = 0;
   /** @brief 增益系数 */
-  float gain_;
+  float gain_ = 0.0f;
   /** @brief ADC修正值 */
-  float offset_;
+  float offset_ = 0.0f;
 };
 
 }  // namespace generic_current

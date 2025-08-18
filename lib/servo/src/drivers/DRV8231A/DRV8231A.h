@@ -26,6 +26,11 @@ namespace DRV8231A {
 class DRV8231A final : public Motor {
  public:
   /**
+   * @brief 构造函数
+   */
+  DRV8231A() = default;
+  
+  /**
    * @brief 初始化电机驱动器
    * @param pin_a 正转PWM输出引脚
    * @param pin_b 反转PWM输出引脚
@@ -45,9 +50,9 @@ class DRV8231A final : public Motor {
 
  private:
   /** @brief PWM A输出引脚 */
-  uint8_t pin_a_;
+  uint8_t pin_a_ = 0;
   /** @brief PWM B输出引脚 */
-  uint8_t pin_b_;
+  uint8_t pin_b_ = 0;
 };
 }  // namespace DRV8231A
 }  // namespace hortor_servo

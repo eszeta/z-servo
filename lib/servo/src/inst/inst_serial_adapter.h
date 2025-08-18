@@ -25,6 +25,11 @@ namespace hortor_servo {
 class InstSerialAdapter : public InstAdapterInterface {
  public:
   /**
+   * @brief 构造函数
+   */
+  InstSerialAdapter() = default;
+  
+  /**
    * @brief 初始化
    * @param serial 串口
    * @return 错误码
@@ -56,9 +61,9 @@ class InstSerialAdapter : public InstAdapterInterface {
    * @return 错误码
    */
   Error Receive(uint8_t data);
-  HardwareSerial *serial_;
-  uint8_t rx_buffer_[128];
-  uint8_t tx_buffer_[128];
+  HardwareSerial *serial_ = nullptr;
+  uint8_t rx_buffer_[128] = {0};
+  uint8_t tx_buffer_[128] = {0};
   uint8_t param_pos_ = 0;
   PacketState packet_state_ = PacketState::kHeader1;
   uint32_t delay_time_ = 0;

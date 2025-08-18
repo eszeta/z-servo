@@ -27,6 +27,7 @@ hortor_servo::InfoLED::InfoLED info_led{};
 HardwareSerial serial(PB4, PB3);
 TwoWire wire(PA8, PA9);
 
+// cppcheck-suppress unusedFunction
 void setup() {
   info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
@@ -34,6 +35,7 @@ void setup() {
   wire.begin();
 }
 
+// cppcheck-suppress unusedFunction
 void loop() {
   static auto last_time = micros() - kTargetLoopPeriodUs;
   const auto current_time = micros();

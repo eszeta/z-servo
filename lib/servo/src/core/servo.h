@@ -113,50 +113,50 @@ class Servo {
   bool IsPositionReached(int16_t pos_error);
 
   bool enabled_ = true;
-  bool torque_enable_;
+  bool torque_enable_ = false;
 
-  float target_acceleration_;
-  float target_position_;
-  int16_t target_time_;
-  float target_velocity_;
-  float target_pwm_;
-  float torque_limit_;
+  float target_acceleration_ = 0.0f;
+  float target_position_ = 0.0f;
+  int16_t target_time_ = 0;
+  float target_velocity_ = 0.0f;
+  float target_pwm_ = 0.0f;
+  float torque_limit_ = 0.0f;
 
-  float present_position_;
-  float present_velocity_;
-  float present_load_;
-  float present_voltage_;
-  float present_current_;
-  uint8_t present_temperature_;
+  float present_position_ = 0.0f;
+  float present_velocity_ = 0.0f;
+  float present_load_ = 0.0f;
+  float present_voltage_ = 0.0f;
+  float present_current_ = 0.0f;
+  uint8_t present_temperature_ = 0;
 
-  uint8_t error_status_;
-  bool moving_;
+  uint8_t error_status_ = 0;
+  bool moving_ = false;
 
-  ServoMode mode_;
+  ServoMode mode_ = ServoMode::kPosition;
 
-  uint16_t min_position_;
-  uint16_t max_position_;
-  uint8_t max_temperature_;
-  float max_voltage_;
-  float min_voltage_;
-  float max_torque_;
-  float min_startup_force_;
+  uint16_t min_position_ = 0;
+  uint16_t max_position_ = 0;
+  uint8_t max_temperature_ = 0;
+  float max_voltage_ = 0.0f;
+  float min_voltage_ = 0.0f;
+  float max_torque_ = 0.0f;
+  float min_startup_force_ = 0.0f;
 
-  uint8_t cw_insensitive_area_;
-  uint8_t ccw_insensitive_area_;
-  uint8_t angular_resolution_;
-  int16_t position_correction_;
+  uint8_t cw_insensitive_area_ = 0;
+  uint8_t ccw_insensitive_area_ = 0;
+  uint8_t angular_resolution_ = 0;
+  int16_t position_correction_ = 0;
 
-  float current_protection_threshold_;
-  uint16_t overcurrent_protection_time_;
+  float current_protection_threshold_ = 0.0f;
+  uint16_t overcurrent_protection_time_ = 0;
 
-  float torque_protection_threshold_;
-  uint16_t torque_protection_time_;
+  float torque_protection_threshold_ = 0.0f;
+  uint16_t torque_protection_time_ = 0;
 
-  float overload_torque_;
+  float overload_torque_ = 0.0f;
 
-  float velocity_proportional_gain_;
-  float velocity_integral_gain_;
+  float velocity_proportional_gain_ = 0.0f;
+  float velocity_integral_gain_ = 0.0f;
 
   PidController pos_pid_{
       {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
@@ -164,15 +164,15 @@ class Servo {
   PidController velocity_pid_{
       {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 1.0f}};
 
-  Direction sensor_direction_;
-  Direction motor_direction_;
+  Direction sensor_direction_ = Direction::CW;
+  Direction motor_direction_ = Direction::CW;
 
   LowPassFilter current_lpf_;
   LowPassFilter pos_lpf_;
   LowPassFilter velocity_lpf_;
 
-  Motor *driver_;
-  Sensor *angle_sensor_;
-  Current *current_sense_;
+  Motor *driver_ = nullptr;
+  Sensor *angle_sensor_ = nullptr;
+  Current *current_sense_ = nullptr;
 };
 }  // namespace hortor_servo

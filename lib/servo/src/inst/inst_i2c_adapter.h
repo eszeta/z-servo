@@ -23,6 +23,11 @@ namespace hortor_servo {
 class InstI2cAdapter : public InstAdapterInterface {
  public:
   /**
+   * @brief 构造函数
+   */
+  InstI2cAdapter() = default;
+  
+  /**
    * @brief 初始化
    * @param wire I2C对象
    * @param address I2C地址
@@ -53,8 +58,8 @@ class InstI2cAdapter : public InstAdapterInterface {
   void OnRequest();
 
  private:
-  TwoWire *wire_;
-  uint8_t rx_buffer_[128];
-  uint8_t tx_buffer_[128];
+  TwoWire *wire_ = nullptr;
+  uint8_t rx_buffer_[128] = {0};
+  uint8_t tx_buffer_[128] = {0};
 };
 }  // namespace hortor_servo

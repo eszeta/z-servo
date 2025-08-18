@@ -27,6 +27,11 @@ namespace MP6515 {
 class MP6515 final : public Motor {
  public:
   /**
+   * @brief 构造函数
+   */
+  MP6515() = default;
+  
+  /**
    * @brief 初始化电机驱动器
    * @param pin_phase 相位引脚编号
    * @param pin_enbl 使能引脚编号
@@ -53,23 +58,23 @@ class MP6515 final : public Motor {
    * @brief 刹车引脚编号
    * 1: 刹车 0: 不刹车
    */
-  uint8_t pin_brake_;
+  uint8_t pin_brake_ = 0;
   /**
    * @brief 相位引脚编号
    * 1: 正转   0: 反转
    */
-  uint8_t pin_phase_;
+  uint8_t pin_phase_ = 0;
 
   /**
    * @brief 使能引脚编号
    */
-  uint8_t pin_enbl_;
+  uint8_t pin_enbl_ = 0;
 
   /**
    * @brief 睡眠引脚编号
    * 1: 工作 0: 睡眠
    */
-  uint8_t pin_sleep_;
+  uint8_t pin_sleep_ = 0;
 };
 }  // namespace MP6515
 }  // namespace hortor_servo
