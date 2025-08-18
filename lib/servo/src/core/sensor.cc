@@ -27,20 +27,20 @@ void Sensor::Init() {
 void Sensor::Process(float dt) {
   raw_ = GetRaw();
 
-  const auto d_angle = static_cast<int16_t>(raw_ - raw_prev_);
+  const auto d_counts = static_cast<int16_t>(raw_ - raw_prev_);
   // 如果发生溢出，将其记录为一圈
-  if (std::abs(d_angle) > 0.8f * kResolution.kEncoderCpr) {
-    full_rotations_ += (d_angle > 0) ? -1 : 1;
+  if (std::abs(d_counts) > 0.8f * kResolution.kEncoderCpr) {
+    full_rotations_ += (d_counts > 0) ? -1 : 1;
   }
   raw_prev_ = raw_;
 
-  // 计算角度变化
-  const auto angle_diff =
+  // 计算计数值变化
+  const auto counts_diff =
       (full_rotations_ - full_rotations_prev_) * kResolution.kEncoderCpr +
-      d_angle;
+      d_counts;
 
   // 计算速度（单位：计数/秒）
-  velocity_ = static_cast<float>(angle_diff) / dt;
+  velocity_ = static_cast<float>(counts_diff) / dt;
 
   // 更新上一次的值
   full_rotations_prev_ = full_rotations_;

@@ -1,28 +1,67 @@
+// Copyright 2025 ES_ZETA
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include "servo.h"
 
 #include "math/math.h"
 
 namespace hortor_servo {
 
+// 浮点数比较阈值，用于判断值是否接近0
+static constexpr float kFloatThreshold = 0.001f;
+
+/**
+ * @brief 链接电机驱动器
+ * @param driver 电机驱动器指针
+ */
 void Servo::LinkDriver(Motor *driver) { driver_ = driver; }
 
+/**
+ * @brief 链接角度传感器
+ * @param sensor 角度传感器指针
+ */
 void Servo::LinkAngleSensor(Sensor *sensor) { angle_sensor_ = sensor; }
 
+/**
+ * @brief 链接电流传感器
+ * @param current_sense 电流传感器指针
+ */
 void Servo::LinkCurrentSense(Current *current_sense) {
   current_sense_ = current_sense;
 }
 
+/**
+ * @brief 初始化舵机
+ */
 void Servo::Init() {}
 
+/**
+ * @brief 执行动作
+ */
 void Servo::Action() {
   if (target_position_ >= min_position_ && target_position_ <= max_position_) {
     moving_ = true;
   }
 }
 
+/**
+ * @brief 处理舵机逻辑
+ * @param dt 时间间隔(秒)
+ */
 void Servo::Process(float dt) {
   angle_sensor_->Process(dt);
-  present_position_ = GetAngle(dt);
+  present_position_ = GetTotalCounts(dt);
   present_velocity_ = GetVelocity(dt);
   present_current_ = GetCurrent(dt);
   if (!enabled_) return;
@@ -34,37 +73,56 @@ void Servo::Process(float dt) {
         moving_ = false;
       }
 
-      if (torque_enable_ || moving_) {
-        // 始终计算位置PID输出作为速度上限
-        const auto pos_pid_vel = pos_pid_.Compute(pos_error, dt);
-
-        auto target_vel = pos_pid_vel;
-        const auto target_vel_abs = std::fabs(target_velocity_);
-        if (target_vel_abs > 0.001f) {
-          // 目标速度不为0时，取位置PID输出和目标速度中较小的那个
-          const auto speed_limit = std::fabs(pos_pid_vel);
-          const auto limited_speed = std::fmin(target_vel_abs, speed_limit);
-          target_vel = std::copysign(limited_speed, pos_error);
-        }
-
-        // 加速度限制
-        if (target_acceleration_ > 0.001f) {
-          const auto delta_v = std::fabs(target_acceleration_ * dt);
-          target_vel = present_velocity_ + std::copysign(delta_v, pos_error);
-        }
-        const auto vel_error = target_vel - present_velocity_;
-        const auto pwm_set = velocity_pid_.Compute(vel_error, dt);
-        SetPower(pwm_set);
+      if (!torque_enable_ && !moving_) {
+        SetPower(0);
+        break;
       }
+
+      // ===== 位置-速度双闭环控制策略（按算法例子修正）=====
+
+      // 第一步：位置环计算目标速度
+      const auto position_error = pos_pid_.Compute(pos_error, dt);
+
+      auto target_velocity = position_error;
+
+      // 第二步：应用加速度限制（在目标速度变化上）
+      if (target_acceleration_ > kFloatThreshold) {
+        const auto velocity_change = target_velocity - present_velocity_;
+        const auto limited_acceleration = constrain(velocity_change,
+                                                    -target_acceleration_ * dt,
+                                                    target_acceleration_ * dt);
+        target_velocity = present_velocity_ + limited_acceleration;
+      }
+
+      // 第三步：应用最高速度限制
+      if (target_velocity_ > kFloatThreshold) {
+        target_velocity =
+            constrain(target_velocity, -target_velocity_, target_velocity_);
+      }
+
+      // 第四步：速度环计算控制输出
+      const auto velocity_error = target_velocity - present_velocity_;
+      const auto control_output = velocity_pid_.Compute(velocity_error, dt);
+
+      // 输出控制信号（PWM）
+      SetPower(control_output);
       break;
     }
     case ServoMode::kVelocity: {
       auto target_vel = target_velocity_;
-      // 加速度限制
-      if (target_acceleration_ > 0.001f) {
-        const auto delta_v = std::fabs(target_acceleration_ * dt);
-        target_vel = present_velocity_ + std::copysign(delta_v, target_vel);
+
+      // 加速度限制：限制速度变化率（考虑方向）
+      if (target_acceleration_ > kFloatThreshold) {
+        const auto velocity_change = target_vel - present_velocity_;
+        const auto max_change = target_acceleration_ * dt;
+
+        // 如果速度变化超出加速度限制，则限制速度变化量
+        if (std::fabs(velocity_change) > max_change) {
+          target_vel =
+              present_velocity_ + std::copysign(max_change, velocity_change);
+        }
       }
+
       const auto vel_error = target_vel - present_velocity_;
       const auto pwm_set = velocity_pid_.Compute(vel_error, dt);
       SetPower(pwm_set);
@@ -80,6 +138,11 @@ void Servo::Process(float dt) {
   }
 }
 
+/**
+ * @brief 检查是否到达目标位置
+ * @param pos_error 位置误差
+ * @return 是否到达目标位置
+ */
 bool Servo::IsPositionReached(int16_t pos_error) {
   if (pos_error > 0 && pos_error > cw_insensitive_area_) {
     return false;
@@ -90,9 +153,14 @@ bool Servo::IsPositionReached(int16_t pos_error) {
   return true;
 }
 
-float Servo::GetAngle(float dt) {
+/**
+ * @brief 获取当前位置（映射后的计数值）
+ * @param dt 时间间隔(秒)
+ * @return 当前位置值
+ */
+float Servo::GetTotalCounts(float dt) {
   const auto direction = static_cast<float>(sensor_direction_);
-  const auto raw = angle_sensor_->GetAngle();
+  const auto raw = angle_sensor_->GetTotalCounts();
   const auto raw_mapped =
       mapResolution(raw, angle_sensor_->kResolution.kBits, kResolution.kBits);
   const auto filtered = pos_lpf_.Compute(raw_mapped, dt);
@@ -100,6 +168,11 @@ float Servo::GetAngle(float dt) {
   return corrected;
 }
 
+/**
+ * @brief 获取当前速度
+ * @param dt 时间间隔(秒)
+ * @return 当前速度值
+ */
 float Servo::GetVelocity(float dt) {
   const auto direction = static_cast<float>(sensor_direction_);
   const auto raw = angle_sensor_->GetVelocity();
@@ -110,12 +183,21 @@ float Servo::GetVelocity(float dt) {
   return corrected;
 }
 
+/**
+ * @brief 获取当前电流
+ * @param dt 时间间隔(秒)
+ * @return 当前电流值
+ */
 float Servo::GetCurrent(float dt) {
   const auto raw = current_sense_->GetCurrent();
   const auto filtered = current_lpf_.Compute(raw, dt);
   return filtered;
 }
 
+/**
+ * @brief 设置电机功率
+ * @param pwm PWM值
+ */
 void Servo::SetPower(const float pwm) {
   present_load_ = pwm;
   const auto direction = static_cast<float>(motor_direction_);
@@ -123,5 +205,8 @@ void Servo::SetPower(const float pwm) {
   driver_->SetPWM(pwm_set);
 }
 
+/**
+ * @brief 电机刹车
+ */
 void Servo::Break() { driver_->Break(); }
 }  // namespace hortor_servo

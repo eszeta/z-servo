@@ -22,26 +22,26 @@
 
 namespace hortor_servo {
 /**
- * @brief 传感器基类，提供角度传感器的通用接口和功能实现
+ * @brief 传感器基类，提供编码器传感器的通用接口和功能实现
  *
- * 该类实现了角度传感器的基本功能，包括角度读取、速度计算和圈数统计。
- * 子类需要实现GetRaw()方法以提供特定传感器的原始角度值。
+ * 该类实现了编码器传感器的基本功能，包括计数值读取、速度计算和圈数统计。
+ * 子类需要实现GetRaw()方法以提供特定传感器的原始计数值。
  */
 class Sensor {
  public:
   explicit Sensor(uint8_t resolution_bits) : kResolution(resolution_bits) {}
 
   /**
-   * @brief 获取机械角度
-   * @return 当前机械角度（原始值，未考虑圈数）
+   * @brief 获取原始计数值
+   * @return 当前原始计数值（未考虑圈数）
    */
-  virtual uint16_t GetRawAngle() { return raw_; }
+  virtual uint16_t GetRawCounts() { return raw_; }
 
   /**
-   * @brief 获取累积角度
-   * @return 当前累积角度（机械角度 + 圈数 * 满量程）
+   * @brief 获取总累积计数值
+   * @return 当前总累积计数值（原始计数值 + 圈数 * 满量程）
    */
-  virtual int32_t GetAngle() {
+  virtual int32_t GetTotalCounts() {
     return full_rotations_ * kResolution.kEncoderCpr + raw_;
   }
 
@@ -78,18 +78,18 @@ class Sensor {
 
  protected:
   /**
-   * @brief 获取原始角度值
-   * @return 传感器的原始角度值
+   * @brief 获取原始计数值
+   * @return 传感器的原始计数值
    *
-   * 子类必须实现此方法以提供特定传感器的原始角度读取功能。
+   * 子类必须实现此方法以提供特定传感器的原始计数值读取功能。
    */
   virtual uint16_t GetRaw() = 0;
 
   /** @brief 当前角速度值 */
   float velocity_ = 0.0f;
-  /** @brief 当前原始角度值 */
+  /** @brief 当前原始计数值 */
   uint16_t raw_ = 0;
-  /** @brief 上次更新的原始角度值 */
+  /** @brief 上次更新的原始计数值 */
   uint16_t raw_prev_ = 0;
   /** @brief 圈数计数器 */
   int32_t full_rotations_ = 0;

@@ -24,13 +24,13 @@ struct Resolution {
   const uint8_t kBits;
   /** @brief Counts Per Revolution */
   const uint16_t kEncoderCpr = (1 << kBits);
-  /** @brief 角度到原始值的转换系数，用于将角度转换为原始值 */
+  /** @brief 角度到计数值的转换系数，用于将角度转换为计数值 */
   const float kAngleToRaw = kEncoderCpr / 360.0f;
-  /** @brief 弧度到原始值的转换系数，用于将弧度转换为原始值 */
+  /** @brief 弧度到计数值的转换系数，用于将弧度转换为计数值 */
   const float kRadianToRaw = kEncoderCpr / TWO_PI;
-  /** @brief 原始值到角度的转换系数，用于将原始值转换为角度 */
+  /** @brief 计数值到角度的转换系数，用于将计数值转换为角度 */
   const float kRawToAngle = 360.0f / kEncoderCpr;
-  /** @brief 原始值到弧度的转换系数，用于将原始值转换为弧度 */
+  /** @brief 计数值到弧度的转换系数，用于将计数值转换为弧度 */
   const float kRawToRadian = TWO_PI / kEncoderCpr;
 };
 

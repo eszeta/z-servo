@@ -41,7 +41,7 @@ class PidController {
    * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(const float& error, const float& feed, const float& dt);
+  float Compute(const float& error, const float& dt, const float& feed);
 
   /**
    * @brief 计算PID控制器输出（无前馈）
