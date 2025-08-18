@@ -34,20 +34,15 @@ void Sensor::Process(float dt) {
   }
   raw_prev_ = raw_;
 
-  accumulated_dt_ += dt;
-  // 确保累积时间达到最小采样间隔
-  if (accumulated_dt_ >= kMinElapsedTime) {
-    // 计算角度变化
-    const auto angle_diff =
-        (full_rotations_ - full_rotations_prev_) * kResolution.kEncoderCpr +
-        d_angle;
+  // 计算角度变化
+  const auto angle_diff =
+      (full_rotations_ - full_rotations_prev_) * kResolution.kEncoderCpr +
+      d_angle;
 
-    // 计算速度（单位：计数/秒）
-    velocity_ = static_cast<float>(angle_diff) / accumulated_dt_;
+  // 计算速度（单位：计数/秒）
+  velocity_ = static_cast<float>(angle_diff) / dt;
 
-    // 更新上一次的值
-    full_rotations_prev_ = full_rotations_;
-    accumulated_dt_ = 0;  // 重置累计时间
-  }
+  // 更新上一次的值
+  full_rotations_prev_ = full_rotations_;
 }
 }  // namespace hortor_servo

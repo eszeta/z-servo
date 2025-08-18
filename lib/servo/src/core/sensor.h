@@ -85,9 +85,6 @@ class Sensor {
    */
   virtual uint16_t GetRaw() = 0;
 
-  /** @brief 最小采样时间间隔（秒），固定为100微秒（10kHz） */
-  static constexpr float kMinElapsedTime = 100.0f * kMicroToSec;
-
   /** @brief 当前角速度值 */
   float velocity_ = 0.0f;
   /** @brief 当前原始角度值 */
@@ -98,7 +95,5 @@ class Sensor {
   int32_t full_rotations_ = 0;
   /** @brief 上次速度计算时的圈数 */
   int32_t full_rotations_prev_ = 0;
-  /** @brief 累计时间间隔（秒） */
-  float accumulated_dt_ = 0.0f;
 };
 }  // namespace hortor_servo
