@@ -694,9 +694,9 @@ class InstAccessor : public RegisterAccessor {
    * @brief 获取目标加速度 (0x29)
    * @return 目标加速度(100步/s²)
    */
-  float GetTargetAcceleration() {
+  float GetGoalAcceleration() {
     uint8_t acceleration;
-    ReadRegField(Regs::kTargetAcceleration, &acceleration);
+    ReadRegField(Regs::kGoalAcceleration, &acceleration);
     return static_cast<float>(acceleration) * 100.0f;
   }
 
@@ -704,8 +704,8 @@ class InstAccessor : public RegisterAccessor {
    * @brief 设置目标加速度 (0x29)
    * @param acceleration 目标加速度(100步/s²)
    */
-  void SetTargetAcceleration(const float acceleration) {
-    WriteRegField(Regs::kTargetAcceleration,
+  void SetGoalAcceleration(const float acceleration) {
+    WriteRegField(Regs::kGoalAcceleration,
                   static_cast<uint8_t>(acceleration / 100.0f));
   }
 
@@ -713,9 +713,9 @@ class InstAccessor : public RegisterAccessor {
    * @brief 获取目标位置 (0x2A-0x2B)
    * @return 目标位置(步)
    */
-  float GetTargetPosition() {
+  float GetGoalPosition() {
     uint16_t position;
-    ReadRegField(Regs::kTargetPositionH, Regs::kTargetPositionL, &position);
+    ReadRegField(Regs::kGoalPositionH, Regs::kGoalPositionL, &position);
     return static_cast<float>(bit_utils::SignToTwos(position, 15));
   }
 
@@ -723,9 +723,9 @@ class InstAccessor : public RegisterAccessor {
    * @brief 设置目标位置 (0x2A-0x2B)
    * @param position 目标位置(步)
    */
-  void SetTargetPosition(const float position) {
-    WriteRegField(Regs::kTargetPositionH,
-                  Regs::kTargetPositionL,
+  void SetGoalPosition(const float position) {
+    WriteRegField(Regs::kGoalPositionH,
+                  Regs::kGoalPositionL,
                   static_cast<uint16_t>(bit_utils::SignToTwos(position, 15)));
   }
 
@@ -733,9 +733,9 @@ class InstAccessor : public RegisterAccessor {
    * @brief 获取目标PWM (0x2C-0x2D)
    * @return 目标PWM值(0.10%)
    */
-  float GetTargetPwm() {
+  float GetGoalPwm() {
     uint16_t pwm;
-    ReadRegField(Regs::kTargetTimeH, Regs::kTargetTimeL, &pwm);
+    ReadRegField(Regs::kGoalTimeH, Regs::kGoalTimeL, &pwm);
     return pwm * 0.01f;
   }
 
@@ -743,19 +743,18 @@ class InstAccessor : public RegisterAccessor {
    * @brief 设置目标PWM (0x2C-0x2D)
    * @param pwm 目标PWM值(0.10%)
    */
-  void SetTargetPwm(const float pwm) {
-    WriteRegField(Regs::kTargetTimeH,
-                  Regs::kTargetTimeL,
-                  static_cast<uint16_t>(pwm * 100));
+  void SetGoalPwm(const float pwm) {
+    WriteRegField(
+        Regs::kGoalTimeH, Regs::kGoalTimeL, static_cast<uint16_t>(pwm * 100));
   }
 
   /**
    * @brief 获取目标时间 (0x2C-0x2D)
    * @return 目标时间(0.10%)
    */
-  uint16_t GetTargetTime() {
+  uint16_t GetGoalTime() {
     uint16_t time;
-    ReadRegField(Regs::kTargetTimeH, Regs::kTargetTimeL, &time);
+    ReadRegField(Regs::kGoalTimeH, Regs::kGoalTimeL, &time);
     return time;
   }
 
@@ -763,17 +762,17 @@ class InstAccessor : public RegisterAccessor {
    * @brief 设置目标时间 (0x2C-0x2D)
    * @param time 目标时间(0.10%)
    */
-  void SetTargetTime(const uint16_t time) {
-    WriteRegField(Regs::kTargetTimeH, Regs::kTargetTimeL, time);
+  void SetGoalTime(const uint16_t time) {
+    WriteRegField(Regs::kGoalTimeH, Regs::kGoalTimeL, time);
   }
 
   /**
    * @brief 获取目标速度 (0x2E-0x2F)
    * @return 目标速度(步/s)
    */
-  float GetTargetVelocity() {
+  float GetGoalVelocity() {
     uint16_t velocity;
-    ReadRegField(Regs::kTargetVelocityH, Regs::kTargetVelocityL, &velocity);
+    ReadRegField(Regs::kGoalVelocityH, Regs::kGoalVelocityL, &velocity);
     return static_cast<float>(bit_utils::SignToTwos(velocity, 15));
   }
 
@@ -781,9 +780,9 @@ class InstAccessor : public RegisterAccessor {
    * @brief 设置目标速度 (0x2E-0x2F)
    * @param velocity 目标速度(步/s)
    */
-  void SetTargetVelocity(const float velocity) {
-    WriteRegField(Regs::kTargetVelocityH,
-                  Regs::kTargetVelocityL,
+  void SetGoalVelocity(const float velocity) {
+    WriteRegField(Regs::kGoalVelocityH,
+                  Regs::kGoalVelocityL,
                   static_cast<uint16_t>(bit_utils::SignToTwos(velocity, 15)));
   }
 

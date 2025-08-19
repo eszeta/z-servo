@@ -164,10 +164,10 @@ Error InstAccessor::ResetRam() {
   SetTorqueEnable(false);
 
   // 动作
-  SetTargetAcceleration(0);
-  SetTargetPosition(0);
-  SetTargetTime(0);
-  SetTargetVelocity(0);
+  SetGoalAcceleration(0);
+  SetGoalPosition(0);
+  SetGoalTime(0);
+  SetGoalVelocity(0);
 
   // 转矩限制
   SetTorqueLimit(GetMaxTorque());

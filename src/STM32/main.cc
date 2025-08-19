@@ -79,7 +79,7 @@ void setup() {
   inst.Init();
 
   inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
-  inst_accessor.SetTargetVelocity(1000.0f);
+  inst_accessor.SetGoalVelocity(1000.0f);
   inst_accessor.SetVelPidKp(0.0f);
   inst_accessor.SetVelPidKi(0.0f);
 

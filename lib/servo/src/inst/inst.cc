@@ -189,22 +189,22 @@ Error Inst::LoadRamConfig() {
   const auto torque_enable = accessor_->GetTorqueEnable();
   servo_->SetTorqueEnable(torque_enable);
 
-  const auto target_acceleration = accessor_->GetTargetAcceleration();
-  servo_->SetTargetAcceleration(target_acceleration);
+  const auto target_acceleration = accessor_->GetGoalAcceleration();
+  servo_->SetGoalAcceleration(target_acceleration);
 
-  const auto target_position = accessor_->GetTargetPosition();
-  servo_->SetTargetPosition(target_position);
+  const auto target_position = accessor_->GetGoalPosition();
+  servo_->SetGoalPosition(target_position);
 
   if (mode == ServoMode::kPwm) {
-    servo_->SetTargetTime(0);
-    servo_->SetTargetPwm(accessor_->GetTargetPwm());
+    servo_->SetGoalTime(0);
+    servo_->SetGoalPwm(accessor_->GetGoalPwm());
   } else {
-    servo_->SetTargetTime(accessor_->GetTargetTime());
-    servo_->SetTargetPwm(0);
+    servo_->SetGoalTime(accessor_->GetGoalTime());
+    servo_->SetGoalPwm(0);
   }
 
-  const auto target_velocity = accessor_->GetTargetVelocity();
-  servo_->SetTargetVelocity(target_velocity);
+  const auto target_velocity = accessor_->GetGoalVelocity();
+  servo_->SetGoalVelocity(target_velocity);
 
   const auto torque_limit = accessor_->GetTorqueLimit();
   servo_->SetTorqueLimit(torque_limit);

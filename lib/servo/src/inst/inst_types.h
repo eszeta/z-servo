@@ -250,28 +250,28 @@ struct ServoRegs {
    * 单位:100步/s^2
    * 如设置为10 则按1000步每秒平方的加减速度变速
    */
-  static constexpr const Register kTargetAcceleration{0x29, 0, 8};
+  static constexpr const Register kGoalAcceleration{0x29, 0, 8};
   /**
    * @brief 目标位置 [-32766-32766]
    * 单位:步
    * 每步为一个最小分辨角度，绝对位置控制方式，最大对应最大有效角度
    */
-  static constexpr const Register kTargetPositionL{0x2A, 0, 8};
-  static constexpr const Register kTargetPositionH{0x2B, 0, 8};
+  static constexpr const Register kGoalPositionL{0x2A, 0, 8};
+  static constexpr const Register kGoalPositionH{0x2B, 0, 8};
   /**
    * @brief 运行时间 [0-1000]
    * 单位:0.10%
    * PWM开环调速度模式下，取值范围50-1000，BIT10为方向位
    */
-  static constexpr const Register kTargetTimeL{0x2C, 0, 8};
-  static constexpr const Register kTargetTimeH{0x2D, 0, 8};
+  static constexpr const Register kGoalTimeL{0x2C, 0, 8};
+  static constexpr const Register kGoalTimeH{0x2D, 0, 8};
   /**
    * @brief 运行速度 [-32766-32766]
    * 单位:步/s
    * 单位时间（每秒）内运动的步数，50步/秒= 0.732 RPM(圈每分钟）
    */
-  static constexpr const Register kTargetVelocityL{0x2E, 0, 8};
-  static constexpr const Register kTargetVelocityH{0x2F, 0, 8};
+  static constexpr const Register kGoalVelocityL{0x2E, 0, 8};
+  static constexpr const Register kGoalVelocityH{0x2F, 0, 8};
   /**
    * @brief 转矩限制 [0-1000]
    * 单位:1.0%
@@ -392,8 +392,8 @@ struct RegsDefaultValues {
   static constexpr uint8_t kDefFirmwareMajor = 1;  // 0x00
   static constexpr uint8_t kDefFirmwareMinor = 0;  // 0x01
   static constexpr uint8_t kDefEnd = 0;            // 0x02
-  static constexpr uint8_t kDefServoMajor = 9;     // 0x03
-  static constexpr uint8_t kDefServoMinor = 0;     // 0x04
+  static constexpr uint8_t kDefServoMajor = 0x77;  // 0x03
+  static constexpr uint8_t kDefServoMinor = 0x07;  // 0x04
 
   // EEPROM（读写）
   static constexpr uint8_t kDefId = 1;                             // 0x05
@@ -406,11 +406,11 @@ struct RegsDefaultValues {
   static constexpr float kDefMaxVoltage = 7.4f;                    // 0x0E
   static constexpr float kDefMinVoltage = 4.0f;                    // 0x0F
   static constexpr uint16_t kDefMaxTorque = 1;                     // 0x10-0x11
-  static constexpr uint8_t kDefOption = 0;                         // 0x12
+  static constexpr uint8_t kDefOption = 12;                        // 0x12
   static constexpr uint8_t kDefUnloadCondition = 44;               // 0x13
   static constexpr uint8_t kDefLedAlarmCondition = 47;             // 0x14
-  static constexpr float kDefPosPidKp = 1.0f;                      // 0x15
-  static constexpr float kDefPosPidKd = 0.0f;                      // 0x16
+  static constexpr float kDefPosPidKp = 3.2f;                      // 0x15
+  static constexpr float kDefPosPidKd = 3.2f;                      // 0x16
   static constexpr float kDefPosPidKi = 0.0f;                      // 0x17
   static constexpr float kDefMinStartupForce = 0.0f;               // 0x18
   static constexpr float kDefPosPidILimit = 0.0f;                  // 0x19
@@ -459,9 +459,8 @@ struct RegsBlocks {
   constexpr static RegsBlock kInternalEeprom = {
       ServoRegs::kSensorDirection.address,
       ServoRegs::kVelocityFilter.address + 1};
-  constexpr static RegsBlock kAction = {
-      ServoRegs::kTargetAcceleration.address,
-      ServoRegs::kTargetVelocityH.address + 1};
+  constexpr static RegsBlock kAction = {ServoRegs::kGoalAcceleration.address,
+                                        ServoRegs::kGoalVelocityH.address + 1};
   constexpr static RegsBlock kTotal = {ServoRegs::kFirmwareMajor.address,
                                        ServoRegs::kVelocityFilter.address + 1};
 };

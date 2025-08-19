@@ -92,11 +92,6 @@ class Servo {
    */
   bool GetMoving() { return moving_; }
   /**
-   * @brief 获取目标位置
-   * @return 目标位置值
-   */
-  float GetTargetPosition() { return target_position_; }
-  /**
    * @brief 获取舵机模式
    * @return 舵机模式
    */
@@ -257,35 +252,36 @@ class Servo {
   void SetTorqueEnable(bool torque_enable) { torque_enable_ = torque_enable; }
   /**
    * @brief 设置目标加速度
-   * @param target_acceleration 目标加速度值
+   * @param goal_acceleration 目标加速度值
    */
-  void SetTargetAcceleration(float target_acceleration) {
-    target_acceleration_ = target_acceleration;
+  void SetGoalAcceleration(float goal_acceleration) {
+    goal_acceleration_ = goal_acceleration;
   }
   /**
    * @brief 设置目标位置
-   * @param target_position 目标位置值
+   * @param goal_position 目标位置值
    */
-  void SetTargetPosition(float target_position) {
-    target_position_ = target_position;
-  }
+  void SetGoalPosition(float goal_position) { goal_position_ = goal_position; }
+  /**
+   * @brief 获取目标位置
+   * @return 目标位置值
+   */
+  float GetGoalPosition() { return goal_position_; }
   /**
    * @brief 设置目标时间
    * @param target_time 目标时间值
    */
-  void SetTargetTime(int16_t target_time) { target_time_ = target_time; }
+  void SetGoalTime(int16_t goal_time) { goal_time_ = goal_time; }
   /**
    * @brief 设置目标PWM
    * @param target_pwm 目标PWM值
    */
-  void SetTargetPwm(float target_pwm) { target_pwm_ = target_pwm; }
+  void SetGoalPwm(float goal_pwm) { goal_pwm_ = goal_pwm; }
   /**
    * @brief 设置目标速度
    * @param target_velocity 目标速度值
    */
-  void SetTargetVelocity(float target_velocity) {
-    target_velocity_ = target_velocity;
-  }
+  void SetGoalVelocity(float goal_velocity) { goal_velocity_ = goal_velocity; }
   /**
    * @brief 设置扭矩限制
    * @param torque_limit 扭矩限制值
@@ -336,15 +332,15 @@ class Servo {
   bool torque_enable_ = false;
 
   /** @brief 目标加速度 */
-  float target_acceleration_ = 0.0f;
+  float goal_acceleration_ = 0.0f;
   /** @brief 目标位置 */
-  float target_position_ = 0.0f;
+  float goal_position_ = 0.0f;
   /** @brief 目标时间 */
-  int16_t target_time_ = 0;
+  int16_t goal_time_ = 0;
   /** @brief 目标速度 */
-  float target_velocity_ = 0.0f;
+  float goal_velocity_ = 0.0f;
   /** @brief 目标PWM */
-  float target_pwm_ = 0.0f;
+  float goal_pwm_ = 0.0f;
   /** @brief 扭矩限制 */
   float torque_limit_ = 0.0f;
 

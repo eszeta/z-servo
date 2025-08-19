@@ -47,7 +47,7 @@ void Servo::Init() {}
  * @brief 执行动作
  */
 void Servo::Action() {
-  if (target_position_ >= min_position_ && target_position_ <= max_position_) {
+  if (goal_position_ >= min_position_ && goal_position_ <= max_position_) {
     moving_ = true;
   }
 }
@@ -64,7 +64,7 @@ void Servo::Process(float dt) {
   if (!enabled_) return;
   switch (mode_) {
     case ServoMode::kPosition: {
-      const auto pos_error = target_position_ - present_position_;
+      const auto pos_error = goal_position_ - present_position_;
 
       if (IsPositionReached(pos_error)) {
         moving_ = false;
@@ -81,18 +81,17 @@ void Servo::Process(float dt) {
       auto next_velocity = position_error;
 
       // 应用加速度限制
-      if (target_acceleration_ > kFloatThreshold) {
+      if (goal_acceleration_ > kFloatThreshold) {
         const auto velocity_change = next_velocity - present_velocity_;
-        const auto limited_acceleration = std::clamp(velocity_change,
-                                                     -target_acceleration_ * dt,
-                                                     target_acceleration_ * dt);
+        const auto limited_acceleration = std::clamp(
+            velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
         next_velocity = present_velocity_ + limited_acceleration;
       }
 
       // 应用最高速度限制
-      if (target_velocity_ > kFloatThreshold ||
-          target_velocity_ < -kFloatThreshold) {
-        const auto limited_velocity = std::abs(target_velocity_);
+      if (goal_velocity_ > kFloatThreshold ||
+          goal_velocity_ < -kFloatThreshold) {
+        const auto limited_velocity = std::abs(goal_velocity_);
         next_velocity =
             std::clamp(next_velocity, -limited_velocity, limited_velocity);
       }
@@ -106,14 +105,13 @@ void Servo::Process(float dt) {
       break;
     }
     case ServoMode::kVelocity: {
-      auto next_velocity = target_velocity_;
+      auto next_velocity = goal_velocity_;
 
       // 加速度限制：限制速度变化率
-      if (target_acceleration_ > kFloatThreshold) {
+      if (goal_acceleration_ > kFloatThreshold) {
         const auto velocity_change = next_velocity - present_velocity_;
-        const auto limited_acceleration = std::clamp(velocity_change,
-                                                     -target_acceleration_ * dt,
-                                                     target_acceleration_ * dt);
+        const auto limited_acceleration = std::clamp(
+            velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
         next_velocity = present_velocity_ + limited_acceleration;
       }
 
@@ -123,7 +121,7 @@ void Servo::Process(float dt) {
       break;
     }
     case ServoMode::kPwm: {
-      const auto pwm_set = target_pwm_;
+      const auto pwm_set = goal_pwm_;
       SetPower(pwm_set);
       break;
     }

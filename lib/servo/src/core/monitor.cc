@@ -28,7 +28,7 @@ void Monitor::Process(float dt) {
 
   bool printed = false;
   if (variables_ & static_cast<uint8_t>(MonitorBitmap::kTarget)) {
-    monitorPort_->print(servo_->GetTargetPosition(), decimals_);
+    monitorPort_->print(servo_->GetGoalPosition(), decimals_);
     printed = true;
   }
 
