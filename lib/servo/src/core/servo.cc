@@ -18,9 +18,6 @@
 
 namespace hortor_servo {
 
-// 浮点数比较阈值，用于判断值是否接近0
-static constexpr float kFloatThreshold = 0.001f;
-
 /**
  * @brief 链接电机驱动器
  * @param driver 电机驱动器指针
@@ -78,53 +75,50 @@ void Servo::Process(float dt) {
         break;
       }
 
-      // ===== 位置-速度双闭环控制策略（按算法例子修正）=====
-
-      // 第一步：位置环计算目标速度
+      // 位置环计算目标速度
       const auto position_error = pos_pid_.Compute(pos_error, dt);
 
-      auto target_velocity = position_error;
+      auto next_velocity = position_error;
 
-      // 第二步：应用加速度限制（在目标速度变化上）
+      // 应用加速度限制
       if (target_acceleration_ > kFloatThreshold) {
-        const auto velocity_change = target_velocity - present_velocity_;
-        const auto limited_acceleration = constrain(velocity_change,
-                                                    -target_acceleration_ * dt,
-                                                    target_acceleration_ * dt);
-        target_velocity = present_velocity_ + limited_acceleration;
+        const auto velocity_change = next_velocity - present_velocity_;
+        const auto limited_acceleration = std::clamp(velocity_change,
+                                                     -target_acceleration_ * dt,
+                                                     target_acceleration_ * dt);
+        next_velocity = present_velocity_ + limited_acceleration;
       }
 
-      // 第三步：应用最高速度限制
-      if (target_velocity_ > kFloatThreshold) {
-        target_velocity =
-            constrain(target_velocity, -target_velocity_, target_velocity_);
+      // 应用最高速度限制
+      if (target_velocity_ > kFloatThreshold ||
+          target_velocity_ < -kFloatThreshold) {
+        const auto limited_velocity = std::abs(target_velocity_);
+        next_velocity =
+            std::clamp(next_velocity, -limited_velocity, limited_velocity);
       }
 
-      // 第四步：速度环计算控制输出
-      const auto velocity_error = target_velocity - present_velocity_;
-      const auto control_output = velocity_pid_.Compute(velocity_error, dt);
+      // 速度环计算控制输出
+      const auto velocity_error = next_velocity - present_velocity_;
+      const auto pwm_set = velocity_pid_.Compute(velocity_error, dt);
 
       // 输出控制信号（PWM）
-      SetPower(control_output);
+      SetPower(pwm_set);
       break;
     }
     case ServoMode::kVelocity: {
-      auto target_vel = target_velocity_;
+      auto next_velocity = target_velocity_;
 
-      // 加速度限制：限制速度变化率（考虑方向）
+      // 加速度限制：限制速度变化率
       if (target_acceleration_ > kFloatThreshold) {
-        const auto velocity_change = target_vel - present_velocity_;
-        const auto max_change = target_acceleration_ * dt;
-
-        // 如果速度变化超出加速度限制，则限制速度变化量
-        if (std::fabs(velocity_change) > max_change) {
-          target_vel =
-              present_velocity_ + std::copysign(max_change, velocity_change);
-        }
+        const auto velocity_change = next_velocity - present_velocity_;
+        const auto limited_acceleration = std::clamp(velocity_change,
+                                                     -target_acceleration_ * dt,
+                                                     target_acceleration_ * dt);
+        next_velocity = present_velocity_ + limited_acceleration;
       }
 
-      const auto vel_error = target_vel - present_velocity_;
-      const auto pwm_set = velocity_pid_.Compute(vel_error, dt);
+      const auto velocity_error = next_velocity - present_velocity_;
+      const auto pwm_set = velocity_pid_.Compute(velocity_error, dt);
       SetPower(pwm_set);
       break;
     }

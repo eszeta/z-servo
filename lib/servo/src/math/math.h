@@ -22,6 +22,9 @@ static constexpr float kMicroToSec = 1e-6f;
 /// @brief 毫秒转换为秒
 static constexpr float kMilliToSec = 1e-3f;
 
+// 浮点数比较阈值，用于判断值是否接近0
+static constexpr float kFloatThreshold = 0.001f;
+
 /// @brief 将一个值从一个分辨率映射到另一个分辨率
 /// @param value 需要映射的值
 /// @param from 源分辨率
