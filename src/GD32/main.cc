@@ -34,7 +34,7 @@ SPIClass spi_sensor(DIGITAL_TO_PINNAME(PA8),
                     DIGITAL_TO_PINNAME(PA10));
 
 hortor_servo::InfoLED::InfoLED info_led;
-hortor_servo::InstSerialAdapter inst_transport;
+hortor_servo::InstSerialAdapter inst_adapter;
 hortor_servo::InstAccessor inst_accessor;
 hortor_servo::Inst inst;
 hortor_servo::MP6515::MP6515 motor_driver;
@@ -61,10 +61,10 @@ void setup() {
   servo.Init();
 
   inst_accessor.Init();
-  inst_transport.Init(&serial_inst);
+  inst_adapter.Init(&serial_inst);
 
   inst.LinkAccessor(&inst_accessor);
-  inst.LinkTransport(&inst_transport);
+  inst.LinkAdapter(&inst_adapter);
   inst.LinkServo(&servo);
   inst.Init();
 

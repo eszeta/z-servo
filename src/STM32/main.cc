@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -36,7 +37,7 @@ TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_inst(PB7, PA15);
 
 hortor_servo::InfoLED::InfoLED info_led{};
-hortor_servo::InstI2cAdapter inst_transport{};
+hortor_servo::InstI2cAdapter inst_adapter{};
 hortor_servo::InstAccessor inst_accessor{};
 hortor_servo::Inst inst{};
 hortor_servo::DRV8231A::DRV8231A motor_driver{};
@@ -45,9 +46,9 @@ hortor_servo::generic_current::GenericCurrent current_sensor{};
 hortor_servo::Servo servo{};
 
 // cppcheck-suppress unusedFunction
-void receiveEvent(int howMany) { inst_transport.OnReceive(howMany); }
+void receiveEvent(int howMany) { inst_adapter.OnReceive(howMany); }
 // cppcheck-suppress unusedFunction
-void requestEvent() { inst_transport.OnRequest(); }
+void requestEvent() { inst_adapter.OnRequest(); }
 
 // cppcheck-suppress unusedFunction
 void setup() {
@@ -71,17 +72,17 @@ void setup() {
   servo.Init();
 
   inst_accessor.Init();
-  inst_transport.Init(&wire_inst);
+  inst_adapter.Init(&wire_inst);
 
   inst.LinkAccessor(&inst_accessor);
-  inst.LinkTransport(&inst_transport);
+  inst.LinkAdapter(&inst_adapter);
   inst.LinkServo(&servo);
   inst.Init();
 
-  inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
-  inst_accessor.SetGoalVelocity(1000.0f);
-  inst_accessor.SetVelPidKp(0.0f);
-  inst_accessor.SetVelPidKi(0.0f);
+  // inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
+  // inst_accessor.SetGoalVelocity(1000.0f);
+  // inst_accessor.SetVelPidKp(0.0f);
+  // inst_accessor.SetVelPidKi(0.0f);
 
   inst.Refresh();
 

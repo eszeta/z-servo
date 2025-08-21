@@ -31,6 +31,7 @@ Error InstSerialAdapter::Process(float dt) {
     is_dirty_ = false;
     const size_t buffer_size = inst_utils::GetBufferSize(tx_buffer_);
     const size_t size = serial_->write(tx_buffer_, buffer_size);
+    serial_->enableHalfDuplexRx();
     if (size != buffer_size) {
       return Error::kIOErr;
     }

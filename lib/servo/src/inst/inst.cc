@@ -32,9 +32,9 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
   return Error::kOk;
 }
 
-Error Inst::LinkTransport(InstAdapterInterface *transport) {
-  transport_ = transport;
-  CHECK(transport_->SetExecute(
+Error Inst::LinkAdapter(InstAdapterInterface *adapter) {
+  adapter_ = adapter;
+  CHECK(adapter_->SetExecute(
       [this](uint8_t *data) -> Error { return Execute(data); }));
   return Error::kOk;
 }
@@ -51,7 +51,7 @@ Error Inst::Refresh() {
 }
 
 Error Inst::Process(float dt) {
-  CHECK(transport_->Process(dt));
+  CHECK(adapter_->Process(dt));
   CHECK(UpdateStatusRegs());
   return Error::kOk;
 }
@@ -69,7 +69,7 @@ Error Inst::Response(const uint8_t reply_idx,
   }
   status_packet_.error = accessor_->GetStatus();
   status_packet_.SetChecksum();
-  CHECK(transport_->Response(reply_idx, tx_buffer_));
+  CHECK(adapter_->Response(reply_idx, tx_buffer_));
   return Error::kOk;
 }
 
@@ -96,7 +96,7 @@ Error Inst::WriteRegs(const uint8_t address,
 
 Error Inst::LoadEepromConfig() {
   const auto response_delay = accessor_->GetResponseDelay();
-  transport_->SetResponseDelay(response_delay);
+  adapter_->SetResponseDelay(response_delay);
 
   const auto mode = accessor_->GetMode();
   servo_->SetMode(mode);

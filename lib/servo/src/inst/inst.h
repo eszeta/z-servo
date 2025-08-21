@@ -41,7 +41,7 @@ class Inst {
    * @brief 链接传输接口
    * @param transport 指令传输接口
    */
-  Error LinkTransport(InstAdapterInterface *transport);
+  Error LinkAdapter(InstAdapterInterface *adapter);
 
   /**
    * @brief 链接伺服电机
@@ -183,7 +183,7 @@ class Inst {
   /**
    * @brief 指令传输接口
    */
-  InstAdapterInterface *transport_ = nullptr;
+  InstAdapterInterface *adapter_ = nullptr;
   /**
    * @brief 伺服电机
    */
