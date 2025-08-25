@@ -44,12 +44,6 @@ Error Inst::LinkServo(Servo *servo) {
   return Error::kOk;
 }
 
-Error Inst::Refresh() {
-  CHECK(LoadEepromConfig());
-  CHECK(LoadRamConfig());
-  return Error::kOk;
-}
-
 Error Inst::Process(float dt) {
   CHECK(adapter_->Process(dt));
   CHECK(UpdateStatusRegs());

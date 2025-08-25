@@ -24,7 +24,7 @@ class Inst {
    * @brief 构造函数
    */
   Inst() = default;
-  
+
   /**
    * @brief 初始化
    * @return 错误码
@@ -56,11 +56,16 @@ class Inst {
    */
   Error Process(float dt);
 
-  /**
-   * @brief 刷新
+    /**
+   * @brief 加载EEPROM寄存器
    * @return 错误码
    */
-  Error Refresh();
+  Error LoadEepromConfig();
+  /**
+   * @brief 加载RAM寄存器
+   * @return 错误码
+   */
+  Error LoadRamConfig();
 
  private:
   /**
@@ -102,16 +107,7 @@ class Inst {
    * @return 错误码
    */
   Error UpdateStatusRegs();
-  /**
-   * @brief 加载EEPROM寄存器
-   * @return 错误码
-   */
-  Error LoadEepromConfig();
-  /**
-   * @brief 加载RAM寄存器
-   * @return 错误码
-   */
-  Error LoadRamConfig();
+
   /**
    * @brief PING指令
    * @param packet 指令包

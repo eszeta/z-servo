@@ -57,9 +57,6 @@ void setup() {
 
   serial_debug.begin(921600);
   hortor_servo::DebugEnable(&serial_debug);
-  hortor_servo::DebugPrintln(F("setup"));
-
-  info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
 
   motor_driver.Init(PA0, PA2);
   wire_sensor.begin();
@@ -84,8 +81,10 @@ void setup() {
   // inst_accessor.SetVelPidKp(0.0f);
   // inst_accessor.SetVelPidKi(0.0f);
 
-  inst.Refresh();
+  inst.LoadEepromConfig();
+  inst.LoadRamConfig();
 
+  info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
 }
 
