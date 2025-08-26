@@ -83,7 +83,7 @@ void Servo::Process(float dt) {
       // 应用加速度限制
       if (goal_acceleration_ > kFloatThreshold) {
         const auto velocity_change = next_velocity - present_velocity_;
-        const auto limited_acceleration = std::clamp(
+        const auto limited_acceleration = constrain(
             velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
         next_velocity = present_velocity_ + limited_acceleration;
       }
@@ -93,7 +93,7 @@ void Servo::Process(float dt) {
           goal_velocity_ < -kFloatThreshold) {
         const auto limited_velocity = std::abs(goal_velocity_);
         next_velocity =
-            std::clamp(next_velocity, -limited_velocity, limited_velocity);
+            constrain(next_velocity, -limited_velocity, limited_velocity);
       }
 
       // 速度环计算控制输出
@@ -110,7 +110,7 @@ void Servo::Process(float dt) {
       // 加速度限制：限制速度变化率
       if (goal_acceleration_ > kFloatThreshold) {
         const auto velocity_change = next_velocity - present_velocity_;
-        const auto limited_acceleration = std::clamp(
+        const auto limited_acceleration = constrain(
             velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
         next_velocity = present_velocity_ + limited_acceleration;
       }

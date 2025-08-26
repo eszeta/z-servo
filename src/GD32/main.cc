@@ -23,7 +23,7 @@
 #include "info_led.h"
 #include "inst/inst.h"
 #include "inst/inst_accessor.h"
-#include "inst/inst_serial_adapter.h"
+#include "inst/inst_handler_serial.h"
 #include "math/math.h"
 
 static constexpr auto kInfoLedPin = PB1;
@@ -34,7 +34,7 @@ SPIClass spi_sensor(DIGITAL_TO_PINNAME(PA8),
                     DIGITAL_TO_PINNAME(PA10));
 
 hortor_servo::InfoLED::InfoLED info_led;
-hortor_servo::InstSerialAdapter inst_adapter;
+hortor_servo::InstHandlerSerial inst_handler;
 hortor_servo::InstAccessor inst_accessor;
 hortor_servo::Inst inst;
 hortor_servo::MP6515::MP6515 motor_driver;
@@ -61,10 +61,10 @@ void setup() {
   servo.Init();
 
   inst_accessor.Init();
-  inst_adapter.Init(&serial_inst);
+  inst_handler.Init(&serial_inst);
 
   inst.LinkAccessor(&inst_accessor);
-  inst.LinkAdapter(&inst_adapter);
+  inst.LinkHandler(&inst_handler);
   inst.LinkServo(&servo);
   inst.Init();
 

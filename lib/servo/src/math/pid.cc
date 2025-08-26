@@ -15,7 +15,6 @@
 #include "pid.h"
 
 #include <Arduino.h>
-
 namespace hortor_servo {
 
 PidController::PidController(const PIDParam& param) : param_(param) {}

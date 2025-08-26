@@ -12,25 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-
 #include <Arduino.h>
-
-#include <functional>
+#include <Wire.h>
 
 #include "core/types.h"
+#include "inst/inst_handler_interface.h"
 
 namespace hortor_servo {
 
-class InstAdapterInterface {
+class InstHandlerI2c : public InstHandlerInterface {
  public:
-  using ExecuteFunc = std::function<Error(uint8_t *data)>;
+  /**
+   * @brief 构造函数
+   */
+  InstHandlerI2c() = default;
+  
+  /**
+   * @brief 初始化
+   * @param wire I2C对象
+   * @param address I2C地址
+   * @return 错误码
+   */
+  Error Init(TwoWire *wire) {
+    wire_ = wire;
+    return Error::kOk;
+  }
 
   /**
    * @brief 处理数据
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  virtual Error Process(const float dt) = 0;
+  Error Process(const float dt) override;
 
   /**
    * @brief 发送数据
@@ -38,29 +51,16 @@ class InstAdapterInterface {
    * @param data 数据
    * @return 错误码
    */
-  virtual Error Response(const uint8_t reply_idx, const uint8_t *data) = 0;
+  Error Response(const uint8_t reply_idx, const uint8_t *data) override;
 
-  /**
-   * @brief 设置响应延迟
-   * 单位: 毫秒
-   */
-  void SetResponseDelay(const uint16_t response_delay) {
-    response_delay_ = response_delay;
-  }
+  void OnReceive(int howMany);
 
-  /**
-   * @brief 设置执行函数
-   * @param execute 执行函数
-   * @return 错误码
-   */
-  Error SetExecute(ExecuteFunc execute) {
-    execute_ = execute;
-    return Error::kOk;
-  }
+  void OnRequest();
 
- protected:
-  ExecuteFunc execute_;
-  uint16_t response_delay_ = 0;
+ private:
+  static constexpr auto kBufferSize = 128;
+  TwoWire *wire_ = nullptr;
+  uint8_t rx_buffer_[kBufferSize] = {0};
+  uint8_t tx_buffer_[kBufferSize] = {0};
 };
-
 }  // namespace hortor_servo

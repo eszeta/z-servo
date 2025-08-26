@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "inst_i2c_adapter.h"
+#include "inst_handler_i2c.h"
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -21,25 +21,25 @@
 
 namespace hortor_servo {
 
-Error InstI2cAdapter::Process(float dt) { return Error::kOk; }
+Error InstHandlerI2c::Process(float dt) { return Error::kOk; }
 
-Error InstI2cAdapter::Response(const uint8_t reply_idx, const uint8_t *data) {
+Error InstHandlerI2c::Response(const uint8_t reply_idx, const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);
-  memcpy(tx_buffer_, data, size);
+  std::copy(data, data + size, tx_buffer_);
   return Error::kOk;
 }
 
-void InstI2cAdapter::OnReceive(int howMany) {
+void InstHandlerI2c::OnReceive(int howMany) {
   size_t pos = 0;
   while (wire_->available()) {
     rx_buffer_[pos++] = wire_->read();
   }
   if (inst_utils::CheckChecksum(rx_buffer_)) {
-    execute_(rx_buffer_);
+    execute_(rx_buffer_, inst_utils::GetBufferSize(rx_buffer_));
   }
 }
 
-void InstI2cAdapter::OnRequest() {
+void InstHandlerI2c::OnRequest() {
   wire_->write(tx_buffer_, inst_utils::GetBufferSize(tx_buffer_));
 }
 }  // namespace hortor_servo

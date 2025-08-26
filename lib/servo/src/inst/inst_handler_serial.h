@@ -13,28 +13,29 @@
 // limitations under the License.
 #pragma once
 #include <Arduino.h>
-#include <Wire.h>
 
-#include "core/types.h"
-#include "inst/inst_adapter_interface.h"
+#include "inst/inst_handler_interface.h"
+#include "inst/inst_types.h"
 
+#ifdef ARDUINO_ARCH_STM32
+#include <HardwareSerial.h>
+#endif
 namespace hortor_servo {
 
-class InstI2cAdapter : public InstAdapterInterface {
+class InstHandlerSerial : public InstHandlerInterface {
  public:
   /**
    * @brief 构造函数
    */
-  InstI2cAdapter() = default;
-  
+  InstHandlerSerial() = default;
+
   /**
    * @brief 初始化
-   * @param wire I2C对象
-   * @param address I2C地址
+   * @param serial 串口
    * @return 错误码
    */
-  Error Init(TwoWire *wire) {
-    wire_ = wire;
+  Error Init(HardwareSerial *serial) {
+    serial_ = serial;
     return Error::kOk;
   }
 
@@ -53,13 +54,20 @@ class InstI2cAdapter : public InstAdapterInterface {
    */
   Error Response(const uint8_t reply_idx, const uint8_t *data) override;
 
-  void OnReceive(int howMany);
-
-  void OnRequest();
-
  private:
-  TwoWire *wire_ = nullptr;
-  uint8_t rx_buffer_[128] = {0};
-  uint8_t tx_buffer_[128] = {0};
+  static constexpr auto kBufferSize = 128;
+  /**
+   * @brief 接收数据
+   * @param data 数据
+   * @return 错误码
+   */
+  Error Receive(uint8_t data);
+  HardwareSerial *serial_ = nullptr;
+  uint8_t rx_buffer_[kBufferSize] = {0};
+  uint8_t tx_buffer_[kBufferSize] = {0};
+  uint8_t param_pos_ = 0;
+  PacketState packet_state_ = PacketState::kHeader1;
+  uint32_t delay_time_ = 0;
+  bool response_pending_ = false;
 };
 }  // namespace hortor_servo

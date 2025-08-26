@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "inst_serial_adapter.h"
+#include "inst_handler_serial.h"
 
 #include <Arduino.h>
 
@@ -24,14 +24,13 @@
 
 namespace hortor_servo {
 
-Error InstSerialAdapter::Process(float dt) {
+Error InstHandlerSerial::Process(float dt) {
   // 延时回包
   delay_time_ -= dt;
-  if (delay_time_ <= 0 && is_dirty_) {
-    is_dirty_ = false;
+  if (delay_time_ <= 0 && response_pending_) {
+    response_pending_ = false;
     const size_t buffer_size = inst_utils::GetBufferSize(tx_buffer_);
     const size_t size = serial_->write(tx_buffer_, buffer_size);
-    serial_->enableHalfDuplexRx();
     if (size != buffer_size) {
       return Error::kIOErr;
     }
@@ -45,7 +44,7 @@ Error InstSerialAdapter::Process(float dt) {
   return Error::kOk;
 }
 
-Error InstSerialAdapter::Receive(uint8_t data) {
+Error InstHandlerSerial::Receive(uint8_t data) {
   switch (packet_state_) {
     case PacketState::kHeader1: {
       if (data == 0xff) {
@@ -95,7 +94,7 @@ Error InstSerialAdapter::Receive(uint8_t data) {
         packet_state_ = PacketState::kHeader1;
         return Error::kInvalidPacket;
       }
-      CHECK(execute_(rx_buffer_));
+      CHECK(execute_(rx_buffer_, inst_utils::GetBufferSize(rx_buffer_)));
       break;
     }
     default: {
@@ -106,12 +105,12 @@ Error InstSerialAdapter::Receive(uint8_t data) {
   return Error::kOk;
 }
 
-Error InstSerialAdapter::Response(const uint8_t reply_idx,
+Error InstHandlerSerial::Response(const uint8_t reply_idx,
                                   const uint8_t *data) {
   const size_t size = inst_utils::GetBufferSize(data);
-  memcpy(tx_buffer_, data, size);
+  std::copy(data, data + size, tx_buffer_);
   delay_time_ = response_delay_ * (reply_idx + 1) * kMilliToSec;  // 毫秒转秒
-  is_dirty_ = true;
+  response_pending_ = true;
   return Error::kOk;
 }
 }  // namespace hortor_servo

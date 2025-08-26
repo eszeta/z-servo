@@ -32,10 +32,10 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
   return Error::kOk;
 }
 
-Error Inst::LinkAdapter(InstAdapterInterface *adapter) {
+Error Inst::LinkHandler(InstHandlerInterface *adapter) {
   adapter_ = adapter;
   CHECK(adapter_->SetExecute(
-      [this](uint8_t *data) -> Error { return Execute(data); }));
+      [this](uint8_t *data, size_t size) -> Error { return Execute(data, size); }));
   return Error::kOk;
 }
 
@@ -58,7 +58,7 @@ Error Inst::Response(const uint8_t reply_idx,
   if (parameter == nullptr) {
     status_packet_.SetParameterSize(0);
   } else {
-    memcpy(status_packet_.parameter, parameter, parameter_size);
+    std::copy(parameter, parameter + parameter_size, status_packet_.parameter);
     status_packet_.SetParameterSize(parameter_size);
   }
   status_packet_.error = accessor_->GetStatus();
@@ -248,7 +248,7 @@ Error Inst::UpdateStatusRegs() {
   return Error::kOk;
 }
 
-Error Inst::Execute(const uint8_t *data) {
+Error Inst::Execute(const uint8_t *data, size_t size) {
   const InstPacket *const packet = reinterpret_cast<const InstPacket *>(data);
   const uint8_t instruction = packet->instruction;
   const uint8_t id = packet->id;
@@ -369,7 +369,7 @@ Error Inst::RegWriteHandler(const InstPacket *packet, const bool response) {
   if (buffer_size_ + size > sizeof(async_write_buffer_)) {
     return Error::kArrayOutOfRange;
   }
-  memcpy(async_write_buffer_ + buffer_size_, tx_buffer_, size);
+  std::copy(tx_buffer_, tx_buffer_ + size, async_write_buffer_ + buffer_size_);
   buffer_size_ += size;
   accessor_->SetAsyncWrite(true);
   if (response) {

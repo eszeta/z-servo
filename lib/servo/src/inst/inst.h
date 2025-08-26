@@ -16,7 +16,7 @@
 
 #include "core/servo.h"
 #include "inst/inst_accessor.h"
-#include "inst/inst_adapter_interface.h"
+#include "inst/inst_handler_interface.h"
 namespace hortor_servo {
 class Inst {
  public:
@@ -41,7 +41,7 @@ class Inst {
    * @brief 链接传输接口
    * @param transport 指令传输接口
    */
-  Error LinkAdapter(InstAdapterInterface *adapter);
+  Error LinkHandler(InstHandlerInterface *adapter);
 
   /**
    * @brief 链接伺服电机
@@ -56,7 +56,7 @@ class Inst {
    */
   Error Process(float dt);
 
-    /**
+  /**
    * @brief 加载EEPROM寄存器
    * @return 错误码
    */
@@ -73,7 +73,7 @@ class Inst {
    * @param data 指令数据
    * @return 错误码
    */
-  Error Execute(const uint8_t *data);
+  Error Execute(const uint8_t *data, size_t size);
 
   /**
    * @brief 响应指令
@@ -179,7 +179,7 @@ class Inst {
   /**
    * @brief 指令传输接口
    */
-  InstAdapterInterface *adapter_ = nullptr;
+  InstHandlerInterface *adapter_ = nullptr;
   /**
    * @brief 伺服电机
    */
