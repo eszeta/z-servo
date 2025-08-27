@@ -32,10 +32,10 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
   return Error::kOk;
 }
 
-Error Inst::LinkHandler(InstHandlerInterface *adapter) {
-  adapter_ = adapter;
-  CHECK(adapter_->SetExecute(
-      [this](uint8_t *data, size_t size) -> Error { return Execute(data, size); }));
+Error Inst::LinkPort(InstPort *port) {
+  port_ = port;
+  CHECK(port_->SetExecute(
+      [this](InstPacket *packet) -> Error { return Execute(packet); }));
   return Error::kOk;
 }
 
@@ -45,7 +45,7 @@ Error Inst::LinkServo(Servo *servo) {
 }
 
 Error Inst::Process(float dt) {
-  CHECK(adapter_->Process(dt));
+  CHECK(port_->Process(dt));
   CHECK(UpdateStatusRegs());
   return Error::kOk;
 }
@@ -53,7 +53,8 @@ Error Inst::Process(float dt) {
 Error Inst::Response(const uint8_t reply_idx,
                      const uint8_t *parameter,
                      const size_t parameter_size) {
-  status_packet_.header = 0xffff;
+  status_packet_.header1 = 0xff;
+  status_packet_.header2 = 0xff;
   status_packet_.id = accessor_->GetId();
   if (parameter == nullptr) {
     status_packet_.SetParameterSize(0);
@@ -61,9 +62,9 @@ Error Inst::Response(const uint8_t reply_idx,
     std::copy(parameter, parameter + parameter_size, status_packet_.parameter);
     status_packet_.SetParameterSize(parameter_size);
   }
-  status_packet_.error = accessor_->GetStatus();
-  status_packet_.SetChecksum();
-  CHECK(adapter_->Response(reply_idx, tx_buffer_));
+  status_packet_.instructionOrError = accessor_->GetStatus();
+  status_packet_.SetChecksum(status_packet_.CalculateChecksum());
+  CHECK(port_->Response(reply_idx, &status_packet_));
   return Error::kOk;
 }
 
@@ -90,7 +91,7 @@ Error Inst::WriteRegs(const uint8_t address,
 
 Error Inst::LoadEepromConfig() {
   const auto response_delay = accessor_->GetResponseDelay();
-  adapter_->SetResponseDelay(response_delay);
+  port_->SetResponseDelay(response_delay);
 
   const auto mode = accessor_->GetMode();
   servo_->SetMode(mode);
@@ -248,9 +249,8 @@ Error Inst::UpdateStatusRegs() {
   return Error::kOk;
 }
 
-Error Inst::Execute(const uint8_t *data, size_t size) {
-  const InstPacket *const packet = reinterpret_cast<const InstPacket *>(data);
-  const uint8_t instruction = packet->instruction;
+Error Inst::Execute(const InstPacket *packet) {
+  const uint8_t instruction = packet->instructionOrError;
   const uint8_t id = packet->id;
   // 254(0XFE) 表示广播ID
   if (id != accessor_->GetId() && id != 0xfe) {
@@ -369,7 +369,7 @@ Error Inst::RegWriteHandler(const InstPacket *packet, const bool response) {
   if (buffer_size_ + size > sizeof(async_write_buffer_)) {
     return Error::kArrayOutOfRange;
   }
-  std::copy(tx_buffer_, tx_buffer_ + size, async_write_buffer_ + buffer_size_);
+  std::copy(packet->buffer, packet->buffer + size, async_write_buffer_ + buffer_size_);
   buffer_size_ += size;
   accessor_->SetAsyncWrite(true);
   if (response) {

@@ -11,30 +11,33 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #pragma once
 #include <Arduino.h>
-#include <Wire.h>
 
-#include "core/types.h"
-#include "inst/inst_handler_interface.h"
+#include "inst/inst_port.h"
+#include "inst/inst_protocol.h"
+#include "inst/inst_types.h"
 
+#ifdef ARDUINO_ARCH_STM32
+#include <HardwareSerial.h>
+#endif
 namespace hortor_servo {
 
-class InstHandlerI2c : public InstHandlerInterface {
+class InstPortSerial : public InstPort {
  public:
   /**
    * @brief 构造函数
    */
-  InstHandlerI2c() = default;
-  
+  InstPortSerial() = default;
+
   /**
    * @brief 初始化
-   * @param wire I2C对象
-   * @param address I2C地址
+   * @param serial 串口
    * @return 错误码
    */
-  Error Init(TwoWire *wire) {
-    wire_ = wire;
+  Error Init(HardwareSerial *serial) {
+    serial_ = serial;
     return Error::kOk;
   }
 
@@ -51,16 +54,14 @@ class InstHandlerI2c : public InstHandlerInterface {
    * @param data 数据
    * @return 错误码
    */
-  Error Response(const uint8_t reply_idx, const uint8_t *data) override;
-
-  void OnReceive(int howMany);
-
-  void OnRequest();
+  Error Response(const uint8_t reply_idx, const StatusPacket *packet) override;
 
  private:
-  static constexpr auto kBufferSize = 128;
-  TwoWire *wire_ = nullptr;
-  uint8_t rx_buffer_[kBufferSize] = {0};
-  uint8_t tx_buffer_[kBufferSize] = {0};
+  HardwareSerial *serial_ = nullptr;
+  uint32_t delay_time_ = 0;
+  bool response_pending_ = false;
+  InstProtocol protocol_{};
+  InstPacket inst_packet_{};
+  StatusPacket status_packet_{};
 };
 }  // namespace hortor_servo

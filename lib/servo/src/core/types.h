@@ -61,7 +61,11 @@ enum class Error : uint8_t {
   /**
    * @brief 数组越界
    */
-  kArrayOutOfRange = 9
+  kArrayOutOfRange = 9,
+  /**
+   * @brief 无效状态
+   */
+  kInvalidState = 10
 };
 
 /**

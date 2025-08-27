@@ -23,7 +23,7 @@
 #include <info_led.h>
 #include <inst/inst.h>
 #include <inst/inst_accessor.h>
-#include <inst/inst_handler_i2c.h>
+#include <inst/inst_port_i2c.h>
 #include <math/math.h>
 
 static constexpr auto kInfoLedPin = PA12;
@@ -37,7 +37,7 @@ TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_inst(PB7, PA15);
 
 hortor_servo::InfoLED::InfoLED info_led{};
-hortor_servo::InstHandlerI2c inst_handler{};
+hortor_servo::InstPortI2c inst_port{};
 hortor_servo::InstAccessor inst_accessor{};
 hortor_servo::Inst inst{};
 hortor_servo::DRV8231A::DRV8231A motor_driver{};
@@ -46,9 +46,9 @@ hortor_servo::generic_current::GenericCurrent current_sensor{};
 hortor_servo::Servo servo{};
 
 // cppcheck-suppress unusedFunction
-void receiveEvent(int howMany) { inst_handler.OnReceive(howMany); }
+void receiveEvent(int howMany) { inst_port.OnReceive(howMany); }
 // cppcheck-suppress unusedFunction
-void requestEvent() { inst_handler.OnRequest(); }
+void requestEvent() { inst_port.OnRequest(); }
 
 // cppcheck-suppress unusedFunction
 void setup() {
@@ -69,10 +69,10 @@ void setup() {
   servo.Init();
 
   inst_accessor.Init();
-  inst_handler.Init(&wire_inst);
+  inst_port.Init(&wire_inst);
 
   inst.LinkAccessor(&inst_accessor);
-  inst.LinkHandler(&inst_handler);
+  inst.LinkPort(&inst_port);
   inst.LinkServo(&servo);
   inst.Init();
 

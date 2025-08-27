@@ -11,35 +11,40 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "inst_handler_i2c.h"
+#include "inst_port_i2c.h"
 
 #include <Arduino.h>
 #include <Wire.h>
 
 #include "core/types.h"
+#include "inst/inst_protocol.h"
 #include "inst/inst_types.h"
 
 namespace hortor_servo {
 
-Error InstHandlerI2c::Process(float dt) { return Error::kOk; }
+Error InstPortI2c::Process(float dt) { return Error::kOk; }
 
-Error InstHandlerI2c::Response(const uint8_t reply_idx, const uint8_t *data) {
-  const size_t size = inst_utils::GetBufferSize(data);
-  std::copy(data, data + size, tx_buffer_);
+Error InstPortI2c::Response(const uint8_t reply_idx, const StatusPacket *packet) {
+  const size_t size = packet->GetBufferSize();
+  std::copy(packet->buffer, packet->buffer + size, status_packet_.buffer);
   return Error::kOk;
 }
 
-void InstHandlerI2c::OnReceive(int howMany) {
-  size_t pos = 0;
+Error InstPortI2c::OnReceive(int howMany) {
+  bool is_complete = false;
   while (wire_->available()) {
-    rx_buffer_[pos++] = wire_->read();
+    uint8_t data = wire_->read();
+    CHECK(protocol_.Process(inst_packet_, data, &is_complete));
+    if (is_complete) {
+      CHECK(execute_(&inst_packet_));
+    }
   }
-  if (inst_utils::CheckChecksum(rx_buffer_)) {
-    execute_(rx_buffer_, inst_utils::GetBufferSize(rx_buffer_));
-  }
+  return Error::kOk;
 }
 
-void InstHandlerI2c::OnRequest() {
-  wire_->write(tx_buffer_, inst_utils::GetBufferSize(tx_buffer_));
+Error InstPortI2c::OnRequest() {
+  const size_t size = status_packet_.GetBufferSize();
+  wire_->write(status_packet_.buffer, size);
+  return Error::kOk;
 }
 }  // namespace hortor_servo

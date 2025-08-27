@@ -16,10 +16,22 @@
 #include <Arduino.h>
 
 #include "core/types.h"
-#include "inst/inst_utils.h"
 #include "register/register.h"
 
 namespace hortor_servo {
+
+/**
+ * @brief 指令包索引
+ */
+namespace PacketIndex {
+static constexpr uint8_t kHeader1 = 0;
+static constexpr uint8_t kHeader2 = 1;
+static constexpr uint8_t kId = 2;
+static constexpr uint8_t kLength = 3;
+static constexpr uint8_t kInstruction = 4;
+static constexpr uint8_t kError = 4;
+static constexpr uint8_t kParameter = 5;
+};  // namespace PacketIndex
 
 /**
  * @brief 伺服寄存器
@@ -477,122 +489,7 @@ struct Instruction {
   static constexpr uint8_t kReset = 0x0a;
 };
 
-enum class PacketState : uint8_t {
-  kHeader1,
-  kHeader2,
-  kId,
-  kLength,
-  kInstruction,
-  kParameter,
-  kChecksum,
-};
-
 static constexpr uint32_t kBaudrateTable[] = {
     1000000, 500000, 250000, 128000, 115200, 76800, 57600, 38400};
 
-struct __attribute__((packed)) InstPacket {
-  uint16_t header;
-  uint8_t id;
-  uint8_t length;
-  uint8_t instruction;
-  uint8_t parameter[];
-
-  uint8_t CalculateChecksum() const {
-    return inst_utils::CalculateChecksum(
-        reinterpret_cast<const uint8_t *>(this));
-  }
-
-  /**
-   * @brief 获取参数长度
-   * @return 参数长度
-   */
-  uint8_t GetParameterSize() const {
-    return inst_utils::GetParameterSize(
-        reinterpret_cast<const uint8_t *>(this));
-  }
-
-  /**
-   * @brief 设置参数长度
-   * @param size 参数长度
-   */
-  void SetParameterSize(const uint8_t size) {
-    inst_utils::SetParameterSize(reinterpret_cast<uint8_t *>(this), size);
-  }
-
-  /**
-   * @brief 获取校验和
-   * @return 校验和
-   */
-  uint8_t GetChecksum() const {
-    return inst_utils::GetChecksum(reinterpret_cast<const uint8_t *>(this));
-  }
-
-  /**
-   * @brief 设置校验和
-   */
-  void SetChecksum() {
-    inst_utils::SetChecksum(reinterpret_cast<uint8_t *>(this));
-  }
-
-  /**
-   * @brief 获取缓冲区大小
-   * @return 缓冲区大小
-   */
-  size_t GetBufferSize() const {
-    return inst_utils::GetBufferSize(reinterpret_cast<const uint8_t *>(this));
-  }
-};
-
-struct __attribute__((packed)) StatusPacket {
-  uint16_t header;
-  uint8_t id;
-  uint8_t length;
-  uint8_t error;
-  uint8_t parameter[];
-
-  uint8_t CalculateChecksum() const {
-    return inst_utils::CalculateChecksum(
-        reinterpret_cast<const uint8_t *>(this));
-  }
-
-  /**
-   * @brief 获取参数长度
-   * @return 参数长度
-   */
-  uint8_t GetParameterSize() const {
-    return inst_utils::GetParameterSize(
-        reinterpret_cast<const uint8_t *>(this));
-  }
-
-  /**
-   * @brief 设置参数长度
-   * @param size 参数长度
-   */
-  void SetParameterSize(const uint8_t size) {
-    inst_utils::SetParameterSize(reinterpret_cast<uint8_t *>(this), size);
-  }
-
-  /**
-   * @brief 获取校验和
-   * @return 校验和
-   */
-  uint8_t GetChecksum() const {
-    return inst_utils::GetChecksum(reinterpret_cast<const uint8_t *>(this));
-  }
-
-  /**
-   * @brief 设置校验和
-   */
-  void SetChecksum() {
-    inst_utils::SetChecksum(reinterpret_cast<uint8_t *>(this));
-  }
-
-  /**
-   * @brief 获取缓冲区大小
-   * @return 缓冲区大小
-   */
-  size_t GetBufferSize() const {
-    return inst_utils::GetBufferSize(reinterpret_cast<const uint8_t *>(this));
-  }
-};
 }  // namespace hortor_servo

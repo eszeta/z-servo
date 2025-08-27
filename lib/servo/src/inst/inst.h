@@ -16,7 +16,10 @@
 
 #include "core/servo.h"
 #include "inst/inst_accessor.h"
-#include "inst/inst_handler_interface.h"
+#include "inst/inst_port.h"
+#include "inst/inst_protocol.h"
+#include "inst/inst_types.h"
+
 namespace hortor_servo {
 class Inst {
  public:
@@ -41,7 +44,7 @@ class Inst {
    * @brief 链接传输接口
    * @param transport 指令传输接口
    */
-  Error LinkHandler(InstHandlerInterface *adapter);
+  Error LinkPort(InstPort *port);
 
   /**
    * @brief 链接伺服电机
@@ -73,7 +76,7 @@ class Inst {
    * @param data 指令数据
    * @return 错误码
    */
-  Error Execute(const uint8_t *data, size_t size);
+  Error Execute(const InstPacket *packet);
 
   /**
    * @brief 响应指令
@@ -179,7 +182,7 @@ class Inst {
   /**
    * @brief 指令传输接口
    */
-  InstHandlerInterface *adapter_ = nullptr;
+  InstPort *port_ = nullptr;
   /**
    * @brief 伺服电机
    */
@@ -187,20 +190,11 @@ class Inst {
   /**
    * @brief 异步写缓冲区
    */
-  uint8_t async_write_buffer_[128];
+  uint8_t async_write_buffer_[128] = {};
   /**
    * @brief 异步写缓冲区大小
    */
   size_t buffer_size_ = 0;
-  union {
-    /**
-     * @brief 发送缓冲区
-     */
-    uint8_t tx_buffer_[128];
-    /**
-     * @brief 状态包
-     */
-    StatusPacket status_packet_;
-  };
+  InstPacket status_packet_{};
 };
 }  // namespace hortor_servo

@@ -16,7 +16,7 @@
 #include <core/types.h>
 #include <debug_print.h>
 #include <info_led.h>
-#include <inst/inst_handler_serial.h>
+#include <inst/inst_port_serial.h>
 #include <math/math.h>
 
 static constexpr auto kInfoLedPin = PB1;
@@ -27,17 +27,17 @@ static constexpr auto kTargetLoopPeriodUs =
 hortor_servo::InfoLED::InfoLED info_led{};
 HardwareSerial serial(PB4, PB3);
 TwoWire wire(PA8, PA9);
-hortor_servo::InstHandlerSerial inst_handler{};
+hortor_servo::InstPortSerial inst_port{};
 
-hortor_servo::Error Execute(uint8_t *data, size_t size);
+hortor_servo::Error Execute(hortor_servo::InstPacket *packet);
 // cppcheck-suppress unusedFunction
 void setup() {
   info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
   serial.begin(115200);
   wire.begin();
-  inst_handler.Init(&serial);
-  inst_handler.SetExecute(&Execute);
+  inst_port.Init(&serial);
+  inst_port.SetExecute(&Execute);
 }
 
 // cppcheck-suppress unusedFunction
@@ -48,7 +48,8 @@ void loop() {
   last_time = current_time;
 
   info_led.Process(dt);
-  inst_handler.Process(dt);
+  inst_port.Process(dt);
+
   // 固定帧率控制
   const auto elapsed_time = micros() - last_time;
   if (elapsed_time < kTargetLoopPeriodUs) {
@@ -56,9 +57,9 @@ void loop() {
   }
 }
 
-hortor_servo::Error Execute(uint8_t *data, size_t size) {
+hortor_servo::Error Execute(hortor_servo::InstPacket *packet) {
   wire.beginTransmission(0x00);
-  wire.write(data, size);
+  wire.write(packet->buffer, packet->GetBufferSize());
   wire.endTransmission(false);
   wire.requestFrom(0x00, 128, 1);
   while (wire.available()) {
