@@ -41,9 +41,7 @@ Error InstPortI2c::Response(const StatusPacket &packet,
   return Error::kOk;
 }
 
-Error InstPortI2c::OnReceive(int howMany) {
-  return Error::kOk;
-}
+Error InstPortI2c::OnReceive(int howMany) { return Error::kOk; }
 
 Error InstPortI2c::OnRequest() {
   const size_t size = status_packet_.GetBufferSize();

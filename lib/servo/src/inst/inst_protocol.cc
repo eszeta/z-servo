@@ -11,9 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #include "inst_protocol.h"
 
 #include <Arduino.h>
+
 #include <algorithm>
 
 namespace hortor_servo {
@@ -99,10 +101,10 @@ Error InstProtocol::Process(InstPacket &packet,
 }
 
 Error InstProtocol::CreateResponse(const uint8_t id,
-                             const uint8_t status,
-                             const uint8_t *parameter,
-                             const size_t parameter_size,
-                             StatusPacket &packet) {
+                                   const uint8_t status,
+                                   const uint8_t *parameter,
+                                   const size_t parameter_size,
+                                   StatusPacket &packet) {
   packet.header1 = 0xff;
   packet.header2 = 0xff;
   packet.id = id;

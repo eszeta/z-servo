@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #pragma once
 
 #include <Arduino.h>
@@ -25,7 +26,7 @@ class GenericCurrent : public Current {
    * @brief 构造函数
    */
   GenericCurrent() = default;
-  
+
   void Init(const uint8_t pin_adc,
             const uint16_t shunt_resistor,
             const float factor);

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #pragma once
 
 #include <Arduino.h>
@@ -30,7 +31,7 @@ class MP6515 final : public Motor {
    * @brief 构造函数
    */
   MP6515() = default;
-  
+
   /**
    * @brief 初始化电机驱动器
    * @param pin_phase 相位引脚编号

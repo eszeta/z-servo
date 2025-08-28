@@ -11,7 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #pragma once
+
 #include <Arduino.h>
 
 #include "core/current.h"
@@ -29,7 +31,7 @@ class DRV8231A final : public Motor {
    * @brief 构造函数
    */
   DRV8231A() = default;
-  
+
   /**
    * @brief 初始化电机驱动器
    * @param pin_a 正转PWM输出引脚

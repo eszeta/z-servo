@@ -58,7 +58,8 @@ Error Inst::Response(const uint8_t reply_idx,
                      const size_t parameter_size) {
   const auto id = accessor_->GetId();
   const auto status = accessor_->GetStatus();
-  CHECK(protocol_.CreateResponse(id, status, parameter, parameter_size, status_packet_));
+  CHECK(protocol_.CreateResponse(
+      id, status, parameter, parameter_size, status_packet_));
   CHECK(port_->Response(status_packet_, reply_idx));
   return Error::kOk;
 }
@@ -364,7 +365,9 @@ Error Inst::RegWriteHandler(const InstPacket *packet, const bool response) {
   if (buffer_size_ + size > sizeof(async_write_buffer_)) {
     return Error::kArrayOutOfRange;
   }
-  std::copy(packet->buffer, packet->buffer + size, async_write_buffer_ + buffer_size_);
+  std::copy(packet->buffer,
+            packet->buffer + size,
+            async_write_buffer_ + buffer_size_);
   buffer_size_ += size;
   accessor_->SetAsyncWrite(true);
   if (response) {

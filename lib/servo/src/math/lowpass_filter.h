@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #pragma once
+
 #include <Arduino.h>
 
 #include "math/math.h"
@@ -42,7 +43,7 @@ class LowPassFilter {
     if (dt <= 0.0f || time_constant_ <= 0.0f) {
       return x;  // 如果参数无效，直接返回输入值
     }
-    
+
     const float alpha = time_constant_ / (time_constant_ + dt);
     const float one_minus_alpha = 1.0f - alpha;
     const float y = alpha * y_prev_ + one_minus_alpha * x;
@@ -54,7 +55,7 @@ class LowPassFilter {
    * @brief 设置时间常数
    * @param time_constant - 时间常数(秒)，必须大于0
    */
-  void SetTimeConstant(float time_constant) { 
+  void SetTimeConstant(float time_constant) {
     if (time_constant > 0.0f) {
       time_constant_ = time_constant;
     }
@@ -69,9 +70,7 @@ class LowPassFilter {
   /**
    * @brief 重置滤波器状态
    */
-  void Reset() {
-    y_prev_ = 0.0f;
-  }
+  void Reset() { y_prev_ = 0.0f; }
 
  protected:
   float time_constant_;  // 低通滤波器时间常数(秒)
