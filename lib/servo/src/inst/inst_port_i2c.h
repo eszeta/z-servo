@@ -28,7 +28,7 @@ class InstPortI2c : public InstPort {
    * @brief 构造函数
    */
   InstPortI2c() = default;
-  
+
   /**
    * @brief 初始化
    * @param wire I2C对象
@@ -45,7 +45,10 @@ class InstPortI2c : public InstPort {
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  Error Process(const float dt) override;
+  Error Process(InstProtocol &protocol,
+                const float dt,
+                InstPacket &inst_packet,
+                bool &is_complete) override;
 
   /**
    * @brief 发送数据
@@ -53,17 +56,14 @@ class InstPortI2c : public InstPort {
    * @param data 数据
    * @return 错误码
    */
-  Error Response(const uint8_t reply_idx, const StatusPacket *packet) override;
+  Error Response(const StatusPacket &packet, const uint8_t reply_idx) override;
 
   Error OnReceive(int howMany);
 
   Error OnRequest();
 
  private:
-  static constexpr auto kBufferSize = 128;
   TwoWire *wire_ = nullptr;
-  InstProtocol protocol_{};
-  InstPacket inst_packet_{};
   StatusPacket status_packet_{};
 };
 }  // namespace hortor_servo

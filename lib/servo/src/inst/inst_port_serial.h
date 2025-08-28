@@ -46,7 +46,10 @@ class InstPortSerial : public InstPort {
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  Error Process(const float dt) override;
+  Error Process(InstProtocol &protocol,
+                const float dt,
+                InstPacket &inst_packet,
+                bool &is_complete) override;
 
   /**
    * @brief 发送数据
@@ -54,14 +57,12 @@ class InstPortSerial : public InstPort {
    * @param data 数据
    * @return 错误码
    */
-  Error Response(const uint8_t reply_idx, const StatusPacket *packet) override;
+  Error Response(const StatusPacket &packet, const uint8_t reply_idx) override;
 
  private:
   HardwareSerial *serial_ = nullptr;
   uint32_t delay_time_ = 0;
   bool response_pending_ = false;
-  InstProtocol protocol_{};
-  InstPacket inst_packet_{};
   StatusPacket status_packet_{};
 };
 }  // namespace hortor_servo

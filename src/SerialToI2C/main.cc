@@ -28,6 +28,8 @@ hortor_servo::InfoLED::InfoLED info_led{};
 HardwareSerial serial(PB4, PB3);
 TwoWire wire(PA8, PA9);
 hortor_servo::InstPortSerial inst_port{};
+hortor_servo::InstProtocol inst_protocol{};
+hortor_servo::InstPacket inst_packet{};
 
 hortor_servo::Error Execute(hortor_servo::InstPacket *packet);
 // cppcheck-suppress unusedFunction
@@ -37,7 +39,6 @@ void setup() {
   serial.begin(115200);
   wire.begin();
   inst_port.Init(&serial);
-  inst_port.SetExecute(&Execute);
 }
 
 // cppcheck-suppress unusedFunction
@@ -48,7 +49,11 @@ void loop() {
   last_time = current_time;
 
   info_led.Process(dt);
-  inst_port.Process(dt);
+  bool is_complete = false;
+  inst_port.Process(inst_protocol, dt, inst_packet, is_complete);
+  if (is_complete) {
+    Execute(&inst_packet);
+  }
 
   // 固定帧率控制
   const auto elapsed_time = micros() - last_time;

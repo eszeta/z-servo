@@ -11,8 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "inst_protocol.h"
+
+#include <Arduino.h>
+#include <algorithm>
+
 namespace hortor_servo {
 
 InstProtocol::InstProtocol() {}
@@ -21,7 +24,8 @@ InstProtocol::~InstProtocol() {}
 
 Error InstProtocol::Process(InstPacket &packet,
                             const uint8_t recv_data,
-                            bool *is_complete) {
+                            bool &is_complete) {
+  is_complete = false;
   switch (packet_state_) {
     case PacketState::kHeader1: {
       if (recv_data == 0xff) {
@@ -83,7 +87,7 @@ Error InstProtocol::Process(InstPacket &packet,
         return Error::kInvalidPacket;
       }
       packet.SetChecksum(recv_data);
-      *is_complete = true;
+      is_complete = true;
       break;
     }
     default: {
@@ -91,6 +95,25 @@ Error InstProtocol::Process(InstPacket &packet,
       return Error::kInvalidState;
     }
   }
+  return Error::kOk;
+}
+
+Error InstProtocol::CreateResponse(const uint8_t id,
+                             const uint8_t status,
+                             const uint8_t *parameter,
+                             const size_t parameter_size,
+                             StatusPacket &packet) {
+  packet.header1 = 0xff;
+  packet.header2 = 0xff;
+  packet.id = id;
+  packet.instructionOrError = status;
+  if (parameter == nullptr) {
+    packet.SetParameterSize(0);
+  } else {
+    packet.SetParameterSize(parameter_size);
+    std::copy(parameter, parameter + parameter_size, packet.parameter);
+  }
+  packet.SetChecksum(packet.CalculateChecksum());
   return Error::kOk;
 }
 }  // namespace hortor_servo

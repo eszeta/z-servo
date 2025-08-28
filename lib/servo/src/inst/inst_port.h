@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #pragma once
 
 #include <Arduino.h>
@@ -24,14 +25,15 @@ namespace hortor_servo {
 
 class InstPort {
  public:
-  using ExecuteFunc = std::function<Error(InstPacket *packet)>;
-
   /**
    * @brief 处理数据
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  virtual Error Process(const float dt) = 0;
+  virtual Error Process(InstProtocol &protocol,
+                        const float dt,
+                        InstPacket &inst_packet,
+                        bool &is_complete) = 0;
 
   /**
    * @brief 发送数据
@@ -39,7 +41,8 @@ class InstPort {
    * @param data 数据
    * @return 错误码
    */
-  virtual Error Response(const uint8_t reply_idx, const StatusPacket *packet) = 0;
+  virtual Error Response(const StatusPacket &packet,
+                         const uint8_t reply_idx) = 0;
 
   /**
    * @brief 设置响应延迟
@@ -49,18 +52,7 @@ class InstPort {
     response_delay_ = response_delay;
   }
 
-  /**
-   * @brief 设置执行函数
-   * @param execute 执行函数
-   * @return 错误码
-   */
-  Error SetExecute(ExecuteFunc execute) {
-    execute_ = execute;
-    return Error::kOk;
-  }
-
  protected:
-  ExecuteFunc execute_;
   uint16_t response_delay_ = 0;
 };
 

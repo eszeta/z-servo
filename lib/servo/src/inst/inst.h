@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #pragma once
 #include <Arduino.h>
 
@@ -195,6 +196,9 @@ class Inst {
    * @brief 异步写缓冲区大小
    */
   size_t buffer_size_ = 0;
-  InstPacket status_packet_{};
+
+  InstProtocol protocol_{};
+  InstPacket inst_packet_{};
+  StatusPacket status_packet_{};
 };
 }  // namespace hortor_servo

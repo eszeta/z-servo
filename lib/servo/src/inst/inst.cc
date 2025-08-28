@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #include "inst.h"
 
 #include <Arduino.h>
@@ -34,8 +35,6 @@ Error Inst::LinkAccessor(InstAccessor *accessor) {
 
 Error Inst::LinkPort(InstPort *port) {
   port_ = port;
-  CHECK(port_->SetExecute(
-      [this](InstPacket *packet) -> Error { return Execute(packet); }));
   return Error::kOk;
 }
 
@@ -45,7 +44,11 @@ Error Inst::LinkServo(Servo *servo) {
 }
 
 Error Inst::Process(float dt) {
-  CHECK(port_->Process(dt));
+  bool is_complete = false;
+  CHECK(port_->Process(protocol_, dt, inst_packet_, is_complete));
+  if (is_complete) {
+    CHECK(Execute(&inst_packet_));
+  }
   CHECK(UpdateStatusRegs());
   return Error::kOk;
 }
@@ -53,18 +56,10 @@ Error Inst::Process(float dt) {
 Error Inst::Response(const uint8_t reply_idx,
                      const uint8_t *parameter,
                      const size_t parameter_size) {
-  status_packet_.header1 = 0xff;
-  status_packet_.header2 = 0xff;
-  status_packet_.id = accessor_->GetId();
-  if (parameter == nullptr) {
-    status_packet_.SetParameterSize(0);
-  } else {
-    std::copy(parameter, parameter + parameter_size, status_packet_.parameter);
-    status_packet_.SetParameterSize(parameter_size);
-  }
-  status_packet_.instructionOrError = accessor_->GetStatus();
-  status_packet_.SetChecksum(status_packet_.CalculateChecksum());
-  CHECK(port_->Response(reply_idx, &status_packet_));
+  const auto id = accessor_->GetId();
+  const auto status = accessor_->GetStatus();
+  CHECK(protocol_.CreateResponse(id, status, parameter, parameter_size, status_packet_));
+  CHECK(port_->Response(status_packet_, reply_idx));
   return Error::kOk;
 }
 

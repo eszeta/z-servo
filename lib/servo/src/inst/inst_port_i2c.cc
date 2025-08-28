@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #include "inst_port_i2c.h"
 
 #include <Arduino.h>
@@ -22,23 +23,25 @@
 
 namespace hortor_servo {
 
-Error InstPortI2c::Process(float dt) { return Error::kOk; }
+Error InstPortI2c::Process(InstProtocol &protocol,
+                           const float dt,
+                           InstPacket &inst_packet,
+                           bool &is_complete) {
+  while (wire_->available()) {
+    uint8_t data = wire_->read();
+    CHECK(protocol.Process(inst_packet, data, is_complete));
+  }
+  return Error::kOk;
+}
 
-Error InstPortI2c::Response(const uint8_t reply_idx, const StatusPacket *packet) {
-  const size_t size = packet->GetBufferSize();
-  std::copy(packet->buffer, packet->buffer + size, status_packet_.buffer);
+Error InstPortI2c::Response(const StatusPacket &packet,
+                            const uint8_t reply_idx) {
+  const size_t size = packet.GetBufferSize();
+  std::copy(packet.buffer, packet.buffer + size, status_packet_.buffer);
   return Error::kOk;
 }
 
 Error InstPortI2c::OnReceive(int howMany) {
-  bool is_complete = false;
-  while (wire_->available()) {
-    uint8_t data = wire_->read();
-    CHECK(protocol_.Process(inst_packet_, data, &is_complete));
-    if (is_complete) {
-      CHECK(execute_(&inst_packet_));
-    }
-  }
   return Error::kOk;
 }
 
