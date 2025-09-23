@@ -27,6 +27,12 @@ class GenericCurrent : public Current {
    */
   GenericCurrent() = default;
 
+  /**
+   * @brief 初始化
+   * @param pin_adc ADC引脚编号
+   * @param shunt_resistor 分流电阻值
+   * @param factor 转换因子
+   */
   void Init(const uint8_t pin_adc,
             const uint16_t shunt_resistor,
             const float factor);
