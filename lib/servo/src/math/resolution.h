@@ -19,7 +19,8 @@ namespace hortor_servo {
 
 struct Resolution {
  public:
-  explicit Resolution(uint8_t resolution_bits) : kBits(resolution_bits) {}
+  constexpr explicit Resolution(uint8_t resolution_bits)
+      : kBits(resolution_bits) {}
   /** @brief 目标分辨率（位数），决定了传感器的精度和量程 */
   const uint8_t kBits;
   /** @brief Counts Per Revolution */

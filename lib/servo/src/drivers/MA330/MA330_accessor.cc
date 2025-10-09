@@ -14,84 +14,83 @@
 
 #include "MA330_accessor.h"
 
-#include "MA330_types.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace MA330 {
 using Regs = MA330Regs;
 
-uint16_t MA330Accessor::ReadRaw() {
-  uint16_t angle;
-  read_raw_(&angle);
-  return angle;
+Error MA330Accessor::ReadRaw(uint16_t& angle_raw) {
+  CHECK(read_raw_(angle_raw));
+  return Error::kOk;
 };
 
-Error MA330Accessor::GetZero(uint16_t* zero) {
+Error MA330Accessor::GetZero(uint16_t& zero) {
   CHECK(ReadRegField(Regs::kZ_H, Regs::kZ_L, zero));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetBiasCurrentTrimming(uint8_t* bias_current_trimming) {
+Error MA330Accessor::GetBiasCurrentTrimming(uint8_t& bias_current_trimming) {
   CHECK(ReadRegField(Regs::kBCT, bias_current_trimming));
   return Error::kOk;
 };
 
-Error MA330Accessor::IsEnableTrimmingX(bool* enable) {
+Error MA330Accessor::IsEnableTrimmingX(bool& enable) {
   CHECK(ReadRegField(Regs::kETX, enable));
   return Error::kOk;
 };
 
-Error MA330Accessor::IsEnableTrimmingY(bool* enable) {
+Error MA330Accessor::IsEnableTrimmingY(bool& enable) {
   CHECK(ReadRegField(Regs::kETY, enable));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetPulsesPerTurn(uint16_t* pulses_per_turn) {
+Error MA330Accessor::GetPulsesPerTurn(uint16_t& pulses_per_turn) {
   uint16_t result;
-  CHECK(ReadRegField(Regs::kPPT_H, Regs::kPPT_L, &result));
-  *pulses_per_turn = result + 1;
+  CHECK(ReadRegField(Regs::kPPT_H, Regs::kPPT_L, result));
+  pulses_per_turn = result + 1;
   return Error::kOk;
 };
 
-Error MA330Accessor::GetIndexLength(uint8_t* index_length) {
+Error MA330Accessor::GetIndexLength(uint8_t& index_length) {
   CHECK(ReadRegField(Regs::kILIP, index_length));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetNumberPolePairs(uint8_t* number_pole_pairs) {
+Error MA330Accessor::GetNumberPolePairs(uint8_t& number_pole_pairs) {
   CHECK(ReadRegField(Regs::kNPP, number_pole_pairs));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetRotationDirection(uint8_t* rotation_direction) {
+Error MA330Accessor::GetRotationDirection(uint8_t& rotation_direction) {
   CHECK(ReadRegField(Regs::kRD, rotation_direction));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetFieldStrengthHighThreshold(uint8_t* high_threshold) {
+Error MA330Accessor::GetFieldStrengthHighThreshold(uint8_t& high_threshold) {
   CHECK(ReadRegField(Regs::kMGHT, high_threshold));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetFieldStrengthLowThreshold(uint8_t* low_threshold) {
+Error MA330Accessor::GetFieldStrengthLowThreshold(uint8_t& low_threshold) {
   CHECK(ReadRegField(Regs::kMGLT, low_threshold));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetFilterWidth(uint8_t* filter_width) {
+Error MA330Accessor::GetFilterWidth(uint8_t& filter_width) {
   CHECK(ReadRegField(Regs::kFW, filter_width));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetHysteresis(uint8_t* hysteresis) {
+Error MA330Accessor::GetHysteresis(uint8_t& hysteresis) {
   CHECK(ReadRegField(Regs::kHYS, hysteresis));
   return Error::kOk;
 };
 
-Error MA330Accessor::GetFieldStrength(FieldStrength* field_strength) {
+Error MA330Accessor::GetFieldStrength(FieldStrength& field_strength) {
   uint8_t result;
-  CHECK(ReadRegField(Regs::kMGL_MGH, &result));
-  *field_strength = static_cast<FieldStrength>(result);
+  CHECK(ReadRegField(Regs::kMGL_MGH, result));
+  field_strength = static_cast<FieldStrength>(result);
   return Error::kOk;
 };
 

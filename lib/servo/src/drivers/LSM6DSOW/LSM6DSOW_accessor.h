@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "LSM6DSOW_types.h"
+#include "types.h"
 #include "core/types.h"
 #include "register/register_accessor.h"
 
@@ -39,7 +39,7 @@ class LSM6DSOW_accessor : public RegisterAccessor {
    * @param z 加速度Z轴数据
    * @return 读取结果
    */
-  Error ReadAcceleration(float* x, float* y, float* z);
+  Error ReadAcceleration(float& x, float& y, float& z);
 
   /**
    * @brief 检查加速度数据是否可用
@@ -54,7 +54,7 @@ class LSM6DSOW_accessor : public RegisterAccessor {
    * @param z 陀螺仪Z轴数据,单位：度/秒
    * @return 读取结果
    */
-  Error ReadGyroscope(float* x, float* y, float* z);
+  Error ReadGyroscope(float& x, float& y, float& z);
 
   /**
    * @brief 检查陀螺仪数据是否可用
@@ -67,7 +67,7 @@ class LSM6DSOW_accessor : public RegisterAccessor {
    * @param temperature_deg 温度数据
    * @return 读取结果
    */
-  Error ReadTemperature(float* temperature_deg);
+  Error ReadTemperature(float& temperature_deg);
 
   /**
    * @brief 检查温度数据是否可用

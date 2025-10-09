@@ -16,41 +16,24 @@
 
 #include <Arduino.h>
 
-#include "inst/inst_port.h"
-#include "inst/inst_protocol.h"
-#include "inst/inst_types.h"
+#include <functional>
 
-#ifdef ARDUINO_ARCH_STM32
-#include <HardwareSerial.h>
-#endif
+#include "core/types.h"
+#include "protocol.h"
+#include "types.h"
 namespace hortor_servo {
 
-class InstPortSerial : public InstPort {
+class InstPortHandler {
  public:
-  /**
-   * @brief 构造函数
-   */
-  InstPortSerial() = default;
-
-  /**
-   * @brief 初始化
-   * @param serial 串口
-   * @return 错误码
-   */
-  Error Init(HardwareSerial *serial) {
-    serial_ = serial;
-    return Error::kOk;
-  }
-
   /**
    * @brief 处理数据
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  Error Process(InstProtocol &protocol,
-                const float dt,
-                InstPacket &inst_packet,
-                bool &is_complete) override;
+  virtual Error Process(InstProtocol &protocol,
+                        const float dt,
+                        InstPacket &inst_packet,
+                        bool &is_complete) = 0;
 
   /**
    * @brief 发送数据
@@ -58,12 +41,19 @@ class InstPortSerial : public InstPort {
    * @param data 数据
    * @return 错误码
    */
-  Error Response(const StatusPacket &packet, const uint8_t reply_idx) override;
+  virtual Error Response(const StatusPacket &packet,
+                         const uint8_t reply_idx) = 0;
 
- private:
-  HardwareSerial *serial_ = nullptr;
-  uint32_t delay_time_ = 0;
-  bool response_pending_ = false;
-  StatusPacket status_packet_{};
+  /**
+   * @brief 设置响应延迟
+   * 单位: 毫秒
+   */
+  void SetResponseDelay(const uint16_t response_delay) {
+    response_delay_ = response_delay;
+  }
+
+ protected:
+  uint16_t response_delay_ = 0;
 };
+
 }  // namespace hortor_servo

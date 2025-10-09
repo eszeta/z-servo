@@ -17,7 +17,7 @@
 #include <core/types.h>
 #include <debug_print.h>
 #include <info_led.h>
-#include <inst/inst_port_serial.h>
+#include <protocol/serial_port_handler.h>
 #include <math/math.h>
 
 static constexpr auto kInfoLedPin = PB1;
@@ -28,7 +28,7 @@ static constexpr auto kTargetLoopPeriodUs =
 hortor_servo::InfoLED::InfoLED info_led{};
 HardwareSerial serial(PB4, PB3);
 TwoWire wire(PA8, PA9);
-hortor_servo::InstPortSerial inst_port{};
+hortor_servo::InstSerialPortHandler inst_port{};
 hortor_servo::InstProtocol inst_protocol{};
 hortor_servo::InstPacket inst_packet{};
 

@@ -14,7 +14,7 @@
 
 #include "LSM6DSOW.h"
 
-#include "LSM6DSOW_types.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace LSM6DSOW {

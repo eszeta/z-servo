@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "inst_port_i2c.h"
+#include "i2c_port_handler.h"
 
 #include <Arduino.h>
 #include <Wire.h>
 
 #include "core/types.h"
-#include "inst/inst_protocol.h"
-#include "inst/inst_types.h"
+#include "protocol.h"
 
 namespace hortor_servo {
 
-Error InstPortI2c::Process(InstProtocol &protocol,
-                           const float dt,
-                           InstPacket &inst_packet,
-                           bool &is_complete) {
+Error InstI2cPortHandler::Process(InstProtocol &protocol,
+                                  const float dt,
+                                  InstPacket &inst_packet,
+                                  bool &is_complete) {
   while (wire_->available()) {
     uint8_t data = wire_->read();
     CHECK(protocol.Process(inst_packet, data, is_complete));
@@ -34,18 +33,19 @@ Error InstPortI2c::Process(InstProtocol &protocol,
   return Error::kOk;
 }
 
-Error InstPortI2c::Response(const StatusPacket &packet,
-                            const uint8_t reply_idx) {
+Error InstI2cPortHandler::Response(const StatusPacket &packet,
+                                   const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
-  std::copy(packet.buffer, packet.buffer + size, status_packet_.buffer);
+  memcpy(status_packet_.buffer, packet.buffer, size);
   return Error::kOk;
 }
 
-Error InstPortI2c::OnReceive(int howMany) { return Error::kOk; }
+Error InstI2cPortHandler::OnReceive(int howMany) { return Error::kOk; }
 
-Error InstPortI2c::OnRequest() {
+Error InstI2cPortHandler::OnRequest() {
   const size_t size = status_packet_.GetBufferSize();
   wire_->write(status_packet_.buffer, size);
   return Error::kOk;
 }
+
 }  // namespace hortor_servo

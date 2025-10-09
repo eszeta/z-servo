@@ -19,6 +19,7 @@
 #include "math/lowpass_filter.h"
 #include "math/math.h"
 #include "math/resolution.h"
+#include "types.h"
 
 namespace hortor_servo {
 /**
@@ -27,35 +28,27 @@ namespace hortor_servo {
  * 该类实现了编码器传感器的基本功能，包括计数值读取、速度计算和圈数统计。
  * 子类需要实现GetRaw()方法以提供特定传感器的原始计数值。
  */
-class Sensor {
+class Encoder {
  public:
-  explicit Sensor(uint8_t resolution_bits) : kResolution(resolution_bits) {}
+  explicit Encoder(uint8_t resolution_bits) : kResolution(resolution_bits) {}
 
   /**
    * @brief 获取原始计数值
-   * @return 当前原始计数值（未考虑圈数）
+   * @return 当前原始计数值
    */
-  virtual uint16_t GetRawCounts() { return raw_; }
+  uint16_t GetRewPos() { return rew_pos_; }
 
   /**
    * @brief 获取总累积计数值
-   * @return 当前总累积计数值（原始计数值 + 圈数 * 满量程）
+   * @return 当前总累积计数值
    */
-  virtual int32_t GetTotalCounts() {
-    return full_rotations_ * kResolution.kEncoderCpr + raw_;
-  }
-
-  /**
-   * @brief 获取角速度
-   * @return 当前角速度（单位：计数/秒）
-   */
-  virtual float GetVelocity() { return velocity_; }
+  int32_t GetPosCounts() { return pos_counts_; }
 
   /**
    * @brief 获取圈数
    * @return 圈数（正值表示顺时针，负值表示逆时针）
    */
-  virtual int32_t GetFullRotations() { return full_rotations_; }
+  int32_t GetRevolutions() { return pos_counts_ / kResolution.kEncoderCpr; }
 
   /**
    * @brief 初始化传感器
@@ -63,7 +56,7 @@ class Sensor {
    * 执行传感器初始化操作，包括初始读取和变量初始化。
    * 子类可以重写此方法以添加特定的初始化步骤。
    */
-  virtual void Init();
+  virtual Error Init();
 
   /**
    * @brief 更新传感器数据
@@ -71,7 +64,7 @@ class Sensor {
    * 读取最新的传感器值并计算相关参数，包括圈数和角速度。
    * 此方法应在主循环中定期调用以保持数据更新。
    */
-  void Process(float dt);
+  Error Process(float dt);
 
   /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
   const Resolution kResolution;
@@ -83,17 +76,13 @@ class Sensor {
    *
    * 子类必须实现此方法以提供特定传感器的原始计数值读取功能。
    */
-  virtual uint16_t GetRaw() = 0;
+  virtual Error GetRaw(uint16_t &out_raw) = 0;
 
-  /** @brief 当前角速度值 */
-  float velocity_ = 0.0f;
-  /** @brief 当前原始计数值 */
-  uint16_t raw_ = 0;
-  /** @brief 上次更新的原始计数值 */
-  uint16_t raw_prev_ = 0;
-  /** @brief 圈数计数器 */
-  int32_t full_rotations_ = 0;
-  /** @brief 上次速度计算时的圈数 */
-  int32_t full_rotations_prev_ = 0;
+  // ========== 状态变量 ==========
+  /** @brief 原始值 [0, CPR-1] */
+  uint16_t rew_pos_ = 0;
+  /** @brief 线性累加位置 [-∞, +∞] */
+  int32_t pos_counts_ = 0;
 };
+
 }  // namespace hortor_servo

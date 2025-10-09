@@ -29,28 +29,14 @@ Error RegisterRawAdapter::Init(uint8_t* regs, const size_t size) {
 }
 
 Error RegisterRawAdapter::LinkAccessor(RegisterAccessor& accessor) {
-  accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
-    return Write(address, data);
-  });
   accessor.SetWriteMultiple(
       [this](const uint8_t address, const uint8_t* data, const size_t size) {
         return WriteMultiple(address, data, size);
       });
-  accessor.SetRead([this](const uint8_t address, uint8_t* data) {
-    return Read(address, data);
-  });
   accessor.SetReadMultiple(
       [this](const uint8_t address, const size_t size, uint8_t* data) {
         return ReadMultiple(address, size, data);
       });
-  return Error::kOk;
-}
-
-Error RegisterRawAdapter::Write(const uint8_t address, const uint8_t data) {
-  if (address >= size_) {
-    return Error::kInvalidParameter;
-  }
-  regs_[address] = data;
   return Error::kOk;
 }
 
@@ -63,14 +49,6 @@ Error RegisterRawAdapter::WriteMultiple(const uint8_t address,
   for (size_t i = 0; i < size; ++i) {
     regs_[address + i] = data[i];
   }
-  return Error::kOk;
-}
-
-Error RegisterRawAdapter::Read(const uint8_t address, uint8_t* data) {
-  if (address >= size_) {
-    return Error::kInvalidParameter;
-  }
-  *data = regs_[address];
   return Error::kOk;
 }
 

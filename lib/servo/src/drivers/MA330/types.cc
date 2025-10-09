@@ -12,29 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MA330_types.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace MA330 {
 
-using Regs = MA330Regs;
-
 // 兼容GD32的编译环境，需要手动定义，否则会链接错误
-constexpr Register Regs::kZ_L;
-constexpr Register Regs::kZ_H;
-constexpr Register Regs::kBCT;
-constexpr Register Regs::kETX;
-constexpr Register Regs::kETY;
-constexpr Register Regs::kILIP;
-constexpr Register Regs::kPPT_L;
-constexpr Register Regs::kPPT_H;
-constexpr Register Regs::kMGHT;
-constexpr Register Regs::kMGLT;
-constexpr Register Regs::kNPP;
-constexpr Register Regs::kRD;
-constexpr Register Regs::kFW;
-constexpr Register Regs::kHYS;
-constexpr Register Regs::kMGL_MGH;
+constexpr Register8 MA330Regs::kZ_L;
+constexpr Register8 MA330Regs::kZ_H;
+constexpr Register8 MA330Regs::kBCT;
+constexpr Register8 MA330Regs::kETX;
+constexpr Register8 MA330Regs::kETY;
+constexpr Register8 MA330Regs::kILIP;
+constexpr Register8 MA330Regs::kPPT_L;
+constexpr Register8 MA330Regs::kPPT_H;
+constexpr Register8 MA330Regs::kMGHT;
+constexpr Register8 MA330Regs::kMGLT;
+constexpr Register8 MA330Regs::kNPP;
+constexpr Register8 MA330Regs::kRD;
+constexpr Register8 MA330Regs::kFW;
+constexpr Register8 MA330Regs::kHYS;
+constexpr Register8 MA330Regs::kMGL_MGH;
 
 }  // namespace MA330
 }  // namespace hortor_servo

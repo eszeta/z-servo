@@ -14,25 +14,25 @@
 
 #include "MA330.h"
 
-#include "MA330_types.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace MA330 {
 
-MA330::MA330() : Sensor(14) {}
+MA330::MA330() : Encoder(14) {}
 
 Error MA330::InitSPI(SPIClass *spi, const uint8_t cs_pin) {
   CHECK(spi_transport_.Init(
       spi, cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
   CHECK(spi_transport_.LinkAccessor(accessor_));
   CHECK(accessor_.Init());
-  hortor_servo::Sensor::Init();
+  hortor_servo::Encoder::Init();
   return Error::kOk;
 }
 
-uint16_t MA330::GetRaw() {
-  uint16_t angle = accessor_.ReadRaw();
-  return angle;
+Error MA330::GetRaw(uint16_t &out_raw) {
+  CHECK(accessor_.ReadRaw(out_raw));
+  return Error::kOk;
 }
 }  // namespace MA330
 }  // namespace hortor_servo

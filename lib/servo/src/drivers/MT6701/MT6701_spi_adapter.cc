@@ -20,33 +20,20 @@ namespace hortor_servo {
 namespace MT6701 {
 
 Error MT6701SpiAdapter::LinkAccessor(MT6701Accessor& accessor) {
-  accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
-    return Write(address, data);
-  });
-  accessor.SetWriteMultiple(
-      [this](const uint8_t address, const uint8_t* data, const size_t size) {
-        return WriteMultiple(address, data, size);
-      });
-  accessor.SetRead([this](const uint8_t address, uint8_t* data) {
-    return Read(address, data);
-  });
-  accessor.SetReadMultiple(
-      [this](const uint8_t address, const size_t size, uint8_t* data) {
-        return ReadMultiple(address, size, data);
-      });
-  accessor.SetReadRaw([this](uint16_t* angle_raw,
-                             Status* field_status,
-                             bool* button_pushed,
-                             bool* track_loss) {
+  RegisterSpiAdapter::LinkAccessor(accessor);
+  accessor.SetReadRaw([this](uint16_t& angle_raw,
+                             Status& field_status,
+                             bool& button_pushed,
+                             bool& track_loss) {
     return ReadRaw(angle_raw, field_status, button_pushed, track_loss);
   });
   return Error::kOk;
 }
 
-Error MT6701SpiAdapter::ReadRaw(uint16_t* angle_raw,
-                                Status* field_status,
-                                bool* button_pushed,
-                                bool* track_loss) {
+Error MT6701SpiAdapter::ReadRaw(uint16_t& angle_raw,
+                                Status& field_status,
+                                bool& button_pushed,
+                                bool& track_loss) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }
@@ -67,12 +54,12 @@ Error MT6701SpiAdapter::ReadRaw(uint16_t* angle_raw,
     uint8_t status : 2;   // 2位磁场状态，指示磁场强度
     uint8_t button : 1;   // 1位按钮状态，指示按钮是否被按下
     uint8_t track : 1;    // 1位跟踪丢失状态，指示是否丢失跟踪
-  } __attribute__((packed))* raw = reinterpret_cast<decltype(raw)>(data);
+  } __packed* raw = reinterpret_cast<decltype(raw)>(data);
 
-  if (angle_raw) *angle_raw = raw->angle;
-  if (field_status) *field_status = static_cast<Status>(raw->status);
-  if (button_pushed) *button_pushed = raw->button;
-  if (track_loss) *track_loss = raw->track;
+  angle_raw = raw->angle;
+  field_status = static_cast<Status>(raw->status);
+  button_pushed = raw->button;
+  track_loss = raw->track;
 
   return Error::kOk;
 }

@@ -17,18 +17,19 @@
 #include <Arduino.h>
 
 #include "core/servo.h"
-#include "inst/inst_accessor.h"
-#include "inst/inst_port.h"
-#include "inst/inst_protocol.h"
-#include "inst/inst_types.h"
+#include "port_handler.h"
+#include "port_table_accessor.h"
+#include "protocol.h"
+#include "types.h"
 
 namespace hortor_servo {
-class Inst {
+
+class Slave {
  public:
   /**
    * @brief 构造函数
    */
-  Inst() = default;
+  Slave() = default;
 
   /**
    * @brief 初始化
@@ -40,19 +41,13 @@ class Inst {
    * @brief 链接访问器
    * @param accessor 指令访问器
    */
-  Error LinkAccessor(InstAccessor *accessor);
+  Error LinkAccessor(PortTableAccessor *accessor);
 
   /**
    * @brief 链接传输接口
    * @param transport 指令传输接口
    */
-  Error LinkPort(InstPort *port);
-
-  /**
-   * @brief 链接伺服电机
-   * @param servo 伺服电机
-   */
-  Error LinkServo(Servo *servo);
+  Error LinkPort(InstPortHandler *port);
 
   /**
    * @brief 处理指令
@@ -61,24 +56,13 @@ class Inst {
    */
   Error Process(float dt);
 
-  /**
-   * @brief 加载EEPROM寄存器
-   * @return 错误码
-   */
-  Error LoadEepromConfig();
-  /**
-   * @brief 加载RAM寄存器
-   * @return 错误码
-   */
-  Error LoadRamConfig();
-
  private:
   /**
    * @brief 执行指令
    * @param data 指令数据
    * @return 错误码
    */
-  Error Execute(const InstPacket *packet);
+  Error Execute(const InstPacket &packet);
 
   /**
    * @brief 响应指令
@@ -101,94 +85,72 @@ class Inst {
                   const uint8_t *data,
                   const size_t size);
   /**
-   * @brief 检查是否需要执行
-   * @param address 地址
-   * @param size 大小
-   * @return 错误码
-   */
-  Error CheckAction(const uint8_t address, const size_t size);
-  /**
-   * @brief 更新RAM寄存器
-   * @return 错误码
-   */
-  Error UpdateStatusRegs();
-
-  /**
    * @brief PING指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error PingHandler(const InstPacket *packet, const bool reply);
+  Error PingHandler(const InstPacket &packet);
   /**
    * @brief 读取数据指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error ReadDataHandler(const InstPacket *packet, const bool reply);
+  Error ReadDataHandler(const InstPacket &packet, const bool response);
   /**
    * @brief 写数据指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error WriteDataHandler(const InstPacket *packet, const bool reply);
+  Error WriteDataHandler(const InstPacket &packet, const bool response);
   /**
    * @brief 写寄存器指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error RegWriteHandler(const InstPacket *packet, const bool reply);
+  Error RegWriteHandler(const InstPacket &packet, const bool response);
   /**
    * @brief 执行指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error ActionHandler(const InstPacket *packet, const bool reply);
+  Error ActionHandler(const InstPacket &packet, const bool response);
   /**
    * @brief 同步写指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error SyncWriteHandler(const InstPacket *packet, const bool reply);
+  Error SyncWriteHandler(const InstPacket &packet, const bool response);
   /**
    * @brief 同步读指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error SyncReadHandler(const InstPacket *packet, const bool reply);
+  Error BulkReadHandler(const InstPacket &packet, const bool response);
   /**
    * @brief 恢复指令
    * @param packet 指令包
-   * @param reply 是否回复
+   * @param response 是否响应
    * @return 错误码
    */
-  Error RecoveryHandler(const InstPacket *packet, const bool reply);
-  /**
-   * @brief 重置指令
-   * @param packet 指令包
-   * @param reply 是否回复
-   * @return 错误码
-   */
-  Error ResetHandler(const InstPacket *packet, const bool reply);
+  Error ResetHandler(const InstPacket &packet, const bool response);
 
+  bool CheckResponse(const uint8_t instruction,
+                     const uint8_t return_level) const;
   /**
    * @brief 指令访问器
    */
-  InstAccessor *accessor_ = nullptr;
+  PortTableAccessor *accessor_ = nullptr;
   /**
    * @brief 指令传输接口
    */
-  InstPort *port_ = nullptr;
-  /**
-   * @brief 伺服电机
-   */
-  Servo *servo_ = nullptr;
+  InstPortHandler *port_ = nullptr;
   /**
    * @brief 异步写缓冲区
    */
@@ -202,4 +164,5 @@ class Inst {
   InstPacket inst_packet_{};
   StatusPacket status_packet_{};
 };
+
 }  // namespace hortor_servo

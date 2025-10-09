@@ -17,9 +17,9 @@
 #include <Arduino.h>
 
 #include "MT6701_accessor.h"
-#include "MT6701_types.h"
 #include "core/types.h"
 #include "register/register_i2c_adapter.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace MT6701 {
@@ -52,10 +52,10 @@ class MT6701I2cAdapter : public RegisterI2CAdapter {
    * 通过I2C接口从MT6701传感器读取当前角度值。
    * 注意：I2C模式下只支持角度读取，不支持其他状态信息。
    */
-  Error ReadRaw(uint16_t* angle_raw,
-                Status* field_status,
-                bool* button_pushed,
-                bool* track_loss);
+  Error ReadRaw(uint16_t& angle_raw,
+                Status& field_status,
+                bool& button_pushed,
+                bool& track_loss);
 };
 
 }  // namespace MT6701

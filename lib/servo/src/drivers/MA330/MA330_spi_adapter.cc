@@ -20,27 +20,14 @@ namespace hortor_servo {
 namespace MA330 {
 
 Error MA330SpiAdapter::LinkAccessor(MA330Accessor& accessor) {
-  accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
-    return Write(address, data);
-  });
-  accessor.SetWriteMultiple(
-      [this](const uint8_t address, const uint8_t* data, const size_t size) {
-        return WriteMultiple(address, data, size);
-      });
-  accessor.SetRead([this](const uint8_t address, uint8_t* data) {
-    return Read(address, data);
-  });
-  accessor.SetReadMultiple(
-      [this](const uint8_t address, const size_t size, uint8_t* data) {
-        return ReadMultiple(address, size, data);
-      });
+  RegisterSpiAdapter::LinkAccessor(accessor);
   accessor.SetReadRaw(
-      [this](uint16_t* angle_raw) { return ReadRaw(angle_raw); });
+      [this](uint16_t& angle_raw) { return ReadRaw(angle_raw); });
   return Error::kOk;
 }
 
-Error MA330SpiAdapter::ReadRaw(uint16_t* angle_raw) {
-  *angle_raw = transfer16(0x0000);
+Error MA330SpiAdapter::ReadRaw(uint16_t& angle_raw) {
+  angle_raw = transfer16(0x0000);
   return Error::kOk;
 }
 

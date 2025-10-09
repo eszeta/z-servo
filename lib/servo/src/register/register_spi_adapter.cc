@@ -33,33 +33,14 @@ Error RegisterSpiAdapter::Init(SPIClass *spi,
 }
 
 Error RegisterSpiAdapter::LinkAccessor(RegisterAccessor &accessor) {
-  accessor.SetWrite([this](const uint8_t address, const uint8_t data) {
-    return Write(address, data);
-  });
   accessor.SetWriteMultiple(
       [this](const uint8_t address, const uint8_t *data, const size_t size) {
         return WriteMultiple(address, data, size);
       });
-  accessor.SetRead([this](const uint8_t address, uint8_t *data) {
-    return Read(address, data);
-  });
   accessor.SetReadMultiple(
       [this](const uint8_t address, const size_t size, uint8_t *data) {
         return ReadMultiple(address, size, data);
       });
-  return Error::kOk;
-}
-
-Error RegisterSpiAdapter::Write(const uint8_t address, const uint8_t data) {
-  if (!spi_) {
-    return Error::kInvalidParameter;
-  }
-  spi_->beginTransaction(spi_settings_);
-  if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
-  spi_->transfer(address);
-  spi_->transfer(data);
-  if (cs_pin_ >= 0) digitalWrite(cs_pin_, HIGH);
-  spi_->endTransaction();
   return Error::kOk;
 }
 
@@ -73,19 +54,6 @@ Error RegisterSpiAdapter::WriteMultiple(const uint8_t address,
   if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
   spi_->transfer(address);
   spi_->transfer(const_cast<uint8_t *>(data), nullptr, size);
-  if (cs_pin_ >= 0) digitalWrite(cs_pin_, HIGH);
-  spi_->endTransaction();
-  return Error::kOk;
-}
-
-Error RegisterSpiAdapter::Read(const uint8_t address, uint8_t *data) {
-  if (!spi_) {
-    return Error::kInvalidParameter;
-  }
-  spi_->beginTransaction(spi_settings_);
-  if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
-  spi_->transfer(0x80 | address);
-  spi_->transfer(data, 1);
   if (cs_pin_ >= 0) digitalWrite(cs_pin_, HIGH);
   spi_->endTransaction();
   return Error::kOk;

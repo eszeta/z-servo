@@ -40,20 +40,6 @@ Hortor-Servo 是一个基于 Arduino 的舵机控制系统，支持 STM32 和 GD
 - STM32G431CB
 - GD32F130G8
 
-## 通信协议
-
-系统支持串口通信协议，指令兼容飞特STS系列：
-
-- PING：检查舵机状态
-- READ DATA：读取数据
-- WRITE DATA：写入数据
-- REG WRITE：寄存器写入
-- ACTION：执行动作
-- SYNC WRITE：同步写入
-- SYNC READ：同步读取
-- RECOVERY：恢复出厂设置
-- RESET：重置状态
-
 ## 许可证
 
 本项目采用Apache License 2.0许可证 - 详情请参阅[LICENSE](LICENSE)文件。

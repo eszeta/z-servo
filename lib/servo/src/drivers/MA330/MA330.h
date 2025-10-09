@@ -18,7 +18,7 @@
 
 #include "MA330_accessor.h"
 #include "MA330_spi_adapter.h"
-#include "core/sensor.h"
+#include "core/encoder.h"
 #include "core/types.h"
 
 namespace hortor_servo {
@@ -31,7 +31,7 @@ namespace MA330 {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本实现使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
-class MA330 final : public Sensor {
+class MA330 final : public Encoder {
  public:
   explicit MA330();
   /**
@@ -51,7 +51,7 @@ class MA330 final : public Sensor {
    * 通过I2C接口读取MT6701传感器的当前角度值。
    * 该方法实现了基类的纯虚函数。
    */
-  uint16_t GetRaw() override;
+  Error GetRaw(uint16_t &out_raw) override;
 
   /**
    * @brief 获取控制器实例

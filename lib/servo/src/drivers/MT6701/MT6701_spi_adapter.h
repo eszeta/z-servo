@@ -17,9 +17,9 @@
 #include <Arduino.h>
 
 #include "MT6701_accessor.h"
-#include "MT6701_types.h"
 #include "core/types.h"
 #include "register/register_spi_adapter.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace MT6701 {
@@ -94,10 +94,10 @@ class MT6701SpiAdapter : public RegisterSpiAdapter {
    * 通过SPI接口从MT6701传感器读取当前角度值和状态信息。
    * SPI模式支持完整的状态信息读取。
    */
-  Error ReadRaw(uint16_t* angle_raw,
-                Status* field_status,
-                bool* button_pushed,
-                bool* track_loss);
+  Error ReadRaw(uint16_t& angle_raw,
+                Status& field_status,
+                bool& button_pushed,
+                bool& track_loss);
 };
 
 }  // namespace MT6701

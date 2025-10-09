@@ -88,7 +88,7 @@ class MA330SpiAdapter : public RegisterSpiAdapter {
    * 通过SPI接口从MT6701传感器读取当前角度值和状态信息。
    * SPI模式支持完整的状态信息读取。
    */
-  Error ReadRaw(uint16_t* angle_raw);
+  Error ReadRaw(uint16_t& angle_raw);
 
  private:
   uint16_t transfer16(uint16_t outValue);

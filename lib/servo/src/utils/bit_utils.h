@@ -124,8 +124,9 @@ static constexpr T ToggleBit(const T data, const uint8_t idx) noexcept {
  * @param numBits 位宽
  * @return 位掩码
  */
-static constexpr uint8_t CreateMask8(const uint8_t startBit,
-                                     const uint8_t numBits) noexcept {
+template <typename T>
+static constexpr T CreateMask(const uint8_t startBit,
+                              const uint8_t numBits) noexcept {
   return ((1U << numBits) - 1) << startBit;
 }
 

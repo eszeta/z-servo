@@ -56,28 +56,12 @@ class RegisterI2CAdapter {
    * @brief 写寄存器
    * @param address 寄存器地址
    * @param data 要写入的数据
-   * @return 错误码，成功返回OK
-   */
-  Error Write(const uint8_t address, const uint8_t data);
-
-  /**
-   * @brief 写寄存器
-   * @param address 寄存器地址
-   * @param data 要写入的数据
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
   Error WriteMultiple(const uint8_t address,
                       const uint8_t* data,
                       const size_t size);
-
-  /**
-   * @brief 读寄存器
-   * @param address 寄存器地址
-   * @param data 读取数据的存储指针
-   * @return 错误码，成功返回OK
-   */
-  Error Read(const uint8_t address, uint8_t* data);
 
   /**
    * @brief 读取多个寄存器

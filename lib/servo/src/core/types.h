@@ -65,7 +65,11 @@ enum class Error : uint8_t {
   /**
    * @brief 无效状态
    */
-  kInvalidState = 10
+  kInvalidState = 10,
+  /**
+   * @brief 未实现
+   */
+  kNotImplemented = 11,
 };
 
 /**

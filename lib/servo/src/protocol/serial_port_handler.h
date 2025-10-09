@@ -15,29 +15,30 @@
 #pragma once
 
 #include <Arduino.h>
-#include <Wire.h>
 
-#include "inst/inst_port.h"
-#include "inst/inst_protocol.h"
-#include "inst/inst_types.h"
+#include "port_handler.h"
+#include "protocol.h"
+#include "types.h"
 
+#ifdef ARDUINO_ARCH_STM32
+#include <HardwareSerial.h>
+#endif
 namespace hortor_servo {
 
-class InstPortI2c : public InstPort {
+class InstSerialPortHandler : public InstPortHandler {
  public:
   /**
    * @brief 构造函数
    */
-  InstPortI2c() = default;
+  InstSerialPortHandler() = default;
 
   /**
    * @brief 初始化
-   * @param wire I2C对象
-   * @param address I2C地址
+   * @param serial 串口
    * @return 错误码
    */
-  Error Init(TwoWire *wire) {
-    wire_ = wire;
+  Error Init(HardwareSerial *serial) {
+    serial_ = serial;
     return Error::kOk;
   }
 
@@ -59,12 +60,11 @@ class InstPortI2c : public InstPort {
    */
   Error Response(const StatusPacket &packet, const uint8_t reply_idx) override;
 
-  Error OnReceive(int howMany);
-
-  Error OnRequest();
-
  private:
-  TwoWire *wire_ = nullptr;
+  HardwareSerial *serial_ = nullptr;
+  uint32_t delay_time_ = 0;
+  bool response_pending_ = false;
   StatusPacket status_packet_{};
 };
+
 }  // namespace hortor_servo

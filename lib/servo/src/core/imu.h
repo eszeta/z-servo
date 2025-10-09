@@ -32,7 +32,7 @@ class IMU {
    * @param z 加速度Z轴,单位:g
    * @return IMUError 读取结果
    */
-  virtual Error ReadAcceleration(float* x, float* y, float* z) = 0;
+  virtual Error ReadAcceleration(float& x, float& y, float& z) = 0;
 
   /**
    * @brief 检查加速度是否可用
@@ -47,7 +47,7 @@ class IMU {
    * @param z 陀螺仪Z轴,单位:度/秒
    * @return IMUError 读取结果
    */
-  virtual Error ReadGyroscope(float* x, float* y, float* z) = 0;
+  virtual Error ReadGyroscope(float& x, float& y, float& z) = 0;
 
   /**
    * @brief 检查陀螺仪是否可用
@@ -60,7 +60,7 @@ class IMU {
    * @param temperature_deg 温度
    * @return IMUError 读取结果
    */
-  virtual Error ReadTemperature(float* temperature_deg) = 0;
+  virtual Error ReadTemperature(float& temperature_deg) = 0;
 
   /**
    * @brief 检查温度是否可用

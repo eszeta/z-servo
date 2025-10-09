@@ -14,7 +14,7 @@
 
 #include "MT6701.h"
 
-#include "MT6701_types.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace MT6701 {
@@ -23,14 +23,19 @@ Error MT6701::Init(TwoWire *wire) {
   CHECK(i2c_transport_.Init(wire, kI2CAddress));
   CHECK(i2c_transport_.LinkAccessor(accessor_));
   CHECK(accessor_.Init());
-  hortor_servo::Sensor::Init();
+  hortor_servo::Encoder::Init();
   return Error::kOk;
 }
 
-uint16_t MT6701::GetRaw() {
-  uint16_t angle = 0;
-  accessor_.ReadRaw(&angle, nullptr, nullptr, nullptr);
-  return angle;
+Error MT6701::GetRaw(uint16_t &out_raw) {
+  Status status = Status::kNormal;
+  bool button_pushed = false;
+  bool track_loss = false;
+  CHECK(accessor_.ReadRaw(out_raw, status, button_pushed, track_loss));
+  (void)status;
+  (void)button_pushed;
+  (void)track_loss;
+  return Error::kOk;
 }
 }  // namespace MT6701
 }  // namespace hortor_servo

@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "types.h"
 namespace hortor_servo {
 
 /**
@@ -25,17 +26,27 @@ class Current {
  public:
   /**
    * @brief 获取当前电流读数
-   * @return float 以安培(A)为单位的电流值
+   * @param current 以安培(A)为单位的电流值
+   * @return Error 错误码
    */
-  virtual float GetCurrent() = 0;
+  virtual Error GetCurrent(float& current) = 0;
 
   /**
    * @brief 读取并平均多次电流采样值
-   * @param n 采样次数，默认为100次
-   * @return float N次采样的平均电流值（单位：安培）
-   * @note 采样频率取决于具体实现，通常在1kHz以上
+   * @param n 采样次数
+   * @param current 平均电流值
+   * @return Error 错误码
    */
-  float ReadAverageCurrents(int n = 100);
+  Error ReadAverageCurrents(int n, float& current) {
+    CHECK(GetCurrent(current));
+    for (int i = 0; i < n; ++i) {
+      float new_current;
+      CHECK(GetCurrent(new_current));
+      current = current * 0.6f + 0.4f * new_current;
+      delay(3);
+    }
+    return Error::kOk;
+  }
 };
 
 }  // namespace hortor_servo

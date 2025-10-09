@@ -18,10 +18,10 @@
 #include <Wire.h>
 
 #include "LSM6DSOW_accessor.h"
-#include "LSM6DSOW_types.h"
 #include "core/imu.h"
 #include "register/register_accessor.h"
 #include "register/register_i2c_adapter.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace LSM6DSOW {
@@ -50,7 +50,7 @@ class LSM6DSOW final : public IMU {
    * @param z 加速度Z轴数据,单位：g
    * @return 读取结果
    */
-  Error ReadAcceleration(float* x, float* y, float* z) override {
+  Error ReadAcceleration(float& x, float& y, float& z) override {
     return accessor_.ReadAcceleration(x, y, z);
   }
 
@@ -69,7 +69,7 @@ class LSM6DSOW final : public IMU {
    * @param z 陀螺仪Z轴数据
    * @return 读取结果
    */
-  Error ReadGyroscope(float* x, float* y, float* z) override {
+  Error ReadGyroscope(float& x, float& y, float& z) override {
     return accessor_.ReadGyroscope(x, y, z);
   }
 
@@ -84,7 +84,7 @@ class LSM6DSOW final : public IMU {
    * @param temperature_deg 温度数据
    * @return 读取结果
    */
-  Error ReadTemperature(float* temperature_deg) override {
+  Error ReadTemperature(float& temperature_deg) override {
     return accessor_.ReadTemperature(temperature_deg);
   }
 

@@ -17,10 +17,15 @@
 #include <Arduino.h>
 
 #include "core/types.h"
-#include "inst/inst_types.h"
+#include "types.h"
 
 namespace hortor_servo {
 
+/**
+ * @brief 指令包状态
+ * DYNAMIXEL Protocol 1.0
+ * https://emanual.robotis.com/docs/en/dxl/protocol1/
+ */
 enum class PacketState : uint8_t {
   kHeader1,
   kHeader2,
@@ -31,7 +36,7 @@ enum class PacketState : uint8_t {
   kChecksum,
 };
 
-struct __attribute__((packed)) InstPacket {
+struct __packed InstPacket {
   static constexpr uint8_t kBufferCapacity = 128;
   static constexpr uint8_t kParameterOffset = 5;
   union {

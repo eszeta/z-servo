@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "inst_protocol.h"
+#include "protocol.h"
 
 #include <Arduino.h>
-
-#include <algorithm>
 
 namespace hortor_servo {
 
@@ -113,9 +111,10 @@ Error InstProtocol::CreateResponse(const uint8_t id,
     packet.SetParameterSize(0);
   } else {
     packet.SetParameterSize(parameter_size);
-    std::copy(parameter, parameter + parameter_size, packet.parameter);
+    memcpy(packet.parameter, parameter, parameter_size);
   }
   packet.SetChecksum(packet.CalculateChecksum());
   return Error::kOk;
 }
+
 }  // namespace hortor_servo

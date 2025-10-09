@@ -19,31 +19,31 @@
 
 #include <functional>
 
-#include "MA330_types.h"
 #include "register/register_accessor.h"
+#include "types.h"
 
 namespace hortor_servo {
 namespace MA330 {
 
 class MA330Accessor : public RegisterAccessor {
  public:
-  using ReadRawFunc = std::function<Error(uint16_t* angle_raw)>;
+  using ReadRawFunc = std::function<Error(uint16_t& angle_raw)>;
   Error Init() { return Error::kOk; }
-  uint16_t ReadRaw();
+  Error ReadRaw(uint16_t& angle_raw);
 
-  Error GetZero(uint16_t* zero);
-  Error GetBiasCurrentTrimming(uint8_t* bias_current_trimming);
-  Error IsEnableTrimmingX(bool* enable);
-  Error IsEnableTrimmingY(bool* enable);
-  Error GetPulsesPerTurn(uint16_t* pulses_per_turn);
-  Error GetIndexLength(uint8_t* index_length);
-  Error GetNumberPolePairs(uint8_t* number_pole_pairs);
-  Error GetRotationDirection(uint8_t* direction);
-  Error GetFilterWidth(uint8_t* filter_width);
-  Error GetHysteresis(uint8_t* hysteresis);
-  Error GetFieldStrengthHighThreshold(uint8_t* high_threshold);
-  Error GetFieldStrengthLowThreshold(uint8_t* low_threshold);
-  Error GetFieldStrength(FieldStrength* field_strength);
+  Error GetZero(uint16_t& zero);
+  Error GetBiasCurrentTrimming(uint8_t& bias_current_trimming);
+  Error IsEnableTrimmingX(bool& enable);
+  Error IsEnableTrimmingY(bool& enable);
+  Error GetPulsesPerTurn(uint16_t& pulses_per_turn);
+  Error GetIndexLength(uint8_t& index_length);
+  Error GetNumberPolePairs(uint8_t& number_pole_pairs);
+  Error GetRotationDirection(uint8_t& direction);
+  Error GetFilterWidth(uint8_t& filter_width);
+  Error GetHysteresis(uint8_t& hysteresis);
+  Error GetFieldStrengthHighThreshold(uint8_t& high_threshold);
+  Error GetFieldStrengthLowThreshold(uint8_t& low_threshold);
+  Error GetFieldStrength(FieldStrength& field_strength);
 
   Error SetZero(uint16_t zero);
   Error SetBiasCurrentTrimming(uint8_t bias_current_trimming);

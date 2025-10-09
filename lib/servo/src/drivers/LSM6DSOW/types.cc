@@ -1,0 +1,68 @@
+// Copyright 2025 ES_ZETA
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "types.h"
+
+namespace hortor_servo {
+namespace LSM6DSOW {
+
+// 兼容GD32的编译环境，需要手动定义，否则会链接错误
+constexpr Register8 LSM6DSOWRegs::kWHO_AM_I;
+constexpr Register8 LSM6DSOWRegs::kCTRL1_XL;
+constexpr Register8 LSM6DSOWRegs::kODR_XL;
+constexpr Register8 LSM6DSOWRegs::kFS_XL;
+constexpr Register8 LSM6DSOWRegs::kLPF2_XL_EN;
+constexpr Register8 LSM6DSOWRegs::kCTRL2_G;
+constexpr Register8 LSM6DSOWRegs::kODR_G;
+constexpr Register8 LSM6DSOWRegs::kFS_G;
+constexpr Register8 LSM6DSOWRegs::kFS_125;
+constexpr Register8 LSM6DSOWRegs::kCTRL7_G;
+constexpr Register8 LSM6DSOWRegs::kG_HM_MODE;
+constexpr Register8 LSM6DSOWRegs::kHP_EN_G;
+constexpr Register8 LSM6DSOWRegs::kHPM_G;
+constexpr Register8 LSM6DSOWRegs::kUSR_OFF_ON_OUT;
+constexpr Register8 LSM6DSOWRegs::kCTRL8_XL;
+constexpr Register8 LSM6DSOWRegs::kHPCF_XL;
+constexpr Register8 LSM6DSOWRegs::kHP_REF_MODE_XL;
+constexpr Register8 LSM6DSOWRegs::kFASTSETTL_MODE_XL;
+constexpr Register8 LSM6DSOWRegs::kHP_SLOPE_XL_EN;
+constexpr Register8 LSM6DSOWRegs::kLOW_PASS_ON_6D;
+constexpr Register8 LSM6DSOWRegs::kSTATUS_REG;
+constexpr Register8 LSM6DSOWRegs::kTDA;
+constexpr Register8 LSM6DSOWRegs::kGDA;
+constexpr Register8 LSM6DSOWRegs::kXLDA;
+constexpr Register8 LSM6DSOWRegs::kOUT_TEMP;
+constexpr Register8 LSM6DSOWRegs::kOUT_TEMP_L;
+constexpr Register8 LSM6DSOWRegs::kOUT_TEMP_H;
+constexpr Register8 LSM6DSOWRegs::kOUTX_G;
+constexpr Register8 LSM6DSOWRegs::kOUTX_L_G;
+constexpr Register8 LSM6DSOWRegs::kOUTX_H_G;
+constexpr Register8 LSM6DSOWRegs::kOUTY_G;
+constexpr Register8 LSM6DSOWRegs::kOUTY_L_G;
+constexpr Register8 LSM6DSOWRegs::kOUTY_H_G;
+constexpr Register8 LSM6DSOWRegs::kOUTZ_G;
+constexpr Register8 LSM6DSOWRegs::kOUTZ_L_G;
+constexpr Register8 LSM6DSOWRegs::kOUTZ_H_G;
+constexpr Register8 LSM6DSOWRegs::kOUTX_A;
+constexpr Register8 LSM6DSOWRegs::kOUTX_L_A;
+constexpr Register8 LSM6DSOWRegs::kOUTX_H_A;
+constexpr Register8 LSM6DSOWRegs::kOUTY_A;
+constexpr Register8 LSM6DSOWRegs::kOUTY_L_A;
+constexpr Register8 LSM6DSOWRegs::kOUTY_H_A;
+constexpr Register8 LSM6DSOWRegs::kOUTZ_A;
+constexpr Register8 LSM6DSOWRegs::kOUTZ_L_A;
+constexpr Register8 LSM6DSOWRegs::kOUTZ_H_A;
+
+}  // namespace LSM6DSOW
+}  // namespace hortor_servo

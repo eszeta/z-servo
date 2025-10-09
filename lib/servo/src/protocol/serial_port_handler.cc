@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "inst_port_serial.h"
+#include "serial_port_handler.h"
 
 #include <Arduino.h>
 
-#include "inst/inst_protocol.h"
-#include "inst/inst_types.h"
 #include "math/math.h"
+#include "port_handler.h"
+#include "protocol.h"
 
 #ifdef ARDUINO_ARCH_STM32
 #include <HardwareSerial.h>
@@ -26,10 +26,10 @@
 
 namespace hortor_servo {
 
-Error InstPortSerial::Process(InstProtocol &protocol,
-                              const float dt,
-                              InstPacket &inst_packet,
-                              bool &is_complete) {
+Error InstSerialPortHandler::Process(InstProtocol &protocol,
+                                     const float dt,
+                                     InstPacket &inst_packet,
+                                     bool &is_complete) {
   // 延时回包
   delay_time_ -= dt;
   if (delay_time_ <= 0 && response_pending_) {
@@ -49,12 +49,13 @@ Error InstPortSerial::Process(InstProtocol &protocol,
   return Error::kOk;
 }
 
-Error InstPortSerial::Response(const StatusPacket &packet,
-                               const uint8_t reply_idx) {
+Error InstSerialPortHandler::Response(const StatusPacket &packet,
+                                      const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
-  std::copy(packet.buffer, packet.buffer + size, status_packet_.buffer);
+  memcpy(status_packet_.buffer, packet.buffer, size);
   delay_time_ = response_delay_ * (reply_idx + 1) * kMilliToSec;  // 毫秒转秒
   response_pending_ = true;
   return Error::kOk;
 }
+
 }  // namespace hortor_servo

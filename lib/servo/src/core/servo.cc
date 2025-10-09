@@ -28,7 +28,7 @@ void Servo::LinkDriver(Motor *driver) { driver_ = driver; }
  * @brief 链接角度传感器
  * @param sensor 角度传感器指针
  */
-void Servo::LinkAngleSensor(Sensor *sensor) { angle_sensor_ = sensor; }
+void Servo::LinkAngleSensor(Encoder *sensor) { encoder = sensor; }
 
 /**
  * @brief 链接电流传感器
@@ -41,27 +41,20 @@ void Servo::LinkCurrentSense(Current *current_sense) {
 /**
  * @brief 初始化舵机
  */
-void Servo::Init() {}
-
-/**
- * @brief 执行动作
- */
-void Servo::Action() {
-  if (goal_position_ >= min_position_ && goal_position_ <= max_position_) {
-    moving_ = true;
-  }
+void Servo::Init() {
 }
 
 /**
  * @brief 处理舵机逻辑
  * @param dt 时间间隔(秒)
  */
-void Servo::Process(float dt) {
-  angle_sensor_->Process(dt);
-  present_position_ = GetTotalCounts(dt);
-  present_velocity_ = GetVelocity(dt);
-  present_current_ = GetCurrent(dt);
-  if (!enabled_) return;
+Error Servo::Process(float dt) {
+  CHECK(RefreshPresentVariables(dt));
+
+  if (!enabled_) {
+    return Error::kOk;
+  }
+
   switch (mode_) {
     case ServoMode::kPosition: {
       const auto pos_error = goal_position_ - present_position_;
@@ -91,7 +84,7 @@ void Servo::Process(float dt) {
       // 应用最高速度限制
       if (goal_velocity_ > kFloatThreshold ||
           goal_velocity_ < -kFloatThreshold) {
-        const auto limited_velocity = std::abs(goal_velocity_);
+        const auto limited_velocity = abs(goal_velocity_);
         next_velocity =
             constrain(next_velocity, -limited_velocity, limited_velocity);
       }
@@ -128,6 +121,31 @@ void Servo::Process(float dt) {
     default:
       SetPower(0);
   }
+  return Error::kOk;
+}
+
+Error Servo::RefreshPresentVariables(float dt) {
+  // 处理编码器
+  CHECK(encoder->Process(dt));
+  // 处理编码器PLL
+  const auto encoder_pos_counts = encoder->GetPosCounts();
+  const auto encoder_bits = encoder->kResolution.kBits;
+  const auto encoder_pos_counts_mapped =
+      mapResolution(encoder_pos_counts, encoder_bits, kResolution.kBits);
+  CHECK(encoder_pll.Process(dt, encoder_pos_counts_mapped));
+
+  // 获取当前位置
+  const auto direction = static_cast<float>(encoder_direction_);
+  present_position_ =
+      encoder_pll.GetPosition() * direction + position_correction_;
+
+  // 获取当前速度
+  present_velocity_ = encoder_pll.GetVelocity() * direction;
+
+  // 获取当前电流
+  CHECK(current_sense_->GetCurrent(present_current_));
+  present_current_ = current_lpf_.Compute(present_current_, dt);
+  return Error::kOk;
 }
 
 /**
@@ -143,47 +161,6 @@ bool Servo::IsPositionReached(int16_t pos_error) {
     return false;
   }
   return true;
-}
-
-/**
- * @brief 获取当前位置（映射后的计数值）
- * @param dt 时间间隔(秒)
- * @return 当前位置值
- */
-float Servo::GetTotalCounts(float dt) {
-  const auto direction = static_cast<float>(sensor_direction_);
-  const auto raw = angle_sensor_->GetTotalCounts();
-  const auto raw_mapped =
-      mapResolution(raw, angle_sensor_->kResolution.kBits, kResolution.kBits);
-  const auto filtered = pos_lpf_.Compute(raw_mapped, dt);
-  const auto corrected = direction * filtered + position_correction_;
-  return corrected;
-}
-
-/**
- * @brief 获取当前速度
- * @param dt 时间间隔(秒)
- * @return 当前速度值
- */
-float Servo::GetVelocity(float dt) {
-  const auto direction = static_cast<float>(sensor_direction_);
-  const auto raw = angle_sensor_->GetVelocity();
-  const auto raw_mapped =
-      mapResolution(raw, angle_sensor_->kResolution.kBits, kResolution.kBits);
-  const auto filtered = velocity_lpf_.Compute(raw_mapped, dt);
-  const auto corrected = direction * filtered;
-  return corrected;
-}
-
-/**
- * @brief 获取当前电流
- * @param dt 时间间隔(秒)
- * @return 当前电流值
- */
-float Servo::GetCurrent(float dt) {
-  const auto raw = current_sense_->GetCurrent();
-  const auto filtered = current_lpf_.Compute(raw, dt);
-  return filtered;
 }
 
 /**

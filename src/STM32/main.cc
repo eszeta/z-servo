@@ -19,12 +19,13 @@
 #include <debug_print.h>
 #include <drivers/DRV8231A/DRV8231A.h>
 #include <drivers/MT6701/MT6701.h>
-#include <drivers/generic_current/generic_current.h>
+#include <drivers/current_mirror/current_mirror.h>
 #include <info_led.h>
-#include <inst/inst.h>
-#include <inst/inst_accessor.h>
-#include <inst/inst_port_i2c.h>
 #include <math/math.h>
+// #include <protocol/i2c_port_handler.h>
+// #include <protocol/slave.h>
+// #include <servo_slave/servo_accessor.h>
+// #include <servo_slave/types.h>
 
 static constexpr auto kInfoLedPin = PA12;
 // 目标帧率500Hz
@@ -34,55 +35,62 @@ static constexpr auto kTargetLoopPeriodUs = 1000000 / kTargetLoopRateHz;
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
-TwoWire wire_inst(PB7, PA15);
+// TwoWire wire_inst(PB7, PA15);
 
 hortor_servo::InfoLED::InfoLED info_led{};
-hortor_servo::InstPortI2c inst_port{};
-hortor_servo::InstAccessor inst_accessor{};
-hortor_servo::Inst inst{};
+// hortor_servo::InstI2cPortHandler inst_port{};
+// hortor_servo::ServoAccessor inst_accessor{};
+// hortor_servo::Slave inst{};
 hortor_servo::DRV8231A::DRV8231A motor_driver{};
 hortor_servo::MT6701::MT6701 angle_sensor{};
-hortor_servo::generic_current::GenericCurrent current_sensor{};
-hortor_servo::Servo servo{};
+hortor_servo::current_mirror::CurrentMirror current_sensor{};
+hortor_servo::Servo servo{11};
 
 // cppcheck-suppress unusedFunction
-void receiveEvent(int howMany) { inst_port.OnReceive(howMany); }
-// cppcheck-suppress unusedFunction
-void requestEvent() { inst_port.OnRequest(); }
+// void receiveEvent(int howMany) { inst_port.OnReceive(howMany); }
+// // cppcheck-suppress unusedFunction
+// void requestEvent() { inst_port.OnRequest(); }
 
 // cppcheck-suppress unusedFunction
 void setup() {
   // 设置PWM频率为10kHz
   analogWriteFrequency(10 * 1000);
 
-  serial_debug.begin(921600);
+  serial_debug.begin(115200);
   hortor_servo::DebugEnable(&serial_debug);
 
   motor_driver.Init(PA0, PA2);
   wire_sensor.begin();
   angle_sensor.Init(&wire_sensor);
-  current_sensor.Init(PA3, 1000, 1500);
+  current_sensor.Init({.pin_adc = PA3,
+                       .ripropi_ohms = 1000.0f,
+                       .scaling_factor = 1500.0f,
+                       .adc_resolution_bits = 12,
+                       .adc_vref_volts = 3.3f,
+                       .calibration_samples = 50});
 
   servo.LinkDriver(&motor_driver);
   servo.LinkAngleSensor(&angle_sensor);
   servo.LinkCurrentSense(&current_sensor);
   servo.Init();
 
-  inst_accessor.Init();
-  inst_port.Init(&wire_inst);
+  // inst_accessor.Init();
+  // inst_port.Init(&wire_inst);
 
-  inst.LinkAccessor(&inst_accessor);
-  inst.LinkPort(&inst_port);
-  inst.LinkServo(&servo);
-  inst.Init();
+  // inst.LinkAccessor(&inst_accessor);
+  // inst.LinkPort(&inst_port);
+  // inst.LinkServo(&servo);
+  // inst.Init();
 
   // inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
   // inst_accessor.SetGoalVelocity(1000.0f);
   // inst_accessor.SetVelPidKp(0.0f);
   // inst_accessor.SetVelPidKi(0.0f);
 
-  inst.LoadEepromConfig();
-  inst.LoadRamConfig();
+  // inst_accessor.SetBaudrate(100);
+
+  // inst.LoadEepromConfig();
+  // inst.LoadRamConfig();
 
   info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
@@ -96,7 +104,7 @@ void loop() {
   last_time = current_time;
 
   info_led.Process(dt);
-  inst.Process(dt);
+  // inst.Process(dt);
   servo.Process(dt);
 
   hortor_servo::DebugPrint(F(">dt:"));

@@ -16,7 +16,7 @@
 
 #include <Arduino.h>
 
-#include "register/register.h"
+#include "register/register_field.h"
 
 namespace hortor_servo {
 namespace MT6701 {
@@ -123,41 +123,40 @@ static constexpr uint8_t kI2CAddress = 0x06;
  * 定义MT6701传感器的寄存器地址和位域，用于通过I2C接口配置传感器。
  * 使用RegisterUtils工具类简化寄存器操作。
  */
-
 struct MT6701Regs {
   // 角度相关寄存器，用于读取当前角度值
-  static constexpr Register kANGLE_0{0x04, 2, 6};
-  static constexpr Register kANGLE_6{0x03, 0, 8};
+  static constexpr Register8 kANGLE_6{0x03, 0, 8};
+  static constexpr Register8 kANGLE_0{0x04, 2, 6};
 
   // 模式选择寄存器，用于配置传感器工作模式
-  static constexpr Register kUVM_MUX{0x25, 7, 1};
-  static constexpr Register kABZ_MUX{0x29, 6, 1};
-  static constexpr Register kDIR{0x29, 1, 1};
+  static constexpr Register8 kUVM_MUX{0x25, 7, 1};
+  static constexpr Register8 kABZ_MUX{0x29, 6, 1};
+  static constexpr Register8 kDIR{0x29, 1, 1};
 
   // 分辨率设置寄存器，用于配置UVW和ABZ模式的分辨率
-  static constexpr Register kUVM_RES_0{0x30, 4, 4};
-  static constexpr Register kABZ_RES_8{0x30, 0, 2};
-  static constexpr Register kABZ_RES_0{0x31, 0, 8};
+  static constexpr Register8 kUVM_RES_0{0x30, 4, 4};
+  static constexpr Register8 kABZ_RES_8{0x30, 0, 2};
+  static constexpr Register8 kABZ_RES_0{0x31, 0, 8};
 
   // 零位和迟滞设置，用于配置零位偏移和迟滞参数
-  static constexpr Register kZERO_8{0x32, 0, 4};
-  static constexpr Register kZERO_0{0x33, 0, 8};
-  static constexpr Register kHYST_2{0x32, 7, 1};
-  static constexpr Register kHYST_0{0x34, 6, 2};
+  static constexpr Register8 kZERO_8{0x32, 0, 4};
+  static constexpr Register8 kZERO_0{0x33, 0, 8};
+  static constexpr Register8 kHYST_2{0x32, 7, 1};
+  static constexpr Register8 kHYST_0{0x34, 6, 2};
 
   // 脉冲宽度设置，用于配置ABZ模式下Z信号的脉冲宽度
-  static constexpr Register kPULSE_WIDTH{0x32, 4, 3};
+  static constexpr Register8 kPULSE_WIDTH{0x32, 4, 3};
 
   // PWM相关设置，用于配置PWM输出的参数
-  static constexpr Register kPWM_FREQ{0x38, 7, 1};
-  static constexpr Register kPWM_POL{0x38, 6, 1};
-  static constexpr Register kOUT_MODE{0x38, 5, 1};
+  static constexpr Register8 kPWM_FREQ{0x38, 7, 1};
+  static constexpr Register8 kPWM_POL{0x38, 6, 1};
+  static constexpr Register8 kOUT_MODE{0x38, 5, 1};
 
   // 模拟输出范围设置，用于配置模拟输出模式的起始和结束角度
-  static constexpr Register kA_STOP_8{0x3E, 4, 4};
-  static constexpr Register kA_START_8{0x3E, 0, 4};
-  static constexpr Register kA_START_0{0x3F, 0, 8};
-  static constexpr Register kA_STOP_0{0x40, 0, 8};
+  static constexpr Register8 kA_STOP_8{0x3E, 4, 4};
+  static constexpr Register8 kA_START_8{0x3E, 0, 4};
+  static constexpr Register8 kA_START_0{0x3F, 0, 8};
+  static constexpr Register8 kA_STOP_0{0x40, 0, 8};
 };  // struct MT6701Regs
 
 };  // namespace MT6701

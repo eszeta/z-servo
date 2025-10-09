@@ -16,9 +16,10 @@
 
 #include <Arduino.h>
 
-#include <vector>
-
 #include "led.h"
+
+// 数组大小计算宏
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 namespace hortor_servo {
 namespace InfoLED {
@@ -87,7 +88,11 @@ class InfoLED {
   /**
    * @brief 当前模式
    */
-  std::vector<BlinkUnit>* current_pattern_ = nullptr;
+  const BlinkUnit* current_pattern_ = nullptr;
+  /**
+   * @brief 当前模式大小
+   */
+  size_t current_pattern_size_ = 0;
   /**
    * @brief 当前步骤
    */
@@ -96,31 +101,12 @@ class InfoLED {
    * @brief 当前步骤已运行时间(秒)
    */
   float elapsed_time_ = 0.0f;
-  /**
-   * @brief 预定义的信息类型
-   */
-  std::vector<std::vector<BlinkUnit>> patterns_ = {
-      // OK - 慢闪
-      {{0.5, true}, {0.5, false}},
-      // WARNING - 快闪
-      {{0.2, true}, {0.2, false}},
-      // ERROR - 一长两闪
-      {{1.0, true},
-       {0.5, false},
-       {0.2, true},
-       {0.2, false},
-       {0.2, true},
-       {0.2, false}},
-      // FATAL_ERROR - 三闪一长
-      {{0.2, true},
-       {0.2, false},
-       {0.2, true},
-       {0.2, false},
-       {0.2, true},
-       {0.2, false},
-       {1, true},
-       {1, false}},
-  };
+  
+  // 预定义的信息类型模式
+  static const BlinkUnit kOkPattern[2];
+  static const BlinkUnit kWarningPattern[2];
+  static const BlinkUnit kErrorPattern[6];
+  static const BlinkUnit kFatalErrorPattern[8];
 };
 
 }  // namespace InfoLED

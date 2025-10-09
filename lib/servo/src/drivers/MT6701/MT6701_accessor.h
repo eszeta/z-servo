@@ -18,9 +18,9 @@
 
 #include <functional>
 
-#include "MT6701_types.h"
 #include "core/types.h"
 #include "register/register_accessor.h"
+#include "types.h"
 namespace hortor_servo {
 namespace MT6701 {
 
@@ -38,10 +38,10 @@ namespace MT6701 {
 // todo：除了ReadRaw,其它函数都没测试过
 class MT6701Accessor : public RegisterAccessor {
  public:
-  using ReadRawFunc = std::function<Error(uint16_t* angle_raw,
-                                          Status* field_status,
-                                          bool* button_pushed,
-                                          bool* track_loss)>;
+  using ReadRawFunc = std::function<Error(uint16_t& angle_raw,
+                                          Status& field_status,
+                                          bool& button_pushed,
+                                          bool& track_loss)>;
 
   Error Init() { return Error::kOk; }
 
@@ -57,10 +57,10 @@ class MT6701Accessor : public RegisterAccessor {
    * 参数可以为nullptr，表示不需要该信息。
    * 注意：I2C模式下只支持角度读取，其他状态信息不可用。
    */
-  Error ReadRaw(uint16_t* angle_raw,
-                Status* field_status = nullptr,
-                bool* button_pushed = nullptr,
-                bool* track_loss = nullptr);
+  Error ReadRaw(uint16_t& angle_raw,
+                Status& field_status,
+                bool& button_pushed,
+                bool& track_loss);
 
   /**
    * @brief 读取磁场状态
@@ -144,7 +144,7 @@ class MT6701Accessor : public RegisterAccessor {
    *
    * 获取MT6701传感器的当前旋转方向。
    */
-  Error GetDirection(Direction* direction);
+  Error GetDirection(Direction& direction);
   /**
    * @brief 将当前设置保存到EEPROM
    * @return 错误码，成功返回OK，否则参见Error错误码
@@ -254,7 +254,7 @@ class MT6701Accessor : public RegisterAccessor {
    *
    * 获取MT6701传感器的当前Z信号脉冲宽度。
    */
-  Error GetPulseWidth(PulseWidth* width);
+  Error GetPulseWidth(PulseWidth& width);
   /**
    * @brief 设置PWM输出频率
    * @param freq 频率选项
@@ -270,7 +270,7 @@ class MT6701Accessor : public RegisterAccessor {
    *
    * 获取MT6701传感器的当前PWM输出频率。
    */
-  Error GetPwmFreq(PwmFreq* freq);
+  Error GetPwmFreq(PwmFreq& freq);
   /**
    * @brief 设置PWM输出极性
    * @param polarity 极性选项
@@ -288,7 +288,7 @@ class MT6701Accessor : public RegisterAccessor {
    *
    * 获取MT6701传感器的当前PWM输出极性。
    */
-  Error GetPwmPolarity(PwmPol* polarity);
+  Error GetPwmPolarity(PwmPol& polarity);
   /**
    * @brief 设置输出模式
    * @param mode 输出模式选项
@@ -305,7 +305,7 @@ class MT6701Accessor : public RegisterAccessor {
    *
    * 获取MT6701传感器的当前输出模式。
    */
-  Error GetOutMode(OutMode* mode);
+  Error GetOutMode(OutMode& mode);
 
   /**
    * @brief 设置读取原始值的函数

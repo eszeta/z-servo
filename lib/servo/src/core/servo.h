@@ -16,12 +16,13 @@
 
 #include <Arduino.h>
 
-#include "core/current.h"
-#include "core/motor.h"
-#include "core/sensor.h"
-#include "core/types.h"
+#include "current.h"
+#include "encoder.h"
+#include "math/encoder_pll.h"
 #include "math/lowpass_filter.h"
 #include "math/pid.h"
+#include "motor.h"
+#include "types.h"
 
 namespace hortor_servo {
 
@@ -36,20 +37,20 @@ class Servo {
   /**
    * @brief 默认构造函数
    */
-  Servo() = default;
+  Servo(uint8_t resolution_bits)
+      : kResolution(resolution_bits), encoder_pll(resolution_bits) {}
 
   void Init();
   void LinkDriver(Motor *driver);
-  void LinkAngleSensor(Sensor *sensor);
+  void LinkAngleSensor(Encoder *sensor);
   void LinkCurrentSense(Current *current_sense);
-  void Action();
-  void Process(float dt);
+  Error Process(float dt);
 
   /**
    * @brief 获取角度传感器
    * @return 角度传感器指针
    */
-  Sensor *GetSensor() { return angle_sensor_; }
+  Encoder *GetSensor() { return encoder; }
 
   /**
    * @brief 获取当前位置
@@ -111,16 +112,6 @@ class Servo {
    * @return 电流低通滤波器引用
    */
   LowPassFilter &GetCurrentLpf() { return current_lpf_; }
-  /**
-   * @brief 获取位置低通滤波器
-   * @return 位置低通滤波器引用
-   */
-  LowPassFilter &GetPosLpf() { return pos_lpf_; }
-  /**
-   * @brief 获取速度低通滤波器
-   * @return 速度低通滤波器引用
-   */
-  LowPassFilter &GetVelocityLpf() { return velocity_lpf_; }
 
   /**
    * @brief 设置舵机模式
@@ -235,7 +226,7 @@ class Servo {
    * @param sensor_direction 传感器方向
    */
   void SetSensorDirection(Direction sensor_direction) {
-    sensor_direction_ = sensor_direction;
+    encoder_direction_ = sensor_direction;
   }
   /**
    * @brief 设置电机方向
@@ -289,27 +280,15 @@ class Servo {
   void SetTorqueLimit(float torque_limit) { torque_limit_ = torque_limit; }
 
   /** @brief 舵机分辨率（位数），决定了舵机的精度和量程 */
-  const Resolution kResolution{11};
+  const Resolution kResolution;
 
  private:
   /**
-   * @brief 获取当前位置（映射后的计数值）
+   * @brief 刷新当前变量
    * @param dt 时间间隔(秒)
-   * @return 当前位置值
+   * @return 错误码
    */
-  float GetTotalCounts(float dt);
-  /**
-   * @brief 获取当前速度
-   * @param dt 时间间隔(秒)
-   * @return 当前速度值
-   */
-  float GetVelocity(float dt);
-  /**
-   * @brief 获取当前电流
-   * @param dt 时间间隔(秒)
-   * @return 当前电流值
-   */
-  float GetCurrent(float dt);
+  Error RefreshPresentVariables(float dt);
   /**
    * @brief 设置电机功率
    * @param pwm PWM值
@@ -415,21 +394,19 @@ class Servo {
       {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 1.0f}};
 
   /** @brief 传感器方向 */
-  Direction sensor_direction_ = Direction::CW;
+  Direction encoder_direction_ = Direction::CCW;
   /** @brief 电机方向 */
   Direction motor_direction_ = Direction::CW;
 
   /** @brief 电流低通滤波器 */
   LowPassFilter current_lpf_;
-  /** @brief 位置低通滤波器 */
-  LowPassFilter pos_lpf_;
-  /** @brief 速度低通滤波器 */
-  LowPassFilter velocity_lpf_;
 
   /** @brief 电机驱动器指针 */
   Motor *driver_ = nullptr;
   /** @brief 角度传感器指针 */
-  Sensor *angle_sensor_ = nullptr;
+  Encoder *encoder = nullptr;
+  /** @brief 编码器PLL */
+  EncoderPll encoder_pll;
   /** @brief 电流传感器指针 */
   Current *current_sense_ = nullptr;
 };
