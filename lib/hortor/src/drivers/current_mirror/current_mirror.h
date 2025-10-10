@@ -19,7 +19,7 @@
 #include "servo/current.h"
 
 namespace hortor::drivers::current_mirror {
-  
+
 class CurrentMirror : public servo::Current {
  public:
   struct Config {

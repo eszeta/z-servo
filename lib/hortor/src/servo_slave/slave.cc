@@ -341,7 +341,8 @@
 //  * @param response 是否响应
 //  * @return 错误码
 //  */
-// Error Slave::WriteDataHandler(const InstPacket *packet, const bool response) {
+// Error Slave::WriteDataHandler(const InstPacket *packet, const bool response)
+// {
 //   const uint8_t address = packet->parameter[0];
 //   const uint8_t size = packet->GetParameterSize() - 1;
 //   CHECK(WriteRegs(address, packet->parameter + 1, size));
@@ -409,12 +410,14 @@
 //  * @brief 同步写入指令处理函数
 //  * 一条 SYNC WRITE 指令可一次修改多个舵机的控制表内容，
 //  * 而 REG WRITE+ACTION 指令是分步做到的。
-//  * 尽管如此，使用 SYNC WRITE 指令时，写入的数据长度和保存数据的首地址必须相同。
+//  * 尽管如此，使用 SYNC WRITE
+//  指令时，写入的数据长度和保存数据的首地址必须相同。
 //  * @param packet 指令包
 //  * @param response 是否响应
 //  * @return 错误码
 //  */
-// Error Slave::SyncWriteHandler(const InstPacket *packet, const bool response) {
+// Error Slave::SyncWriteHandler(const InstPacket *packet, const bool response)
+// {
 //   const uint8_t address = packet->parameter[0];
 //   const uint8_t data_size = packet->parameter[1];
 //   const uint8_t parameter_size = packet->GetParameterSize();

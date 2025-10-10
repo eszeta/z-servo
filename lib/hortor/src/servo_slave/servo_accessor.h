@@ -53,8 +53,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error GetFirmwareVersion(uint8_t& firmware_version) {
-//     CHECK(ReadRegField(ControlTable::kFirmwareVersion.reg, firmware_version));
-//     return Error::kOk;
+//     CHECK(ReadRegField(ControlTable::kFirmwareVersion.reg,
+//     firmware_version)); return Error::kOk;
 //   }
 
 //   /**
@@ -63,8 +63,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error SetFirmwareVersion(const uint8_t firmware_version) {
-//     CHECK(WriteRegField(ControlTable::kFirmwareVersion.reg, firmware_version));
-//     return Error::kOk;
+//     CHECK(WriteRegField(ControlTable::kFirmwareVersion.reg,
+//     firmware_version)); return Error::kOk;
 //   }
 
 //   /**
@@ -123,9 +123,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error GetReturnDelayTime(uint8_t& return_delay_time) {
-//     CHECK(ReadRegField(ControlTable::kReturnDelayTime.reg, return_delay_time));
-//     return_delay_time *= 2;
-//     return Error::kOk;
+//     CHECK(ReadRegField(ControlTable::kReturnDelayTime.reg,
+//     return_delay_time)); return_delay_time *= 2; return Error::kOk;
 //   }
 
 //   /**
@@ -185,8 +184,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error GetTemperatureLimit(uint8_t& temperature_limit) {
-//     CHECK(ReadRegField(ControlTable::kTemperatureLimit.reg, temperature_limit));
-//     return Error::kOk;
+//     CHECK(ReadRegField(ControlTable::kTemperatureLimit.reg,
+//     temperature_limit)); return Error::kOk;
 //   }
 
 //   /**
@@ -196,7 +195,8 @@
 //    */
 //   Error SetTemperatureLimit(const uint8_t temperature_limit) {
 //     CHECK(
-//         WriteRegField(ControlTable::kTemperatureLimit.reg, temperature_limit));
+//         WriteRegField(ControlTable::kTemperatureLimit.reg,
+//         temperature_limit));
 //     return Error::kOk;
 //   }
 
@@ -206,8 +206,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error GetMinVoltageLimit(uint8_t& min_voltage_limit) {
-//     CHECK(ReadRegField(ControlTable::kMinVoltageLimit.reg, min_voltage_limit));
-//     return Error::kOk;
+//     CHECK(ReadRegField(ControlTable::kMinVoltageLimit.reg,
+//     min_voltage_limit)); return Error::kOk;
 //   }
 
 //   /**
@@ -216,8 +216,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error SetMinVoltageLimit(const uint8_t min_voltage_limit) {
-//     CHECK(WriteRegField(ControlTable::kMinVoltageLimit.reg, min_voltage_limit));
-//     return Error::kOk;
+//     CHECK(WriteRegField(ControlTable::kMinVoltageLimit.reg,
+//     min_voltage_limit)); return Error::kOk;
 //   }
 
 //   /**
@@ -226,8 +226,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error GetMaxVoltageLimit(uint8_t& max_voltage_limit) {
-//     CHECK(ReadRegField(ControlTable::kMaxVoltageLimit.reg, max_voltage_limit));
-//     return Error::kOk;
+//     CHECK(ReadRegField(ControlTable::kMaxVoltageLimit.reg,
+//     max_voltage_limit)); return Error::kOk;
 //   }
 
 //   /**
@@ -236,8 +236,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error SetMaxVoltageLimit(const uint8_t max_voltage_limit) {
-//     CHECK(WriteRegField(ControlTable::kMaxVoltageLimit.reg, max_voltage_limit));
-//     return Error::kOk;
+//     CHECK(WriteRegField(ControlTable::kMaxVoltageLimit.reg,
+//     max_voltage_limit)); return Error::kOk;
 //   }
 
 //   /**
@@ -326,8 +326,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error GetMultiTurnOffset(uint16_t& multi_turn_offset) {
-//     CHECK(ReadRegField(ControlTable::kMultiTurnOffset.reg, multi_turn_offset));
-//     return Error::kOk;
+//     CHECK(ReadRegField(ControlTable::kMultiTurnOffset.reg,
+//     multi_turn_offset)); return Error::kOk;
 //   }
 //   /**
 //    * @brief 设置多圈偏移
@@ -335,8 +335,8 @@
 //    * @return 错误码，成功返回OK
 //    */
 //   Error SetMultiTurnOffset(const uint16_t multi_turn_offset) {
-//     CHECK(WriteRegField(ControlTable::kMultiTurnOffset.reg, multi_turn_offset));
-//     return Error::kOk;
+//     CHECK(WriteRegField(ControlTable::kMultiTurnOffset.reg,
+//     multi_turn_offset)); return Error::kOk;
 //   }
 //   /**
 //    * @brief 获取分辨率分频
@@ -345,7 +345,8 @@
 //    */
 //   Error GetResolutionDivider(uint8_t& resolution_divider) {
 //     CHECK(
-//         ReadRegField(ControlTable::kResolutionDivider.reg, resolution_divider));
+//         ReadRegField(ControlTable::kResolutionDivider.reg,
+//         resolution_divider));
 //     return Error::kOk;
 //   }
 //   /**
@@ -883,7 +884,8 @@
 // //   int16_t GetPositionCorrection() {
 // //     uint16_t correction;
 // //     ReadRegField(
-// //         Regs::kPositionCorrectionH, Regs::kPositionCorrectionL, &correction);
+// //         Regs::kPositionCorrectionH, Regs::kPositionCorrectionL,
+// &correction);
 // //     return bit_utils::SignToTwos(correction, 11);
 // //   }
 
@@ -968,7 +970,8 @@
 // //    * @param torque 过载扭矩(1.0%)
 // //    */
 // //   void SetOverloadTorque(const float torque) {
-// //     WriteRegField(Regs::kOverloadTorque, static_cast<uint8_t>(torque * 100));
+// //     WriteRegField(Regs::kOverloadTorque, static_cast<uint8_t>(torque *
+// 100));
 // //   }
 
 // //   /**
@@ -1246,7 +1249,8 @@
 // //    * @param voltage 电压值(0.1V)
 // //    */
 // //   void SetPresentVoltage(const float voltage) {
-// //     WriteRegField(Regs::kPresentVoltage, static_cast<uint8_t>(voltage * 10));
+// //     WriteRegField(Regs::kPresentVoltage, static_cast<uint8_t>(voltage *
+// 10));
 // //   }
 
 // //   /**
@@ -1315,7 +1319,8 @@
 // //    * @param direction 传感器方向
 // //    */
 // //   void SetSensorDirection(const Direction direction) {
-// //     WriteRegField(Regs::kSensorDirection, direction == Direction::CCW ? 1 :
+// //     WriteRegField(Regs::kSensorDirection, direction == Direction::CCW ? 1
+// :
 // //     0);
 // //   }
 
@@ -1427,7 +1432,8 @@
 // //    * @param filter 电流滤波系数(0.001)
 // //    */
 // //   void SetCurrentFilter(const float filter) {
-// //     WriteRegField(Regs::kCurrentFilter, static_cast<uint8_t>(filter * 1000));
+// //     WriteRegField(Regs::kCurrentFilter, static_cast<uint8_t>(filter *
+// 1000));
 // //   }
 
 // //   /**

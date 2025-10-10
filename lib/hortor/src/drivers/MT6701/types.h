@@ -112,9 +112,9 @@ enum class Status : uint8_t {
 };
 
 /** @brief SSI时钟频率，定义SPI通信的时钟速率（1MHz） */
-static constexpr uint32_t kSSIClock = 1000000;
+constexpr uint32_t kSSIClock = 1000000;
 /** @brief I2C默认地址，MT6701传感器的7位I2C地址 */
-static constexpr uint8_t kI2CAddress = 0x06;
+constexpr uint8_t kI2CAddress = 0x06;
 
 /**
  * @brief MT6701寄存器定义

@@ -41,11 +41,11 @@ using hortor::utils::DebugPrint;
 using hortor::utils::DebugPrintln;
 using hortor::utils::TaskScheduler;
 
-static constexpr auto kInfoLedPin = PA12;
+constexpr auto kInfoLedPin = PA12;
 // 主控制循环频率 500Hz
-static constexpr auto kMainLoopRateHz = 500;
+constexpr auto kMainLoopRateHz = 500;
 // 调试输出频率 10Hz
-static constexpr auto kDebugOutputRateHz = 10;
+constexpr auto kDebugOutputRateHz = 10;
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
@@ -80,7 +80,10 @@ void setup() {
   serial_debug.begin(115200);
   DebugEnable(&serial_debug);
 
-  motor_driver.Init(PA0, PA2);
+  motor_driver.Init({.pin_in1 = PA0,
+                     .pin_in2 = PA2,
+                     .pin_nfault = 0,  // 如果硬件连接了 nFAULT，填入引脚号
+                     .slow_decay_threshold = 0.3f});  // 低于 30% 使用慢速衰减
   wire_sensor.begin();
   angle_sensor.Init(&wire_sensor);
   current_sensor.Init({.pin_adc = PA3,

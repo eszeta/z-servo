@@ -426,4 +426,4 @@ struct LSM6DSOWRegs {
   static constexpr Register8 kOUTZ_H_A{0x2D, 0, 8};
 };  // struct LSM6DSOWRegs
 
-}  // namespace hortor
+}  // namespace hortor::drivers::LSM6DSOW

@@ -53,7 +53,8 @@ Error InstSerialPortHandler::Response(const StatusPacket &packet,
                                       const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);
-  delay_time_ = response_delay_ * (reply_idx + 1) * math::kMilliToSec;  // 毫秒转秒
+  delay_time_ =
+      response_delay_ * (reply_idx + 1) * math::kMilliToSec;  // 毫秒转秒
   response_pending_ = true;
   return Error::kOk;
 }

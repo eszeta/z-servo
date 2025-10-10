@@ -46,11 +46,11 @@ enum class ServoMode : uint8_t {
  * @brief 电机状态位
  */
 namespace ServoStatusMask {
-static constexpr uint8_t kVoltage = 1 << 0;
-static constexpr uint8_t kSensor = 1 << 1;
-static constexpr uint8_t kTemperature = 1 << 2;
-static constexpr uint8_t kCurrent = 1 << 3;
-static constexpr uint8_t kLoad = 1 << 5;
+constexpr uint8_t kVoltage = 1 << 0;
+constexpr uint8_t kSensor = 1 << 1;
+constexpr uint8_t kTemperature = 1 << 2;
+constexpr uint8_t kCurrent = 1 << 3;
+constexpr uint8_t kLoad = 1 << 5;
 };  // namespace ServoStatusMask
 
 /**

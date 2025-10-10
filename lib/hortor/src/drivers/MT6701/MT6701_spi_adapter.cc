@@ -63,4 +63,4 @@ Error MT6701SpiAdapter::ReadRaw(uint16_t& angle_raw,
   return Error::kOk;
 }
 
-}  // namespace hortor
+}  // namespace hortor::drivers::MT6701

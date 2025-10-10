@@ -37,7 +37,7 @@ Error MT6701I2cAdapter::ReadRaw(uint16_t& angle_raw,
   CHECK(ReadMultiple(MT6701Regs::kANGLE_6.address, 1, &angle6));
   CHECK(ReadMultiple(MT6701Regs::kANGLE_0.address, 1, &angle0));
 
-  angle_raw = reg::RegisterUtils::GetCombinedValue(
+  angle_raw = reg::GetCombinedValue(
       MT6701Regs::kANGLE_6, MT6701Regs::kANGLE_0, angle6, angle0);
 
   // I2C模式下不支持这些状态读取

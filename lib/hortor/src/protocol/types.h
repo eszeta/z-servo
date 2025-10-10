@@ -24,13 +24,13 @@ namespace hortor::protocol {
  * @brief 指令包索引
  */
 namespace PacketIndex {
-static constexpr uint8_t kHeader1 = 0;
-static constexpr uint8_t kHeader2 = 1;
-static constexpr uint8_t kId = 2;
-static constexpr uint8_t kLength = 3;
-static constexpr uint8_t kInstruction = 4;
-static constexpr uint8_t kError = 4;
-static constexpr uint8_t kParameter = 5;
+constexpr uint8_t kHeader1 = 0;
+constexpr uint8_t kHeader2 = 1;
+constexpr uint8_t kId = 2;
+constexpr uint8_t kLength = 3;
+constexpr uint8_t kInstruction = 4;
+constexpr uint8_t kError = 4;
+constexpr uint8_t kParameter = 5;
 };  // namespace PacketIndex
 
 constexpr uint8_t kBroadcastId = 0xfe;

@@ -16,16 +16,31 @@
 
 #include <Arduino.h>
 
-#include "servo/current.h"
 #include "servo/motor.h"
 
 namespace hortor::drivers::MP6515 {
+
 /**
- * @brief MP6515电机驱动器
- * @details 使用两个PWM输出控制电机正反转
+ * @brief MP6515 电机驱动器
+ * @details
+ * H 桥电机驱动器，使用 Phase/Enable 控制模式。
+ * 支持正反转控制、PWM 调速、制动和滑行功能。
+ *
+ * 控制模式：
+ * - 正转：PHASE=1, ENABLE=PWM
+ * - 反转：PHASE=0, ENABLE=PWM
+ * - 滑行：ENABLE=0, BRAKE=0
+ * - 制动：BRAKE=1
  */
 class MP6515 final : public servo::Motor {
  public:
+  struct Config {
+    uint8_t pin_phase;  // PHASE 相位引脚
+    uint8_t pin_enbl;   // ENABLE 使能引脚（PWM）
+    uint8_t pin_brake;  // BRAKE 制动引脚
+    uint8_t pin_sleep;  // SLEEP 睡眠引脚
+  };
+
   /**
    * @brief 构造函数
    */
@@ -33,48 +48,44 @@ class MP6515 final : public servo::Motor {
 
   /**
    * @brief 初始化电机驱动器
-   * @param pin_phase 相位引脚编号
-   * @param pin_enbl 使能引脚编号
-   * @param pin_brake 刹车引脚编号
-   * @param pin_sleep 睡眠引脚编号
+   * @param config 配置参数
+   * @return Error 错误码
    */
-  void Init(const uint8_t pin_phase,
-            const uint8_t pin_enbl,
-            const uint8_t pin_brake,
-            const uint8_t pin_sleep);
+  Error Init(const Config& config);
+
   /**
-   * @brief 设置PWM输出
-   * @param pwm PWM值，范围为-1.0到1.0
+   * @brief 设置 PWM 输出
+   * @param pwm PWM 值，范围为 -1.0 到 1.0
    */
   void SetPWM(float pwm) override;
 
   /**
-   * @brief 断电
+   * @brief 制动（快速停止）
    */
-  void Break() override;
+  void Brake() override;
+
+  /**
+   * @brief 滑行（自由停止）
+   */
+  void Coast() override;
+
+  /**
+   * @brief 检查是否已初始化
+   * @return true 如果已初始化，false 否则
+   */
+  bool IsInitialized() const { return initialized_; }
 
  private:
-  /**
-   * @brief 刹车引脚编号
-   * 1: 刹车 0: 不刹车
-   */
-  uint8_t pin_brake_ = 0;
-  /**
-   * @brief 相位引脚编号
-   * 1: 正转   0: 反转
-   */
+  /** @brief PHASE 相位引脚（1: 正转, 0: 反转） */
   uint8_t pin_phase_ = 0;
-
-  /**
-   * @brief 使能引脚编号
-   */
+  /** @brief ENABLE 使能引脚（PWM 控制速度） */
   uint8_t pin_enbl_ = 0;
-
-  /**
-   * @brief 睡眠引脚编号
-   * 1: 工作 0: 睡眠
-   */
+  /** @brief BRAKE 制动引脚（1: 制动, 0: 不制动） */
+  uint8_t pin_brake_ = 0;
+  /** @brief SLEEP 睡眠引脚（1: 工作, 0: 睡眠） */
   uint8_t pin_sleep_ = 0;
+  /** @brief 是否已初始化 */
+  bool initialized_ = false;
 };
 
 }  // namespace hortor::drivers::MP6515

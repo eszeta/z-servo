@@ -176,6 +176,6 @@ void Servo::SetPower(const float pwm) {
 /**
  * @brief 电机刹车
  */
-void Servo::Break() { driver_->Break(); }
+void Servo::Break() { driver_->Brake(); }
 
 }  // namespace hortor::servo

@@ -18,6 +18,7 @@
 
 #include "hortor.h"
 #include "register/register_field.h"
+#include "register/register_utils.h"
 #include "servo/types.h"
 
 namespace hortor::reg {
@@ -91,7 +92,7 @@ class RegisterAccessor {
   Error WriteRegField(const RegisterField<T>& reg, T value) {
     T data;
     CHECK(Read(reg.address, data));
-    RegisterUtils::SetValue(reg, data, value, data);
+    SetValue(reg, data, value, data);
     CHECK(Write(reg.address, data));
     return Error::kOk;
   }
@@ -121,7 +122,7 @@ class RegisterAccessor {
     T high_value, low_value;
     CHECK(Read(high.address, high_value));
     CHECK(Read(low.address, low_value));
-    RegisterUtils::SetCombinedValue(
+    SetCombinedValue(
         high, low, high_value, low_value, value, high_value, low_value);
     CHECK(Write(high.address, high_value));
     CHECK(Write(low.address, low_value));
@@ -138,7 +139,7 @@ class RegisterAccessor {
   Error ReadRegField(const RegisterField<T>& reg, T& value) {
     T data;
     CHECK(Read(reg.address, data));
-    value = RegisterUtils::GetValue(reg, data);
+    value = GetValue(reg, data);
     return Error::kOk;
   }
 
@@ -170,7 +171,7 @@ class RegisterAccessor {
     T high_value, low_value;
     CHECK(Read(high.address, high_value));
     CHECK(Read(low.address, low_value));
-    value = RegisterUtils::GetCombinedValue(high, low, high_value, low_value);
+    value = GetCombinedValue(high, low, high_value, low_value);
     return Error::kOk;
   }
 

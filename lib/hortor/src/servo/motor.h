@@ -32,8 +32,13 @@ class Motor {
   virtual void SetPWM(float pwm) = 0;
 
   /**
-   * @brief 断电
+   * @brief 制动（快速停止）
    */
-  virtual void Break() = 0;
+  virtual void Brake() = 0;
+
+  /**
+   * @brief 滑行（自由停止）
+   */
+  virtual void Coast() = 0;
 };
 }  // namespace hortor::servo
