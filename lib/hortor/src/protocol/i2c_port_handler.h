@@ -1,0 +1,72 @@
+// Copyright 2025 ES_ZETA
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
+
+#include <Arduino.h>
+#include <Wire.h>
+
+#include "hortor.h"
+#include "port_handler.h"
+#include "protocol.h"
+#include "types.h"
+
+namespace hortor::protocol {
+
+class InstI2cPortHandler : public InstPortHandler {
+ public:
+  /**
+   * @brief 构造函数
+   */
+  InstI2cPortHandler() = default;
+
+  /**
+   * @brief 初始化
+   * @param wire I2C对象
+   * @param address I2C地址
+   * @return 错误码
+   */
+  Error Init(TwoWire *wire) {
+    wire_ = wire;
+    return Error::kOk;
+  }
+
+  /**
+   * @brief 处理数据
+   * @param dt 时间间隔(秒)
+   * @return 错误码
+   */
+  Error Process(InstProtocol &protocol,
+                const float dt,
+                InstPacket &inst_packet,
+                bool &is_complete) override;
+
+  /**
+   * @brief 发送数据
+   * @param reply_idx 回复索引
+   * @param data 数据
+   * @return 错误码
+   */
+  Error Response(const StatusPacket &packet, const uint8_t reply_idx) override;
+
+  Error OnReceive(int howMany);
+
+  Error OnRequest();
+
+ private:
+  TwoWire *wire_ = nullptr;
+  StatusPacket status_packet_{};
+};
+
+}  // namespace hortor::protocol

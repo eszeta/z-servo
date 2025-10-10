@@ -35,22 +35,22 @@
 //                     DIGITAL_TO_PINNAME(PA9),
 //                     DIGITAL_TO_PINNAME(PA10));
 
-// hortor_servo::InfoLED::InfoLED info_led;
-// hortor_servo::InstSerialPortHandler inst_port;
-// hortor_servo::PortTableAccessor inst_accessor;
-// hortor_servo::Slave inst;
-// hortor_servo::MP6515::MP6515 motor_driver;
-// hortor_servo::MA330::MA330 angle_sensor;
-// hortor_servo::generic_current::CurrentMirror current_sensor;
-// hortor_servo::Servo servo;
+// hortor::InfoLED::InfoLED info_led;
+// hortor::InstSerialPortHandler inst_port;
+// hortor::PortTableAccessor inst_accessor;
+// hortor::Slave inst;
+// hortor::MP6515::MP6515 motor_driver;
+// hortor::MA330::MA330 angle_sensor;
+// hortor::generic_current::CurrentMirror current_sensor;
+// hortor::Servo servo;
 
 // // cppcheck-suppress unusedFunction
 // void setup() {
 //   serial_debug.begin(9600);
-//   hortor_servo::DebugEnable(&serial_debug);
-//   hortor_servo::DebugPrintln(F("setup"));
+//   hortor::DebugEnable(&serial_debug);
+//   hortor::DebugPrintln(F("setup"));
 
-//   info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
+//   info_led.Init(kInfoLedPin, hortor::InfoLED::Mode::kOpenDrain);
 
 //   motor_driver.Init(PA0, PA2, PA1, PA3);
 //   spi_sensor.begin();
@@ -70,14 +70,14 @@
 //   // inst.LinkServo(&servo);
 //   inst.Init();
 
-//   info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
+//   info_led.SetInfo(hortor::InfoLED::InfoType::kOk);
 // }
 
 // // cppcheck-suppress unusedFunction
 // void loop() {
 //   static auto last_time = micros() - 1;
 //   const auto current_time = micros();
-//   const auto dt = (current_time - last_time) * hortor_servo::kMicroToSec;
+//   const auto dt = (current_time - last_time) * hortor::kMicroToSec;
 //   info_led.Process(dt);
 //   inst.Process(dt);
 //   servo.Process(dt);

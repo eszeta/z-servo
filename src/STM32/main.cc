@@ -15,36 +15,57 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <core/servo.h>
-#include <debug_print.h>
 #include <drivers/DRV8231A/DRV8231A.h>
 #include <drivers/MT6701/MT6701.h>
 #include <drivers/current_mirror/current_mirror.h>
-#include <info_led.h>
+#include <info_led/info_led.h>
 #include <math/math.h>
+#include <servo/servo.h>
+#include <utils/debug_print.h>
+#include <utils/task_scheduler.h>
 // #include <protocol/i2c_port_handler.h>
 // #include <protocol/slave.h>
 // #include <servo_slave/servo_accessor.h>
 // #include <servo_slave/types.h>
 
+using hortor::Error;
+using hortor::drivers::current_mirror::CurrentMirror;
+using hortor::drivers::DRV8231A::DRV8231A;
+using hortor::drivers::MT6701::MT6701;
+using hortor::info_led::InfoLED;
+using hortor::info_led::InfoType;
+using hortor::info_led::Mode;
+using hortor::servo::Servo;
+using hortor::utils::DebugEnable;
+using hortor::utils::DebugPrint;
+using hortor::utils::DebugPrintln;
+using hortor::utils::TaskScheduler;
+
 static constexpr auto kInfoLedPin = PA12;
-// 目标帧率500Hz
-static constexpr auto kTargetLoopRateHz = 500;
-// 目标周期(微秒)
-static constexpr auto kTargetLoopPeriodUs = 1000000 / kTargetLoopRateHz;
+// 主控制循环频率 500Hz
+static constexpr auto kMainLoopRateHz = 500;
+// 调试输出频率 10Hz
+static constexpr auto kDebugOutputRateHz = 10;
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
 // TwoWire wire_inst(PB7, PA15);
 
-hortor_servo::InfoLED::InfoLED info_led{};
-// hortor_servo::InstI2cPortHandler inst_port{};
-// hortor_servo::ServoAccessor inst_accessor{};
-// hortor_servo::Slave inst{};
-hortor_servo::DRV8231A::DRV8231A motor_driver{};
-hortor_servo::MT6701::MT6701 angle_sensor{};
-hortor_servo::current_mirror::CurrentMirror current_sensor{};
-hortor_servo::Servo servo{11};
+InfoLED info_led{};
+// InstI2cPortHandler inst_port{};
+// ServoAccessor inst_accessor{};
+// Slave inst{};
+DRV8231A motor_driver{};
+MT6701 angle_sensor{};
+CurrentMirror current_sensor{};
+Servo servo2{11};
+
+// 集中式任务调度器（固定容量，避免动态分配）
+TaskScheduler scheduler{};
+
+// 前向声明
+Error MainLoopCallback(float dt);
+Error DebugOutputCallback(float dt);
 
 // cppcheck-suppress unusedFunction
 // void receiveEvent(int howMany) { inst_port.OnReceive(howMany); }
@@ -57,7 +78,7 @@ void setup() {
   analogWriteFrequency(10 * 1000);
 
   serial_debug.begin(115200);
-  hortor_servo::DebugEnable(&serial_debug);
+  DebugEnable(&serial_debug);
 
   motor_driver.Init(PA0, PA2);
   wire_sensor.begin();
@@ -69,10 +90,10 @@ void setup() {
                        .adc_vref_volts = 3.3f,
                        .calibration_samples = 50});
 
-  servo.LinkDriver(&motor_driver);
-  servo.LinkAngleSensor(&angle_sensor);
-  servo.LinkCurrentSense(&current_sensor);
-  servo.Init();
+  servo2.LinkDriver(&motor_driver);
+  servo2.LinkAngleSensor(&angle_sensor);
+  servo2.LinkCurrentSense(&current_sensor);
+  servo2.Init();
 
   // inst_accessor.Init();
   // inst_port.Init(&wire_inst);
@@ -82,7 +103,7 @@ void setup() {
   // inst.LinkServo(&servo);
   // inst.Init();
 
-  // inst_accessor.SetMode(hortor_servo::ServoMode::kVelocity);
+  // inst_accessor.SetMode(ServoMode::kVelocity);
   // inst_accessor.SetGoalVelocity(1000.0f);
   // inst_accessor.SetVelPidKp(0.0f);
   // inst_accessor.SetVelPidKi(0.0f);
@@ -92,37 +113,47 @@ void setup() {
   // inst.LoadEepromConfig();
   // inst.LoadRamConfig();
 
-  info_led.Init(kInfoLedPin, hortor_servo::InfoLED::Mode::kOpenDrain);
-  info_led.SetInfo(hortor_servo::InfoLED::InfoType::kOk);
+  info_led.Init(kInfoLedPin, Mode::kOpenDrain);
+  info_led.SetInfo(InfoType::kOk);
+
+  // 注册任务：集中式调度
+  scheduler.Register(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制
+  scheduler.Register(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
+}
+
+/**
+ * @brief 主控制循环回调函数（500Hz）
+ * @param dt 距离上次调用的时间间隔（秒）
+ */
+Error MainLoopCallback(float dt) {
+  info_led.Process(dt);
+  // inst.Process(dt);
+  CHECK(servo2.Process(dt));
+  return Error::kOk;
+}
+
+/**
+ * @brief 调试输出回调函数（10Hz）
+ * @param dt 距离上次调用的时间间隔（秒）
+ */
+Error DebugOutputCallback(float dt) {
+  DebugPrint(F(">dt:"));
+  DebugPrintln(dt);
+  DebugPrint(F(">pwm:"));
+  DebugPrintln(servo2.GetPresentLoad());
+
+  auto present_velocity = servo2.GetPresentVelocity();
+  DebugPrint(F(">velocity:"));
+  DebugPrintln(present_velocity);
+
+  auto present_position = servo2.GetPresentPosition();
+  DebugPrint(F(">position:"));
+  DebugPrintln(present_position);
+  return Error::kOk;
 }
 
 // cppcheck-suppress unusedFunction
 void loop() {
-  static auto last_time = micros() - kTargetLoopPeriodUs;
-  const auto current_time = micros();
-  const auto dt = (current_time - last_time) * hortor_servo::kMicroToSec;
-  last_time = current_time;
-
-  info_led.Process(dt);
-  // inst.Process(dt);
-  servo.Process(dt);
-
-  hortor_servo::DebugPrint(F(">dt:"));
-  hortor_servo::DebugPrintln(dt);
-  hortor_servo::DebugPrint(F(">pwm:"));
-  hortor_servo::DebugPrintln(servo.GetPresentLoad());
-
-  auto present_velocity = servo.GetPresentVelocity();
-  hortor_servo::DebugPrint(F(">velocity:"));
-  hortor_servo::DebugPrintln(present_velocity);
-
-  auto present_position = servo.GetPresentPosition();
-  hortor_servo::DebugPrint(F(">position:"));
-  hortor_servo::DebugPrintln(present_position);
-
-  // 固定帧率控制
-  const auto elapsed_time = micros() - last_time;
-  if (elapsed_time < kTargetLoopPeriodUs) {
-    delayMicroseconds(kTargetLoopPeriodUs - elapsed_time);
-  }
+  // 统一调度与睡眠（按最小周期）
+  scheduler.Tick();
 }
