@@ -1,0 +1,111 @@
+// Copyright 2025 ES_ZETA
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
+
+#include <Arduino.h>
+
+#include "led.h"
+
+// 数组大小计算宏
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+namespace hortor::info_led {
+
+/**
+ * @brief LED闪烁模式的基本单元
+ */
+struct BlinkUnit {
+  float duration;  // 持续时间(秒)
+  bool state;      // true表示亮，false表示灭
+};
+
+/**
+ * @brief 信息类型
+ */
+enum class InfoType {
+  kOk,          // 正常状态
+  kWarning,     // 警告
+  kError,       // 错误
+  kFatalError,  // 致命错误
+  kMax
+};
+
+/**
+ * @brief 信息LED
+ */
+class InfoLED {
+ public:
+  /**
+   * @brief 构造函数
+   */
+  InfoLED() = default;
+  /**
+   * @brief 初始化
+   */
+  void Init(const uint32_t pin, const Mode mode = Mode::kPushPull);
+  /**
+   * @brief 初始化
+   * @param pinName 引脚名
+   * @param mode 模式
+   */
+  void Init(const PinName pinName, const Mode mode = Mode::kPushPull);
+
+  /**
+   * @brief 设置预定义的信息类型
+   * @param type 信息类型
+   */
+  void SetInfo(InfoType type);
+
+  /**
+   * @brief 停止显示信息
+   */
+  void Stop();
+
+  /**
+   * @brief 需要在主循环中调用以更新LED状态
+   * @param dt 时间间隔(秒)
+   */
+  void Process(float dt);
+
+ private:
+  /**
+   * @brief LED
+   */
+  LED led_;
+  /**
+   * @brief 当前模式
+   */
+  const BlinkUnit* current_pattern_ = nullptr;
+  /**
+   * @brief 当前模式大小
+   */
+  size_t current_pattern_size_ = 0;
+  /**
+   * @brief 当前步骤
+   */
+  size_t current_step_ = 0;
+  /**
+   * @brief 当前步骤已运行时间(秒)
+   */
+  float elapsed_time_ = 0.0f;
+
+  // 预定义的信息类型模式
+  static const BlinkUnit kOkPattern[2];
+  static const BlinkUnit kWarningPattern[2];
+  static const BlinkUnit kErrorPattern[6];
+  static const BlinkUnit kFatalErrorPattern[8];
+};
+
+}  // namespace hortor::info_led
