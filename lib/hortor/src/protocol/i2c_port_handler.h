@@ -20,11 +20,10 @@
 #include "hortor.h"
 #include "port_handler.h"
 #include "protocol.h"
-#include "types.h"
 
 namespace hortor::protocol {
 
-class InstI2cPortHandler : public InstPortHandler {
+class InstI2cPortHandler : public InstPortHandler<InstI2cPortHandler> {
  public:
   /**
    * @brief 构造函数
@@ -34,7 +33,6 @@ class InstI2cPortHandler : public InstPortHandler {
   /**
    * @brief 初始化
    * @param wire I2C对象
-   * @param address I2C地址
    * @return 错误码
    */
   Error Init(TwoWire *wire) {
@@ -43,30 +41,41 @@ class InstI2cPortHandler : public InstPortHandler {
   }
 
   /**
-   * @brief 处理数据
+   * @brief 处理数据实现
+   * @param protocol 协议处理器
    * @param dt 时间间隔(秒)
+   * @param inst_packet 指令包
+   * @param is_complete 是否完成
    * @return 错误码
    */
-  Error Process(InstProtocol &protocol,
-                const float dt,
-                InstPacket &inst_packet,
-                bool &is_complete) override;
+  Error ProcessImpl(InstProtocol &protocol,
+                    const float dt,
+                    InstPacket &inst_packet,
+                    bool &is_complete);
 
   /**
-   * @brief 发送数据
+   * @brief 发送响应数据实现
+   * @param packet 状态包
    * @param reply_idx 回复索引
-   * @param data 数据
    * @return 错误码
    */
-  Error Response(const StatusPacket &packet, const uint8_t reply_idx) override;
+  Error ResponseImpl(const StatusPacket &packet, const uint8_t reply_idx);
 
+  /**
+   * @brief I2C 接收事件回调
+   * @param howMany 接收的字节数
+   * @return 错误码
+   */
   Error OnReceive(int howMany);
 
+  /**
+   * @brief I2C 请求事件回调
+   * @return 错误码
+   */
   Error OnRequest();
 
  private:
   TwoWire *wire_ = nullptr;
-  StatusPacket status_packet_{};
 };
 
 }  // namespace hortor::protocol

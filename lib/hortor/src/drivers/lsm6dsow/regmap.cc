@@ -18,7 +18,8 @@ namespace hortor::drivers::LSM6DSOW {
 
 using Regs = LSM6DSOWRegs;
 
-Error RegMap::Init() {
+Error RegMap::Init(TwoWire* wire, const int address) {
+  CHECK(RegMapI2CBus::Init(wire, address));
   uint8_t value;
   CHECK(Read(Regs::kWHO_AM_I.address, value));
   if (value != 0x6C) {
@@ -46,7 +47,7 @@ Error RegMap::Init() {
 Error RegMap::ReadAcceleration(float& x, float& y, float& z) {
   const uint8_t size = 6;
   uint8_t data[size];
-  CHECK(ReadMultiple(Regs::kOUTX_A.address, size, data));
+  CHECK(ReadBytes(Regs::kOUTX_A.address, size, data));
   const int16_t x_raw = static_cast<int16_t>(data[1] << 8 | data[0]);
   const int16_t y_raw = static_cast<int16_t>(data[3] << 8 | data[2]);
   const int16_t z_raw = static_cast<int16_t>(data[5] << 8 | data[4]);
@@ -68,7 +69,7 @@ bool RegMap::AccelerationAvailable() {
 Error RegMap::ReadGyroscope(float& x, float& y, float& z) {
   const uint8_t size = 6;
   uint8_t data[size];
-  CHECK(ReadMultiple(Regs::kOUTX_L_G.address, size, data));
+  CHECK(ReadBytes(Regs::kOUTX_L_G.address, size, data));
   const int16_t x_raw = static_cast<int16_t>(data[1] << 8 | data[0]);
   const int16_t y_raw = static_cast<int16_t>(data[3] << 8 | data[2]);
   const int16_t z_raw = static_cast<int16_t>(data[5] << 8 | data[4]);
@@ -90,7 +91,7 @@ bool RegMap::GyroscopeAvailable() {
 Error RegMap::ReadTemperature(float& temperature_deg) {
   const uint8_t size = 2;
   uint8_t data[size];
-  CHECK(ReadMultiple(Regs::kOUT_TEMP.address, size, data));
+  CHECK(ReadBytes(Regs::kOUT_TEMP.address, size, data));
   const int16_t value = static_cast<int16_t>(data[1] << 8 | data[0]);
   temperature_deg = (static_cast<float>(value) / 256) + 25;
   return Error::kOk;

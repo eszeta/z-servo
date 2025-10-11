@@ -23,22 +23,30 @@ namespace hortor::servo {
  * @details
  * 所有具体的电机驱动器实现都必须继承自此类。该类提供了电机驱动器的基本接口定义。
  */
+template <typename Derived>
 class Motor {
+ protected:
+  Derived& AsDerived() { return static_cast<Derived&>(*this); }
+
+  const Derived& AsDerived() const {
+    return static_cast<const Derived&>(*this);
+  }
+
  public:
   /**
    * @brief 设置电机PWM
    * @param pwm (-1..1)
    */
-  virtual void SetPWM(float pwm) = 0;
+  void SetPWM(float pwm) { return AsDerived().SetPWMImpl(pwm); }
 
   /**
    * @brief 制动（快速停止）
    */
-  virtual void Brake() = 0;
+  void Brake() { return AsDerived().BrakeImpl(); }
 
   /**
    * @brief 滑行（自由停止）
    */
-  virtual void Coast() = 0;
+  void Coast() { return AsDerived().CoastImpl(); }
 };
 }  // namespace hortor::servo

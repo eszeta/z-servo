@@ -25,7 +25,15 @@ namespace hortor::servo {
  * @brief IMU类
  * @details 定义了IMU的基本接口
  */
+template <typename Derived>
 class IMU {
+ protected:
+  Derived& AsDerived() { return static_cast<Derived&>(*this); }
+
+  const Derived& AsDerived() const {
+    return static_cast<const Derived&>(*this);
+  }
+
  public:
   /**
    * @brief 读取加速度
@@ -34,13 +42,17 @@ class IMU {
    * @param z 加速度Z轴,单位:g
    * @return IMUError 读取结果
    */
-  virtual Error ReadAcceleration(float& x, float& y, float& z) = 0;
+  Error ReadAcceleration(float& x, float& y, float& z) {
+    return AsDerived().ReadAccelerationImpl(x, y, z);
+  }
 
   /**
    * @brief 检查加速度是否可用
    * @return bool 加速度是否可用
    */
-  virtual bool AccelerationAvailable() = 0;
+  bool AccelerationAvailable() {
+    return AsDerived().AccelerationAvailableImpl();
+  }
 
   /**
    * @brief 读取陀螺仪
@@ -49,26 +61,30 @@ class IMU {
    * @param z 陀螺仪Z轴,单位:度/秒
    * @return IMUError 读取结果
    */
-  virtual Error ReadGyroscope(float& x, float& y, float& z) = 0;
+  Error ReadGyroscope(float& x, float& y, float& z) {
+    return AsDerived().ReadGyroscopeImpl(x, y, z);
+  }
 
   /**
    * @brief 检查陀螺仪是否可用
    * @return bool 陀螺仪是否可用
    */
-  virtual bool GyroscopeAvailable() = 0;
+  bool GyroscopeAvailable() { return AsDerived().GyroscopeAvailableImpl(); }
 
   /**
    * @brief 读取温度
    * @param temperature_deg 温度
    * @return IMUError 读取结果
    */
-  virtual Error ReadTemperature(float& temperature_deg) = 0;
+  Error ReadTemperature(float& temperature_deg) {
+    return AsDerived().ReadTemperatureImpl(temperature_deg);
+  }
 
   /**
    * @brief 检查温度是否可用
    * @return bool 温度是否可用
    */
-  virtual bool TemperatureAvailable() = 0;
+  bool TemperatureAvailable() { return AsDerived().TemperatureAvailableImpl(); }
 };
 
 }  // namespace hortor::servo

@@ -30,19 +30,7 @@ Error RegMapI2CBus::Init(TwoWire* wire, const int address) {
   return Error::kOk;
 }
 
-Error RegMapI2CBus::LinkAccessor(RegMap& accessor) {
-  accessor.SetWriteMultiple(
-      [this](const uint8_t address, const uint8_t* data, const size_t size) {
-        return WriteMultiple(address, data, size);
-      });
-  accessor.SetReadMultiple(
-      [this](const uint8_t address, const size_t size, uint8_t* data) {
-        return ReadMultiple(address, size, data);
-      });
-  return Error::kOk;
-}
-
-Error RegMapI2CBus::WriteMultiple(const uint8_t address,
+Error RegMapI2CBus::WriteBytesImpl(const uint8_t address,
                                    const uint8_t* data,
                                    const size_t size) {
   if (!wire_ || !data) {
@@ -57,7 +45,7 @@ Error RegMapI2CBus::WriteMultiple(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegMapI2CBus::ReadMultiple(const uint8_t address,
+Error RegMapI2CBus::ReadBytesImpl(const uint8_t address,
                                   const size_t size,
                                   uint8_t* data) {
   if (!wire_ || !data) {
@@ -78,4 +66,3 @@ Error RegMapI2CBus::ReadMultiple(const uint8_t address,
 }
 
 }  // namespace hortor::regmap
-

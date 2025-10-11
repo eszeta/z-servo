@@ -16,7 +16,6 @@
 
 #include <Arduino.h>
 
-#include "regmap.h"
 #include "regmap/regmap_spi_bus.h"
 
 namespace hortor::drivers::MA330 {
@@ -27,65 +26,30 @@ namespace hortor::drivers::MA330 {
  * 实现通过SPI协议与MA330传感器通信的功能。
  * SPI模式提供更高的通信速度，但功能有限，主要用于角度读取。
  */
-class RegMapSpiBus : public hortor::regmap::RegMapSpiBus {
+class RegMapSpiBus : public regmap::RegMapSpiBus {
  public:
   /**
-   * @brief 设置寄存器访问器函数
-   * @param accessor 寄存器访问器
-   * @return 错误码
-   */
-  Error LinkAccessor(RegMap& regmap);
-
-  /**
-   * @brief 写寄存器
+   * @brief 写寄存器 MA330特殊SPI写实现
    * @param address 寄存器地址
    * @param data 要写入的数据
-   * @return 错误码, 始终返回kGeneralErr
+   * @return 错误码
    */
   Error Write(const uint8_t address, const uint8_t data);
 
   /**
-   * @brief 写寄存器 MA330不支持SPI写数据段
-   * @param address 寄存器地址
-   * @param data 要写入的数据
-   * @param size 数据长度
-   * @return 错误码, 始终返回kGeneralErr
-   */
-  Error WriteMultiple(const uint8_t address,
-                      const uint8_t* data,
-                      const size_t size) {
-    return Error::kGeneralErr;
-  }
-
-  /**
-   * @brief 读寄存器 MA330不支持SPI读数据
+   * @brief 读寄存器 MA330特殊SPI读实现
    * @param address 寄存器地址
    * @param data 读取数据的存储指针
-   * @return 错误码, 始终返回kGeneralErr
+   * @return 错误码
    */
   Error Read(const uint8_t address, uint8_t* data);
 
   /**
-   * @brief 读寄存器 MA330不支持SPI读数据段
-   * @param address 寄存器地址
-   * @param data 读取数据的存储指针
-   * @param size 读取数据的长度
-   * @return 错误码, 始终返回kGeneralErr
-   */
-  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) {
-    return Error::kGeneralErr;
-  }
-
-  /**
-   * @brief 读取原始数据
-   * @param angle_raw 原始角度值指针，用于存储读取的角度值
-   * @param field_status 磁场状态指针，用于存储磁场状态
-   * @param button_pushed 按钮状态指针，用于存储按钮是否被按下
-   * @param track_loss 跟踪丢失状态指针，用于存储是否丢失跟踪
+   * @brief 读取原始角度数据
+   * @param angle_raw 原始角度值引用，用于存储读取的角度值
    * @return 错误码，成功返回OK
    *
-   * 通过SPI接口从MT6701传感器读取当前角度值和状态信息。
-   * SPI模式支持完整的状态信息读取。
+   * 通过SPI接口从MA330传感器读取当前角度值。
    */
   Error ReadRaw(uint16_t& angle_raw);
 

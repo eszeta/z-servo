@@ -27,7 +27,7 @@ namespace hortor::drivers::LSM6DSOW {
 /**
  * @brief LSM6DSOW传感器类，继承自IMU类，提供与LSM6DSOW传感器的接口
  */
-class LSM6DSOW final : public servo::IMU {
+class LSM6DSOW final : public servo::IMU<LSM6DSOW> {
  public:
   /**
    * @brief 默认构造函数
@@ -39,7 +39,10 @@ class LSM6DSOW final : public servo::IMU {
    * @param wire I2C通信接口指针
    * @return 初始化结果
    */
-  Error InitI2C(TwoWire* wire);
+  Error InitI2C(TwoWire* wire) {
+    CHECK(regmap_.Init(wire, kI2CAddress));
+    return Error::kOk;
+  }
 
   /**
    * @brief 读取加速度数据
@@ -48,7 +51,7 @@ class LSM6DSOW final : public servo::IMU {
    * @param z 加速度Z轴数据,单位：g
    * @return 读取结果
    */
-  Error ReadAcceleration(float& x, float& y, float& z) override {
+  Error ReadAccelerationImpl(float& x, float& y, float& z) {
     return regmap_.ReadAcceleration(x, y, z);
   }
 
@@ -56,9 +59,7 @@ class LSM6DSOW final : public servo::IMU {
    * @brief 检查加速度数据是否可用
    * @return 是否可用
    */
-  bool AccelerationAvailable() override {
-    return regmap_.AccelerationAvailable();
-  }
+  bool AccelerationAvailableImpl() { return regmap_.AccelerationAvailable(); }
 
   /**
    * @brief 读取陀螺仪数据
@@ -67,7 +68,7 @@ class LSM6DSOW final : public servo::IMU {
    * @param z 陀螺仪Z轴数据
    * @return 读取结果
    */
-  Error ReadGyroscope(float& x, float& y, float& z) override {
+  Error ReadGyroscopeImpl(float& x, float& y, float& z) {
     return regmap_.ReadGyroscope(x, y, z);
   }
 
@@ -75,14 +76,14 @@ class LSM6DSOW final : public servo::IMU {
    * @brief 检查陀螺仪数据是否可用
    * @return 是否可用
    */
-  bool GyroscopeAvailable() override { return regmap_.GyroscopeAvailable(); }
+  bool GyroscopeAvailableImpl() { return regmap_.GyroscopeAvailable(); }
 
   /**
    * @brief 读取温度数据
    * @param temperature_deg 温度数据
    * @return 读取结果
    */
-  Error ReadTemperature(float& temperature_deg) override {
+  Error ReadTemperatureImpl(float& temperature_deg) {
     return regmap_.ReadTemperature(temperature_deg);
   }
 
@@ -90,14 +91,10 @@ class LSM6DSOW final : public servo::IMU {
    * @brief 检查温度数据是否可用
    * @return 是否可用
    */
-  bool TemperatureAvailable() override {
-    return regmap_.TemperatureAvailable();
-  }
+  bool TemperatureAvailableImpl() { return regmap_.TemperatureAvailable(); }
 
  private:
-  /** @brief 寄存器映射实例，负责与传感器的具体通信操作 */
+  /** @brief 寄存器映射实例（包含I2C通信层），负责与传感器的具体通信操作 */
   RegMap regmap_;
-  /** @brief I2C通信实例，提供底层I2C接口 */
-  regmap::RegMapI2CBus i2c_transport_;
 };
 }  // namespace hortor::drivers::LSM6DSOW

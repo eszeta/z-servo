@@ -27,7 +27,7 @@
 
 namespace hortor::protocol {
 
-class InstSerialPortHandler : public InstPortHandler {
+class InstSerialPortHandler : public InstPortHandler<InstSerialPortHandler> {
  public:
   /**
    * @brief 构造函数
@@ -45,28 +45,30 @@ class InstSerialPortHandler : public InstPortHandler {
   }
 
   /**
-   * @brief 处理数据
+   * @brief 处理数据实现
+   * @param protocol 协议处理器
    * @param dt 时间间隔(秒)
+   * @param inst_packet 指令包
+   * @param is_complete 是否完成
    * @return 错误码
    */
-  Error Process(InstProtocol &protocol,
-                const float dt,
-                InstPacket &inst_packet,
-                bool &is_complete) override;
+  Error ProcessImpl(InstProtocol &protocol,
+                    const float dt,
+                    InstPacket &inst_packet,
+                    bool &is_complete);
 
   /**
-   * @brief 发送数据
+   * @brief 发送响应数据实现
+   * @param packet 状态包
    * @param reply_idx 回复索引
-   * @param data 数据
    * @return 错误码
    */
-  Error Response(const StatusPacket &packet, const uint8_t reply_idx) override;
+  Error ResponseImpl(const StatusPacket &packet, const uint8_t reply_idx);
 
  private:
   HardwareSerial *serial_ = nullptr;
   uint32_t delay_time_ = 0;
   bool response_pending_ = false;
-  StatusPacket status_packet_{};
 };
 
 }  // namespace hortor::protocol

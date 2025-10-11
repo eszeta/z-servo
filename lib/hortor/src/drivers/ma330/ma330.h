@@ -30,9 +30,9 @@ namespace hortor::drivers::MA330 {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本实现使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
-class MA330 final : public servo::Encoder {
+class MA330 final : public servo::Encoder<MA330> {
  public:
-  explicit MA330();
+  explicit MA330() : servo::Encoder<MA330>(14) {}
   /**
    * @brief 初始化传感器
    * @param wire I2C通信接口指针
@@ -50,7 +50,7 @@ class MA330 final : public servo::Encoder {
    * 通过I2C接口读取MT6701传感器的当前角度值。
    * 该方法实现了基类的纯虚函数。
    */
-  Error GetRaw(uint16_t &out_raw) override;
+  Error GetRawImpl(uint16_t &out_raw);
 
   /**
    * @brief 获取寄存器映射实例
@@ -61,11 +61,8 @@ class MA330 final : public servo::Encoder {
   RegMap *GetRegMap() { return &regmap_; }
 
  private:
-  /** @brief 寄存器映射实例，负责与传感器的具体通信操作 */
+  /** @brief 寄存器映射实例（包含SPI通信层），负责与传感器的具体通信操作 */
   RegMap regmap_;
-
-  /** @brief SPI通信实例，提供底层SPI接口 */
-  RegMapSpiBus spi_transport_;
 };
 
 }  // namespace hortor::drivers::MA330

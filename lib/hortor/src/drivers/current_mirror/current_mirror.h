@@ -20,7 +20,7 @@
 
 namespace hortor::drivers::current_mirror {
 
-class CurrentMirror : public servo::Current {
+class CurrentMirror : public servo::Current<CurrentMirror> {
  public:
   struct Config {
     uint8_t pin_adc;               // ADC 引脚
@@ -47,7 +47,7 @@ class CurrentMirror : public servo::Current {
    * @param current 当前测量的电流值（安培）
    * @return Error 错误码
    */
-  Error GetCurrent(float& current) override;
+  Error GetCurrentImpl(float& current);
 
  private:
   /** @brief ADC电压转换系数 */
@@ -74,9 +74,6 @@ class CurrentMirror : public servo::Current {
   uint8_t pin_adc_ = 0;
   /** @brief 校准采样次数 */
   uint16_t calibration_samples_ = 50;
-
-  /** @brief 是否初始化 */
-  bool initialized_ = false;
 };
 
 }  // namespace hortor::drivers::current_mirror

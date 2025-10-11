@@ -21,6 +21,7 @@
 #include "hortor.h"
 #include "math/encoder_pll.h"
 #include "math/lowpass_filter.h"
+#include "math/math.h"
 #include "math/pid.h"
 #include "motor.h"
 #include "types.h"
@@ -33,6 +34,7 @@ namespace hortor::servo {
  * 该类实现了舵机的核心控制功能，包括位置控制、速度控制、电流控制等。
  * 支持多种控制模式，并提供完整的PID控制和保护功能。
  */
+template <typename MotorType, typename EncoderType, typename CurrentType>
 class Servo {
  public:
   /**
@@ -42,16 +44,17 @@ class Servo {
       : kResolution(resolution_bits), encoder_pll(resolution_bits) {}
 
   void Init();
-  void LinkDriver(Motor *driver);
-  void LinkAngleSensor(Encoder *sensor);
-  void LinkCurrentSense(Current *current_sense);
   Error Process(float dt);
 
   /**
    * @brief 获取角度传感器
    * @return 角度传感器指针
    */
-  Encoder *GetSensor() { return encoder; }
+  EncoderType &GetSensor() { return encoder; }
+
+  CurrentType &GetCurrentSense() { return current_sense_; }
+
+  MotorType &GetMotor() { return motor_; }
 
   /**
    * @brief 获取当前位置
@@ -403,13 +406,166 @@ class Servo {
   math::LowPassFilter current_lpf_;
 
   /** @brief 电机驱动器指针 */
-  Motor *driver_ = nullptr;
+  MotorType motor_;
   /** @brief 角度传感器指针 */
-  Encoder *encoder = nullptr;
+  EncoderType encoder;
   /** @brief 编码器PLL */
   math::EncoderPll encoder_pll;
   /** @brief 电流传感器指针 */
-  Current *current_sense_ = nullptr;
+  CurrentType current_sense_;
 };
+
+// =============================================================================
+// 模板实现
+// =============================================================================
+/**
+ * @brief 初始化舵机
+ */
+template <typename MotorType, typename EncoderType, typename CurrentType>
+void Servo<MotorType, EncoderType, CurrentType>::Init() {}
+
+/**
+ * @brief 处理舵机逻辑
+ * @param dt 时间间隔(秒)
+ */
+template <typename MotorType, typename EncoderType, typename CurrentType>
+Error Servo<MotorType, EncoderType, CurrentType>::Process(float dt) {
+  CHECK(RefreshPresentVariables(dt));
+
+  if (!enabled_) {
+    return Error::kOk;
+  }
+
+  switch (mode_) {
+    case ServoMode::kPosition: {
+      const auto pos_error = goal_position_ - present_position_;
+
+      if (IsPositionReached(pos_error)) {
+        moving_ = false;
+      }
+
+      if (!torque_enable_ && !moving_) {
+        SetPower(0);
+        break;
+      }
+
+      // 位置环计算目标速度
+      const auto position_error = pos_pid_.Compute(pos_error, dt);
+
+      auto next_velocity = position_error;
+
+      // 应用加速度限制
+      if (goal_acceleration_ > math::kFloatThreshold) {
+        const auto velocity_change = next_velocity - present_velocity_;
+        const auto limited_acceleration = constrain(
+            velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
+        next_velocity = present_velocity_ + limited_acceleration;
+      }
+
+      // 应用最高速度限制
+      if (goal_velocity_ > math::kFloatThreshold ||
+          goal_velocity_ < -math::kFloatThreshold) {
+        const auto limited_velocity = abs(goal_velocity_);
+        next_velocity =
+            constrain(next_velocity, -limited_velocity, limited_velocity);
+      }
+
+      // 速度环计算控制输出
+      const auto velocity_error = next_velocity - present_velocity_;
+      const auto pwm_set = velocity_pid_.Compute(velocity_error, dt);
+
+      // 输出控制信号（PWM）
+      SetPower(pwm_set);
+      break;
+    }
+    case ServoMode::kVelocity: {
+      auto next_velocity = goal_velocity_;
+
+      // 加速度限制：限制速度变化率
+      if (goal_acceleration_ > math::kFloatThreshold) {
+        const auto velocity_change = next_velocity - present_velocity_;
+        const auto limited_acceleration = constrain(
+            velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
+        next_velocity = present_velocity_ + limited_acceleration;
+      }
+
+      const auto velocity_error = next_velocity - present_velocity_;
+      const auto pwm_set = velocity_pid_.Compute(velocity_error, dt);
+      SetPower(pwm_set);
+      break;
+    }
+    case ServoMode::kPwm: {
+      const auto pwm_set = goal_pwm_;
+      SetPower(pwm_set);
+      break;
+    }
+    default:
+      SetPower(0);
+  }
+  return Error::kOk;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType>
+Error Servo<MotorType, EncoderType, CurrentType>::RefreshPresentVariables(
+    float dt) {
+  // 处理编码器
+  CHECK(encoder.Process(dt));
+  // 处理编码器PLL
+  const auto encoder_pos_counts = encoder.GetPosCounts();
+  const auto encoder_bits = encoder.kResolution.kBits;
+  const auto encoder_pos_counts_mapped =
+      math::mapResolution(encoder_pos_counts, encoder_bits, kResolution.kBits);
+  CHECK(encoder_pll.Process(dt, encoder_pos_counts_mapped));
+
+  // 获取当前位置
+  const auto direction = static_cast<float>(encoder_direction_);
+  present_position_ =
+      encoder_pll.GetPosition() * direction + position_correction_;
+
+  // 获取当前速度
+  present_velocity_ = encoder_pll.GetVelocity() * direction;
+
+  // 获取当前电流
+  CHECK(current_sense_.GetCurrent(present_current_));
+  present_current_ = current_lpf_.Compute(present_current_, dt);
+  return Error::kOk;
+}
+
+/**
+ * @brief 检查是否到达目标位置
+ * @param pos_error 位置误差
+ * @return 是否到达目标位置
+ */
+template <typename MotorType, typename EncoderType, typename CurrentType>
+bool Servo<MotorType, EncoderType, CurrentType>::IsPositionReached(
+    int16_t pos_error) {
+  if (pos_error > 0 && pos_error > cw_insensitive_area_) {
+    return false;
+  }
+  if (pos_error < 0 && -pos_error > ccw_insensitive_area_) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @brief 设置电机功率
+ * @param pwm PWM值
+ */
+template <typename MotorType, typename EncoderType, typename CurrentType>
+void Servo<MotorType, EncoderType, CurrentType>::SetPower(const float pwm) {
+  present_load_ = pwm;
+  const auto direction = static_cast<float>(motor_direction_);
+  const auto pwm_set = direction * pwm;
+  motor_.SetPWM(pwm_set);
+}
+
+/**
+ * @brief 电机刹车
+ */
+template <typename MotorType, typename EncoderType, typename CurrentType>
+void Servo<MotorType, EncoderType, CurrentType>::Break() {
+  motor_->Brake();
+}
 
 }  // namespace hortor::servo

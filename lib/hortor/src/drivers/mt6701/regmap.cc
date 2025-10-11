@@ -17,10 +17,12 @@
 namespace hortor::drivers::MT6701 {
 
 Error MT6701RegMap::ReadRaw(uint16_t& angle_raw,
-                              Status& field_status,
-                              bool& button_pushed,
-                              bool& track_loss) {
-  return read_raw_(angle_raw, field_status, button_pushed, track_loss);
+                            Status& field_status,
+                            bool& button_pushed,
+                            bool& track_loss) {
+  // 直接调用 RegMapI2CBus 的 ReadRaw 实现
+  return RegMapI2CBus::ReadRaw(
+      angle_raw, field_status, button_pushed, track_loss);
 }
 
 Status MT6701RegMap::ReadFieldStatus() {
@@ -42,8 +44,8 @@ Error MT6701RegMap::SetUvmMode(const uint8_t pairs) {
 }
 
 Error MT6701RegMap::SetAbzMode(const uint16_t pulses_per_round,
-                                 const PulseWidth z_pulse_width,
-                                 const Hyst hysteresis) {
+                               const PulseWidth z_pulse_width,
+                               const Hyst hysteresis) {
   CHECK(SetPulseWidth(z_pulse_width));
   CHECK(SetHyst(hysteresis));
   CHECK(SetABZPulsePerRound(pulses_per_round));
@@ -62,8 +64,7 @@ Error MT6701RegMap::SetAnalogMode(const float start, const float stop) {
   return Error::kOk;
 }
 
-Error MT6701RegMap::SetPwmMode(const PwmFreq frequency,
-                                 const PwmPol polarity) {
+Error MT6701RegMap::SetPwmMode(const PwmFreq frequency, const PwmPol polarity) {
   CHECK(SetOutMode(OutMode::kPWM));
   CHECK(SetPwmFreq(frequency));
   CHECK(SetPwmPolarity(polarity));

@@ -24,14 +24,32 @@ namespace hortor::servo {
  * @details
  * 所有具体的电流传感器实现都必须继承自此类。该类提供了电流检测的基本接口定义。
  */
+template <typename Derived>
 class Current {
+ protected:
+  /**
+   * @brief 获取派生类引用
+   * @return 派生类引用
+   */
+  Derived& AsDerived() { return static_cast<Derived&>(*this); }
+
+  /**
+   * @brief 获取派生类常量引用
+   * @return 派生类常量引用
+   */
+  const Derived& AsDerived() const {
+    return static_cast<const Derived&>(*this);
+  }
+
  public:
   /**
    * @brief 获取当前电流读数
    * @param current 以安培(A)为单位的电流值
    * @return Error 错误码
    */
-  virtual Error GetCurrent(float& current) = 0;
+  Error GetCurrent(float& current) {
+    return AsDerived().GetCurrentImpl(current);
+  }
 
   /**
    * @brief 读取并平均多次电流采样值

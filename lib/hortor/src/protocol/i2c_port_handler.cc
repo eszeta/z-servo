@@ -18,14 +18,13 @@
 #include <Wire.h>
 
 #include "protocol.h"
-#include "servo/types.h"
 
 namespace hortor::protocol {
 
-Error InstI2cPortHandler::Process(InstProtocol &protocol,
-                                  const float dt,
-                                  InstPacket &inst_packet,
-                                  bool &is_complete) {
+Error InstI2cPortHandler::ProcessImpl(InstProtocol &protocol,
+                                      const float dt,
+                                      InstPacket &inst_packet,
+                                      bool &is_complete) {
   while (wire_->available()) {
     uint8_t data = wire_->read();
     CHECK(protocol.Process(inst_packet, data, is_complete));
@@ -33,8 +32,8 @@ Error InstI2cPortHandler::Process(InstProtocol &protocol,
   return Error::kOk;
 }
 
-Error InstI2cPortHandler::Response(const StatusPacket &packet,
-                                   const uint8_t reply_idx) {
+Error InstI2cPortHandler::ResponseImpl(const StatusPacket &packet,
+                                       const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);
   return Error::kOk;

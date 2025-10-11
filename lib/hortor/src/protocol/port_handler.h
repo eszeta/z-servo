@@ -20,42 +20,57 @@
 
 #include "hortor.h"
 #include "protocol.h"
-#include "servo/types.h"
-#include "types.h"
 
 namespace hortor::protocol {
 
+/**
+ * @brief 指令端口处理器基类（CRTP 模式）
+ *
+ * 使用 CRTP 模式实现静态多态，消除虚函数调用开销。
+ * 派生类需要实现 ProcessImpl() 和 ResponseImpl() 方法。
+ *
+ * @tparam Derived 派生类类型
+ */
+template <typename Derived>
 class InstPortHandler {
  public:
   /**
    * @brief 处理数据
+   * @param protocol 协议处理器
    * @param dt 时间间隔(秒)
+   * @param inst_packet 指令包
+   * @param is_complete 是否完成
    * @return 错误码
    */
-  virtual Error Process(InstProtocol &protocol,
-                        const float dt,
-                        InstPacket &inst_packet,
-                        bool &is_complete) = 0;
+  Error Process(InstProtocol &protocol,
+                const float dt,
+                InstPacket &inst_packet,
+                bool &is_complete) {
+    return static_cast<Derived *>(this)->ProcessImpl(
+        protocol, dt, inst_packet, is_complete);
+  }
 
   /**
-   * @brief 发送数据
+   * @brief 发送响应数据
+   * @param packet 状态包
    * @param reply_idx 回复索引
-   * @param data 数据
    * @return 错误码
    */
-  virtual Error Response(const StatusPacket &packet,
-                         const uint8_t reply_idx) = 0;
+  Error Response(const StatusPacket &packet, const uint8_t reply_idx) {
+    return static_cast<Derived *>(this)->ResponseImpl(packet, reply_idx);
+  }
 
   /**
    * @brief 设置响应延迟
-   * 单位: 毫秒
+   * @param response_delay 响应延迟时间（毫秒）
    */
   void SetResponseDelay(const uint16_t response_delay) {
     response_delay_ = response_delay;
   }
 
  protected:
-  uint16_t response_delay_ = 0;
+  StatusPacket status_packet_{};  // 状态包缓冲区
+  uint16_t response_delay_ = 0;   // 响应延迟（毫秒）
 };
 
 }  // namespace hortor::protocol

@@ -19,14 +19,12 @@
 namespace hortor::drivers::MT6701 {
 
 Error MT6701::Init(TwoWire *wire) {
-  CHECK(i2c_transport_.Init(wire, kI2CAddress));
-  CHECK(i2c_transport_.LinkAccessor(regmap_));
-  CHECK(regmap_.Init());
-  Encoder::Init();
+  CHECK(regmap_.Init(wire, kI2CAddress));
+  servo::Encoder<MT6701>::Init();
   return Error::kOk;
 }
 
-Error MT6701::GetRaw(uint16_t &out_raw) {
+Error MT6701::GetRawImpl(uint16_t &out_raw) {
   Status status = Status::kNormal;
   bool button_pushed = false;
   bool track_loss = false;

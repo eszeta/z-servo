@@ -42,7 +42,6 @@ Error CurrentMirror::Init(const Config& config) {
   // 零点校准
   CHECK(CalibrateOffsets());
 
-  initialized_ = true;
   return Error::kOk;
 }
 
@@ -60,7 +59,7 @@ Error CurrentMirror::CalibrateOffsets() {
   return Error::kOk;
 }
 
-Error CurrentMirror::GetCurrent(float& current) {
+Error CurrentMirror::GetCurrentImpl(float& current) {
   float voltage;
   CHECK(ReadADCVoltage(voltage));
 

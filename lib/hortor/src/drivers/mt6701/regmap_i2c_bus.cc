@@ -14,28 +14,15 @@
 
 #include "regmap_i2c_bus.h"
 
-#include "regmap.h"
-
 namespace hortor::drivers::MT6701 {
-
-Error RegMapI2CBus::LinkAccessor(MT6701RegMap& regmap) {
-  regmap::RegMapI2CBus::LinkAccessor(regmap);
-  regmap.SetReadRaw([this](uint16_t& angle_raw,
-                           Status& field_status,
-                           bool& button_pushed,
-                           bool& track_loss) {
-    return ReadRaw(angle_raw, field_status, button_pushed, track_loss);
-  });
-  return Error::kOk;
-}
 
 Error RegMapI2CBus::ReadRaw(uint16_t& angle_raw,
                             Status& field_status,
                             bool& button_pushed,
                             bool& track_loss) {
   uint8_t angle6, angle0;
-  CHECK(ReadMultiple(MT6701Regs::kANGLE_6.address, 1, &angle6));
-  CHECK(ReadMultiple(MT6701Regs::kANGLE_0.address, 1, &angle0));
+  CHECK(ReadBytes(MT6701Regs::kANGLE_6.address, 1, &angle6));
+  CHECK(ReadBytes(MT6701Regs::kANGLE_0.address, 1, &angle0));
 
   angle_raw = regmap::GetCombinedValue(
       MT6701Regs::kANGLE_6, MT6701Regs::kANGLE_0, angle6, angle0);

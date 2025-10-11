@@ -40,7 +40,7 @@ namespace hortor::drivers::DRV8231A {
  * - 滑行：IN1=0, IN2=0 → 高阻态
  * - 制动：IN1=1, IN2=1 → 低边导通
  */
-class DRV8231A final : public servo::Motor {
+class DRV8231A final : public servo::Motor<DRV8231A> {
  public:
   struct Config {
     uint8_t pin_in1;                    // IN1 控制引脚
@@ -69,19 +69,19 @@ class DRV8231A final : public servo::Motor {
    * - |pwm| < slow_decay_threshold：慢速衰减（适合低速）
    * - |pwm| >= slow_decay_threshold：快速衰减（适合高速）
    */
-  void SetPWM(float pwm) override;
+  void SetPWMImpl(float pwm);
 
   /**
    * @brief 制动（低边导通）
    * @details IN1=1, IN2=1，电机快速停止
    */
-  void Brake() override;
+  void BrakeImpl();
 
   /**
    * @brief 滑行（高阻态）
    * @details IN1=0, IN2=0，电机自由滑行
    */
-  void Coast() override;
+  void CoastImpl();
   /**
    * @brief 检查是否有故障
    * @return true 如果检测到故障，false 否则
@@ -107,8 +107,6 @@ class DRV8231A final : public servo::Motor {
   uint8_t pin_in2_ = 0;
   /** @brief nFAULT 引脚 */
   uint8_t pin_nfault_ = 0;
-  /** @brief 是否已初始化 */
-  bool initialized_ = false;
   /** @brief 慢速衰减阈值 */
   float slow_decay_threshold_ = 0.3f;
 };

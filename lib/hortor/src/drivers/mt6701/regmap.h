@@ -18,14 +18,14 @@
 
 #include <functional>
 
-#include "regmap/regmap.h"
+#include "regmap_i2c_bus.h"
 #include "servo/types.h"
 #include "types.h"
 
 namespace hortor::drivers::MT6701 {
 
 /**
- * @brief MT6701控制器类
+ * @brief MT6701控制器类（CRTP模式）
  * @note 该类负责与MT6701传感器进行通信，并提供读取角度值和配置传感器的功能
  *
  * Controller类封装了MT6701磁性角度传感器的所有操作，包括：
@@ -33,18 +33,11 @@ namespace hortor::drivers::MT6701 {
  * - 传感器配置（工作模式、分辨率、零位等）
  * - 输出设置（模拟输出、PWM输出）
  *
- * 通过通信接口（I2C或SPI）与传感器交互，提供高级API简化传感器使用。
+ * 通过 CRTP 继承自 RegMapI2CBus，实现编译期静态多态。
  */
 // todo：除了ReadRaw,其它函数都没测试过
-class MT6701RegMap : public regmap::RegMap {
+class MT6701RegMap : public RegMapI2CBus {
  public:
-  using ReadRawFunc = std::function<Error(uint16_t& angle_raw,
-                                          Status& field_status,
-                                          bool& button_pushed,
-                                          bool& track_loss)>;
-
-  Error Init() { return Error::kOk; }
-
   /**
    * @brief 读取原始位置和状态值
    * @param angle_raw 原始角度指针 [0...16383]
@@ -306,15 +299,6 @@ class MT6701RegMap : public regmap::RegMap {
    * 获取MT6701传感器的当前输出模式。
    */
   Error GetOutMode(OutMode& mode);
-
-  /**
-   * @brief 设置读取原始值的函数
-   * @param read_raw 读取原始值的函数
-   */
-  void SetReadRaw(ReadRawFunc read_raw) { read_raw_ = read_raw; }
-
- private:
-  ReadRawFunc read_raw_;
 };
 
 }  // namespace hortor::drivers::MT6701

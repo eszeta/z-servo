@@ -15,9 +15,9 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <drivers/DRV8231A/DRV8231A.h>
-#include <drivers/MT6701/MT6701.h>
 #include <drivers/current_mirror/current_mirror.h>
+#include <drivers/drv8231a/drv8231a.h>
+#include <drivers/mt6701/mt6701.h>
 #include <info_led/info_led.h>
 #include <math/math.h>
 #include <servo/servo.h>
@@ -55,10 +55,7 @@ InfoLED info_led{};
 // InstI2cPortHandler inst_port{};
 // ServoAccessor inst_accessor{};
 // Slave inst{};
-DRV8231A motor_driver{};
-MT6701 angle_sensor{};
-CurrentMirror current_sensor{};
-Servo servo2{11};
+Servo<DRV8231A, MT6701, CurrentMirror> servo{11};
 
 // 集中式任务调度器（固定容量，避免动态分配）
 TaskScheduler scheduler{};
@@ -80,23 +77,25 @@ void setup() {
   serial_debug.begin(115200);
   DebugEnable(&serial_debug);
 
-  motor_driver.Init({.pin_in1 = PA0,
-                     .pin_in2 = PA2,
-                     .pin_nfault = 0,  // 如果硬件连接了 nFAULT，填入引脚号
-                     .slow_decay_threshold = 0.3f});  // 低于 30% 使用慢速衰减
   wire_sensor.begin();
-  angle_sensor.Init(&wire_sensor);
-  current_sensor.Init({.pin_adc = PA3,
-                       .ripropi_ohms = 1000.0f,
-                       .scaling_factor = 1500.0f,
-                       .adc_resolution_bits = 12,
-                       .adc_vref_volts = 3.3f,
-                       .calibration_samples = 50});
 
-  servo2.LinkDriver(&motor_driver);
-  servo2.LinkAngleSensor(&angle_sensor);
-  servo2.LinkCurrentSense(&current_sensor);
-  servo2.Init();
+  const DRV8231A::Config motor_config = {
+      .pin_in1 = PA0,
+      .pin_in2 = PA2,
+      .pin_nfault = 0,              // 如果硬件连接了 nFAULT，填入引脚号
+      .slow_decay_threshold = 0.3f  // 低于 30% 使用慢速衰减
+  };
+  const CurrentMirror::Config current_mirror_config = {
+      .pin_adc = PA3,
+      .ripropi_ohms = 1000.0f,
+      .scaling_factor = 1500.0f,
+      .adc_resolution_bits = 12,
+      .adc_vref_volts = 3.3f,
+      .calibration_samples = 50};
+  servo.GetMotor().Init(motor_config);
+  servo.GetSensor().Init(&wire_sensor);
+  servo.GetCurrentSense().Init(current_mirror_config);
+  servo.Init();
 
   // inst_accessor.Init();
   // inst_port.Init(&wire_inst);
@@ -131,7 +130,7 @@ void setup() {
 Error MainLoopCallback(float dt) {
   info_led.Process(dt);
   // inst.Process(dt);
-  CHECK(servo2.Process(dt));
+  CHECK(servo.Process(dt));
   return Error::kOk;
 }
 
@@ -143,13 +142,13 @@ Error DebugOutputCallback(float dt) {
   DebugPrint(F(">dt:"));
   DebugPrintln(dt);
   DebugPrint(F(">pwm:"));
-  DebugPrintln(servo2.GetPresentLoad());
+  DebugPrintln(servo.GetPresentLoad());
 
-  auto present_velocity = servo2.GetPresentVelocity();
+  auto present_velocity = servo.GetPresentVelocity();
   DebugPrint(F(">velocity:"));
   DebugPrintln(present_velocity);
 
-  auto present_position = servo2.GetPresentPosition();
+  auto present_position = servo.GetPresentPosition();
   DebugPrint(F(">position:"));
   DebugPrintln(present_position);
   return Error::kOk;

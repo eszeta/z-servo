@@ -41,11 +41,10 @@ Error DRV8231A::Init(const Config& config) {
   digitalWrite(pin_in1_, LOW);
   digitalWrite(pin_in2_, LOW);
 
-  initialized_ = true;
   return Error::kOk;
 }
 
-void DRV8231A::SetPWM(float pwm) {
+void DRV8231A::SetPWMImpl(float pwm) {
   // 限制 PWM 范围
   pwm = constrain(pwm, -1.0f, 1.0f);
 
@@ -95,13 +94,13 @@ void DRV8231A::SetPWMSlowDecay(float pwm) {
   }
 }
 
-void DRV8231A::Brake() {
+void DRV8231A::BrakeImpl() {
   // 制动模式：IN1=1, IN2=1（低边导通）
   digitalWrite(pin_in1_, HIGH);
   digitalWrite(pin_in2_, HIGH);
 }
 
-void DRV8231A::Coast() {
+void DRV8231A::CoastImpl() {
   // 滑行模式：IN1=0, IN2=0（高阻态）
   digitalWrite(pin_in1_, LOW);
   digitalWrite(pin_in2_, LOW);

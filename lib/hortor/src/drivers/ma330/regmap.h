@@ -17,19 +17,18 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include <functional>
-
-#include "regmap/regmap.h"
+#include "regmap_spi_bus.h"
 #include "types.h"
 
 namespace hortor::drivers::MA330 {
 
-class RegMap : public regmap::RegMap {
+/**
+ * @brief MA330寄存器映射类（CRTP模式）
+ *
+ * 继承自 RegMapSpiBus，通过 CRTP 实现编译期静态多态。
+ */
+class RegMap : public RegMapSpiBus {
  public:
-  using ReadRawFunc = std::function<Error(uint16_t& angle_raw)>;
-  Error Init() { return Error::kOk; }
-  Error ReadRaw(uint16_t& angle_raw);
-
   Error GetZero(uint16_t& zero);
   Error GetBiasCurrentTrimming(uint8_t& bias_current_trimming);
   Error IsEnableTrimmingX(bool& enable);
@@ -55,14 +54,6 @@ class RegMap : public regmap::RegMap {
   Error SetHysteresis(uint8_t hysteresis);
   Error SetFieldStrengthThresholds(uint8_t high_threshold,
                                    uint8_t low_threshold);
-  /**
-   * @brief 设置读取原始值的函数
-   * @param read_raw 读取原始值的函数
-   */
-  void SetReadRaw(ReadRawFunc read_raw) { read_raw_ = read_raw; }
-
- private:
-  ReadRawFunc read_raw_;
 };
 
 }  // namespace hortor::drivers::MA330

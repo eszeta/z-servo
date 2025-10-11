@@ -14,20 +14,7 @@
 
 #include "regmap_spi_bus.h"
 
-#include "regmap.h"
-
 namespace hortor::drivers::MT6701 {
-
-Error RegMapSpiBus::LinkAccessor(MT6701RegMap& regmap) {
-  regmap::RegMapSpiBus::LinkAccessor(regmap);
-  regmap.SetReadRaw([this](uint16_t& angle_raw,
-                           Status& field_status,
-                           bool& button_pushed,
-                           bool& track_loss) {
-    return ReadRaw(angle_raw, field_status, button_pushed, track_loss);
-  });
-  return Error::kOk;
-}
 
 Error RegMapSpiBus::ReadRaw(uint16_t& angle_raw,
                             Status& field_status,

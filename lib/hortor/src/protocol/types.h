@@ -47,17 +47,17 @@ struct __packed ControlTableItem {
       : reg(address, shift, bits), default_value(default_value) {}
 };
 
-#define CTI_08(name, address, default_value)           \
-  static constexpr ControlTableItem<uint8_t> name {    \
-    address, 0, 8, static_cast<uint8_t>(default_value) \
+#define CTI_08(name, address, default_value)                          \
+  static constexpr hortor::protocol::ControlTableItem<uint8_t> name { \
+    address, 0, 8, static_cast<uint8_t>(default_value)                \
   }
-#define CTI_16(name, address, default_value)             \
-  static constexpr ControlTableItem<uint16_t> name {     \
-    address, 0, 16, static_cast<uint16_t>(default_value) \
+#define CTI_16(name, address, default_value)                           \
+  static constexpr hortor::protocol::ControlTableItem<uint16_t> name { \
+    address, 0, 16, static_cast<uint16_t>(default_value)               \
   }
-#define CTI_32(name, address, default_value)             \
-  static constexpr ControlTableItem<uint32_t> name {     \
-    address, 0, 32, static_cast<uint32_t>(default_value) \
+#define CTI_32(name, address, default_value)                           \
+  static constexpr hortor::protocol::ControlTableItem<uint32_t> name { \
+    address, 0, 32, static_cast<uint32_t>(default_value)               \
   }
 
 struct ControlTableBlock {

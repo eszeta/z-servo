@@ -16,7 +16,6 @@
 
 #include <Arduino.h>
 
-#include "regmap.h"
 #include "regmap/regmap_i2c_bus.h"
 #include "servo/types.h"
 #include "types.h"
@@ -32,20 +31,13 @@ namespace hortor::drivers::MT6701 {
 class RegMapI2CBus : public regmap::RegMapI2CBus {
  public:
   /**
-   * @brief 设置寄存器访问器函数
-   * @param accessor 寄存器访问器
-   * @return 错误码，成功返回OK
-   */
-  Error LinkAccessor(MT6701RegMap& regmap);
-
-  /**
    * @brief 读取原始数据
-   * @param angle_raw 原始角度值指针，用于存储读取的角度值
-   * @param field_status 磁场状态指针，用于存储磁场状态（I2C模式下不支持）
+   * @param angle_raw 原始角度值引用，用于存储读取的角度值
+   * @param field_status 磁场状态引用，用于存储磁场状态（I2C模式下不支持）
    * @param button_pushed
-   * 按钮状态指针，用于存储按钮是否被按下（I2C模式下不支持）
+   * 按钮状态引用，用于存储按钮是否被按下（I2C模式下不支持）
    * @param track_loss
-   * 跟踪丢失状态指针，用于存储是否丢失跟踪（I2C模式下不支持）
+   * 跟踪丢失状态引用，用于存储是否丢失跟踪（I2C模式下不支持）
    * @return 错误码，成功返回OK
    *
    * 通过I2C接口从MT6701传感器读取当前角度值。

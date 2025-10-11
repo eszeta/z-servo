@@ -41,11 +41,10 @@ Error MP6515::Init(const Config& config) {
   digitalWrite(pin_brake_, LOW);
   digitalWrite(pin_sleep_, HIGH);  // 退出睡眠
 
-  initialized_ = true;
   return Error::kOk;
 }
 
-void MP6515::SetPWM(float pwm) {
+void MP6515::SetPWMImpl(float pwm) {
   // 限制 PWM 范围
   pwm = constrain(pwm, -1.0f, 1.0f);
 
@@ -67,12 +66,12 @@ void MP6515::SetPWM(float pwm) {
   }
 }
 
-void MP6515::Brake() {
+void MP6515::BrakeImpl() {
   // 制动模式：BRAKE=1
   digitalWrite(pin_brake_, HIGH);
 }
 
-void MP6515::Coast() {
+void MP6515::CoastImpl() {
   // 滑行模式：BRAKE=0, ENABLE=0
   digitalWrite(pin_brake_, LOW);
   digitalWrite(pin_enbl_, LOW);

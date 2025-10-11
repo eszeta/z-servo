@@ -31,14 +31,14 @@ namespace hortor::drivers::MT6701 {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本实现使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
-class MT6701 final : public servo::Encoder {
+class MT6701 final : public servo::Encoder<MT6701> {
  public:
   /**
    * @brief 构造函数
    *
    * 初始化MT6701传感器对象，设置分辨率为14位（0-16383范围）。
    */
-  explicit MT6701() : servo::Encoder(14) {}
+  explicit MT6701() : servo::Encoder<MT6701>(14) {}
 
   /**
    * @brief 初始化传感器
@@ -57,7 +57,7 @@ class MT6701 final : public servo::Encoder {
    * 通过I2C接口读取MT6701传感器的当前角度值。
    * 该方法实现了基类的纯虚函数。
    */
-  Error GetRaw(uint16_t &out_raw) override;
+  Error GetRawImpl(uint16_t &out_raw);
 
   /**
    * @brief 获取控制器实例
@@ -68,11 +68,8 @@ class MT6701 final : public servo::Encoder {
   MT6701RegMap *GetRegMap() { return &regmap_; }
 
  private:
-  /** @brief 寄存器映射实例，负责与传感器的具体通信操作 */
+  /** @brief 寄存器映射实例（包含I2C通信层），负责与传感器的具体通信操作 */
   MT6701RegMap regmap_;
-
-  /** @brief I2C通信实例，提供底层I2C接口 */
-  RegMapI2CBus i2c_transport_;
 };
 
 }  // namespace hortor::drivers::MT6701

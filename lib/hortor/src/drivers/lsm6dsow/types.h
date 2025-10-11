@@ -230,7 +230,7 @@ enum class LOW_PASS_ON_6D {
  * @brief 陀螺仪控制寄存器，用于控制陀螺仪的工作模式
  */
 struct LSM6DSOWRegs {
-  using RegField8 = hortor::regmap::RegField8;
+  using RegField8 = regmap::RegField8;
   /**
    * @brief WHO_AM_I寄存器
    * @note 这是一个只读寄存器。其值固定为6Ch。

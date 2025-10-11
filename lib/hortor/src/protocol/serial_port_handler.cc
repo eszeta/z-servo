@@ -26,10 +26,10 @@
 
 namespace hortor::protocol {
 
-Error InstSerialPortHandler::Process(InstProtocol &protocol,
-                                     const float dt,
-                                     InstPacket &inst_packet,
-                                     bool &is_complete) {
+Error InstSerialPortHandler::ProcessImpl(InstProtocol &protocol,
+                                         const float dt,
+                                         InstPacket &inst_packet,
+                                         bool &is_complete) {
   // 延时回包
   delay_time_ -= dt;
   if (delay_time_ <= 0 && response_pending_) {
@@ -49,8 +49,8 @@ Error InstSerialPortHandler::Process(InstProtocol &protocol,
   return Error::kOk;
 }
 
-Error InstSerialPortHandler::Response(const StatusPacket &packet,
-                                      const uint8_t reply_idx) {
+Error InstSerialPortHandler::ResponseImpl(const StatusPacket &packet,
+                                          const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);
   delay_time_ =

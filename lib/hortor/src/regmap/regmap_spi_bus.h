@@ -23,9 +23,9 @@
 namespace hortor::regmap {
 
 /**
- * @brief SPI总线寄存器访问实现
+ * @brief SPI总线寄存器访问实现（CRTP模式）
  */
-class RegMapSpiBus {
+class RegMapSpiBus : public RegMap<RegMapSpiBus> {
  public:
   /**
    * @brief 初始化SPI通信
@@ -37,31 +37,24 @@ class RegMapSpiBus {
   Error Init(SPIClass *spi, int cs_pin, const SPISettings &spi_settings);
 
   /**
-   * @brief 设置寄存器访问器函数
-   * @param accessor 寄存器访问器
-   * @return 错误码，成功返回OK
-   */
-  Error LinkAccessor(RegMap &accessor);
-
-  /**
-   * @brief 写寄存器
+   * @brief 写寄存器实现
    * @param address 寄存器地址
    * @param data 要写入的数据
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteMultiple(const uint8_t address,
-                      const uint8_t *data,
-                      const size_t size);
+  Error WriteBytesImpl(const uint8_t address,
+                       const uint8_t *data,
+                       const size_t size);
 
   /**
-   * @brief 读取多个寄存器
+   * @brief 读取多个寄存器实现
    * @param address 寄存器地址
-   * @param data 读取数据的存储指针
    * @param size 读取数据的长度
+   * @param data 读取数据的存储指针
    * @return 错误码，成功返回OK
    */
-  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t *data);
+  Error ReadBytesImpl(const uint8_t address, const size_t size, uint8_t *data);
 
  protected:
   /** @brief SPI通信接口指针 */
@@ -73,4 +66,3 @@ class RegMapSpiBus {
 };
 
 }  // namespace hortor::regmap
-

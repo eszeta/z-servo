@@ -32,7 +32,7 @@ namespace hortor::drivers::MP6515 {
  * - 滑行：ENABLE=0, BRAKE=0
  * - 制动：BRAKE=1
  */
-class MP6515 final : public servo::Motor {
+class MP6515 final : public servo::Motor<MP6515> {
  public:
   struct Config {
     uint8_t pin_phase;  // PHASE 相位引脚
@@ -57,23 +57,17 @@ class MP6515 final : public servo::Motor {
    * @brief 设置 PWM 输出
    * @param pwm PWM 值，范围为 -1.0 到 1.0
    */
-  void SetPWM(float pwm) override;
+  void SetPWMImpl(float pwm);
 
   /**
    * @brief 制动（快速停止）
    */
-  void Brake() override;
+  void BrakeImpl();
 
   /**
    * @brief 滑行（自由停止）
    */
-  void Coast() override;
-
-  /**
-   * @brief 检查是否已初始化
-   * @return true 如果已初始化，false 否则
-   */
-  bool IsInitialized() const { return initialized_; }
+  void CoastImpl();
 
  private:
   /** @brief PHASE 相位引脚（1: 正转, 0: 反转） */
@@ -84,8 +78,6 @@ class MP6515 final : public servo::Motor {
   uint8_t pin_brake_ = 0;
   /** @brief SLEEP 睡眠引脚（1: 工作, 0: 睡眠） */
   uint8_t pin_sleep_ = 0;
-  /** @brief 是否已初始化 */
-  bool initialized_ = false;
 };
 
 }  // namespace hortor::drivers::MP6515

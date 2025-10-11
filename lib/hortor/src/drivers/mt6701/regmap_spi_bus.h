@@ -16,7 +16,6 @@
 
 #include <Arduino.h>
 
-#include "regmap.h"
 #include "regmap/regmap_spi_bus.h"
 #include "servo/types.h"
 #include "types.h"
@@ -24,20 +23,16 @@
 namespace hortor::drivers::MT6701 {
 
 /**
- * @brief SPI通信实现
+ * @brief SPI通信实现（CRTP模式）
  *
  * 实现通过SPI协议与MT6701传感器通信的功能。
  * SPI模式提供更高的通信速度，但功能有限，主要用于角度读取。
+ *
+ * 注意：此类目前未集成到主 MT6701 驱动中。
+ * MT6701 主驱动使用 I2C 接口（见 mt6701.h）。
  */
 class RegMapSpiBus : public regmap::RegMapSpiBus {
  public:
-  /**
-   * @brief 设置寄存器访问器函数
-   * @param accessor 寄存器访问器
-   * @return 错误码
-   */
-  Error LinkAccessor(MT6701RegMap& regmap);
-
   /**
    * @brief 写寄存器 MT6701不支持SPI写
    * @param address 寄存器地址
@@ -55,9 +50,9 @@ class RegMapSpiBus : public regmap::RegMapSpiBus {
    * @param size 数据长度
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error WriteMultiple(const uint8_t address,
-                      const uint8_t* data,
-                      const size_t size) {
+  Error WriteBytes(const uint8_t address,
+                   const uint8_t* data,
+                   const size_t size) {
     return Error::kGeneralErr;
   }
 
@@ -78,7 +73,7 @@ class RegMapSpiBus : public regmap::RegMapSpiBus {
    * @param size 读取数据的长度
    * @return 错误码, 始终返回kGeneralErr
    */
-  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) {
+  Error ReadBytes(const uint8_t address, const size_t size, uint8_t* data) {
     return Error::kGeneralErr;
   }
 

@@ -20,11 +20,6 @@ namespace hortor::drivers::MA330 {
 
 using Regs = MA330Regs;
 
-Error RegMap::ReadRaw(uint16_t& angle_raw) {
-  CHECK(read_raw_(angle_raw));
-  return Error::kOk;
-};
-
 Error RegMap::GetZero(uint16_t& zero) {
   CHECK(ReadRegField(Regs::kZ_H, Regs::kZ_L, zero));
   return Error::kOk;
@@ -142,7 +137,7 @@ Error RegMap::SetHysteresis(uint8_t value) {
 };
 
 Error RegMap::SetFieldStrengthThresholds(uint8_t high_threshold,
-                                                uint8_t low_threshold) {
+                                         uint8_t low_threshold) {
   CHECK(WriteRegField(Regs::kMGLT, low_threshold));
   CHECK(WriteRegField(Regs::kMGHT, high_threshold));
   return Error::kOk;

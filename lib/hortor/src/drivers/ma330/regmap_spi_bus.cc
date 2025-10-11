@@ -18,12 +18,6 @@
 
 namespace hortor::drivers::MA330 {
 
-Error RegMapSpiBus::LinkAccessor(RegMap& regmap) {
-  regmap::RegMapSpiBus::LinkAccessor(regmap);
-  regmap.SetReadRaw([this](uint16_t& angle_raw) { return ReadRaw(angle_raw); });
-  return Error::kOk;
-}
-
 Error RegMapSpiBus::ReadRaw(uint16_t& angle_raw) {
   angle_raw = transfer16(0x0000);
   return Error::kOk;

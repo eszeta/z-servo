@@ -14,27 +14,39 @@
 
 #pragma once
 
-#include <functional>
-
 #include "hortor.h"
 #include "regmap/reg_field.h"
-#include "regmap/regmap_utils.h"
 #include "servo/types.h"
 
 namespace hortor::regmap {
 
 /**
- * @brief 寄存器映射基类
+ * @brief 寄存器映射基类（CRTP模式）
  *
  * 提供寄存器读写功能。基于 Linux Kernel regmap 子系统设计。
+ * 使用 CRTP (Curiously Recurring Template Pattern) 实现编译期静态多态，
+ * 消除虚函数和 std::function 的运行时开销。
+ *
+ * @tparam Derived 派生类类型，必须实现 WriteBytesImpl 和 ReadBytesImpl 方法
  */
+template <typename Derived>
 class RegMap {
+ protected:
+  /**
+   * @brief 获取派生类引用
+   * @return 派生类引用
+   */
+  Derived& AsDerived() { return static_cast<Derived&>(*this); }
+
+  /**
+   * @brief 获取派生类常量引用
+   * @return 派生类常量引用
+   */
+  const Derived& AsDerived() const {
+    return static_cast<const Derived&>(*this);
+  }
+
  public:
-  /** @brief 多字节写寄存器函数类型 */
-  using WriteMultipleFunc = std::function<Error(
-      const uint8_t address, const uint8_t* data, const size_t size)>;
-  using ReadMultipleFunc = std::function<Error(
-      const uint8_t address, const size_t size, uint8_t* data)>;
   /**
    * @brief 写寄存器
    * @param address 寄存器地址
@@ -43,7 +55,7 @@ class RegMap {
    */
   template <typename T>
   Error Write(const uint8_t address, const T data) {
-    return WriteMultiple(
+    return WriteBytes(
         address, reinterpret_cast<const uint8_t*>(&data), sizeof(T));
   }
 
@@ -54,10 +66,10 @@ class RegMap {
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteMultiple(const uint8_t address,
-                      const uint8_t* data,
-                      const size_t size) {
-    return write_multiple_(address, data, size);
+  Error WriteBytes(const uint8_t address,
+                   const uint8_t* data,
+                   const size_t size) {
+    return AsDerived().WriteBytesImpl(address, data, size);
   }
 
   /**
@@ -68,7 +80,7 @@ class RegMap {
    */
   template <typename T>
   Error Read(const uint8_t address, T& data) {
-    return ReadMultiple(address, sizeof(T), reinterpret_cast<uint8_t*>(&data));
+    return ReadBytes(address, sizeof(T), reinterpret_cast<uint8_t*>(&data));
   }
 
   /**
@@ -78,8 +90,8 @@ class RegMap {
    * @param data 读取数据的存储指针
    * @return 错误码，成功返回OK
    */
-  Error ReadMultiple(const uint8_t address, const size_t size, uint8_t* data) {
-    return read_multiple_(address, size, data);
+  Error ReadBytes(const uint8_t address, const size_t size, uint8_t* data) {
+    return AsDerived().ReadBytesImpl(address, size, data);
   }
 
   /**
@@ -174,23 +186,6 @@ class RegMap {
     value = GetCombinedValue(high, low, high_value, low_value);
     return Error::kOk;
   }
-
-  /** @brief 设置多字节写寄存器函数 */
-  void SetWriteMultiple(WriteMultipleFunc write_multiple) {
-    write_multiple_ = write_multiple;
-  }
-
-  /** @brief 设置多字节读寄存器函数 */
-  void SetReadMultiple(ReadMultipleFunc read_multiple) {
-    read_multiple_ = read_multiple;
-  }
-
- protected:
-  /** @brief 多字节写寄存器函数对象 */
-  WriteMultipleFunc write_multiple_;
-  /** @brief 多字节读寄存器函数对象 */
-  ReadMultipleFunc read_multiple_;
 };
 
 }  // namespace hortor::regmap
-

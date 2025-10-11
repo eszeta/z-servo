@@ -28,19 +28,7 @@ Error RegMapMmio::Init(uint8_t* regs, const size_t size) {
   return Error::kOk;
 }
 
-Error RegMapMmio::LinkAccessor(RegMap& accessor) {
-  accessor.SetWriteMultiple(
-      [this](const uint8_t address, const uint8_t* data, const size_t size) {
-        return WriteMultiple(address, data, size);
-      });
-  accessor.SetReadMultiple(
-      [this](const uint8_t address, const size_t size, uint8_t* data) {
-        return ReadMultiple(address, size, data);
-      });
-  return Error::kOk;
-}
-
-Error RegMapMmio::WriteMultiple(const uint8_t address,
+Error RegMapMmio::WriteBytesImpl(const uint8_t address,
                                  const uint8_t* data,
                                  const size_t size) {
   if (address + size > size_) {
@@ -52,7 +40,7 @@ Error RegMapMmio::WriteMultiple(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegMapMmio::ReadMultiple(const uint8_t address,
+Error RegMapMmio::ReadBytesImpl(const uint8_t address,
                                 const size_t size,
                                 uint8_t* data) {
   if (address + size > size_) {
@@ -65,4 +53,3 @@ Error RegMapMmio::ReadMultiple(const uint8_t address,
 }
 
 }  // namespace hortor::regmap
-

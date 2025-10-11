@@ -15,7 +15,7 @@
 #include "types.h"
 
 namespace hortor::drivers::LSM6DSOW {
-using RegField8 = hortor::regmap::RegField8;
+using RegField8 = regmap::RegField8;
 // 兼容GD32的编译环境，需要手动定义，否则会链接错误
 constexpr RegField8 LSM6DSOWRegs::kWHO_AM_I;
 constexpr RegField8 LSM6DSOWRegs::kCTRL1_XL;

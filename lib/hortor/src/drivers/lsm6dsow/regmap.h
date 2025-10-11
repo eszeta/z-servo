@@ -14,22 +14,26 @@
 
 #pragma once
 
-#include "regmap/regmap.h"
+#include "regmap/regmap_i2c_bus.h"
 #include "servo/types.h"
 #include "types.h"
 
 namespace hortor::drivers::LSM6DSOW {
 
 /**
- * @brief LSM6DSOW控制器类，负责与LSM6DSOW传感器的通信和数据读取
+ * @brief LSM6DSOW控制器类（CRTP模式），负责与LSM6DSOW传感器的通信和数据读取
+ *
+ * 继承自 regmap::RegMapI2CBus，通过 CRTP 实现编译期静态多态。
  */
-class RegMap : public hortor::regmap::RegMap {
+class RegMap : public regmap::RegMapI2CBus {
  public:
   /**
    * @brief 初始化控制器
+   * @param wire Arduino Wire对象指针
+   * @param address 从机地址
    * @return 初始化结果
    */
-  Error Init();
+  Error Init(TwoWire* wire, const int address);
 
   /**
    * @brief 读取加速度数据

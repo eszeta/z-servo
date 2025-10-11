@@ -33,19 +33,7 @@ Error RegMapSpiBus::Init(SPIClass *spi,
   return Error::kOk;
 }
 
-Error RegMapSpiBus::LinkAccessor(RegMap &accessor) {
-  accessor.SetWriteMultiple(
-      [this](const uint8_t address, const uint8_t *data, const size_t size) {
-        return WriteMultiple(address, data, size);
-      });
-  accessor.SetReadMultiple(
-      [this](const uint8_t address, const size_t size, uint8_t *data) {
-        return ReadMultiple(address, size, data);
-      });
-  return Error::kOk;
-}
-
-Error RegMapSpiBus::WriteMultiple(const uint8_t address,
+Error RegMapSpiBus::WriteBytesImpl(const uint8_t address,
                                    const uint8_t *data,
                                    const size_t size) {
   if (!spi_ || !data) {
@@ -60,7 +48,7 @@ Error RegMapSpiBus::WriteMultiple(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegMapSpiBus::ReadMultiple(const uint8_t address,
+Error RegMapSpiBus::ReadBytesImpl(const uint8_t address,
                                   const size_t size,
                                   uint8_t *data) {
   if (!spi_) {
@@ -76,4 +64,3 @@ Error RegMapSpiBus::ReadMultiple(const uint8_t address,
 }
 
 }  // namespace hortor::regmap
-

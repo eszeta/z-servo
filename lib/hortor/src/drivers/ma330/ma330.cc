@@ -12,24 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MA330.h"
+#include "ma330.h"
 
 #include "types.h"
 
 namespace hortor::drivers::MA330 {
 
-MA330::MA330() : servo::Encoder(14) {}
-
 Error MA330::InitSPI(SPIClass *spi, const uint8_t cs_pin) {
-  CHECK(spi_transport_.Init(
-      spi, cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
-  CHECK(spi_transport_.LinkAccessor(regmap_));
-  CHECK(regmap_.Init());
-  servo::Encoder::Init();
+  CHECK(regmap_.Init(spi, cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
+  servo::Encoder<MA330>::Init();
   return Error::kOk;
 }
 
-Error MA330::GetRaw(uint16_t &out_raw) {
+Error MA330::GetRawImpl(uint16_t &out_raw) {
   CHECK(regmap_.ReadRaw(out_raw));
   return Error::kOk;
 }

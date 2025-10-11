@@ -21,19 +21,19 @@
 
 namespace hortor::servo {
 
-enum class MonitorBitmap : uint8_t {
-  kTarget = 0b1000000,    // 监控目标值
-  kVoltage = 0b0100000,   // 监控电压值
-  kCurrent = 0b0001000,   // 监控电流值
-  kVelocity = 0b0000010,  // 监控速度值
-  kPosition = 0b0000001   // 监控位置值
-};
-
 /**
  * @brief 监控类，用于监控电机状态
  */
+template <typename ServoType>
 class Monitor {
  public:
+  enum class MonitorBitmap : uint8_t {
+    kTarget = 0b1000000,    // 监控目标值
+    kVoltage = 0b0100000,   // 监控电压值
+    kCurrent = 0b0001000,   // 监控电流值
+    kVelocity = 0b0000010,  // 监控速度值
+    kPosition = 0b0000001   // 监控位置值
+  };
   /**
    * @brief 使用监控
    * @param serial 串口
@@ -50,7 +50,7 @@ class Monitor {
    * @brief 链接电机
    * @param servo 伺服电机
    */
-  void LinkMotor(Servo *servo);
+  void LinkMotor(ServoType *servo);
 
  private:
   /**
@@ -63,7 +63,7 @@ class Monitor {
   /**
    * @brief 伺服电机
    */
-  Servo *servo_ = nullptr;
+  ServoType *servo_ = nullptr;
   /**
    * @brief 监控输出
    */
@@ -83,4 +83,56 @@ class Monitor {
   float period_ = 0.1f;
 };
 
+template <typename ServoType>
+void Monitor<ServoType>::UseMonitoring(Print &serial) {
+  monitorPort_ = &serial;
+}
+
+template <typename ServoType>
+void Monitor<ServoType>::LinkMotor(ServoType *servo) {
+  servo_ = servo;
+}
+
+template <typename ServoType>
+void Monitor<ServoType>::Process(float dt) {
+  if (!monitorPort_) return;
+  static float accumulated_time = 0;
+  accumulated_time += dt;
+  if (accumulated_time < period_) return;
+  accumulated_time = 0;
+
+  bool printed = false;
+  if (variables_ & static_cast<uint8_t>(MonitorBitmap::kTarget)) {
+    monitorPort_->print(servo_->GetGoalPosition(), decimals_);
+    printed = true;
+  }
+
+  if (variables_ & static_cast<uint8_t>(MonitorBitmap::kVoltage)) {
+    if (printed) monitorPort_->print(separator_);
+    monitorPort_->print(servo_->GetPresentLoad(), decimals_);
+    printed = true;
+  }
+
+  if (variables_ & static_cast<uint8_t>(MonitorBitmap::kCurrent)) {
+    if (printed) monitorPort_->print(separator_);
+    monitorPort_->print(servo_->GetPresentCurrent(), decimals_);  // mAmps
+    printed = true;
+  }
+
+  if (variables_ & static_cast<uint8_t>(MonitorBitmap::kVelocity)) {
+    if (printed) monitorPort_->print(separator_);
+    monitorPort_->print(servo_->GetPresentVelocity(), decimals_);
+    printed = true;
+  }
+
+  if (variables_ & static_cast<uint8_t>(MonitorBitmap::kPosition)) {
+    if (printed) monitorPort_->print(separator_);
+    monitorPort_->print(servo_->GetPresentPosition(), decimals_);
+    printed = true;
+  }
+
+  if (printed) {
+    monitorPort_->println(separator_);
+  }
+}
 }  // namespace hortor::servo
