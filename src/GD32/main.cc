@@ -37,7 +37,7 @@
 
 // hortor::InfoLED::InfoLED info_led;
 // hortor::InstSerialPortHandler inst_port;
-// hortor::PortTableAccessor inst_accessor;
+// hortor::PortTableRegMap inst_accessor;
 // hortor::Slave inst;
 // hortor::MP6515::MP6515 motor_driver;
 // hortor::MA330::MA330 angle_sensor;
