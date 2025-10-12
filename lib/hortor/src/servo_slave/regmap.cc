@@ -24,8 +24,9 @@ Error RegMap::Init() {
   CHECK(LoadEeprom());
   return Error::kOk;
 }
-
-Error RegMap::GetStatusImpl(uint8_t& status) { return Error::kOk; }
+Error RegMap::ServoIdImpl(uint8_t& id) { return Error::kOk; }
+Error RegMap::StatusImpl(uint8_t& status) { return Error::kOk; }
+Error RegMap::ReturnLevelImpl(uint8_t& return_level) { return Error::kOk; }
 Error RegMap::RecoveryEepromImpl() { return Error::kOk; }
 Error RegMap::LoadEepromImpl() { return Error::kOk; }
 Error RegMap::StoreEepromImpl() { return Error::kOk; }

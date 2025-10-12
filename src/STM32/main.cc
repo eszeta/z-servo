@@ -41,6 +41,7 @@ using hortor::utils::DebugPrint;
 using hortor::utils::DebugPrintln;
 using hortor::utils::TaskScheduler;
 
+// 信息灯引脚
 constexpr auto kInfoLedPin = PA12;
 // 主控制循环频率 500Hz
 constexpr auto kMainLoopRateHz = 500;

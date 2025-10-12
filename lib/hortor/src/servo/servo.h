@@ -33,6 +33,10 @@ namespace hortor::servo {
  *
  * 该类实现了舵机的核心控制功能，包括位置控制、速度控制、电流控制等。
  * 支持多种控制模式，并提供完整的PID控制和保护功能。
+ *
+ * @tparam MotorType 电机驱动器类型，必须继承自 Motor<MotorType>
+ * @tparam EncoderType 编码器传感器类型，必须继承自 Encoder<EncoderType>
+ * @tparam CurrentType 电流传感器类型，必须继承自 Current<CurrentType>
  */
 template <typename MotorType, typename EncoderType, typename CurrentType>
 class Servo {
@@ -41,16 +45,34 @@ class Servo {
    * @brief 默认构造函数
    */
   Servo(uint8_t resolution_bits)
-      : kResolution(resolution_bits), encoder_pll(resolution_bits) {}
+      : kResolution(resolution_bits), encoder_pll_(resolution_bits) {}
 
-  void Init();
+  /**
+   * @brief 初始化舵机
+   */
+  Error Init();
+
+  /**
+   * @brief 处理舵机逻辑
+   * @param dt 时间间隔(秒)
+   * @return 错误码
+   */
   Error Process(float dt);
+
+  /**
+   * @brief 电机刹车
+   */
+  void Break();
+  /**
+   * @brief 电机滑行
+   */
+  void Coast();
 
   /**
    * @brief 获取角度传感器
    * @return 角度传感器指针
    */
-  EncoderType &GetSensor() { return encoder; }
+  EncoderType &GetSensor() { return encoder_; }
 
   CurrentType &GetCurrentSense() { return current_sense_; }
 
@@ -299,15 +321,26 @@ class Servo {
    */
   void SetPower(const float pwm);
   /**
-   * @brief 电机刹车
-   */
-  void Break();
-  /**
    * @brief 检查是否到达目标位置
    * @param pos_error 位置误差
    * @return 是否到达目标位置
    */
   bool IsPositionReached(int16_t pos_error);
+
+  /**
+   * @brief 获取编码器基类引用（IDE 类型提示用）
+   */
+  Encoder<EncoderType> &EncoderBase() { return encoder_; }
+
+  /**
+   * @brief 获取电流传感器基类引用（IDE 类型提示用）
+   */
+  Current<CurrentType> &CurrentSenseBase() { return current_sense_; }
+
+  /**
+   * @brief 获取电机基类引用（IDE 类型提示用）
+   */
+  Motor<MotorType> &MotorBase() { return motor_; }
 
   /** @brief 舵机使能状态 */
   bool enabled_ = true;
@@ -408,9 +441,9 @@ class Servo {
   /** @brief 电机驱动器指针 */
   MotorType motor_;
   /** @brief 角度传感器指针 */
-  EncoderType encoder;
+  EncoderType encoder_;
   /** @brief 编码器PLL */
-  math::EncoderPll encoder_pll;
+  math::EncoderPll encoder_pll_;
   /** @brief 电流传感器指针 */
   CurrentType current_sense_;
 };
@@ -422,7 +455,9 @@ class Servo {
  * @brief 初始化舵机
  */
 template <typename MotorType, typename EncoderType, typename CurrentType>
-void Servo<MotorType, EncoderType, CurrentType>::Init() {}
+Error Servo<MotorType, EncoderType, CurrentType>::Init() {
+  return Error::kOk;
+}
 
 /**
  * @brief 处理舵机逻辑
@@ -508,6 +543,8 @@ Error Servo<MotorType, EncoderType, CurrentType>::Process(float dt) {
 template <typename MotorType, typename EncoderType, typename CurrentType>
 Error Servo<MotorType, EncoderType, CurrentType>::RefreshPresentVariables(
     float dt) {
+  auto &encoder = EncoderBase();
+  auto &current_sense = CurrentSenseBase();
   // 处理编码器
   CHECK(encoder.Process(dt));
   // 处理编码器PLL
@@ -515,18 +552,18 @@ Error Servo<MotorType, EncoderType, CurrentType>::RefreshPresentVariables(
   const auto encoder_bits = encoder.kResolution.kBits;
   const auto encoder_pos_counts_mapped =
       math::mapResolution(encoder_pos_counts, encoder_bits, kResolution.kBits);
-  CHECK(encoder_pll.Process(dt, encoder_pos_counts_mapped));
+  CHECK(encoder_pll_.Process(dt, encoder_pos_counts_mapped));
 
   // 获取当前位置
   const auto direction = static_cast<float>(encoder_direction_);
   present_position_ =
-      encoder_pll.GetPosition() * direction + position_correction_;
+      encoder_pll_.GetPosition() * direction + position_correction_;
 
   // 获取当前速度
-  present_velocity_ = encoder_pll.GetVelocity() * direction;
+  present_velocity_ = encoder_pll_.GetVelocity() * direction;
 
   // 获取当前电流
-  CHECK(current_sense_.GetCurrent(present_current_));
+  CHECK(current_sense.GetCurrent(present_current_));
   present_current_ = current_lpf_.Compute(present_current_, dt);
   return Error::kOk;
 }
@@ -557,7 +594,7 @@ void Servo<MotorType, EncoderType, CurrentType>::SetPower(const float pwm) {
   present_load_ = pwm;
   const auto direction = static_cast<float>(motor_direction_);
   const auto pwm_set = direction * pwm;
-  motor_.SetPWM(pwm_set);
+  MotorBase().SetPWM(pwm_set);
 }
 
 /**
@@ -565,7 +602,15 @@ void Servo<MotorType, EncoderType, CurrentType>::SetPower(const float pwm) {
  */
 template <typename MotorType, typename EncoderType, typename CurrentType>
 void Servo<MotorType, EncoderType, CurrentType>::Break() {
-  motor_->Brake();
+  MotorBase().Brake();
+}
+
+/**
+ * @brief 电机滑行
+ */
+template <typename MotorType, typename EncoderType, typename CurrentType>
+void Servo<MotorType, EncoderType, CurrentType>::Coast() {
+  MotorBase().Coast();
 }
 
 }  // namespace hortor::servo

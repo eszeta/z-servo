@@ -212,8 +212,8 @@ Error Slave<RegMapType, PortHandlerType>::Response(
     const size_t parameter_size) {
   uint8_t id = 0;
   uint8_t status = 0;
-  CHECK(regmap_->GetServoId(id));
-  CHECK(regmap_->GetStatus(status));
+  CHECK(regmap_->ServoId(id));
+  CHECK(regmap_->Status(status));
   CHECK(protocol_.CreateResponse(
       id, status, parameter, parameter_size, status_packet_));
   CHECK(port_->Response(status_packet_, reply_idx));
@@ -252,14 +252,14 @@ template <typename RegMapType, typename PortHandlerType>
 Error Slave<RegMapType, PortHandlerType>::Execute(const InstPacket& packet) {
   const auto isBroadcast = packet.id == kBroadcastId;
   uint8_t id = 0;
-  CHECK(regmap_->GetServoId(id));
+  CHECK(regmap_->ServoId(id));
   const auto isSelf = packet.id == id;
   if (!isSelf && !isBroadcast) {
     return Error::kOk;
   }
   const auto instruction = packet.instructionOrError;
   uint8_t return_level = 0;
-  CHECK(regmap_->GetReturnLevel(return_level));
+  CHECK(regmap_->ReturnLevel(return_level));
   const auto response = CheckResponse(instruction, return_level);
 
   switch (instruction) {
@@ -385,7 +385,7 @@ Error Slave<RegMapType, PortHandlerType>::SyncWriteHandler(
   for (uint8_t i = 0; i < block_count; i++) {
     const uint8_t target_id = parameter[0];
     uint8_t id = 0;
-    CHECK(regmap_->GetServoId(id));
+    CHECK(regmap_->ServoId(id));
     if (id == target_id) {
       const uint8_t* data = parameter + 1;
       CHECK(WriteRegs(address, data, data_size));
@@ -412,7 +412,7 @@ Error Slave<RegMapType, PortHandlerType>::BulkReadHandler(
   for (uint8_t i = 0; i < block_count; i++) {
     const uint8_t target_id = parameter[0];
     uint8_t id = 0;
-    CHECK(regmap_->GetServoId(id));
+    CHECK(regmap_->ServoId(id));
     if (id == target_id) {
       hit = true;
       response_idx = i;

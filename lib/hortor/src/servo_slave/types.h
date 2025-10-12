@@ -22,63 +22,140 @@ namespace hortor::servo_slave {
 
 using protocol::ControlTableBlock;
 
-static constexpr uint32_t kBaudrateTable[] = {
+constexpr uint32_t kBaudrateTable[] = {
     2000000, 1000000, 500000, 250000, 115200, 57600, 38400, 9600};
-struct ControlTable {
-  /*-------------------- EEPROM 区（掉电保存） --------------------*/
-  CTI_16(kModelNumber, 0, 360);       // 型号固件写死 360（0x0168）
-  CTI_08(kFirmwareVersion, 2, 0);     // 固件版本（只读，出厂烧录）
-  CTI_08(kId, 3, 1);                  // 总线 ID（1 为出厂值，范围 0-252）
-  CTI_08(kBaudRate, 4, 1);            // 波特率
-  CTI_08(kReturnDelayTime, 5, 250);   // 返回延时 250×2 µs = 500 µs
-  CTI_16(kCwAngleLimit, 6, 0);        // 顺时针角度限位（0°）
-  CTI_16(kCcwAngleLimit, 8, 4095);    // 逆时针角度限位（360° → 4095）
-  CTI_08(kTemperatureLimit, 11, 70);  // 温度报警阈值 70 ℃
-  CTI_08(kMinVoltageLimit, 12, 60);   // 最低输入电压 6.0 V（60×0.1 V）
-  CTI_08(kMaxVoltageLimit, 13, 160);  // 最高输入电压 16.0 V
-  CTI_16(kMaxTorque, 14, 1023);       // 最大扭矩 1023 ≙ 100 %
-  CTI_08(kStatusReturnLevel, 16, 2);  // 状态包返回等级 2（所有指令都返回）
-  CTI_08(kAlarmLed, 17, 36);          // 报警时 LED 闪烁掩码 36（0x24）
-  CTI_08(kShutdown, 18, 36);          // 报警后关闸掩码 36（同 LED）
-  CTI_16(kMultiTurnOffset, 20, 0);    // 多圈偏移 0（仅多圈模式有效）
-  CTI_08(kResolutionDivider, 22, 1);  // 分辨率分频 1（1-4 有效）
+namespace ControlTable {
+// constexpr 工厂函数，用于创建 ControlTableItem
+constexpr auto CTI8(uint8_t addr, uint8_t val = 0) {
+  return protocol::ControlTableItem<uint8_t>(addr, 0, 8, val);
+}
+constexpr auto CTI16(uint16_t addr, uint16_t val = 0) {
+  return protocol::ControlTableItem<uint16_t>(addr, 0, 16, val);
+}
+constexpr auto CTI32(uint32_t addr, uint32_t val = 0) {
+  return protocol::ControlTableItem<uint32_t>(addr, 0, 32, val);
+}
+/*-------------------- EEPROM 区（掉电保存） --------------------*/
+/** @brief 型号 (只读) */
+constexpr auto kModelNumber = CTI16(0, 360);
+/** @brief 型号信息 (只读) */
+constexpr auto kModelInformation = CTI32(2, 0);
+/** @brief 固件版本 (只读) */
+constexpr auto kFirmwareVersion = CTI8(6, 0);
+/** @brief 舵机ID，范围: 0-252 */
+constexpr auto kId = CTI8(7, 0);
+/** @brief 波特率索引 */
+constexpr auto kBaudRate = CTI8(8, 0);
+/** @brief 返回延迟，单位: 2μs */
+constexpr auto kReturnDelayTime = CTI8(9, 0);
+/** @brief 驱动模式 */
+constexpr auto kDriveMode = CTI8(10, 0);
+/** @brief 工作模式 */
+constexpr auto kOperatingMode = CTI8(11, 0);
+/** @brief 副ID，范围: 0-252 */
+constexpr auto kSecondaryId = CTI8(12, 0);
+/** @brief 协议版本 */
+constexpr auto kProtocolVersion = CTI8(13, 0);
+/** @brief 归零偏移，单位: pulse */
+constexpr auto kHomingOffset = CTI32(20, 0);
+/** @brief 运动阈值，单位: rev/min */
+constexpr auto kMovingThreshold = CTI32(24, 0);
+/** @brief 温度上限，单位: °C */
+constexpr auto kTemperatureLimit = CTI8(31, 0);
+/** @brief 最高电压限制，单位: 0.1V */
+constexpr auto kMaxVoltageLimit = CTI16(32, 0);
+/** @brief 最低电压限制，单位: 0.1V */
+constexpr auto kMinVoltageLimit = CTI16(34, 0);
+/** @brief PWM上限，单位: 0.113% */
+constexpr auto kPwmLimit = CTI16(36, 0);
+/** @brief 电流上限，单位: mA */
+constexpr auto kCurrentLimit = CTI16(38, 0);
+/** @brief 速度上限，单位: rev/min */
+constexpr auto kVelocityLimit = CTI32(44, 0);
+/** @brief 位置上限，单位: pulse */
+constexpr auto kMaxPositionLimit = CTI32(48, 0);
+/** @brief 位置下限，单位: pulse */
+constexpr auto kMinPositionLimit = CTI32(52, 0);
+/** @brief 关断条件 */
+constexpr auto kShutdown = CTI8(63, 0);
 
-  /*-------------------- RAM 区（掉电丢失） --------------------*/
-  CTI_08(kTorqueEnable, 24, 0);        // 扭矩开关 0=关闭 1=开启
-  CTI_08(kDxlLed, 25, 0);              // 用户 LED 0=灭 1=亮
-  CTI_08(kPosDgain, 26, 8);            // PID 微分增益 D
-  CTI_08(kPosIgain, 27, 0);            // PID 积分增益 I
-  CTI_08(kPosPgain, 28, 8);            // PID 比例增益 P
-  CTI_16(kGoalPosition, 30, 0);        // 目标位置 0-4095（0.088°/步）
-  CTI_16(kMovingSpeed, 32, 0);         // 移动速度 0=最大速度
-  CTI_16(kTorqueLimit, 34, 1023);      // 实时扭矩限制 1023≙100 %
-  CTI_16(kPresentPosition, 36, 0);     // 当前位置（只读）
-  CTI_16(kPresentSpeed, 38, 0);        // 当前速度（只读）
-  CTI_16(kPresentLoad, 40, 0);         // 当前负载（只读，0-1023）
-  CTI_08(kPresentVoltage, 42, 0);      // 当前电压（只读，值×0.1 V）
-  CTI_08(kPresentTemperature, 43, 0);  // 当前温度（只读，单位℃）
-  CTI_08(kRegistered, 44, 0);          // REG_WRITE 指令注册标志
-  CTI_08(kMoving, 46, 0);              // 是否正在运动 0=静止 1=运动中
-  CTI_08(kLock, 47, 0);                // EEPROM 锁 0=解锁 1=锁定
-  CTI_16(kPunch, 48, 32);              // 启动电流阈值 32（0x20）
-  CTI_16(kRealtimeTick, 50, 0);        // 实时时钟 ms 计数（只读）
-  CTI_08(kGoalAcceleration, 73, 0);    // 目标加速度 0=无限制
-};  // struct ControlTable
+/*-------------------- RAM 区（掉电不保存） --------------------*/
+/** @brief 力矩使能 */
+constexpr auto kTorqueEnable = CTI8(64, 0);
+/** @brief LED开关 */
+constexpr auto kDxlLed = CTI8(65, 0);
+/** @brief 状态返回级别 */
+constexpr auto kStatusReturnLevel = CTI8(68, 0);
+/** @brief 已注册指令 (只读) */
+constexpr auto kRegisteredInstruction = CTI8(69, 0);
+/** @brief 硬件错误状态 (只读) */
+constexpr auto kHardwareErrorStatus = CTI8(70, 0);
+/** @brief 速度积分增益 */
+constexpr auto kVelocityIgain = CTI16(76, 0);
+/** @brief 速度比例增益 */
+constexpr auto kVelocityPgain = CTI16(78, 0);
+/** @brief 位置微分增益 */
+constexpr auto kPositionDgain = CTI16(80, 0);
+/** @brief 位置积分增益 */
+constexpr auto kPositionIgain = CTI16(82, 0);
+/** @brief 位置比例增益 */
+constexpr auto kPositionPgain = CTI16(84, 0);
+/** @brief 前馈二阶增益 */
+constexpr auto kFeedforward2ndGain = CTI16(88, 0);
+/** @brief 前馈一阶增益 */
+constexpr auto kFeedforward1stGain = CTI16(90, 0);
+/** @brief 总线看门狗，单位: 20ms */
+constexpr auto kBusWatchdog = CTI8(98, 0);
+/** @brief 目标PWM，单位: 0.113% */
+constexpr auto kGoalPwm = CTI16(100, 0);
+/** @brief 目标电流，单位: mA */
+constexpr auto kGoalCurrent = CTI16(102, 0);
+/** @brief 目标速度，单位: rev/min */
+constexpr auto kGoalVelocity = CTI32(104, 0);
+/** @brief 轨迹加速度，单位: rev/min² */
+constexpr auto kProfileAcceleration = CTI32(108, 0);
+/** @brief 轨迹速度，单位: rev/min */
+constexpr auto kProfileVelocity = CTI32(112, 0);
+/** @brief 目标位置，单位: pulse */
+constexpr auto kGoalPosition = CTI32(116, 0);
+/** @brief 实时时钟 (只读)，单位: ms */
+constexpr auto kRealtimeTick = CTI16(120, 0);
+/** @brief 运动状态 (只读) */
+constexpr auto kMoving = CTI8(122, 0);
+/** @brief 运动详细状态 (只读) */
+constexpr auto kMovingStatus = CTI8(123, 0);
+/** @brief 当前PWM (只读)，单位: 0.113% */
+constexpr auto kPresentPwm = CTI16(124, 0);
+/** @brief 当前电流 (只读)，单位: mA */
+constexpr auto kPresentCurrent = CTI16(126, 0);
+/** @brief 当前速度 (只读)，单位: rev/min */
+constexpr auto kPresentVelocity = CTI32(128, 0);
+/** @brief 当前位置 (只读)，单位: pulse */
+constexpr auto kPresentPosition = CTI32(132, 0);
+/** @brief 速度轨迹 (只读)，单位: rev/min */
+constexpr auto kVelocityTrajectory = CTI32(136, 0);
+/** @brief 位置轨迹 (只读)，单位: pulse */
+constexpr auto kPositionTrajectory = CTI32(140, 0);
+/** @brief 当前输入电压 (只读)，单位: 0.1V */
+constexpr auto kPresentInputVoltage = CTI16(144, 0);
+/** @brief 当前温度 (只读)，单位: °C */
+constexpr auto kPresentTemperature = CTI8(146, 0);
+};  // namespace ControlTable
 
-struct TableBlocks {
-  constexpr static ControlTableBlock kEeprom = {
-      ControlTable::kModelNumber.reg.address,
-      ControlTable::kResolutionDivider.reg.address +
-          ControlTable::kResolutionDivider.reg.getSize()};
+namespace TableBlocks {
+constexpr static ControlTableBlock kEeprom = {
+    ControlTable::kModelNumber.reg.address,
+    ControlTable::kShutdown.reg.address +
+        ControlTable::kShutdown.reg.getSize()};
 
-  constexpr static ControlTableBlock kRam = {
-      ControlTable::kTorqueEnable.reg.address,
-      ControlTable::kGoalAcceleration.reg.address +
-          ControlTable::kGoalAcceleration.reg.getSize()};
+constexpr static ControlTableBlock kRam = {
+    ControlTable::kTorqueEnable.reg.address,
+    ControlTable::kPresentTemperature.reg.address +
+        ControlTable::kPresentTemperature.reg.getSize()};
 
-  constexpr static ControlTableBlock kTotal = {
-      ControlTable::kModelNumber.reg.address,
-      ControlTable::kGoalAcceleration.reg.address +
-          ControlTable::kGoalAcceleration.reg.getSize()};
-};
+constexpr static ControlTableBlock kTotal = {
+    ControlTable::kModelNumber.reg.address,
+    ControlTable::kPresentTemperature.reg.address +
+        ControlTable::kPresentTemperature.reg.getSize()};
+};  // namespace TableBlocks
 }  // namespace hortor::servo_slave

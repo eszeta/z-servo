@@ -54,14 +54,14 @@ class RegMap : public BusImpl {
    * @param id 伺服ID存储引用
    * @return 错误码
    */
-  Error GetServoId(uint8_t& id) { return AsDerived().GetServoIdImpl(id); }
+  Error ServoId(uint8_t& id) { return AsDerived().ServoIdImpl(id); }
 
   /**
    * @brief 获取状态
    * @param status 状态存储引用
    * @return 错误码
    */
-  Error GetStatus(uint8_t& status) { return AsDerived().GetStatusImpl(status); }
+  Error Status(uint8_t& status) { return AsDerived().StatusImpl(status); }
 
   /**
    * @brief 获取状态包返回级别
@@ -78,8 +78,8 @@ class RegMap : public BusImpl {
    * 2	All Instructions
    *    Returns the Status Packet for all Instructions
    */
-  Error GetReturnLevel(uint8_t& return_level) {
-    return AsDerived().GetReturnLevelImpl(return_level);
+  Error ReturnLevel(uint8_t& return_level) {
+    return AsDerived().ReturnLevelImpl(return_level);
   }
 
   /**
@@ -108,6 +108,30 @@ class RegMap : public BusImpl {
    */
   Error StoreEeprom(const uint8_t address, const uint8_t size) {
     return AsDerived().StoreEepromImpl(address, size);
+  }
+
+  /**
+   * @brief 读取 ControlTableItem 字段
+   * @tparam T 字段类型
+   * @param item ControlTableItem
+   * @param value 读取值的存储引用
+   * @return 错误码
+   */
+  template <typename T>
+  Error ReadRegField(const ControlTableItem<T>& item, T& value) {
+    return BusImpl::ReadRegField(item.reg, value);
+  }
+
+  /**
+   * @brief 写入 ControlTableItem 字段
+   * @tparam T 字段类型
+   * @param item ControlTableItem
+   * @param value 要写入的值
+   * @return 错误码
+   */
+  template <typename T>
+  Error WriteRegField(const ControlTableItem<T>& item, const T value) {
+    return BusImpl::WriteRegField(item.reg, value);
   }
 };
 

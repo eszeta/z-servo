@@ -31,347 +31,418 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
  public:
   Error Init();
 
-  /*-------------------- EEPROM 区（掉电保存） --------------------*/
-  /**
-   * @brief 获取舵机型号
-   * @param model_number 舵机型号
-   * @return 错误码，成功返回OK
-   */
   Error GetModelNumber(uint16_t& model_number) {
-    CHECK(ReadRegField(ControlTable::kModelNumber.reg, model_number));
-    return Error::kOk;
+    return ReadRegField(ControlTable::kModelNumber, model_number);
   }
 
-  /**
-   * @brief 设置舵机型号
-   * @param model_number 舵机型号
-   * @return 错误码，成功返回OK
-   */
   Error SetModelNumber(const uint16_t model_number) {
-    CHECK(WriteRegField(ControlTable::kModelNumber.reg, model_number));
-    return Error::kOk;
+    return WriteRegField(ControlTable::kModelNumber, model_number);
   }
 
-  /**
-   * @brief 获取固件版本
-   * @param firmware_version 固件版本
-   * @return 错误码，成功返回OK
-   */
+  Error GetModelInformation(uint32_t& model_information) {
+    return ReadRegField(ControlTable::kModelInformation, model_information);
+  }
+
+  Error SetModelInformation(const uint32_t model_information) {
+    return WriteRegField(ControlTable::kModelInformation, model_information);
+  }
+
   Error GetFirmwareVersion(uint8_t& firmware_version) {
-    CHECK(ReadRegField(ControlTable::kFirmwareVersion.reg, firmware_version));
-    return Error::kOk;
+    return ReadRegField(ControlTable::kFirmwareVersion, firmware_version);
   }
 
-  /**
-   * @brief 设置固件版本
-   * @param firmware_version 固件版本
-   * @return 错误码，成功返回OK
-   */
   Error SetFirmwareVersion(const uint8_t firmware_version) {
-    CHECK(WriteRegField(ControlTable::kFirmwareVersion.reg, firmware_version));
-    return Error::kOk;
+    return WriteRegField(ControlTable::kFirmwareVersion, firmware_version);
   }
 
-  /**
-   * @brief 获取舵机ID
-   * @return 舵机ID
-   */
-  Error GetId(uint8_t& id) {
-    CHECK(ReadRegField(ControlTable::kId.reg, id));
-    return Error::kOk;
-  }
+  Error GetId(uint8_t& id) { return ReadRegField(ControlTable::kId, id); }
 
-  /**
-   * @brief 设置舵机ID
-   * @param id 舵机ID
-   * @return 错误码，成功返回OK
-   */
   Error SetId(const uint8_t id) {
-    CHECK(WriteRegField(ControlTable::kId.reg, id));
-    return Error::kOk;
+    return WriteRegField(ControlTable::kId, id);
   }
 
-  /**
-   * @brief 获取波特率
-   * @param baudrate 波特率
-   * @return 错误码，成功返回OK
-   */
-  Error GetBaudrate(uint32_t& baudrate) {
-    uint8_t baudrate_index = 0;
-    CHECK(ReadRegField(ControlTable::kBaudRate.reg, baudrate_index));
-    baudrate = kBaudrateTable[baudrate_index];
-    return Error::kOk;
+  Error GetBaudRate(uint8_t& baud_rate) {
+    return ReadRegField(ControlTable::kBaudRate, baud_rate);
   }
 
-  /**
-   * @brief 设置波特率
-   * @param baudrate 波特率
-   * @return 错误码，成功返回OK
-   */
-  Error SetBaudrate(const uint32_t baudrate) {
-    uint8_t baudrate_index = 0;
-    constexpr uint8_t baudrate_table_size =
-        sizeof(kBaudrateTable) / sizeof(kBaudrateTable[0]);
-    for (uint8_t i = 0; i < baudrate_table_size; i++) {
-      if (baudrate == kBaudrateTable[i]) {
-        baudrate_index = i;
-        break;
-      }
-    }
-    CHECK(WriteRegField(ControlTable::kBaudRate.reg, baudrate_index));
-    return Error::kOk;
+  Error SetBaudRate(const uint8_t baud_rate) {
+    return WriteRegField(ControlTable::kBaudRate, baud_rate);
   }
 
-  /**
-   * @brief 获取返回延时时间
-   * @param return_delay_time 返回延时时间
-   * @return 错误码，成功返回OK
-   */
   Error GetReturnDelayTime(uint8_t& return_delay_time) {
-    CHECK(ReadRegField(ControlTable::kReturnDelayTime.reg, return_delay_time));
-    return_delay_time *= 2;
-    return Error::kOk;
+    return ReadRegField(ControlTable::kReturnDelayTime, return_delay_time);
   }
 
-  /**
-   * @brief 设置返回延时时间
-   * @param return_delay_time 返回延时时间
-   * @return 错误码，成功返回OK
-   */
   Error SetReturnDelayTime(const uint8_t return_delay_time) {
-    CHECK(WriteRegField(ControlTable::kReturnDelayTime.reg,
-                        return_delay_time / 2));
-    return Error::kOk;
+    return WriteRegField(ControlTable::kReturnDelayTime, return_delay_time);
   }
 
-  /**
-   * @brief 获取顺时针角度限位
-   * @param cw_angle_limit 顺时针角度限位
-   * @return 错误码，成功返回OK
-   */
-  Error GetCwAngleLimit(uint16_t& cw_angle_limit) {
-    CHECK(ReadRegField(ControlTable::kCwAngleLimit.reg, cw_angle_limit));
-    return Error::kOk;
+  Error GetDriveMode(uint8_t& drive_mode) {
+    return ReadRegField(ControlTable::kDriveMode, drive_mode);
   }
 
-  /**
-   * @brief 设置顺时针角度限位
-   * @param cw_angle_limit 顺时针角度限位
-   * @return 错误码，成功返回OK
-   */
-  Error SetCwAngleLimit(const uint16_t cw_angle_limit) {
-    CHECK(WriteRegField(ControlTable::kCwAngleLimit.reg, cw_angle_limit));
-    return Error::kOk;
+  Error SetDriveMode(const uint8_t drive_mode) {
+    return WriteRegField(ControlTable::kDriveMode, drive_mode);
   }
 
-  /**
-   * @brief 获取逆时针角度限位
-   * @param ccw_angle_limit 逆时针角度限位
-   * @return 错误码，成功返回OK
-   */
-  Error GetCcwAngleLimit(uint16_t& ccw_angle_limit) {
-    CHECK(ReadRegField(ControlTable::kCcwAngleLimit.reg, ccw_angle_limit));
-    return Error::kOk;
+  Error GetOperatingMode(uint8_t& operating_mode) {
+    return ReadRegField(ControlTable::kOperatingMode, operating_mode);
   }
 
-  /**
-   * @brief 设置逆时针角度限位
-   * @param ccw_angle_limit 逆时针角度限位
-   * @return 错误码，成功返回OK
-   */
-  Error SetCcwAngleLimit(const uint16_t ccw_angle_limit) {
-    CHECK(WriteRegField(ControlTable::kCcwAngleLimit.reg, ccw_angle_limit));
-    return Error::kOk;
+  Error SetOperatingMode(const uint8_t operating_mode) {
+    return WriteRegField(ControlTable::kOperatingMode, operating_mode);
   }
 
-  /**
-   * @brief 获取温度限位
-   * @param temperature_limit 温度限位
-   * @return 错误码，成功返回OK
-   */
+  Error GetSecondaryId(uint8_t& secondary_id) {
+    return ReadRegField(ControlTable::kSecondaryId, secondary_id);
+  }
+
+  Error SetSecondaryId(const uint8_t secondary_id) {
+    return WriteRegField(ControlTable::kSecondaryId, secondary_id);
+  }
+
+  Error GetProtocolVersion(uint8_t& protocol_version) {
+    return ReadRegField(ControlTable::kProtocolVersion, protocol_version);
+  }
+
+  Error SetProtocolVersion(const uint8_t protocol_version) {
+    return WriteRegField(ControlTable::kProtocolVersion, protocol_version);
+  }
+
+  Error GetHomingOffset(uint32_t& homing_offset) {
+    return ReadRegField(ControlTable::kHomingOffset, homing_offset);
+  }
+
+  Error SetHomingOffset(const uint32_t homing_offset) {
+    return WriteRegField(ControlTable::kHomingOffset, homing_offset);
+  }
+
+  Error GetMovingThreshold(uint32_t& moving_threshold) {
+    return ReadRegField(ControlTable::kMovingThreshold, moving_threshold);
+  }
+
+  Error SetMovingThreshold(const uint32_t moving_threshold) {
+    return WriteRegField(ControlTable::kMovingThreshold, moving_threshold);
+  }
+
   Error GetTemperatureLimit(uint8_t& temperature_limit) {
-    CHECK(ReadRegField(ControlTable::kTemperatureLimit.reg, temperature_limit));
-    return Error::kOk;
+    return ReadRegField(ControlTable::kTemperatureLimit, temperature_limit);
   }
 
-  /**
-   * @brief 设置温度限位
-   * @param temperature_limit 温度限位
-   * @return 错误码，成功返回OK
-   */
   Error SetTemperatureLimit(const uint8_t temperature_limit) {
-    CHECK(
-        WriteRegField(ControlTable::kTemperatureLimit.reg, temperature_limit));
-    return Error::kOk;
+    return WriteRegField(ControlTable::kTemperatureLimit, temperature_limit);
   }
 
-  /**
-   * @brief 获取最低输入电压限位
-   * @param min_voltage_limit 最低输入电压限位
-   * @return 错误码，成功返回OK
-   */
-  Error GetMinVoltageLimit(uint8_t& min_voltage_limit) {
-    CHECK(ReadRegField(ControlTable::kMinVoltageLimit.reg, min_voltage_limit));
-    return Error::kOk;
+  Error GetMaxVoltageLimit(uint16_t& max_voltage_limit) {
+    return ReadRegField(ControlTable::kMaxVoltageLimit, max_voltage_limit);
   }
 
-  /**
-   * @brief 设置最低输入电压限位
-   * @param min_voltage_limit 最低输入电压限位
-   * @return 错误码，成功返回OK
-   */
-  Error SetMinVoltageLimit(const uint8_t min_voltage_limit) {
-    CHECK(WriteRegField(ControlTable::kMinVoltageLimit.reg, min_voltage_limit));
-    return Error::kOk;
+  Error SetMaxVoltageLimit(const uint16_t max_voltage_limit) {
+    return WriteRegField(ControlTable::kMaxVoltageLimit, max_voltage_limit);
   }
 
-  /**
-   * @brief 获取最高输入电压限位
-   * @param max_voltage_limit 最高输入电压限位
-   * @return 错误码，成功返回OK
-   */
-  Error GetMaxVoltageLimit(uint8_t& max_voltage_limit) {
-    CHECK(ReadRegField(ControlTable::kMaxVoltageLimit.reg, max_voltage_limit));
-    return Error::kOk;
+  Error GetMinVoltageLimit(uint16_t& min_voltage_limit) {
+    return ReadRegField(ControlTable::kMinVoltageLimit, min_voltage_limit);
   }
 
-  /**
-   * @brief 设置最高输入电压限位
-   * @param max_voltage_limit 最高输入电压限位
-   * @return 错误码，成功返回OK
-   */
-  Error SetMaxVoltageLimit(const uint8_t max_voltage_limit) {
-    CHECK(WriteRegField(ControlTable::kMaxVoltageLimit.reg, max_voltage_limit));
-    return Error::kOk;
+  Error SetMinVoltageLimit(const uint16_t min_voltage_limit) {
+    return WriteRegField(ControlTable::kMinVoltageLimit, min_voltage_limit);
   }
 
-  /**
-   * @brief 获取最大扭矩
-   * @param max_torque 最大扭矩
-   * @return 错误码，成功返回OK
-   */
-  Error GetMaxTorque(uint16_t& max_torque) {
-    CHECK(ReadRegField(ControlTable::kMaxTorque.reg, max_torque));
-    return Error::kOk;
+  Error GetPwmLimit(uint16_t& pwm_limit) {
+    return ReadRegField(ControlTable::kPwmLimit, pwm_limit);
   }
 
-  /**
-   * @brief 设置最大扭矩
-   * @param max_torque 最大扭矩
-   * @return 错误码，成功返回OK
-   */
-  Error SetMaxTorque(const uint16_t max_torque) {
-    CHECK(WriteRegField(ControlTable::kMaxTorque.reg, max_torque));
-    return Error::kOk;
+  Error SetPwmLimit(const uint16_t pwm_limit) {
+    return WriteRegField(ControlTable::kPwmLimit, pwm_limit);
   }
 
-  /**
-   * @brief 获取状态包返回级别
-   * @param return_level 状态包返回级别
-   * @return 错误码，成功返回OK
-   */
-  Error GetStatusReturnLevel(uint8_t& return_level) {
-    CHECK(ReadRegField(ControlTable::kStatusReturnLevel.reg, return_level));
-    return Error::kOk;
+  Error GetCurrentLimit(uint16_t& current_limit) {
+    return ReadRegField(ControlTable::kCurrentLimit, current_limit);
   }
 
-  /**
-   * @brief 设置状态包返回级别
-   * @param return_level 状态包返回级别
-   * @return 错误码，成功返回OK
-   */
-  Error SetStatusReturnLevel(const uint8_t return_level) {
-    CHECK(WriteRegField(ControlTable::kStatusReturnLevel.reg, return_level));
-    return Error::kOk;
+  Error SetCurrentLimit(const uint16_t current_limit) {
+    return WriteRegField(ControlTable::kCurrentLimit, current_limit);
   }
 
-  /**
-   * @brief 获取报警LED状态
-   * @param alarm_led 报警LED状态
-   * @return 错误码，成功返回OK
-   */
-  Error GetAlarmLed(uint8_t& alarm_led) {
-    CHECK(ReadRegField(ControlTable::kAlarmLed.reg, alarm_led));
-    return Error::kOk;
+  Error GetVelocityLimit(uint32_t& velocity_limit) {
+    return ReadRegField(ControlTable::kVelocityLimit, velocity_limit);
   }
 
-  /**
-   * @brief 设置报警LED状态
-   * @param alarm_led 报警LED状态
-   * @return 错误码，成功返回OK
-   */
-  Error SetAlarmLed(const uint8_t alarm_led) {
-    CHECK(WriteRegField(ControlTable::kAlarmLed.reg, alarm_led));
-    return Error::kOk;
+  Error SetVelocityLimit(const uint32_t velocity_limit) {
+    return WriteRegField(ControlTable::kVelocityLimit, velocity_limit);
   }
 
-  /**
-   * @brief 获取报警后关闸状态
-   * @param shutdown 报警后关闸状态
-   * @return 错误码，成功返回OK
-   */
+  Error GetMaxPositionLimit(uint32_t& max_position_limit) {
+    return ReadRegField(ControlTable::kMaxPositionLimit, max_position_limit);
+  }
+
+  Error SetMaxPositionLimit(const uint32_t max_position_limit) {
+    return WriteRegField(ControlTable::kMaxPositionLimit, max_position_limit);
+  }
+
+  Error GetMinPositionLimit(uint32_t& min_position_limit) {
+    return ReadRegField(ControlTable::kMinPositionLimit, min_position_limit);
+  }
+
+  Error SetMinPositionLimit(const uint32_t min_position_limit) {
+    return WriteRegField(ControlTable::kMinPositionLimit, min_position_limit);
+  }
+
   Error GetShutdown(uint8_t& shutdown) {
-    CHECK(ReadRegField(ControlTable::kShutdown.reg, shutdown));
-    return Error::kOk;
+    return ReadRegField(ControlTable::kShutdown, shutdown);
   }
 
-  /**
-   * @brief 设置报警后关闸状态
-   * @param shutdown 报警后关闸状态
-   * @return 错误码，成功返回OK
-   */
   Error SetShutdown(const uint8_t shutdown) {
-    CHECK(WriteRegField(ControlTable::kShutdown.reg, shutdown));
-    return Error::kOk;
-  }
-
-  /**
-   * @brief 获取多圈偏移
-   * @param multi_turn_offset 多圈偏移
-   * @return 错误码，成功返回OK
-   */
-  Error GetMultiTurnOffset(uint16_t& multi_turn_offset) {
-    CHECK(ReadRegField(ControlTable::kMultiTurnOffset.reg, multi_turn_offset));
-    return Error::kOk;
-  }
-  /**
-   * @brief 设置多圈偏移
-   * @param multi_turn_offset 多圈偏移
-   * @return 错误码，成功返回OK
-   */
-  Error SetMultiTurnOffset(const uint16_t multi_turn_offset) {
-    CHECK(WriteRegField(ControlTable::kMultiTurnOffset.reg, multi_turn_offset));
-    return Error::kOk;
-  }
-  /**
-   * @brief 获取分辨率分频
-   * @param resolution_divider 分辨率分频
-   * @return 错误码，成功返回OK
-   */
-  Error GetResolutionDivider(uint8_t& resolution_divider) {
-    CHECK(
-        ReadRegField(ControlTable::kResolutionDivider.reg, resolution_divider));
-    return Error::kOk;
-  }
-  /**
-   * @brief 设置分辨率分频
-   * @param resolution_divider 分辨率分频
-   * @return 错误码，成功返回OK
-   */
-  Error SetResolutionDivider(const uint8_t resolution_divider) {
-    CHECK(WriteRegField(ControlTable::kResolutionDivider.reg,
-                        resolution_divider));
-    return Error::kOk;
+    return WriteRegField(ControlTable::kShutdown, shutdown);
   }
 
   /*-------------------- RAM 区（掉电丢失） --------------------*/
 
-  // Protocol 接口实现（CRTP 模式）
-  Error GetServoIdImpl(uint8_t& id) { return GetId(id); }
-  Error GetReturnLevelImpl(uint8_t& return_level) {
-    return GetStatusReturnLevel(return_level);
+  Error GetTorqueEnable(uint8_t& torque_enable) {
+    return ReadRegField(ControlTable::kTorqueEnable, torque_enable);
   }
-  Error GetStatusImpl(uint8_t& status);
+
+  Error SetTorqueEnable(const uint8_t torque_enable) {
+    return WriteRegField(ControlTable::kTorqueEnable, torque_enable);
+  }
+
+  Error GetDxlLed(uint8_t& dxl_led) {
+    return ReadRegField(ControlTable::kDxlLed, dxl_led);
+  }
+
+  Error SetDxlLed(const uint8_t dxl_led) {
+    return WriteRegField(ControlTable::kDxlLed, dxl_led);
+  }
+
+  Error GetStatusReturnLevel(uint8_t& status_return_level) {
+    return ReadRegField(ControlTable::kStatusReturnLevel, status_return_level);
+  }
+
+  Error SetStatusReturnLevel(const uint8_t status_return_level) {
+    return WriteRegField(ControlTable::kStatusReturnLevel, status_return_level);
+  }
+
+  Error GetRegisteredInstruction(uint8_t& registered_instruction) {
+    return ReadRegField(ControlTable::kRegisteredInstruction, registered_instruction);
+  }
+
+  Error SetRegisteredInstruction(const uint8_t registered_instruction) {
+    return WriteRegField(ControlTable::kRegisteredInstruction, registered_instruction);
+  }
+
+  Error GetHardwareErrorStatus(uint8_t& hardware_error_status) {
+    return ReadRegField(ControlTable::kHardwareErrorStatus, hardware_error_status);
+  }
+
+  Error SetHardwareErrorStatus(const uint8_t hardware_error_status) {
+    return WriteRegField(ControlTable::kHardwareErrorStatus, hardware_error_status);
+  }
+
+  Error GetVelocityIgain(uint16_t& velocity_igain) {
+    return ReadRegField(ControlTable::kVelocityIgain, velocity_igain);
+  }
+
+  Error SetVelocityIgain(const uint16_t velocity_igain) {
+    return WriteRegField(ControlTable::kVelocityIgain, velocity_igain);
+  }
+
+  Error GetVelocityPgain(uint16_t& velocity_pgain) {
+    return ReadRegField(ControlTable::kVelocityPgain, velocity_pgain);
+  }
+
+  Error SetVelocityPgain(const uint16_t velocity_pgain) {
+    return WriteRegField(ControlTable::kVelocityPgain, velocity_pgain);
+  }
+
+  Error GetPositionDgain(uint16_t& position_dgain) {
+    return ReadRegField(ControlTable::kPositionDgain, position_dgain);
+  }
+
+  Error SetPositionDgain(const uint16_t position_dgain) {
+    return WriteRegField(ControlTable::kPositionDgain, position_dgain);
+  }
+
+  Error GetPositionIgain(uint16_t& position_igain) {
+    return ReadRegField(ControlTable::kPositionIgain, position_igain);
+  }
+
+  Error SetPositionIgain(const uint16_t position_igain) {
+    return WriteRegField(ControlTable::kPositionIgain, position_igain);
+  }
+
+  Error GetPositionPgain(uint16_t& position_pgain) {
+    return ReadRegField(ControlTable::kPositionPgain, position_pgain);
+  }
+
+  Error SetPositionPgain(const uint16_t position_pgain) {
+    return WriteRegField(ControlTable::kPositionPgain, position_pgain);
+  }
+
+  Error GetFeedforward2ndGain(uint16_t& feedforward_2nd_gain) {
+    return ReadRegField(ControlTable::kFeedforward2ndGain, feedforward_2nd_gain);
+  }
+
+  Error SetFeedforward2ndGain(const uint16_t feedforward_2nd_gain) {
+    return WriteRegField(ControlTable::kFeedforward2ndGain, feedforward_2nd_gain);
+  }
+
+  Error GetFeedforward1stGain(uint16_t& feedforward_1st_gain) {
+    return ReadRegField(ControlTable::kFeedforward1stGain, feedforward_1st_gain);
+  }
+
+  Error SetFeedforward1stGain(const uint16_t feedforward_1st_gain) {
+    return WriteRegField(ControlTable::kFeedforward1stGain, feedforward_1st_gain);
+  }
+
+  Error GetBusWatchdog(uint8_t& bus_watchdog) {
+    return ReadRegField(ControlTable::kBusWatchdog, bus_watchdog);
+  }
+
+  Error SetBusWatchdog(const uint8_t bus_watchdog) {
+    return WriteRegField(ControlTable::kBusWatchdog, bus_watchdog);
+  }
+
+  Error GetGoalPwm(uint16_t& goal_pwm) {
+    return ReadRegField(ControlTable::kGoalPwm, goal_pwm);
+  }
+
+  Error SetGoalPwm(const uint16_t goal_pwm) {
+    return WriteRegField(ControlTable::kGoalPwm, goal_pwm);
+  }
+
+  Error GetGoalCurrent(uint16_t& goal_current) {
+    return ReadRegField(ControlTable::kGoalCurrent, goal_current);
+  }
+
+  Error SetGoalCurrent(const uint16_t goal_current) {
+    return WriteRegField(ControlTable::kGoalCurrent, goal_current);
+  }
+
+  Error GetGoalVelocity(uint32_t& goal_velocity) {
+    return ReadRegField(ControlTable::kGoalVelocity, goal_velocity);
+  }
+
+  Error SetGoalVelocity(const uint32_t goal_velocity) {
+    return WriteRegField(ControlTable::kGoalVelocity, goal_velocity);
+  }
+
+  Error GetProfileAcceleration(uint32_t& profile_acceleration) {
+    return ReadRegField(ControlTable::kProfileAcceleration, profile_acceleration);
+  }
+
+  Error SetProfileAcceleration(const uint32_t profile_acceleration) {
+    return WriteRegField(ControlTable::kProfileAcceleration, profile_acceleration);
+  }
+
+  Error GetProfileVelocity(uint32_t& profile_velocity) {
+    return ReadRegField(ControlTable::kProfileVelocity, profile_velocity);
+  }
+
+  Error SetProfileVelocity(const uint32_t profile_velocity) {
+    return WriteRegField(ControlTable::kProfileVelocity, profile_velocity);
+  }
+
+  Error GetGoalPosition(uint32_t& goal_position) {
+    return ReadRegField(ControlTable::kGoalPosition, goal_position);
+  }
+
+  Error SetGoalPosition(const uint32_t goal_position) {
+    return WriteRegField(ControlTable::kGoalPosition, goal_position);
+  }
+
+  Error GetRealtimeTick(uint16_t& realtime_tick) {
+    return ReadRegField(ControlTable::kRealtimeTick, realtime_tick);
+  }
+
+  Error SetRealtimeTick(const uint16_t realtime_tick) {
+    return WriteRegField(ControlTable::kRealtimeTick, realtime_tick);
+  }
+
+  Error GetMoving(uint8_t& moving) {
+    return ReadRegField(ControlTable::kMoving, moving);
+  }
+
+  Error SetMoving(const uint8_t moving) {
+    return WriteRegField(ControlTable::kMoving, moving);
+  }
+
+  Error GetMovingStatus(uint8_t& moving_status) {
+    return ReadRegField(ControlTable::kMovingStatus, moving_status);
+  }
+
+  Error SetMovingStatus(const uint8_t moving_status) {
+    return WriteRegField(ControlTable::kMovingStatus, moving_status);
+  }
+
+  Error GetPresentPwm(uint16_t& present_pwm) {
+    return ReadRegField(ControlTable::kPresentPwm, present_pwm);
+  }
+
+  Error SetPresentPwm(const uint16_t present_pwm) {
+    return WriteRegField(ControlTable::kPresentPwm, present_pwm);
+  }
+
+  Error GetPresentCurrent(uint16_t& present_current) {
+    return ReadRegField(ControlTable::kPresentCurrent, present_current);
+  }
+
+  Error SetPresentCurrent(const uint16_t present_current) {
+    return WriteRegField(ControlTable::kPresentCurrent, present_current);
+  }
+
+  Error GetPresentVelocity(uint32_t& present_velocity) {
+    return ReadRegField(ControlTable::kPresentVelocity, present_velocity);
+  }
+
+  Error SetPresentVelocity(const uint32_t present_velocity) {
+    return WriteRegField(ControlTable::kPresentVelocity, present_velocity);
+  }
+
+  Error GetPresentPosition(uint32_t& present_position) {
+    return ReadRegField(ControlTable::kPresentPosition, present_position);
+  }
+
+  Error SetPresentPosition(const uint32_t present_position) {
+    return WriteRegField(ControlTable::kPresentPosition, present_position);
+  }
+
+  Error GetVelocityTrajectory(uint32_t& velocity_trajectory) {
+    return ReadRegField(ControlTable::kVelocityTrajectory, velocity_trajectory);
+  }
+
+  Error SetVelocityTrajectory(const uint32_t velocity_trajectory) {
+    return WriteRegField(ControlTable::kVelocityTrajectory, velocity_trajectory);
+  }
+
+  Error GetPositionTrajectory(uint32_t& position_trajectory) {
+    return ReadRegField(ControlTable::kPositionTrajectory, position_trajectory);
+  }
+
+  Error SetPositionTrajectory(const uint32_t position_trajectory) {
+    return WriteRegField(ControlTable::kPositionTrajectory, position_trajectory);
+  }
+
+  Error GetPresentInputVoltage(uint16_t& present_input_voltage) {
+    return ReadRegField(ControlTable::kPresentInputVoltage, present_input_voltage);
+  }
+
+  Error SetPresentInputVoltage(const uint16_t present_input_voltage) {
+    return WriteRegField(ControlTable::kPresentInputVoltage, present_input_voltage);
+  }
+
+  Error GetPresentTemperature(uint8_t& present_temperature) {
+    return ReadRegField(ControlTable::kPresentTemperature, present_temperature);
+  }
+
+  Error SetPresentTemperature(const uint8_t present_temperature) {
+    return WriteRegField(ControlTable::kPresentTemperature, present_temperature);
+  }
+
+  // Protocol 接口实现（CRTP 模式）
+  Error ServoIdImpl(uint8_t& id);
+  Error ReturnLevelImpl(uint8_t& return_level);
+  Error StatusImpl(uint8_t& status);
   Error RecoveryEepromImpl();
   Error LoadEepromImpl();
   Error StoreEepromImpl();

@@ -57,7 +57,7 @@
 //                      const uint8_t *parameter,
 //                      const size_t parameter_size) {
 //   const auto id = accessor_->GetId();
-//   const auto status = accessor_->GetStatus();
+//   const auto status = accessor_->Status();
 //   CHECK(protocol_.CreateResponse(
 //       id, status, parameter, parameter_size, status_packet_));
 //   CHECK(port_->Response(status_packet_, reply_idx));
