@@ -20,7 +20,7 @@ namespace hortor::drivers::MA330 {
 
 Error MA330::InitSPI(SPIClass *spi, const uint8_t cs_pin) {
   CHECK(regmap_.Init(spi, cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
-  servo::Encoder<MA330>::Init();
+  servo::Encoder<MA330, kResolutionBits>::Init();
   return Error::kOk;
 }
 

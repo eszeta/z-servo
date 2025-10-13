@@ -17,22 +17,22 @@
 #include <Arduino.h>
 namespace hortor::math {
 
+template <uint8_t Bits>
 struct Resolution {
  public:
-  constexpr explicit Resolution(uint8_t resolution_bits)
-      : kBits(resolution_bits) {}
+  constexpr explicit Resolution() {}
   /** @brief 目标分辨率（位数），决定了传感器的精度和量程 */
-  const uint8_t kBits;
+  static constexpr uint8_t kBits = Bits;
   /** @brief Counts Per Revolution */
-  const uint16_t kEncoderCpr = (1 << kBits);
+  static constexpr uint16_t kEncoderCpr = (1 << kBits);
   /** @brief 角度到计数值的转换系数，用于将角度转换为计数值 */
-  const float kAngleToRaw = kEncoderCpr / 360.0f;
+  static constexpr float kAngleToRaw = kEncoderCpr / 360.0f;
   /** @brief 弧度到计数值的转换系数，用于将弧度转换为计数值 */
-  const float kRadianToRaw = kEncoderCpr / TWO_PI;
+  static constexpr float kRadianToRaw = kEncoderCpr / TWO_PI;
   /** @brief 计数值到角度的转换系数，用于将计数值转换为角度 */
-  const float kRawToAngle = 360.0f / kEncoderCpr;
+  static constexpr float kRawToAngle = 360.0f / kEncoderCpr;
   /** @brief 计数值到弧度的转换系数，用于将计数值转换为弧度 */
-  const float kRawToRadian = TWO_PI / kEncoderCpr;
+  static constexpr float kRawToRadian = TWO_PI / kEncoderCpr;
 };
 
 }  // namespace hortor::math

@@ -38,35 +38,18 @@ namespace hortor::servo {
  * @tparam EncoderType 编码器传感器类型，必须继承自 Encoder<EncoderType>
  * @tparam CurrentType 电流传感器类型，必须继承自 Current<CurrentType>
  */
-template <typename MotorType, typename EncoderType, typename CurrentType>
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
+          uint8_t ResolutionBits>
 class Servo {
  public:
+  /** @brief 舵机分辨率（位数），决定了舵机的精度和量程 */
+  static constexpr math::Resolution<ResolutionBits> kResolution{};
   /**
    * @brief 默认构造函数
    */
-  Servo(uint8_t resolution_bits)
-      : kResolution(resolution_bits), encoder_pll_(resolution_bits) {}
-
-  /**
-   * @brief 初始化舵机
-   */
-  Error Init();
-
-  /**
-   * @brief 处理舵机逻辑
-   * @param dt 时间间隔(秒)
-   * @return 错误码
-   */
-  Error Process(float dt);
-
-  /**
-   * @brief 电机刹车
-   */
-  void Break();
-  /**
-   * @brief 电机滑行
-   */
-  void Coast();
+  Servo() {}
 
   /**
    * @brief 获取角度传感器
@@ -78,539 +61,289 @@ class Servo {
 
   MotorType &GetMotor() { return motor_; }
 
-  /**
-   * @brief 获取当前位置
-   * @return 当前位置值
-   */
-  float GetPresentPosition() { return present_position_; }
-  /**
-   * @brief 获取当前速度
-   * @return 当前速度值
-   */
-  float GetPresentVelocity() { return present_velocity_; }
-  /**
-   * @brief 获取当前负载
-   * @return 当前负载值
-   */
-  float GetPresentLoad() { return present_load_; }
-  /**
-   * @brief 获取当前电压
-   * @return 当前电压值
-   */
-  float GetPresentVoltage() { return present_voltage_; }
-  /**
-   * @brief 获取当前温度
-   * @return 当前温度值
-   */
-  float GetPresentTemperature() { return present_temperature_; }
-  /**
-   * @brief 获取当前电流
-   * @return 当前电流值
-   */
-  float GetPresentCurrent() { return present_current_; }
-  /**
-   * @brief 获取错误状态
-   * @return 错误状态值
-   */
-  uint8_t GetErrorStatus() { return error_status_; }
-  /**
-   * @brief 获取运动状态
-   * @return 是否在运动
-   */
-  bool GetMoving() { return moving_; }
-  /**
-   * @brief 获取舵机模式
-   * @return 舵机模式
-   */
-  ServoMode GetMode() { return mode_; }
-  /**
-   * @brief 获取位置PID控制器
-   * @return 位置PID控制器引用
-   */
-  math::PidController &GetPosPid() { return pos_pid_; }
-  /**
-   * @brief 获取速度PID控制器
-   * @return 速度PID控制器引用
-   */
-  math::PidController &GetVelPid() { return velocity_pid_; }
-  /**
-   * @brief 获取电流低通滤波器
-   * @return 电流低通滤波器引用
-   */
-  math::LowPassFilter &GetCurrentLpf() { return current_lpf_; }
-
-  /**
-   * @brief 设置舵机模式
-   * @param mode 舵机模式
-   */
-  void SetMode(ServoMode mode) { mode_ = mode; }
-  /**
-   * @brief 设置最小位置
-   * @param min_position 最小位置值
-   */
-  void SetMinPosition(uint16_t min_position) { min_position_ = min_position; }
-  /**
-   * @brief 设置最大位置
-   * @param max_position 最大位置值
-   */
-  void SetMaxPosition(uint16_t max_position) { max_position_ = max_position; }
-  /**
-   * @brief 设置最大温度
-   * @param max_temperature 最大温度值
-   */
-  void SetMaxTemperature(uint8_t max_temperature) {
-    max_temperature_ = max_temperature;
-  }
-  /**
-   * @brief 设置最大电压
-   * @param max_voltage 最大电压值
-   */
-  void SetMaxVoltage(float max_voltage) { max_voltage_ = max_voltage; }
-  /**
-   * @brief 设置最小电压
-   * @param min_voltage 最小电压值
-   */
-  void SetMinVoltage(float min_voltage) { min_voltage_ = min_voltage; }
-  /**
-   * @brief 设置最大扭矩
-   * @param max_torque 最大扭矩值
-   */
-  void SetMaxTorque(float max_torque) { max_torque_ = max_torque; }
-  /**
-   * @brief 设置最小启动力
-   * @param min_startup_force 最小启动力值
-   */
-  void SetMinStartupForce(float min_startup_force) {
-    min_startup_force_ = min_startup_force;
-  }
-  /**
-   * @brief 设置顺时针不敏感区域
-   * @param cw_insensitive_area 顺时针不敏感区域值
-   */
-  void SetCWInsensitiveArea(uint8_t cw_insensitive_area) {
-    cw_insensitive_area_ = cw_insensitive_area;
-  }
-  /**
-   * @brief 设置逆时针不敏感区域
-   * @param ccw_insensitive_area 逆时针不敏感区域值
-   */
-  void SetCCWInsensitiveArea(uint8_t ccw_insensitive_area) {
-    ccw_insensitive_area_ = ccw_insensitive_area;
-  }
-  /**
-   * @brief 设置角度分辨率
-   * @param angular_resolution 角度分辨率值
-   */
-  void SetAngularResolution(uint8_t angular_resolution) {
-    angular_resolution_ = angular_resolution;
-  }
-  /**
-   * @brief 设置位置校正
-   * @param position_correction 位置校正值
-   */
-  void SetPositionCorrection(int16_t position_correction) {
-    position_correction_ = position_correction;
-  }
-  /**
-   * @brief 设置电流保护阈值
-   * @param current_protection_threshold 电流保护阈值
-   */
-  void SetCurrentProtectionThreshold(float current_protection_threshold) {
-    current_protection_threshold_ = current_protection_threshold;
-  }
-  /**
-   * @brief 设置过流保护时间
-   * @param overcurrent_protection_time 过流保护时间
-   */
-  void SetOvercurrentProtectionTime(uint16_t overcurrent_protection_time) {
-    overcurrent_protection_time_ = overcurrent_protection_time;
-  }
-  /**
-   * @brief 设置扭矩保护阈值
-   * @param torque_protection_threshold 扭矩保护阈值
-   */
-  void SetTorqueProtectionThreshold(float torque_protection_threshold) {
-    torque_protection_threshold_ = torque_protection_threshold;
-  }
-  /**
-   * @brief 设置扭矩保护时间
-   * @param torque_protection_time 扭矩保护时间
-   */
-  void SetTorqueProtectionTime(uint16_t torque_protection_time) {
-    torque_protection_time_ = torque_protection_time;
-  }
-  /**
-   * @brief 设置过载扭矩
-   * @param overload_torque 过载扭矩值
-   */
-  void SetOverloadTorque(float overload_torque) {
-    overload_torque_ = overload_torque;
-  }
-
-  /**
-   * @brief 设置传感器方向
-   * @param sensor_direction 传感器方向
-   */
-  void SetSensorDirection(Direction sensor_direction) {
-    encoder_direction_ = sensor_direction;
-  }
-  /**
-   * @brief 设置电机方向
-   * @param motor_direction 电机方向
-   */
-  void SetMotorDirection(Direction motor_direction) {
-    motor_direction_ = motor_direction;
-  }
-
-  /**
-   * @brief 设置扭矩使能
-   * @param torque_enable 是否使能扭矩
-   */
-  void SetTorqueEnable(bool torque_enable) { torque_enable_ = torque_enable; }
-  /**
-   * @brief 设置目标加速度
-   * @param goal_acceleration 目标加速度值
-   */
-  void SetGoalAcceleration(float goal_acceleration) {
-    goal_acceleration_ = goal_acceleration;
-  }
+  // ========== 位置控制接口 ==========
   /**
    * @brief 设置目标位置
-   * @param goal_position 目标位置值
+   * @param position 目标位置（pulse）
    */
-  void SetGoalPosition(float goal_position) { goal_position_ = goal_position; }
+  void SetGoalPosition(int32_t position) { goal_position_ = position; }
+
   /**
    * @brief 获取目标位置
-   * @return 目标位置值
+   * @return 目标位置（pulse）
    */
-  float GetGoalPosition() { return goal_position_; }
-  /**
-   * @brief 设置目标时间
-   * @param target_time 目标时间值
-   */
-  void SetGoalTime(int16_t goal_time) { goal_time_ = goal_time; }
-  /**
-   * @brief 设置目标PWM
-   * @param target_pwm 目标PWM值
-   */
-  void SetGoalPwm(float goal_pwm) { goal_pwm_ = goal_pwm; }
-  /**
-   * @brief 设置目标速度
-   * @param target_velocity 目标速度值
-   */
-  void SetGoalVelocity(float goal_velocity) { goal_velocity_ = goal_velocity; }
-  /**
-   * @brief 设置扭矩限制
-   * @param torque_limit 扭矩限制值
-   */
-  void SetTorqueLimit(float torque_limit) { torque_limit_ = torque_limit; }
+  int32_t GetGoalPosition() const { return goal_position_; }
 
-  /** @brief 舵机分辨率（位数），决定了舵机的精度和量程 */
-  const math::Resolution kResolution;
-
- private:
   /**
-   * @brief 刷新当前变量
+   * @brief 设置位置下限
+   * @param limit 位置下限（pulse）
+   */
+  void SetMinPositionLimit(uint32_t limit) { min_position_limit_ = limit; }
+
+  /**
+   * @brief 设置位置上限
+   * @param limit 位置上限（pulse）
+   */
+  void SetMaxPositionLimit(uint32_t limit) { max_position_limit_ = limit; }
+
+  // ========== PID 参数接口 ==========
+  /**
+   * @brief 设置位置环 PID 参数
+   * @param kp 比例增益（已转换）
+   * @param ki 积分增益（已转换）
+   * @param kd 微分增益（已转换）
+   */
+  void SetPositionPID(float kp, float ki, float kd) {
+    position_pid_.SetKp(kp);
+    position_pid_.SetKi(ki);
+    position_pid_.SetKd(kd);
+  }
+
+  /**
+   * @brief 设置速度环 PI 参数
+   * @param kp 比例增益（已转换）
+   * @param ki 积分增益（已转换）
+   */
+  void SetVelocityPI(float kp, float ki) {
+    velocity_pid_.SetKp(kp);
+    velocity_pid_.SetKi(ki);
+  }
+
+  /**
+   * @brief 设置前馈增益
+   * @param ff1 一阶前馈（速度）
+   * @param ff2 二阶前馈（加速度）
+   */
+  void SetFeedforwardGain(float ff1, float ff2) {
+    feedforward_1st_gain_ = ff1;
+    feedforward_2nd_gain_ = ff2;
+  }
+
+  // ========== 轨迹反馈接口 ==========
+  /**
+   * @brief 获取位置轨迹
+   * @return 位置轨迹（pulse）
+   */
+  int32_t GetPositionTrajectory() const { return position_trajectory_; }
+
+  /**
+   * @brief 获取速度轨迹
+   * @return 速度轨迹（counts/s）
+   */
+  float GetVelocityTrajectory() const { return velocity_trajectory_; }
+
+  /**
+   * @brief 获取运动状态
+   * @return 运动状态位域
+   */
+  uint8_t GetMovingStatus() const { return moving_status_.value_; }
+
+  /**
+   * @brief 初始化舵机
+   */
+  Error Init() { return Error::kOk; }
+
+  /**
+   * @brief 处理舵机逻辑
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  Error RefreshPresentVariables(float dt);
-  /**
-   * @brief 设置电机功率
-   * @param pwm PWM值
-   */
-  void SetPower(const float pwm);
-  /**
-   * @brief 检查是否到达目标位置
-   * @param pos_error 位置误差
-   * @return 是否到达目标位置
-   */
-  bool IsPositionReached(int16_t pos_error);
+  Error Process(float dt) {
+    CHECK(RefreshPresent(dt));
+    if (!enabled_) {
+      return Error::kOk;
+    }
+    switch (operating_mode_) {
+      case OperatingMode::kCurrent: {
+        /* code */
+        break;
+      }
+      case OperatingMode::kVelocity: {
+        /* code */
+        break;
+      }
+      case OperatingMode::kPosition: {
+        /* code */
+        break;
+      }
+      case OperatingMode::kExtendedPosition: {
+        /* code */
+        break;
+      }
+      case OperatingMode::kCurrentPosition: {
+        /* code */
+        break;
+      }
+      case OperatingMode::kPwm: {
+        /* code */
+        break;
+      }
+      default:
+        return Error::kModeNotSupport;
+        break;
+    }
+    return Error::kOk;
+  }
 
-  /**
-   * @brief 获取编码器基类引用（IDE 类型提示用）
-   */
-  Encoder<EncoderType> &EncoderBase() { return encoder_; }
-
-  /**
-   * @brief 获取电流传感器基类引用（IDE 类型提示用）
-   */
-  Current<CurrentType> &CurrentSenseBase() { return current_sense_; }
-
-  /**
-   * @brief 获取电机基类引用（IDE 类型提示用）
-   */
-  Motor<MotorType> &MotorBase() { return motor_; }
-
+ private:
   /** @brief 舵机使能状态 */
   bool enabled_ = true;
   /** @brief 扭矩使能状态 */
   bool torque_enable_ = false;
 
-  /** @brief 目标加速度 */
-  float goal_acceleration_ = 0.0f;
-  /** @brief 目标位置 */
-  float goal_position_ = 0.0f;
-  /** @brief 目标时间 */
-  int16_t goal_time_ = 0;
-  /** @brief 目标速度 */
-  float goal_velocity_ = 0.0f;
-  /** @brief 目标PWM */
-  float goal_pwm_ = 0.0f;
-  /** @brief 扭矩限制 */
-  float torque_limit_ = 0.0f;
+  /** @brief 驱动模式 */
+  union DriveMode {
+    uint8_t value_ = 0;
+    struct {
+      bool reverse_mode_ : 1;           // 位0
+      bool reserved_bit1_ : 1;          // 位1 - 保留
+      bool profile_configuration_ : 1;  // 位2
+      bool reserved_bits3_7_ : 5;       // 位3-7 - 保留（5位）
+    };
+  };
 
-  /** @brief 当前位置 */
-  float present_position_ = 0.0f;
-  /** @brief 当前速度 */
-  float present_velocity_ = 0.0f;
-  /** @brief 当前负载 */
-  float present_load_ = 0.0f;
-  /** @brief 当前电压 */
-  float present_voltage_ = 0.0f;
-  /** @brief 当前电流 */
-  float present_current_ = 0.0f;
-  /** @brief 当前温度 */
-  uint8_t present_temperature_ = 0;
-
-  /** @brief 错误状态 */
-  uint8_t error_status_ = 0;
-  /** @brief 运动状态 */
-  bool moving_ = false;
+  union MovingStatus {
+    uint8_t value_ = 0;
+    struct {
+      bool in_position : 1;          // 位0: 已到达目标位置
+      bool profile_ongoing : 1;      // 位1: 轨迹进行中
+      bool reserved_bit2 : 1;        // 位2: 保留
+      bool following_error : 1;      // 位3: 跟随误差
+      uint8_t velocity_profile : 2;  // 位4-5: 速度轨迹类型 (
+                                     //   00=Step,
+                                     //   01=Rect,
+                                     //   10=Tri,
+                                     //   11=Trap)
+      uint8_t reserved_bits6_7 : 2;  // 位6-7: 保留
+    };
+  };
 
   /** @brief 舵机模式 */
-  ServoMode mode_ = ServoMode::kPosition;
-
-  /** @brief 最小位置限制 */
-  uint16_t min_position_ = 0;
-  /** @brief 最大位置限制 */
-  uint16_t max_position_ = 0;
-  /** @brief 最大温度限制 */
-  uint8_t max_temperature_ = 0;
-  /** @brief 最大电压限制 */
-  float max_voltage_ = 0.0f;
-  /** @brief 最小电压限制 */
-  float min_voltage_ = 0.0f;
-  /** @brief 最大扭矩限制 */
-  float max_torque_ = 0.0f;
-  /** @brief 最小启动力 */
-  float min_startup_force_ = 0.0f;
-
-  /** @brief 顺时针不敏感区域 */
-  uint8_t cw_insensitive_area_ = 0;
-  /** @brief 逆时针不敏感区域 */
-  uint8_t ccw_insensitive_area_ = 0;
-  /** @brief 角度分辨率 */
-  uint8_t angular_resolution_ = 0;
-  /** @brief 位置校正值 */
-  int16_t position_correction_ = 0;
-
-  /** @brief 电流保护阈值 */
-  float current_protection_threshold_ = 0.0f;
-  /** @brief 过流保护时间 */
-  uint16_t overcurrent_protection_time_ = 0;
-
-  /** @brief 扭矩保护阈值 */
-  float torque_protection_threshold_ = 0.0f;
-  /** @brief 扭矩保护时间 */
-  uint16_t torque_protection_time_ = 0;
-
-  /** @brief 过载扭矩 */
-  float overload_torque_ = 0.0f;
-
-  /** @brief 速度比例增益 */
-  float velocity_proportional_gain_ = 0.0f;
-  /** @brief 速度积分增益 */
-  float velocity_integral_gain_ = 0.0f;
-
-  /** @brief 位置PID控制器 */
-  math::PidController pos_pid_{
-      {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 0.0f}};
-  /** @brief 速度PID控制器（ServoMode::kSpeed模式专用） */
-  math::PidController velocity_pid_{
-      {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .ff = 0.0f, .limit = 1.0f}};
+  OperatingMode operating_mode_ = OperatingMode::kPosition;
 
   /** @brief 传感器方向 */
   Direction encoder_direction_ = Direction::CCW;
   /** @brief 电机方向 */
   Direction motor_direction_ = Direction::CW;
 
+  /** @brief 当前位置 */
+  uint32_t present_position_ = 0;
+  /** @brief 当前速度 */
+  uint32_t present_velocity_ = 0;
+  /** @brief 当前电流（XL330用电流表示负载） */
+  float present_current_ = 0.0f;
+  /** @brief 当前输入电压 */
+  float present_input_voltage_ = 0.0f;
+  /** @brief 当前温度 */
+  float present_temperature_ = 0.0f;
+  /** @brief 当前PWM */
+  float present_pwm_ = 0.0f;
+
   /** @brief 电流低通滤波器 */
   math::LowPassFilter current_lpf_;
 
-  /** @brief 电机驱动器指针 */
+  // ========== 传感器与电机相关==========
+  /** @brief 电机驱动器 */
   MotorType motor_;
-  /** @brief 角度传感器指针 */
+  /** @brief 角度传感器 */
   EncoderType encoder_;
   /** @brief 编码器PLL */
-  math::EncoderPll encoder_pll_;
-  /** @brief 电流传感器指针 */
+  math::EncoderPll<ResolutionBits> encoder_pll_{};
+  /** @brief 电流传感器 */
   CurrentType current_sense_;
-};
 
-// =============================================================================
-// 模板实现
-// =============================================================================
-/**
- * @brief 初始化舵机
- */
-template <typename MotorType, typename EncoderType, typename CurrentType>
-Error Servo<MotorType, EncoderType, CurrentType>::Init() {
-  return Error::kOk;
-}
+  // ========== 位置控制相关 ==========
+  /** @brief 目标位置 */
+  int32_t goal_position_ = 0;
+  /** @brief 位置下限 */
+  uint32_t min_position_limit_ = 0;
+  /** @brief 位置上限 */
+  uint32_t max_position_limit_ = 4095;
 
-/**
- * @brief 处理舵机逻辑
- * @param dt 时间间隔(秒)
- */
-template <typename MotorType, typename EncoderType, typename CurrentType>
-Error Servo<MotorType, EncoderType, CurrentType>::Process(float dt) {
-  CHECK(RefreshPresentVariables(dt));
+  // ========== Profile 参数 ==========
+  /** @brief 轨迹速度（RPM，Velocity-based 模式） */
+  float profile_velocity_ = 0.0f;
+  /** @brief 轨迹加速度（rev/min²，Velocity-based 模式） */
+  float profile_acceleration_ = 0.0f;
 
-  if (!enabled_) {
+  // ========== PID 控制器 ==========
+  /** @brief 位置环 PID 控制器 */
+  math::PidController position_pid_{{.kp = 0.0f,
+                                     .ki = 0.0f,
+                                     .kd = 0.0f,
+                                     .ff = 0.0f,
+                                     .i_limit = 0.0f,
+                                     .limit = 0.0f}};
+  /** @brief 速度环 PID 控制器 */
+  math::PidController velocity_pid_{{.kp = 0.0f,
+                                     .ki = 0.0f,
+                                     .kd = 0.0f,
+                                     .ff = 0.0f,
+                                     .i_limit = 0.0f,
+                                     .limit = 0.0f}};
+
+  // ========== 前馈增益 ==========
+  /** @brief 一阶前馈增益（速度前馈，已转换为浮点数） */
+  float feedforward_1st_gain_ = 0.0f;
+  /** @brief 二阶前馈增益（加速度前馈，已转换为浮点数） */
+  float feedforward_2nd_gain_ = 0.0f;
+
+  // ========== 轨迹输出（用于状态反馈和调试） ==========
+  /** @brief 位置轨迹（Profile 生成的期望位置） */
+  int32_t position_trajectory_ = 0;
+  /** @brief 速度轨迹（Position PID 输出或 Profile 生成的期望速度） */
+  float velocity_trajectory_ = 0.0f;
+
+  // ========== 运动状态 ==========
+  /** @brief 运动状态位域 */
+  MovingStatus moving_status_{};
+  /** @brief 驱动模式配置 */
+  DriveMode drive_mode_{};
+
+  /**
+   * @brief 刷新当前变量
+   * @param dt 时间间隔(秒)
+   * @return 错误码
+   */
+  Error RefreshPresent(float dt) {
+    // 处理编码器
+    CHECK(encoder_.Process(dt));
+    // 处理编码器PLL
+    CHECK(encoder_pll_.Process(
+        dt, encoder_.GetPosCounts(), encoder_.kResolution.kBits));
+
+    // 获取当前位置
+    const auto direction = static_cast<float>(encoder_direction_);
+    present_position_ = encoder_pll_.Pulse() * direction;
+
+    // 获取当前速度
+    present_velocity_ = encoder_pll_.GetRpm() * direction;
+
+    // 获取当前电流
+    float current_float;
+    CHECK(current_sense_.GetCurrent(current_float));
+    present_current_ = current_lpf_.Compute(current_float, dt);
     return Error::kOk;
   }
-
-  switch (mode_) {
-    case ServoMode::kPosition: {
-      const auto pos_error = goal_position_ - present_position_;
-
-      if (IsPositionReached(pos_error)) {
-        moving_ = false;
-      }
-
-      if (!torque_enable_ && !moving_) {
-        SetPower(0);
-        break;
-      }
-
-      // 位置环计算目标速度
-      const auto position_error = pos_pid_.Compute(pos_error, dt);
-
-      auto next_velocity = position_error;
-
-      // 应用加速度限制
-      if (goal_acceleration_ > math::kFloatThreshold) {
-        const auto velocity_change = next_velocity - present_velocity_;
-        const auto limited_acceleration = constrain(
-            velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
-        next_velocity = present_velocity_ + limited_acceleration;
-      }
-
-      // 应用最高速度限制
-      if (goal_velocity_ > math::kFloatThreshold ||
-          goal_velocity_ < -math::kFloatThreshold) {
-        const auto limited_velocity = abs(goal_velocity_);
-        next_velocity =
-            constrain(next_velocity, -limited_velocity, limited_velocity);
-      }
-
-      // 速度环计算控制输出
-      const auto velocity_error = next_velocity - present_velocity_;
-      const auto pwm_set = velocity_pid_.Compute(velocity_error, dt);
-
-      // 输出控制信号（PWM）
-      SetPower(pwm_set);
-      break;
-    }
-    case ServoMode::kVelocity: {
-      auto next_velocity = goal_velocity_;
-
-      // 加速度限制：限制速度变化率
-      if (goal_acceleration_ > math::kFloatThreshold) {
-        const auto velocity_change = next_velocity - present_velocity_;
-        const auto limited_acceleration = constrain(
-            velocity_change, -goal_acceleration_ * dt, goal_acceleration_ * dt);
-        next_velocity = present_velocity_ + limited_acceleration;
-      }
-
-      const auto velocity_error = next_velocity - present_velocity_;
-      const auto pwm_set = velocity_pid_.Compute(velocity_error, dt);
-      SetPower(pwm_set);
-      break;
-    }
-    case ServoMode::kPwm: {
-      const auto pwm_set = goal_pwm_;
-      SetPower(pwm_set);
-      break;
-    }
-    default:
-      SetPower(0);
+  /**
+   * @brief 设置电机功率
+   * @param pwm PWM值
+   */
+  void SetMotorPower(const float pwm) {
+    present_pwm_ = pwm;
+    const auto direction = static_cast<float>(motor_direction_);
+    const auto pwm_set = direction * pwm;
+    motor_.SetPWM(pwm_set);
   }
-  return Error::kOk;
-}
 
-template <typename MotorType, typename EncoderType, typename CurrentType>
-Error Servo<MotorType, EncoderType, CurrentType>::RefreshPresentVariables(
-    float dt) {
-  auto &encoder = EncoderBase();
-  auto &current_sense = CurrentSenseBase();
-  // 处理编码器
-  CHECK(encoder.Process(dt));
-  // 处理编码器PLL
-  const auto encoder_pos_counts = encoder.GetPosCounts();
-  const auto encoder_bits = encoder.kResolution.kBits;
-  const auto encoder_pos_counts_mapped =
-      math::mapResolution(encoder_pos_counts, encoder_bits, kResolution.kBits);
-  CHECK(encoder_pll_.Process(dt, encoder_pos_counts_mapped));
-
-  // 获取当前位置
-  const auto direction = static_cast<float>(encoder_direction_);
-  present_position_ =
-      encoder_pll_.GetPosition() * direction + position_correction_;
-
-  // 获取当前速度
-  present_velocity_ = encoder_pll_.GetVelocity() * direction;
-
-  // 获取当前电流
-  CHECK(current_sense.GetCurrent(present_current_));
-  present_current_ = current_lpf_.Compute(present_current_, dt);
-  return Error::kOk;
-}
-
-/**
- * @brief 检查是否到达目标位置
- * @param pos_error 位置误差
- * @return 是否到达目标位置
- */
-template <typename MotorType, typename EncoderType, typename CurrentType>
-bool Servo<MotorType, EncoderType, CurrentType>::IsPositionReached(
-    int16_t pos_error) {
-  if (pos_error > 0 && pos_error > cw_insensitive_area_) {
-    return false;
-  }
-  if (pos_error < 0 && -pos_error > ccw_insensitive_area_) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * @brief 设置电机功率
- * @param pwm PWM值
- */
-template <typename MotorType, typename EncoderType, typename CurrentType>
-void Servo<MotorType, EncoderType, CurrentType>::SetPower(const float pwm) {
-  present_load_ = pwm;
-  const auto direction = static_cast<float>(motor_direction_);
-  const auto pwm_set = direction * pwm;
-  MotorBase().SetPWM(pwm_set);
-}
-
-/**
- * @brief 电机刹车
- */
-template <typename MotorType, typename EncoderType, typename CurrentType>
-void Servo<MotorType, EncoderType, CurrentType>::Break() {
-  MotorBase().Brake();
-}
-
-/**
- * @brief 电机滑行
- */
-template <typename MotorType, typename EncoderType, typename CurrentType>
-void Servo<MotorType, EncoderType, CurrentType>::Coast() {
-  MotorBase().Coast();
-}
+  /**
+   * @brief 电机刹车
+   */
+  void MotorBreak() { motor_.Brake(); }
+  /**
+   * @brief 电机滑行
+   */
+  void MotorCoast() { motor_.Coast(); }
+};
 
 }  // namespace hortor::servo

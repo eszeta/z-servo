@@ -30,7 +30,7 @@ namespace hortor::servo {
  * 该类实现了编码器传感器的基本功能，包括计数值读取、速度计算和圈数统计。
  * 子类需要实现GetRaw()方法以提供特定传感器的原始计数值。
  */
-template <typename Derived>
+template <typename Derived, uint8_t Bits>
 class Encoder {
  protected:
   /**
@@ -48,7 +48,7 @@ class Encoder {
   }
 
  public:
-  explicit Encoder(uint8_t resolution_bits) : kResolution(resolution_bits) {}
+  explicit Encoder() {}
 
   /**
    * @brief 获取原始计数值
@@ -115,7 +115,8 @@ class Encoder {
   }
 
   /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
-  const math::Resolution kResolution;
+  static constexpr math::Resolution<Bits> kResolution{};
+  static constexpr uint8_t kResolutionBits = Bits;
 
  protected:
   /**

@@ -23,6 +23,7 @@
 #include "types.h"
 
 namespace hortor::drivers::MT6701 {
+constexpr uint8_t kResolutionBits = 14;
 
 /**
  * @brief MT6701磁性角度传感器实现类
@@ -31,14 +32,14 @@ namespace hortor::drivers::MT6701 {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本实现使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
-class MT6701 final : public servo::Encoder<MT6701> {
+class MT6701 final : public servo::Encoder<MT6701, kResolutionBits> {
  public:
   /**
    * @brief 构造函数
    *
    * 初始化MT6701传感器对象，设置分辨率为14位（0-16383范围）。
    */
-  explicit MT6701() : servo::Encoder<MT6701>(14) {}
+  explicit MT6701() : servo::Encoder<MT6701, kResolutionBits>() {}
 
   /**
    * @brief 初始化传感器

@@ -20,7 +20,7 @@ namespace hortor::drivers::MT6701 {
 
 Error MT6701::Init(TwoWire *wire) {
   CHECK(regmap_.Init(wire, kI2CAddress));
-  servo::Encoder<MT6701>::Init();
+  servo::Encoder<MT6701, kResolutionBits>::Init();
   return Error::kOk;
 }
 

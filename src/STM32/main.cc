@@ -56,7 +56,7 @@ InfoLED info_led{};
 // InstI2cPortHandler inst_port{};
 // ServoAccessor inst_accessor{};
 // Slave inst{};
-Servo<DRV8231A, MT6701, CurrentMirror> servo{11};
+Servo<DRV8231A, MT6701, CurrentMirror, 12> servo{};
 
 // 集中式任务调度器（固定容量，避免动态分配）
 TaskScheduler scheduler{};
@@ -106,7 +106,7 @@ void setup() {
   // inst.LinkServo(&servo);
   // inst.Init();
 
-  // inst_accessor.SetMode(ServoMode::kVelocity);
+  // inst_accessor.SetMode(OperatingMode::kVelocity);
   // inst_accessor.SetGoalVelocity(1000.0f);
   // inst_accessor.SetVelPidKp(0.0f);
   // inst_accessor.SetVelPidKi(0.0f);
@@ -140,18 +140,18 @@ Error MainLoopCallback(float dt) {
  * @param dt 距离上次调用的时间间隔（秒）
  */
 Error DebugOutputCallback(float dt) {
-  DebugPrint(F(">dt:"));
-  DebugPrintln(dt);
-  DebugPrint(F(">pwm:"));
-  DebugPrintln(servo.GetPresentLoad());
+  // DebugPrint(F(">dt:"));
+  // DebugPrintln(dt);
+  // DebugPrint(F(">pwm:"));
+  // DebugPrintln(servo.GetPresentPwm());
 
-  auto present_velocity = servo.GetPresentVelocity();
-  DebugPrint(F(">velocity:"));
-  DebugPrintln(present_velocity);
+  // auto present_velocity = servo.GetPresentVelocity();
+  // DebugPrint(F(">velocity:"));
+  // DebugPrintln(present_velocity);
 
-  auto present_position = servo.GetPresentPosition();
-  DebugPrint(F(">position:"));
-  DebugPrintln(present_position);
+  // auto present_position = servo.GetPresentPosition();
+  // DebugPrint(F(">position:"));
+  // DebugPrintln(present_position);
   return Error::kOk;
 }
 

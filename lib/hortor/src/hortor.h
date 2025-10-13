@@ -81,5 +81,9 @@ enum class Error : uint8_t {
    * @brief 未实现
    */
   kNotImplemented = 11,
+  /**
+   * @brief 模式不支持
+   */
+  kModeNotSupport = 12,
 };
 }  // namespace hortor

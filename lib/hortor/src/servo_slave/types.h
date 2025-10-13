@@ -99,11 +99,11 @@ constexpr auto kHardwareErrorStatus = CTI8(70, 0);
 constexpr auto kVelocityIgain = CTI16(76, 1920);
 /** @brief 速度比例增益 | 单位: - | 访问: RW | 初始值: 100 */
 constexpr auto kVelocityPgain = CTI16(78, 100);
-/** @brief 位置微分增益 | 单位: - | 访问: RW | 初始值: 4000 */
+/** @brief 位置微分增益 | 单位: - | 访问: RW | 初始值: 4000 (M077: 250.0) */
 constexpr auto kPositionDgain = CTI16(80, 4000);
-/** @brief 位置积分增益 | 单位: - | 访问: RW */
+/** @brief 位置积分增益 | 单位: - | 访问: RW | 初始值: 0 */
 constexpr auto kPositionIgain = CTI16(82, 0);
-/** @brief 位置比例增益 | 单位: - | 访问: RW | 初始值: 800 */
+/** @brief 位置比例增益 | 单位: - | 访问: RW | 初始值: 800 (M077: 6.25) */
 constexpr auto kPositionPgain = CTI16(84, 800);
 /** @brief 前馈二阶增益 | 单位: - | 访问: RW */
 constexpr auto kFeedforward2ndGain = CTI16(88, 0);

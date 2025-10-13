@@ -22,7 +22,7 @@
 #include "servo/types.h"
 
 namespace hortor::drivers::MA330 {
-
+constexpr uint8_t kResolutionBits = 14;
 /**
  * @brief MT6701磁性角度传感器实现类
  *
@@ -30,9 +30,9 @@ namespace hortor::drivers::MA330 {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本实现使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
-class MA330 final : public servo::Encoder<MA330> {
+class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
  public:
-  explicit MA330() : servo::Encoder<MA330>(14) {}
+  explicit MA330() : servo::Encoder<MA330, kResolutionBits>() {}
   /**
    * @brief 初始化传感器
    * @param wire I2C通信接口指针

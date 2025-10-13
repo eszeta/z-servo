@@ -89,7 +89,7 @@
 //   const auto response_delay = accessor_->GetResponseDelay();
 //   port_->SetResponseDelay(response_delay);
 
-//   const auto mode = accessor_->GetMode();
+//   const auto mode = accessor_->GetOperatingMode();
 //   servo_->SetMode(mode);
 
 //   const auto min_position = accessor_->GetMinPosition();
@@ -175,7 +175,7 @@
 // }
 
 // Error Slave::LoadRamConfig() {
-//   const auto mode = accessor_->GetMode();
+//   const auto mode = accessor_->GetOperatingMode();
 
 //   const auto torque_enable = accessor_->GetTorqueEnable();
 //   servo_->SetTorqueEnable(torque_enable);
@@ -186,7 +186,7 @@
 //   const auto target_position = accessor_->GetGoalPosition();
 //   servo_->SetGoalPosition(target_position);
 
-//   if (mode == ServoMode::kPwm) {
+//   if (mode == OperatingMode::kPwm) {
 //     servo_->SetGoalTime(0);
 //     servo_->SetGoalPwm(accessor_->GetGoalPwm());
 //   } else {
