@@ -49,66 +49,6 @@ class RegMap : public BusImpl {
   }
 
  public:
-  /**
-   * @brief 获取伺服ID
-   * @param id 伺服ID存储引用
-   * @return 错误码
-   */
-  Error ServoId(uint8_t& id) { return AsDerived().ServoIdImpl(id); }
-
-  /**
-   * @brief 获取状态
-   * @param status 状态存储引用
-   * @return 错误码
-   */
-  Error Status(uint8_t& status) { return AsDerived().StatusImpl(status); }
-
-  /**
-   * @brief 获取状态包返回级别
-   * @param return_level 返回级别存储引用
-   * @return 错误码
-   *
-   * 0	PING Instruction
-   *    Returns the Status Packet for PING Instruction only
-   *
-   * 1	PING Instruction
-   *    READ Instruction
-   *    Returns the Status Packet for PING and READ Instruction
-   *
-   * 2	All Instructions
-   *    Returns the Status Packet for all Instructions
-   */
-  Error ReturnLevel(uint8_t& return_level) {
-    return AsDerived().ReturnLevelImpl(return_level);
-  }
-
-  /**
-   * @brief 恢复EEPROM
-   * @return 错误码
-   */
-  Error RecoveryEeprom() { return AsDerived().RecoveryEepromImpl(); }
-
-  /**
-   * @brief 加载EEPROM
-   * @return 错误码
-   */
-  Error LoadEeprom() { return AsDerived().LoadEepromImpl(); }
-
-  /**
-   * @brief 存储EEPROM
-   * @return 错误码
-   */
-  Error StoreEeprom() { return AsDerived().StoreEepromImpl(); }
-
-  /**
-   * @brief 存储EEPROM（指定地址和大小）
-   * @param address 地址
-   * @param size 大小
-   * @return 错误码
-   */
-  Error StoreEeprom(const uint8_t address, const uint8_t size) {
-    return AsDerived().StoreEepromImpl(address, size);
-  }
 
   /**
    * @brief 读取 ControlTableItem 字段

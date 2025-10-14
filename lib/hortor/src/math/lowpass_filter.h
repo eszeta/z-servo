@@ -34,6 +34,9 @@ class LowPassFilter {
     y_prev_ = 0.0f;
   }
 
+  LowPassFilter(const LowPassFilter&) = delete;
+  LowPassFilter& operator=(const LowPassFilter&) = delete;
+
   /**
    * @brief 计算滤波值
    * @param x - 输入值

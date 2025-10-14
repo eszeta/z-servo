@@ -43,14 +43,14 @@ namespace {
  * 转换公式: voltage = raw × 0.1V
  * 范围: 0 × 0.1 = 0.0V 到 160 × 0.1 = 16.0V
  */
-inline float VoltageFromRaw(uint16_t raw) { return raw * 0.1f; }
+constexpr float VoltageFromRaw(uint16_t raw) { return raw * 0.1f; }
 
 /**
  * @brief 将实际电压值转换为原始值
  * @param voltage 实际电压值 (0.0-16.0V)
  * @return 原始值 (0-160)
  */
-inline uint16_t VoltageToRaw(float voltage) {
+constexpr uint16_t VoltageToRaw(float voltage) {
   return static_cast<uint16_t>(voltage * 10.0f);
 }
 
@@ -64,14 +64,14 @@ inline uint16_t VoltageToRaw(float voltage) {
  *
  * @note 负值表示反向旋转
  */
-inline float PwmFromRaw(uint16_t raw) { return raw * 0.113f; }
+constexpr float PwmFromRaw(uint16_t raw) { return raw * 0.113f; }
 
 /**
  * @brief 将实际 PWM 百分比转换为原始值
  * @param percent 实际 PWM 百分比 (-100.0% 到 100.0%)
  * @return 原始值 (0-885)
  */
-inline uint16_t PwmToRaw(float percent) {
+constexpr uint16_t PwmToRaw(float percent) {
   return static_cast<uint16_t>(percent / 0.113f);
 }
 
@@ -85,14 +85,14 @@ inline uint16_t PwmToRaw(float percent) {
  *
  * @note 负值表示反向旋转
  */
-inline float VelocityFromRaw(uint32_t raw) { return raw * 0.229f; }
+constexpr float VelocityFromRaw(uint32_t raw) { return raw * 0.229f; }
 
 /**
  * @brief 将实际速度值转换为原始值
  * @param rpm 实际速度值 (-468.763 到 468.763 RPM)
  * @return 原始值 (0-2047)
  */
-inline uint32_t VelocityToRaw(float rpm) {
+constexpr uint32_t VelocityToRaw(float rpm) {
   return static_cast<uint32_t>(rpm / 0.229f);
 }
 
@@ -106,14 +106,14 @@ inline uint32_t VelocityToRaw(float rpm) {
  *
  * @note 仅在 Velocity-based Profile 模式下使用
  */
-inline float AccelerationFromRaw(uint32_t raw) { return raw * 214.577f; }
+constexpr float AccelerationFromRaw(uint32_t raw) { return raw * 214.577f; }
 
 /**
  * @brief 将实际加速度值转换为原始值
  * @param acc 实际加速度值 (0-7,032,024.959 rev/min²)
  * @return 原始值 (0-32767)
  */
-inline uint32_t AccelerationToRaw(float acc) {
+constexpr uint32_t AccelerationToRaw(float acc) {
   return static_cast<uint32_t>(acc / 214.577f);
 }
 
@@ -125,14 +125,16 @@ inline uint32_t AccelerationToRaw(float acc) {
  * 转换公式: delay = raw × 2μs
  * 范围: 0 × 2 = 0μs 到 254 × 2 = 508μs
  */
-inline uint16_t DelayFromRaw(uint8_t raw) { return raw * 2; }
+constexpr uint16_t DelayFromRaw(uint8_t raw) { return raw * 2; }
 
 /**
  * @brief 将实际延迟时间转换为原始值
  * @param us 实际延迟时间 (0-508 μs)
  * @return 原始值 (0-254)
  */
-inline uint8_t DelayToRaw(uint16_t us) { return static_cast<uint8_t>(us / 2); }
+constexpr uint8_t DelayToRaw(uint16_t us) {
+  return static_cast<uint8_t>(us / 2);
+}
 
 /**
  * @brief 将原始看门狗值转换为实际时间
@@ -144,14 +146,14 @@ inline uint8_t DelayToRaw(uint16_t us) { return static_cast<uint8_t>(us / 2); }
  *
  * @note 0 表示禁用看门狗功能
  */
-inline uint16_t WatchdogFromRaw(uint8_t raw) { return raw * 20; }
+constexpr uint16_t WatchdogFromRaw(uint8_t raw) { return raw * 20; }
 
 /**
  * @brief 将实际看门狗时间转换为原始值
  * @param ms 实际看门狗时间 (0-5080 ms)
  * @return 原始值 (0-254)
  */
-inline uint8_t WatchdogToRaw(uint16_t ms) {
+constexpr uint8_t WatchdogToRaw(uint16_t ms) {
   return static_cast<uint8_t>(ms / 20);
 }
 
@@ -163,14 +165,14 @@ inline uint8_t WatchdogToRaw(uint16_t ms) {
  * 转换公式: gain = raw / 128.0
  * 范围: 0 / 128 = 0.0 到 16383 / 128 = 127.99
  */
-inline float PidPGainFromRaw(uint16_t raw) { return raw / 128.0f; }
+constexpr float PidPGainFromRaw(uint16_t raw) { return raw / 128.0f; }
 
 /**
  * @brief 将实际 P 增益值转换为原始值
  * @param gain 实际 P 增益值 (0.0-127.99)
  * @return 原始值 (0-16383)
  */
-inline uint16_t PidPGainToRaw(float gain) {
+constexpr uint16_t PidPGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 128.0f);
 }
 
@@ -182,14 +184,14 @@ inline uint16_t PidPGainToRaw(float gain) {
  * 转换公式: gain = raw / 65536.0
  * 范围: 0 / 65536 = 0.0 到 16383 / 65536 = 0.25
  */
-inline float PidIGainFromRaw(uint16_t raw) { return raw / 65536.0f; }
+constexpr float PidIGainFromRaw(uint16_t raw) { return raw / 65536.0f; }
 
 /**
  * @brief 将实际 I 增益值转换为原始值
  * @param gain 实际 I 增益值 (0.0-0.25)
  * @return 原始值 (0-16383)
  */
-inline uint16_t PidIGainToRaw(float gain) {
+constexpr uint16_t PidIGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 65536.0f);
 }
 
@@ -201,14 +203,14 @@ inline uint16_t PidIGainToRaw(float gain) {
  * 转换公式: gain = raw / 16.0
  * 范围: 0 / 16 = 0.0 到 16383 / 16 = 1023.9
  */
-inline float PidDGainFromRaw(uint16_t raw) { return raw / 16.0f; }
+constexpr float PidDGainFromRaw(uint16_t raw) { return raw / 16.0f; }
 
 /**
  * @brief 将实际 D 增益值转换为原始值
  * @param gain 实际 D 增益值 (0.0-1023.9)
  * @return 原始值 (0-16383)
  */
-inline uint16_t PidDGainToRaw(float gain) {
+constexpr uint16_t PidDGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 16.0f);
 }
 
@@ -222,14 +224,14 @@ inline uint16_t PidDGainToRaw(float gain) {
  *
  * @note 实际使用中通常限制在 0.0-127.99 范围内
  */
-inline float FeedforwardGainFromRaw(uint16_t raw) { return raw / 4.0f; }
+constexpr float FeedforwardGainFromRaw(uint16_t raw) { return raw / 4.0f; }
 
 /**
  * @brief 将实际前馈增益值转换为原始值
  * @param gain 实际前馈增益值 (0.0-4095.75)
  * @return 原始值 (0-16383)
  */
-inline uint16_t FeedforwardGainToRaw(float gain) {
+constexpr uint16_t FeedforwardGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 4.0f);
 }
 
@@ -514,32 +516,42 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - 位域寄存器，每个 bit 控制不同功能
    * - 修改后需要重启生效
    *
-   * 【位域定义】
-   * | Bit | 名称                    | 说明                          |
-   * |-----|------------------------|-------------------------------|
-   * | 0   | Normal/Reverse Mode    | 0: 正转, 1: 反转              |
-   * | 1   | -                      | 未使用                        |
-   * | 2   | Profile Configuration  | 0: Velocity-based, 1: Time-based |
-   * | 3-7 | -                      | 未使用                        |
+  * 【位域定义】
+  * | Bit | 名称                        | 说明 |
+  * |-----|----------------------------|----------------------------------------------------------------------|
+  * | 0   | Reverse Mode               | 0: Normal, 1: Reverse |
+  * | 1   | -                          | 保留（未使用） |
+  * | 2   | Profile Configuration      | 0: Velocity-based, 1: Time-based |
+  * | 3   | Torque On by Goal Update   | 0: 仅在 Torque Enable(64)=1
+  时执行命令；1: 忽略 Torque Enable 状态，
+  * |     |                            |    若 Torque Enable(64)=0
+  且收到命令则自动置 1 并执行               |
+  * | 4-7 | -                          | 保留（未使用） |
    *
-   * 【反转模式 (Bit 0 = 1)】
-   * - 正向指令导致反向旋转
-   * - Present Position 值反向
-   * - 适用于机械安装方向相反的情况
+   * 【反转模式 (Bit 0)】
+   * - [0] Normal Mode: CCW(正), CW(反)
+   * - [1] Reverse Mode: CCW(反), CW(正)
    *
-   * 【Profile 配置 (Bit 2)】
+  * 【Profile 配置 (Bit 2)】
    * - 0: Velocity-based Profile - 使用速度和加速度参数
    * - 1: Time-based Profile - 使用时间参数（毫秒）
+
+  * 【扭矩联动 (Bit 3: Torque On by Goal Update)】
+  * - [0] 标准：仅当 Torque Enable(64)=1 时执行目标命令
+  * - [1] 联动：忽略当前 Torque Enable(64) 值；若为 0 且接收到命令，
+  *             将自动置 Torque Enable(64)=1 并执行命令
    *
-   * 【使用场景】
+  * 【使用场景】
    * - 机械适配：反转模式适应安装方向
-   * - 轨迹控制：选择 Profile 类型
-   * - 系统集成：统一多舵机行为
+  * - 轨迹控制：选择 Profile 类型
+  * - 扭矩管理：按需启用 Bit3 以简化上层控制
+  * - 系统集成：统一多舵机行为
    *
    * 【相关寄存器】
    * - Profile Velocity: Velocity-based 模式使用
-   * - Profile Acceleration: 两种模式都使用
+  * - Profile Acceleration: 两种模式都使用（Time-based 模式为加速时间）
    * - Operating Mode: 工作模式设置
+  * - Torque Enable: 扭矩使能控制（与 Bit3 行为相关）
    *
    * @note 修改后需调用 StoreEeprom() 并重启生效
    * @see SetProfileVelocity, SetProfileAcceleration, GetOperatingMode
@@ -2336,7 +2348,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * Velocity-based Profile:
    *   t1 = 64 × (Profile Velocity / Profile Acceleration)
-   *   
+   *
    *   其中:
    *   - t1: 加速时间（毫秒 ms）
    *   - Profile Velocity: 单位 0.229 RPM/tick
@@ -2345,7 +2357,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * Time-based Profile:
    *   t1 = Profile Acceleration(108)
-   *   
+   *
    *   其中:
    *   - t1: 加速时间（毫秒 ms）
    *   - Profile Acceleration 直接设置加速时间
@@ -2590,8 +2602,10 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * 【Triangular vs Trapezoidal】
    * - 当配置为 Trapezoidal 时（Profile Velocity ≠ 0, Profile Acceleration ≠ 0）
-   * - 如果移动距离足够长：执行完整梯形曲线 → Moving Status 显示 11 (Trapezoidal)
-   * - 如果移动距离太短：自动降级为三角形曲线 → Moving Status 显示 10 (Triangular)
+   * - 如果移动距离足够长：执行完整梯形曲线 → Moving Status 显示 11
+   * (Trapezoidal)
+   * - 如果移动距离太短：自动降级为三角形曲线 → Moving Status 显示 10
+   * (Triangular)
    * - Triangular 是系统根据实际距离自动选择的，无法直接配置
    *
    * 【状态说明】
@@ -2829,7 +2843,8 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - 与 Present Velocity 对比可得速度跟踪误差
    *
    * 【控制流程】
-   * Goal Position → [Profile Generator] → Velocity Trajectory(136) → [Velocity PID] → PWM
+   * Goal Position → [Profile Generator] → Velocity Trajectory(136) → [Velocity
+   * PID] → PWM
    * - Profile Generator 根据 Goal Position 生成期望速度轨迹
    * - 期望速度轨迹存储在 Velocity Trajectory(136) 中
    * - Velocity PID 控制器跟踪 Velocity Trajectory
@@ -3010,30 +3025,10 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
 
   /** @} */  // 状态反馈组结束
 
-  //==============================================================================
-  // EEPROM 管理区（EEPROM）
-  //==============================================================================
-  /**
-   * @name EEPROM 管理
-   * 管理 EEPROM 的存储、加载和恢复操作。
-   * EEPROM 用于保存配置参数，掉电不丢失。
-   * @{
-   */
-
-  // 注意：EEPROM 管理功能通过 Protocol 接口实现
-  // 具体实现请参考 ServoIdImpl, LoadEepromImpl, StoreEepromImpl,
-  // RecoveryEepromImpl
-
-  /** @} */  // EEPROM 管理组结束
-
-  // Protocol 接口实现（CRTP 模式）
-  Error ServoIdImpl(uint8_t& id);
-  Error ReturnLevelImpl(uint8_t& return_level);
-  Error StatusImpl(uint8_t& status);
-  Error RecoveryEepromImpl();
-  Error LoadEepromImpl();
-  Error StoreEepromImpl();
-  Error StoreEepromImpl(const uint8_t address, const uint8_t size);
+  Error RecoveryEeprom();
+  Error LoadEeprom();
+  Error StoreEeprom();
+  Error StoreEeprom(const uint8_t address, const uint8_t size);
 
  private:
   uint8_t table_[TableBlocks::kTotal.size()] = {};

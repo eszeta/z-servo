@@ -32,7 +32,7 @@ namespace hortor::protocol {
  * @tparam Derived 派生类类型
  */
 template <typename Derived>
-class InstPortHandler {
+class PortHandler {
  public:
   /**
    * @brief 处理数据

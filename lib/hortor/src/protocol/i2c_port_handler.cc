@@ -21,7 +21,7 @@
 
 namespace hortor::protocol {
 
-Error InstI2cPortHandler::ProcessImpl(InstProtocol &protocol,
+Error I2cPortHandler::ProcessImpl(InstProtocol &protocol,
                                       const float dt,
                                       InstPacket &inst_packet,
                                       bool &is_complete) {
@@ -32,16 +32,16 @@ Error InstI2cPortHandler::ProcessImpl(InstProtocol &protocol,
   return Error::kOk;
 }
 
-Error InstI2cPortHandler::ResponseImpl(const StatusPacket &packet,
+Error I2cPortHandler::ResponseImpl(const StatusPacket &packet,
                                        const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);
   return Error::kOk;
 }
 
-Error InstI2cPortHandler::OnReceive(int howMany) { return Error::kOk; }
+Error I2cPortHandler::OnReceive(int howMany) { return Error::kOk; }
 
-Error InstI2cPortHandler::OnRequest() {
+Error I2cPortHandler::OnRequest() {
   const size_t size = status_packet_.GetBufferSize();
   wire_->write(status_packet_.buffer, size);
   return Error::kOk;

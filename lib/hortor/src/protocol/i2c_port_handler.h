@@ -23,12 +23,12 @@
 
 namespace hortor::protocol {
 
-class InstI2cPortHandler : public InstPortHandler<InstI2cPortHandler> {
+class I2cPortHandler : public PortHandler<I2cPortHandler> {
  public:
   /**
    * @brief 构造函数
    */
-  InstI2cPortHandler() = default;
+  I2cPortHandler() = default;
 
   /**
    * @brief 初始化

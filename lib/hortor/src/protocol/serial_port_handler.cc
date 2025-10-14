@@ -26,7 +26,7 @@
 
 namespace hortor::protocol {
 
-Error InstSerialPortHandler::ProcessImpl(InstProtocol &protocol,
+Error SerialPortHandler::ProcessImpl(InstProtocol &protocol,
                                          const float dt,
                                          InstPacket &inst_packet,
                                          bool &is_complete) {
@@ -49,7 +49,7 @@ Error InstSerialPortHandler::ProcessImpl(InstProtocol &protocol,
   return Error::kOk;
 }
 
-Error InstSerialPortHandler::ResponseImpl(const StatusPacket &packet,
+Error SerialPortHandler::ResponseImpl(const StatusPacket &packet,
                                           const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);

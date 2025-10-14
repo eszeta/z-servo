@@ -36,19 +36,19 @@ class EncoderPll {
    * @brief 获取估计位置
    * @return 估计位置（单位：pulse）
    */
-  float Pulse() { return pulse_; }
+  float Pulse() const { return pulse_; }
 
   /**
    * @brief 获取估计速度
    * @return 估计速度（单位：pulse/秒）
    */
-  float GetVelocity() { return velocity_; }
+  float GetVelocity() const { return velocity_; }
 
   /**
    * @brief 获取估计速度
    * @return 估计速度（单位：RPM）
    */
-  float GetRpm() { return rpm_; }
+  float GetRpm() const { return rpm_; }
   /**
    * @brief 处理编码器数据
    * @param dt 时间间隔(秒)

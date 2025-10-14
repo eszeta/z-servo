@@ -23,6 +23,8 @@ struct Resolution {
   constexpr explicit Resolution() {}
   /** @brief 目标分辨率（位数），决定了传感器的精度和量程 */
   static constexpr uint8_t kBits = Bits;
+  /** @brief 最大值 */
+  static constexpr uint32_t kMax = (1 << kBits) - 1;
   /** @brief Counts Per Revolution */
   static constexpr uint16_t kEncoderCpr = (1 << kBits);
   /** @brief 角度到计数值的转换系数，用于将角度转换为计数值 */

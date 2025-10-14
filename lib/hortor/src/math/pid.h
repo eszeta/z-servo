@@ -20,29 +20,22 @@
 
 namespace hortor::math {
 
-struct PIDParam {
-  float kp;
-  float ki;
-  float kd;
-  float ff;
-  float i_limit;
-  float limit;
-};
 /**
  * @brief PID控制器类
  */
-class PidController {
+class Pid {
  public:
-  explicit PidController(const PIDParam& param);
+  struct Config {
+    float proportional_gain;   // 比例增益 Kp
+    float integral_gain;       // 积分增益 Ki
+    float derivative_gain;     // 微分增益 Kd
+    float antiwindup_gain;     // 抗饱和增益 Ka，用于抑制积分饱和
+    float output_limit;        // 输出限幅值
+  };
 
-  /**
-   * @brief 计算PID控制器输出
-   * @param error - 控制误差
-   * @param feed - 前馈输入
-   * @param dt - 时间间隔(秒)
-   * @return 控制输出
-   */
-  float Compute(const float& error, const float& dt, const float& feed);
+  explicit Pid(const Config& config);
+  Pid(const Pid&) = delete;
+  Pid& operator=(const Pid&) = delete;
 
   /**
    * @brief 计算PID控制器输出（无前馈）
@@ -50,7 +43,9 @@ class PidController {
    * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(const float& error, const float& dt);
+  float Compute(const float error,
+                const float dt,
+                const float feedforward = 0.0f);
 
   /**
    * @brief 重置PID控制器状态
@@ -59,32 +54,29 @@ class PidController {
   void Reset();
 
   // 参数设置和获取接口
-  void SetKp(float kp) { param_.kp = kp; }
-  float GetKp() const { return param_.kp; }
+  void SetProportionalGain(float gain) { config_.proportional_gain = gain; }
+  float GetProportionalGain() const { return config_.proportional_gain; }
 
-  void SetKi(float ki) { param_.ki = ki; }
-  float GetKi() const { return param_.ki; }
+  void SetIntegralGain(float gain) { config_.integral_gain = gain; }
+  float GetIntegralGain() const { return config_.integral_gain; }
 
-  void SetKd(float kd) { param_.kd = kd; }
-  float GetKd() const { return param_.kd; }
+  void SetDerivativeGain(float gain) { config_.derivative_gain = gain; }
+  float GetDerivativeGain() const { return config_.derivative_gain; }
 
-  void SetFf(float ff) { param_.ff = ff; }
-  float GetFf() const { return param_.ff; }
+  void SetAntiwindupGain(float gain) { config_.antiwindup_gain = gain; }
+  float GetAntiwindupGain() const { return config_.antiwindup_gain; }
 
-  void SetLimit(float limit) { param_.limit = limit; }
-  float GetLimit() const { return param_.limit; }
-
-  void SetIlimit(float ilimit) { param_.i_limit = ilimit; }
-  float GetIlimit() const { return param_.i_limit; }
+  void SetOutputLimit(float limit) { config_.output_limit = limit; }
+  float GetOutputLimit() const { return config_.output_limit; }
 
  private:
   // 控制器参数
-  PIDParam param_;
+  Config config_;
 
   // 控制器状态
-  float error_prev_ = 0.0f;    // 上一次误差，用于计算微分项
-  float output_prev_ = 0.0f;   // 上一次输出，用于变化率限制
-  float integral_sum_ = 0.0f;  // 积分累加值，用于消除静态误差
+  float previous_error_ = 0.0f;        // 上一次的控制误差，用于计算微分项
+  float integral_accumulator_ = 0.0f;   // 积分累加值，用于消除静态误差
+  float antiwindup_feedback_ = 0.0f;    // 抗饱和反馈值，为输出饱和时被削减的部分
 };
 
 }  // namespace hortor::math

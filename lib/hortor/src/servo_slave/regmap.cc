@@ -24,13 +24,8 @@ Error RegMap::Init() {
   CHECK(LoadEeprom());
   return Error::kOk;
 }
-Error RegMap::ServoIdImpl(uint8_t& id) { return GetId(id); }
-Error RegMap::StatusImpl(uint8_t& status) { return Error::kOk; }
-Error RegMap::ReturnLevelImpl(uint8_t& return_level) {
-  return GetStatusReturnLevel(return_level);
-}
-Error RegMap::RecoveryEepromImpl() { return Error::kOk; }
-Error RegMap::LoadEepromImpl() {
+Error RegMap::RecoveryEeprom() { return Error::kOk; }
+Error RegMap::LoadEeprom() {
   // #ifndef EEPROM_DISABLE
   //   int pos = 0;
   //   for (uint8_t address = RegsBlocks::kEeprom.begin;
@@ -46,7 +41,7 @@ Error RegMap::LoadEepromImpl() {
   // #endif
   return Error::kOk;
 }
-Error RegMap::StoreEepromImpl() {
+Error RegMap::StoreEeprom() {
   // #ifndef EEPROM_DISABLE
   //   int pos = 0;
   //   for (uint8_t address = RegsBlocks::kEeprom.begin;
@@ -62,7 +57,7 @@ Error RegMap::StoreEepromImpl() {
   // #endif
   return Error::kOk;
 }
-Error RegMap::StoreEepromImpl(const uint8_t address, const uint8_t size) {
+Error RegMap::StoreEeprom(const uint8_t address, const uint8_t size) {
   return Error::kOk;
 }
 }  // namespace hortor::servo_slave
