@@ -32,21 +32,20 @@ struct BlinkUnit {
 };
 
 /**
- * @brief 信息类型
- */
-enum class InfoType {
-  kOk,          // 正常状态
-  kWarning,     // 警告
-  kError,       // 错误
-  kFatalError,  // 致命错误
-  kMax
-};
-
-/**
  * @brief 信息LED
  */
 class InfoLED {
  public:
+  /**
+   * @brief 信息类型
+   */
+  enum class InfoType {
+    kOk,          // 正常状态
+    kWarning,     // 警告
+    kError,       // 错误
+    kFatalError,  // 致命错误
+    kMax
+  };
   /**
    * @brief 构造函数
    */

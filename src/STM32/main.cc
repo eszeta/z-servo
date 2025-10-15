@@ -23,6 +23,7 @@
 #include <servo/servo.h>
 #include <servo_slave/slave.h>
 #include <utils/debug_print.h>
+#include <utils/monitor.h>
 #include <utils/task_scheduler.h>
 
 using hortor::Error;
@@ -31,13 +32,11 @@ using hortor::drivers::DRV8231A::DRV8231A;
 using hortor::drivers::MT6701::BusType;
 using hortor::drivers::MT6701::MT6701;
 using hortor::info_led::InfoLED;
-using hortor::info_led::InfoType;
 using hortor::info_led::Mode;
 using hortor::servo::Servo;
 using hortor::servo_slave::Slave;
 using hortor::utils::DebugEnable;
-using hortor::utils::DebugPrint;
-using hortor::utils::DebugPrintln;
+using hortor::utils::Monitor;
 using hortor::utils::TaskScheduler;
 
 // 信息灯引脚
@@ -49,13 +48,18 @@ constexpr auto kDebugOutputRateHz = 10;
 
 constexpr auto kResolutionBits = 12;
 
+// 伺服电机类型别名，简化复杂的模板类型
+using ServoType =
+    Servo<DRV8231A, MT6701<BusType::kI2C>, CurrentMirror, kResolutionBits>;
+
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_slave(PB7, PA15);
 
 InfoLED info_led{};
 Slave slave{};
-Servo<DRV8231A, MT6701<BusType::kI2C>, CurrentMirror, kResolutionBits> servo{};
+ServoType servo{};
+Monitor<ServoType> monitor{};
 
 // 集中式任务调度器（固定容量，避免动态分配）
 TaskScheduler scheduler{};
@@ -95,18 +99,11 @@ void setup() {
   // slave.LinkServo(&servo);
   slave.Init();
 
-  // inst_accessor.SetMode(OperatingMode::kVelocity);
-  // inst_accessor.SetGoalVelocity(1000.0f);
-  // inst_accessor.SetVelPidKp(0.0f);
-  // inst_accessor.SetVelPidKi(0.0f);
-
-  // inst_accessor.SetBaudrate(100);
-
-  // inst.LoadEepromConfig();
-  // inst.LoadRamConfig();
+  monitor.LinkPort(&serial_debug);
+  monitor.LinkMotor(&servo);
 
   info_led.Init(kInfoLedPin, Mode::kOpenDrain);
-  info_led.SetInfo(InfoType::kOk);
+  info_led.SetInfo(InfoLED::InfoType::kOk);
 
   // 注册任务：集中式调度
   scheduler.Register(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制
@@ -129,18 +126,7 @@ Error MainLoopCallback(float dt) {
  * @param dt 距离上次调用的时间间隔（秒）
  */
 Error DebugOutputCallback(float dt) {
-  DebugPrint(F(">dt:"));
-  DebugPrintln(dt);
-  DebugPrint(F(">pwm:"));
-  DebugPrintln(servo.GetPresentPwm());
-
-  auto present_velocity = servo.GetPresentVelocity();
-  DebugPrint(F(">velocity:"));
-  DebugPrintln(present_velocity);
-
-  auto present_position = servo.GetPresentPosition();
-  DebugPrint(F(">position:"));
-  DebugPrintln(present_position);
+  CHECK(monitor.Process(dt));
   return Error::kOk;
 }
 
