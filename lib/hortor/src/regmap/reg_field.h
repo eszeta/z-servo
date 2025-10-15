@@ -80,8 +80,6 @@ struct __packed RegField {
   /** @brief 赋值操作符 */
   RegField& operator=(const RegField& other) = delete;
 
-  constexpr uint8_t getSize() const { return sizeof(T); }
-
   /**
    * @brief 获取寄存器中的特定位域值
    * @param field 寄存器位域描述

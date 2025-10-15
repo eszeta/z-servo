@@ -145,22 +145,24 @@ constexpr auto kPositionTrajectory = CTI32(140, 0);
 constexpr auto kPresentInputVoltage = CTI16(144, 0);
 /** @brief 当前温度 | 单位: °C | 访问: R */
 constexpr auto kPresentTemperature = CTI8(146, 0);
+
+constexpr static size_t kTotalSize = kPresentTemperature.reg.address + kPresentTemperature.reg.kSize;
 };  // namespace ControlTable
 
 namespace TableBlocks {
 constexpr static ControlTableBlock kEeprom = {
     ControlTable::kModelNumber.reg.address,
     ControlTable::kShutdown.reg.address +
-        ControlTable::kShutdown.reg.getSize()};
+        ControlTable::kShutdown.reg.kSize};
 
 constexpr static ControlTableBlock kRam = {
     ControlTable::kTorqueEnable.reg.address,
     ControlTable::kPresentTemperature.reg.address +
-        ControlTable::kPresentTemperature.reg.getSize()};
+        ControlTable::kPresentTemperature.reg.kSize};
 
 constexpr static ControlTableBlock kTotal = {
     ControlTable::kModelNumber.reg.address,
     ControlTable::kPresentTemperature.reg.address +
-        ControlTable::kPresentTemperature.reg.getSize()};
+        ControlTable::kPresentTemperature.reg.kSize};
 };  // namespace TableBlocks
 }  // namespace hortor::servo_slave

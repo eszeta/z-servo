@@ -3031,7 +3031,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
   Error StoreEeprom(const uint8_t address, const uint8_t size);
 
  private:
-  uint8_t table_[TableBlocks::kTotal.size()] = {};
+  uint8_t table_[ControlTable::kTotalSize] = {};
 };
 
 }  // namespace hortor::servo_slave
