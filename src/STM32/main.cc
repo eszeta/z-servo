@@ -119,7 +119,7 @@ void setup() {
  */
 Error MainLoopCallback(float dt) {
   info_led.Process(dt);
-  slave.Process(dt);
+  CHECK(slave.Process(dt));
   CHECK(servo.Process(dt));
   return Error::kOk;
 }
@@ -129,18 +129,18 @@ Error MainLoopCallback(float dt) {
  * @param dt 距离上次调用的时间间隔（秒）
  */
 Error DebugOutputCallback(float dt) {
-  // DebugPrint(F(">dt:"));
-  // DebugPrintln(dt);
-  // DebugPrint(F(">pwm:"));
-  // DebugPrintln(servo.GetPresentPwm());
+  DebugPrint(F(">dt:"));
+  DebugPrintln(dt);
+  DebugPrint(F(">pwm:"));
+  DebugPrintln(servo.GetPresentPwm());
 
-  // auto present_velocity = servo.GetPresentVelocity();
-  // DebugPrint(F(">velocity:"));
-  // DebugPrintln(present_velocity);
+  auto present_velocity = servo.GetPresentVelocity();
+  DebugPrint(F(">velocity:"));
+  DebugPrintln(present_velocity);
 
-  // auto present_position = servo.GetPresentPosition();
-  // DebugPrint(F(">position:"));
-  // DebugPrintln(present_position);
+  auto present_position = servo.GetPresentPosition();
+  DebugPrint(F(">position:"));
+  DebugPrintln(present_position);
   return Error::kOk;
 }
 

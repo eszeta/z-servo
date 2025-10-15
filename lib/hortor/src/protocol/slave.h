@@ -119,8 +119,7 @@ class Slave {
     if (!isSelf && !isBroadcast) {
       return Error::kOk;
     }
-    const auto instruction =
-        static_cast<Instruction>(packet.instructionOrError);
+    const auto instruction = packet.instructionOrError;
     const auto response = CheckResponse(instruction, return_level_);
 
     switch (instruction) {
@@ -349,7 +348,7 @@ class Slave {
     return AsDerived().ResetImpl();
   }
 
-  bool CheckResponse(const Instruction instruction,
+  bool CheckResponse(const uint8_t instruction,
                      const uint8_t return_level) const {
     switch (return_level) {
       case 0:

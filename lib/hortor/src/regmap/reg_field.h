@@ -45,7 +45,7 @@ using CombinedType = typename CombinedTypeImpl<T>::type;
 
 template <typename T>
 struct RegField;
-typedef RegField<uint8_t> RegField8;
+typedef RegField<uint8_t> RegField08;
 typedef RegField<uint16_t> RegField16;
 typedef RegField<uint32_t> RegField32;
 
@@ -58,6 +58,7 @@ typedef RegField<uint32_t> RegField32;
 template <typename T = uint8_t>
 struct __packed RegField {
  public:
+  static constexpr size_t kSize = sizeof(T);
   const uint8_t address;  // 寄存器地址
   const uint8_t shift;    // 起始位置
   const uint8_t bits;     // 位宽

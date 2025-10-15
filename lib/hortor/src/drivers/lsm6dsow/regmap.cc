@@ -16,30 +16,28 @@
 
 namespace hortor::drivers::LSM6DSOW {
 
-using Regs = LSM6DSOWRegs;
-
 Error RegMap::Init(TwoWire* wire, const int address) {
   CHECK(RegMapI2CBus::Init(wire, address));
   uint8_t value;
-  CHECK(Read(Regs::kWHO_AM_I.address, value));
+  CHECK(Read(LSM6DSOWRegs::kWHO_AM_I.address, value));
   if (value != 0x6C) {
     return Error::kGeneralErr;
   }
 
   // set the gyroscope control register to work at 104 Hz, 2000 dps and in
   // bypass mode
-  CHECK(Write(Regs::kCTRL2_G.address, 0x4C));
+  CHECK(Write(LSM6DSOWRegs::kCTRL2_G.address, 0x4C));
 
   // Set the Accelerometer control register to work at 104 Hz, 4 g,and in bypass
   // mode and enable ODR/4 low pass filter (check figure9 of LSM6DSOW's
   // datasheet)
-  CHECK(Write(Regs::kCTRL1_XL.address, 0x4A));
+  CHECK(Write(LSM6DSOWRegs::kCTRL1_XL.address, 0x4A));
 
   // set gyroscope power mode to high performance and bandwidth to 16 MHz
-  CHECK(Write(Regs::kCTRL7_G.address, 0x00));
+  CHECK(Write(LSM6DSOWRegs::kCTRL7_G.address, 0x00));
 
   // Set the ODR config register to ODR/4
-  CHECK(Write(Regs::kCTRL8_XL.address, 0x09));
+  CHECK(Write(LSM6DSOWRegs::kCTRL8_XL.address, 0x09));
 
   return Error::kOk;
 }
@@ -47,7 +45,7 @@ Error RegMap::Init(TwoWire* wire, const int address) {
 Error RegMap::ReadAcceleration(float& x, float& y, float& z) {
   const uint8_t size = 6;
   uint8_t data[size];
-  CHECK(ReadBytes(Regs::kOUTX_A.address, size, data));
+  CHECK(ReadBytes(LSM6DSOWRegs::kOUTX_A.address, size, data));
   const int16_t x_raw = static_cast<int16_t>(data[1] << 8 | data[0]);
   const int16_t y_raw = static_cast<int16_t>(data[3] << 8 | data[2]);
   const int16_t z_raw = static_cast<int16_t>(data[5] << 8 | data[4]);
@@ -59,7 +57,7 @@ Error RegMap::ReadAcceleration(float& x, float& y, float& z) {
 
 bool RegMap::AccelerationAvailable() {
   uint8_t value;
-  const Error err = ReadRegField(Regs::kXLDA, value);
+  const Error err = ReadRegField(LSM6DSOWRegs::kXLDA, value);
   if (err != Error::kOk) {
     return false;
   }
@@ -69,7 +67,7 @@ bool RegMap::AccelerationAvailable() {
 Error RegMap::ReadGyroscope(float& x, float& y, float& z) {
   const uint8_t size = 6;
   uint8_t data[size];
-  CHECK(ReadBytes(Regs::kOUTX_L_G.address, size, data));
+  CHECK(ReadBytes(LSM6DSOWRegs::kOUTX_L_G.address, size, data));
   const int16_t x_raw = static_cast<int16_t>(data[1] << 8 | data[0]);
   const int16_t y_raw = static_cast<int16_t>(data[3] << 8 | data[2]);
   const int16_t z_raw = static_cast<int16_t>(data[5] << 8 | data[4]);
@@ -81,7 +79,7 @@ Error RegMap::ReadGyroscope(float& x, float& y, float& z) {
 
 bool RegMap::GyroscopeAvailable() {
   uint8_t value;
-  const Error err = ReadRegField(Regs::kGDA, value);
+  const Error err = ReadRegField(LSM6DSOWRegs::kGDA, value);
   if (err != Error::kOk) {
     return false;
   }
@@ -91,7 +89,7 @@ bool RegMap::GyroscopeAvailable() {
 Error RegMap::ReadTemperature(float& temperature_deg) {
   const uint8_t size = 2;
   uint8_t data[size];
-  CHECK(ReadBytes(Regs::kOUT_TEMP.address, size, data));
+  CHECK(ReadBytes(LSM6DSOWRegs::kOUT_TEMP.address, size, data));
   const int16_t value = static_cast<int16_t>(data[1] << 8 | data[0]);
   temperature_deg = (static_cast<float>(value) / 256) + 25;
   return Error::kOk;
@@ -99,7 +97,7 @@ Error RegMap::ReadTemperature(float& temperature_deg) {
 
 bool RegMap::TemperatureAvailable() {
   uint8_t value;
-  const Error err = ReadRegField(Regs::kTDA, value);
+  const Error err = ReadRegField(LSM6DSOWRegs::kTDA, value);
   if (err != Error::kOk) {
     return false;
   }

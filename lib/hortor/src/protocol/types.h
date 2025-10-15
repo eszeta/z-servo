@@ -33,7 +33,8 @@ constexpr uint8_t kError = 4;
 constexpr uint8_t kParameter = 5;
 };  // namespace PacketIndex
 
-enum class Instruction : uint8_t {
+namespace Instruction {
+enum : uint8_t {
   kPing = 0x01,
   kReadData = 0x02,
   kWriteData = 0x03,
@@ -44,6 +45,7 @@ enum class Instruction : uint8_t {
   kSyncWrite = 0x82,
   kBulkRead = 0x92,
 };
+}  // namespace Instruction
 
 constexpr uint8_t kBroadcastId = 0xfe;
 

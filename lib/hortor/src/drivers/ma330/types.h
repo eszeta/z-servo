@@ -25,23 +25,23 @@ enum class FieldStrength : uint8_t {
   kErr = 0x03  // impossible state
 };
 
-struct MA330Regs {
-  using RegField8 = regmap::RegField8;
-  static constexpr RegField8 kZ_L{0x00, 0, 8};
-  static constexpr RegField8 kZ_H{0x01, 0, 8};
-  static constexpr RegField8 kBCT{0x02, 0, 8};
-  static constexpr RegField8 kETX{0x03, 0, 1};
-  static constexpr RegField8 kETY{0x03, 1, 1};
-  static constexpr RegField8 kILIP{0x04, 2, 4};
-  static constexpr RegField8 kPPT_L{0x04, 6, 2};
-  static constexpr RegField8 kPPT_H{0x05, 0, 8};
-  static constexpr RegField8 kMGHT{0x06, 2, 3};
-  static constexpr RegField8 kMGLT{0x06, 5, 3};
-  static constexpr RegField8 kNPP{0x07, 5, 3};
-  static constexpr RegField8 kRD{0x09, 7, 1};
-  static constexpr RegField8 kFW{0x0E, 0, 8};
-  static constexpr RegField8 kHYS{0x10, 0, 8};
-  static constexpr RegField8 kMGL_MGH{0x1B, 6, 2};
+namespace MA330Regs {
+  using RegField08 = regmap::RegField08;
+  static constexpr RegField08 kZ_L{0x00, 0, 8};
+  static constexpr RegField08 kZ_H{0x01, 0, 8};
+  static constexpr RegField08 kBCT{0x02, 0, 8};
+  static constexpr RegField08 kETX{0x03, 0, 1};
+  static constexpr RegField08 kETY{0x03, 1, 1};
+  static constexpr RegField08 kILIP{0x04, 2, 4};
+  static constexpr RegField08 kPPT_L{0x04, 6, 2};
+  static constexpr RegField08 kPPT_H{0x05, 0, 8};
+  static constexpr RegField08 kMGHT{0x06, 2, 3};
+  static constexpr RegField08 kMGLT{0x06, 5, 3};
+  static constexpr RegField08 kNPP{0x07, 5, 3};
+  static constexpr RegField08 kRD{0x09, 7, 1};
+  static constexpr RegField08 kFW{0x0E, 0, 8};
+  static constexpr RegField08 kHYS{0x10, 0, 8};
+  static constexpr RegField08 kMGL_MGH{0x1B, 6, 2};
 };  // struct MA330Regs
 
 }  // namespace hortor::drivers::MA330
