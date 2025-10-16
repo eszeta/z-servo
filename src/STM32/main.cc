@@ -25,6 +25,7 @@
 #include <utils/debug_print.h>
 #include <utils/monitor.h>
 #include <utils/task_scheduler.h>
+#include <utils/commander.h>
 
 using hortor::Error;
 using hortor::drivers::current_mirror::CurrentMirror;
@@ -38,7 +39,7 @@ using hortor::servo_slave::Slave;
 using hortor::utils::DebugEnable;
 using hortor::utils::Monitor;
 using hortor::utils::TaskScheduler;
-
+using hortor::utils::Commander;
 // 信息灯引脚
 constexpr auto kInfoLedPin = PA12;
 // 主控制循环频率 1000Hz
@@ -60,7 +61,7 @@ InfoLED info_led{};
 Slave slave{};
 ServoType servo{};
 Monitor<ServoType> monitor{};
-
+Commander commander{};
 // 集中式任务调度器（固定容量，避免动态分配）
 TaskScheduler scheduler{};
 
