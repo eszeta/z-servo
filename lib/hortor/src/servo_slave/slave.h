@@ -22,36 +22,71 @@
 #include "regmap.h"
 
 namespace hortor::servo_slave {
-
-class Slave : public protocol::Slave<Slave, RegMap, protocol::I2cPortHandler> {
+template <typename ServoType>
+class Slave : public protocol::
+                  Slave<Slave<ServoType>, RegMap, protocol::I2cPortHandler> {
  public:
+  ServoType& GetServo() { return *servo_; }
+  /**
+   * @brief 链接伺服电机
+   * @param servo 伺服电机
+   * @return 错误码
+   */
+  Error LinkServo(ServoType* servo) {
+    servo_ = servo;
+    return Error::kOk;
+  }
+
   Error Init() {
     CHECK((protocol::Slave<Slave, RegMap, protocol::I2cPortHandler>::Init()));
-    uint8_t id = 0;
-    CHECK(regmap_.GetId(id));
-    uint8_t return_level = 0;
-    CHECK(regmap_.GetStatusReturnLevel(return_level));
-    SetId(id);
-    SetReturnLevel(return_level);
-    SetStatus(0);
+    this->SetId(this->regmap_.GetId());
+    this->SetReturnLevel(this->regmap_.GetStatusReturnLevel());
+    this->SetStatus(0);
     return Error::kOk;
   }
 
   Error ResetImpl() {
-    regmap_.RecoveryEeprom();
+    this->regmap_.RecoveryEeprom();
     return Error::kOk;
   }
 
   Error WriteRegsImpl(const uint8_t address,
                       const uint8_t* data,
                       const size_t size) {
+    if (TableBlocks::kEeprom.InBlock(address, size)) {
+      CHECK(this->regmap_.StoreEeprom());
+    }
+    CHECK(SyncSlaveParameters());
+    CHECK(SyncMotorParameters());
     return Error::kOk;
   }
 
   Error ResponseImpl(const uint8_t reply_idx,
                      const uint8_t* parameter,
                      const size_t parameter_size) {
-    SetStatus(0);
+    this->SetStatus(0);
+    return Error::kOk;
+  }
+
+ private:
+  /**
+   * @brief 伺服电机
+   */
+  ServoType* servo_ = nullptr;
+  /**
+   * @brief 同步从机参数
+   */
+  Error SyncSlaveParameters() {
+    this->SetId(this->regmap_.GetId());
+    this->SetReturnLevel(this->regmap_.GetStatusReturnLevel());
+    return Error::kOk;
+  }
+  /**
+   * @brief 同步电机参数
+   * @return 错误码
+   */
+  Error SyncMotorParameters() {
+    this->regmap_.GetVelocityIgain();
     return Error::kOk;
   }
 };

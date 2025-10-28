@@ -26,38 +26,26 @@ Error RegMap::Init() {
 }
 Error RegMap::RecoveryEeprom() { return Error::kOk; }
 Error RegMap::LoadEeprom() {
-  // #ifndef EEPROM_DISABLE
-  //   int pos = 0;
-  //   for (uint8_t address = RegsBlocks::kEeprom.begin;
-  //        address < RegsBlocks::kEeprom.end;
-  //        address++) {
-  //     regs_[address] = EEPROM.read(pos++);
-  //   }
-  //   for (uint8_t address = RegsBlocks::kInternalEeprom.begin;
-  //        address < RegsBlocks::kInternalEeprom.end;
-  //        address++) {
-  //     regs_[address] = EEPROM.read(pos++);
-  //   }
-  // #endif
+#ifndef EEPROM_DISABLE
+  int pos = 0;
+  for (uint8_t address = TableBlocks::kEeprom.begin;
+       address < TableBlocks::kEeprom.end;
+       address++) {
+    regs_[address] = EEPROM.read(pos++);
+  }
+#endif
   return Error::kOk;
 }
+
 Error RegMap::StoreEeprom() {
-  // #ifndef EEPROM_DISABLE
-  //   int pos = 0;
-  //   for (uint8_t address = RegsBlocks::kEeprom.begin;
-  //        address < RegsBlocks::kEeprom.end;
-  //        address++) {
-  //     EEPROM.update(pos++, regs_[address]);
-  //   }
-  //   for (uint8_t address = RegsBlocks::kInternalEeprom.begin;
-  //        address < RegsBlocks::kInternalEeprom.end;
-  //        address++) {
-  //     EEPROM.update(pos++, regs_[address]);
-  //   }
-  // #endif
-  return Error::kOk;
-}
-Error RegMap::StoreEeprom(const uint8_t address, const uint8_t size) {
+#ifndef EEPROM_DISABLE
+  int pos = 0;
+  for (uint8_t address = TableBlocks::kEeprom.begin;
+       address < TableBlocks::kEeprom.end;
+       address++) {
+    EEPROM.update(pos++, regs_[address]);
+  }
+#endif
   return Error::kOk;
 }
 }  // namespace hortor::servo_slave

@@ -427,8 +427,6 @@ class Servo {
    * 6. 最终 PWM 通过逆变器作用于电机，驱动舵机输出端运动。
    * 7. 结果更新到 Present Position、Present Velocity、Present PWM 与
    * Present Current。
-   *
-   * 其中 Ka 为抗积分饱和增益（Anti-windup Gain），用户不可修改。
    */
   void positionControler(float dt) {
     const auto limited_goal_position = GetLimitedGoalPosition();

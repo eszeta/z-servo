@@ -22,10 +22,10 @@
 #include <math/math.h>
 #include <servo/servo.h>
 #include <servo_slave/slave.h>
+#include <utils/commander.h>
 #include <utils/debug_print.h>
 #include <utils/monitor.h>
 #include <utils/task_scheduler.h>
-#include <utils/commander.h>
 
 using hortor::Error;
 using hortor::drivers::current_mirror::CurrentMirror;
@@ -36,10 +36,10 @@ using hortor::info_led::InfoLED;
 using hortor::info_led::Mode;
 using hortor::servo::Servo;
 using hortor::servo_slave::Slave;
+using hortor::utils::Commander;
 using hortor::utils::DebugEnable;
 using hortor::utils::Monitor;
 using hortor::utils::TaskScheduler;
-using hortor::utils::Commander;
 // 信息灯引脚
 constexpr auto kInfoLedPin = PA12;
 // 主控制循环频率 1000Hz
@@ -58,7 +58,7 @@ TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_slave(PB7, PA15);
 
 InfoLED info_led{};
-Slave slave{};
+Slave<ServoType> slave{};
 ServoType servo{};
 Monitor<ServoType> monitor{};
 Commander commander{};
@@ -97,7 +97,7 @@ void setup() {
 
   slave.GetRegMap().Init();
   slave.GetPortHandler().Init(&wire_slave);
-  // slave.LinkServo(&servo);
+  slave.LinkServo(&servo);
   slave.Init();
 
   monitor.LinkPort(&serial_debug);

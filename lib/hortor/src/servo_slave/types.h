@@ -117,9 +117,11 @@ constexpr auto kGoalPwm = CTI16(100, 0);
 constexpr auto kGoalCurrent = CTI16(102, 0);
 /** @brief 目标速度 | 单位: 0.229 rev/min | 访问: RW */
 constexpr auto kGoalVelocity = CTI32(104, 0);
-/** @brief 轨迹加速度 | 单位: Velocity-based: 214.577 rev/min², Time-based: 1ms | 访问: RW */
+/** @brief 轨迹加速度 | 单位: Velocity-based: 214.577 rev/min², Time-based: 1ms
+ * | 访问: RW */
 constexpr auto kProfileAcceleration = CTI32(108, 0);
-/** @brief 轨迹速度 | 单位: Velocity-based: 0.229 rev/min, Time-based: 1ms | 访问: RW */
+/** @brief 轨迹速度 | 单位: Velocity-based: 0.229 rev/min, Time-based: 1ms |
+ * 访问: RW */
 constexpr auto kProfileVelocity = CTI32(112, 0);
 /** @brief 目标位置 | 单位: pulse (0-4095=0-360°) | 访问: RW */
 constexpr auto kGoalPosition = CTI32(116, 0);
@@ -146,22 +148,17 @@ constexpr auto kPresentInputVoltage = CTI16(144, 0);
 /** @brief 当前温度 | 单位: °C | 访问: R */
 constexpr auto kPresentTemperature = CTI8(146, 0);
 
-constexpr static size_t kTotalSize = kPresentTemperature.reg.address + kPresentTemperature.reg.kSize;
+constexpr static size_t kTotalSize =
+    kPresentTemperature.reg.address + kPresentTemperature.reg.kSize;
 };  // namespace ControlTable
 
 namespace TableBlocks {
 constexpr static ControlTableBlock kEeprom = {
     ControlTable::kModelNumber.reg.address,
-    ControlTable::kShutdown.reg.address +
-        ControlTable::kShutdown.reg.kSize};
+    ControlTable::kShutdown.reg.address + ControlTable::kShutdown.reg.kSize};
 
 constexpr static ControlTableBlock kRam = {
     ControlTable::kTorqueEnable.reg.address,
-    ControlTable::kPresentTemperature.reg.address +
-        ControlTable::kPresentTemperature.reg.kSize};
-
-constexpr static ControlTableBlock kTotal = {
-    ControlTable::kModelNumber.reg.address,
     ControlTable::kPresentTemperature.reg.address +
         ControlTable::kPresentTemperature.reg.kSize};
 };  // namespace TableBlocks
