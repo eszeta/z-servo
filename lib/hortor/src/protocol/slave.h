@@ -56,7 +56,7 @@ class Slave {
     if (is_complete) {
       CHECK(Execute(inst_packet_));
     }
-    return Error::kOk;
+    return AsDerived().ProcessImpl(dt);
   }
 
   /**
@@ -243,11 +243,11 @@ class Slave {
    */
   Error RegWriteHandler(const InstPacket& packet, const bool response) {
     const size_t size = packet.GetBufferSize();
-    if (buffer_size_ + size > sizeof(async_write_buffer_)) {
+    if (async_write_buffer_size_ + size > sizeof(async_write_buffer_)) {
       return Error::kArrayOutOfRange;
     }
-    memcpy(async_write_buffer_ + buffer_size_, packet.buffer, size);
-    buffer_size_ += size;
+    memcpy(async_write_buffer_ + async_write_buffer_size_, packet.buffer, size);
+    async_write_buffer_size_ += size;
     if (response) {
       CHECK(Response(0, nullptr, 0));
     }
@@ -261,20 +261,20 @@ class Slave {
    */
   Error ActionHandler(const InstPacket& packet, const bool response) {
     const uint8_t* buffer = async_write_buffer_;
-    while (buffer_size_ > 0) {
+    while (async_write_buffer_size_ > 0) {
       const InstPacket* const reg_write_packet =
           reinterpret_cast<const InstPacket*>(buffer);
       const size_t packet_size = reg_write_packet->GetBufferSize();
-      if (buffer_size_ < packet_size) {
+      if (async_write_buffer_size_ < packet_size) {
         break;
       }
       const uint8_t address = reg_write_packet->parameter[0];
       const uint8_t size = reg_write_packet->GetParameterSize() - 1;
       CHECK(WriteRegs(address, reg_write_packet->parameter + 1, size));
-      buffer_size_ -= packet_size;
+      async_write_buffer_size_ -= packet_size;
       buffer += packet_size;
     }
-    buffer_size_ = 0;
+    async_write_buffer_size_ = 0;
     if (response) {
       CHECK(Response(0, nullptr, 0));
     }
@@ -390,7 +390,7 @@ class Slave {
   /**
    * @brief 异步写缓冲区大小
    */
-  size_t buffer_size_ = 0;
+  size_t async_write_buffer_size_ = 0;
 
   InstProtocol protocol_{};
   InstPacket inst_packet_{};

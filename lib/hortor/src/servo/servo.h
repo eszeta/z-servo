@@ -43,8 +43,8 @@ union DriveMode {
   };
 };
 
-/** @brief 控制模式 */
-union ControlMode {
+/** @brief 运动状态 */
+union MovingStatus {
   uint8_t value_ = 0;
   struct {
     bool in_position_ : 1;          // 位0: 已到达目标位置
@@ -110,18 +110,28 @@ class Servo {
   void SetOperatingMode(const OperatingMode operating_mode) {
     operating_mode_ = operating_mode;
   }
+  void SetOperatingMode(const uint8_t operating_mode) {
+    operating_mode_ = static_cast<OperatingMode>(operating_mode);
+  }
   /** @brief 驱动模式 */
   DriveMode GetDriveMode() const { return drive_mode_; }
   void SetDriveMode(const DriveMode drive_mode) { drive_mode_ = drive_mode; }
+  void SetDriveMode(const uint8_t drive_mode) {
+    drive_mode_.value_ = drive_mode;
+  }
 
   int8_t GetReverseModeDirection() const {
     return drive_mode_.reverse_mode_ ? -1 : 1;
   }
 
   /** @brief 控制模式 */
-  ControlMode GetControlMode() const { return control_mode_; }
-  void SetControlMode(const ControlMode control_mode) {
-    control_mode_ = control_mode;
+  MovingStatus GetMovingStatus() const { return moving_status_; }
+  uint8_t GetMovingStatusValue() const { return moving_status_.value_; }
+  void SetMovingStatus(const MovingStatus control_mode) {
+    moving_status_ = control_mode;
+  }
+  void SetMovingStatus(const uint8_t moving_status) {
+    moving_status_.value_ = moving_status;
   }
 
   // ========== 内部设置 ==========
@@ -250,7 +260,7 @@ class Servo {
    */
   Error Process(float dt) {
     CHECK(RefreshPresent(dt));
-    CHECK(ExecuteControlMode(dt));
+    CHECK(ExecuteOperatingMode(dt));
     return Error::kOk;
   }
 
@@ -276,7 +286,7 @@ class Servo {
   DriveMode drive_mode_{};
 
   /** @brief 控制模式 */
-  ControlMode control_mode_{};
+  MovingStatus moving_status_{};
 
   // ========== 内部设置 ==========
   /** @brief 传感器安装方向 */
@@ -377,7 +387,7 @@ class Servo {
    * @param dt 时间间隔(秒)
    * @return 错误码
    */
-  Error ExecuteControlMode(float dt) {
+  Error ExecuteOperatingMode(float dt) {
     if (!GetTorqueEnable()) {
       return Error::kOk;
     }
@@ -391,7 +401,7 @@ class Servo {
         break;
       }
       case OperatingMode::kPosition: {
-        positionControler(dt);
+        positionMode(dt);
         break;
       }
       case OperatingMode::kExtendedPosition: {
@@ -428,7 +438,7 @@ class Servo {
    * 7. 结果更新到 Present Position、Present Velocity、Present PWM 与
    * Present Current。
    */
-  void positionControler(float dt) {
+  void positionMode(float dt) {
     const auto limited_goal_position = GetLimitedGoalPosition();
     const auto velocityTrajectory = 0;
     const auto positionTrajectory = limited_goal_position;
