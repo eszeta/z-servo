@@ -91,6 +91,11 @@ class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
 template <>
 class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
  public:
+  struct Config {
+    TwoWire* wire;
+    servo::Reverse direction;
+    int32_t homing_offset;
+  };
   /**
    * @brief 构造函数
    *
@@ -106,9 +111,10 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
    * 配置并初始化MT6701传感器，建立I2C通信，并执行基类初始化。
    * 必须在使用传感器前调用此方法。
    */
-  Error Init(TwoWire* wire) {
-    CHECK(regmap_.Init(wire, kI2CAddress));
-    CHECK(MT6701Base<RegMapI2CBus>::Init());
+  Error Init(const Config& config) {
+    CHECK(regmap_.Init(config.wire, kI2CAddress));
+    CHECK(
+        MT6701Base<RegMapI2CBus>::Init(config.direction, config.homing_offset));
     return Error::kOk;
   }
 };
@@ -123,6 +129,13 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
 template <>
 class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
  public:
+  struct Config {
+    SPIClass* spi;
+    int cs_pin;
+    SPISettings spi_settings;
+    servo::Reverse direction;
+    int32_t homing_offset;
+  };
   /**
    * @brief 构造函数
    *
@@ -140,9 +153,10 @@ class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
    * 配置并初始化MT6701传感器，建立SPI通信，并执行基类初始化。
    * 必须在使用传感器前调用此方法。
    */
-  Error Init(SPIClass* spi, int cs_pin, const SPISettings& spi_settings) {
-    CHECK(regmap_.Init(spi, cs_pin, spi_settings));
-    CHECK(MT6701Base<RegMapSpiBus>::Init());
+  Error Init(const Config& config) {
+    CHECK(regmap_.Init(config.spi, config.cs_pin, config.spi_settings));
+    CHECK(
+        MT6701Base<RegMapSpiBus>::Init(config.direction, config.homing_offset));
     return Error::kOk;
   }
 };

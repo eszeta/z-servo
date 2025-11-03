@@ -96,10 +96,9 @@ enum class OperatingMode : uint8_t {
 /**
  * @brief 方向
  */
-enum class Direction : int8_t {
-  CW = 1,      // clockwise
-  CCW = -1,    // counterclockwise
-  unknown = 0  // not yet known or invalid state
+enum class Reverse : int8_t {
+  kNormal = 1,    // clockwise
+  kReverse = -1,  // counterclockwise
 };
 
 }  // namespace hortor::servo

@@ -54,35 +54,52 @@ class Encoder {
    * @brief 获取原始计数值
    * @return 当前原始计数值
    */
-  uint16_t GetRewPos() { return rew_pos_; }
+  uint16_t GetRewPos() const { return rew_pos_; }
 
   /**
    * @brief 获取总累积计数值
    * @return 当前总累积计数值
    */
-  int32_t GetPosCounts() { return pos_counts_; }
+  int32_t GetPos() const {
+    return pos_ + homing_offset_ * static_cast<int32_t>(reverse_);
+  }
 
   /**
    * @brief 获取圈数
-   * @return 圈数（正值表示顺时针，负值表示逆时针）
+   * @return 圈数
    */
-  int32_t GetRevolutions() { return pos_counts_ / kResolution.kEncoderCpr; }
+  int32_t GetRevolutions() const { return GetPos() / kResolution.kEncoderCpr; }
+
+  /**
+   * @brief 获取反转
+   * @return 反转
+   */
+  Reverse GetReverse() const { return reverse_; }
+  void SetReverse(const Reverse reverse) { reverse_ = reverse; }
+
+  /** @brief 归零偏移 */
+  int32_t GetHomingOffset() const { return homing_offset_; }
+  void SetHomingOffset(const int32_t homing_offset) {
+    homing_offset_ = homing_offset;
+  }
 
   /**
    * @brief 初始化传感器
+   * @param reverse 反转
    *
    * 执行传感器初始化操作，包括初始读取和变量初始化。
    * 子类可以重写此方法以添加特定的初始化步骤。
    */
-  Error Init() {
+  Error Init(const Reverse reverse, const int32_t homing_offset) {
     // 读取初始原始值，等待传感器稳定后再次读取
     CHECK(GetRaw(rew_pos_));
     delay(10);
     CHECK(GetRaw(rew_pos_));
 
     // 初始化所有位置和速度状态变量
-    pos_counts_ = rew_pos_;
-
+    reverse_ = reverse;
+    homing_offset_ = homing_offset;
+    pos_ = pos_ * static_cast<int32_t>(reverse);
     return Error::kOk;
   }
 
@@ -107,11 +124,24 @@ class Encoder {
     }
 
     // 更新线性累加位置（可跨越多圈）
-    pos_counts_ += delta_enc;
+    pos_ += delta_enc * static_cast<int32_t>(reverse_);
 
     // 更新原始值记录
     rew_pos_ = raw_new;
     return Error::kOk;
+  }
+
+  /**
+   * @brief 置中
+   *
+   * 将当前位置设置为编码器量程的中心位置，通过调整 homing_offset_ 实现。
+   * 调用此方法后，GetPos() 将返回 kResolution.kMax / 2。
+   */
+  void Center() {
+    const int32_t center_target = static_cast<int32_t>(kResolution.kMax / 2);
+    const int32_t reverse_val = static_cast<int32_t>(reverse_);
+    const int32_t new_homing_offset = (center_target - pos_) * reverse_val;
+    SetHomingOffset(new_homing_offset);
   }
 
   /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
@@ -131,7 +161,11 @@ class Encoder {
   /** @brief 原始值 [0, CPR-1] */
   uint16_t rew_pos_ = 0;
   /** @brief 线性累加位置 [-∞, +∞] */
-  int32_t pos_counts_ = 0;
+  int32_t pos_ = 0;
+  /** @brief 反转 */
+  Reverse reverse_ = Reverse::kNormal;
+  /** @brief 归零偏移 */
+  int32_t homing_offset_ = 0;
 };
 
 }  // namespace hortor::servo

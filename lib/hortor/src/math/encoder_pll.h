@@ -27,7 +27,7 @@ class EncoderPll {
  public:
   explicit EncoderPll() {}
   Error Init(uint16_t pos) {
-    pulse_ = static_cast<float>(pos);
+    pos_ = static_cast<float>(pos);
     velocity_ = 0.0f;
     return Error::kOk;
   }
@@ -36,7 +36,7 @@ class EncoderPll {
    * @brief 获取估计位置
    * @return 估计位置（单位：pulse）
    */
-  float Pulse() const { return pulse_; }
+  float Pos() const { return pos_; }
 
   /**
    * @brief 获取估计速度
@@ -60,13 +60,13 @@ class EncoderPll {
     const auto mapped =
         math::mapResolution(pos_counts, encoder_bits, kResolution.kBits);
     // PLL 预测步骤：使用当前速度估计预测下一个位置
-    pulse_ += dt * velocity_;
+    pos_ += dt * velocity_;
 
     // PLL 误差计算
-    float error = static_cast<float>(mapped) - pulse_;
+    float error = static_cast<float>(mapped) - pos_;
 
     // PLL 校正步骤：用比例-积分反馈校正估计值
-    pulse_ += dt * kPllKp * error;
+    pos_ += dt * kPllKp * error;
     velocity_ += dt * kPllKi * error;
 
     // 零速度对齐：防止静止时的速度抖动
@@ -90,7 +90,7 @@ class EncoderPll {
 
   // PLL 状态变量
   /** @brief 线性位置估计（平滑后） */
-  float pulse_ = 0.0f;
+  float pos_ = 0.0f;
   /** @brief 速度估计 [pulse/s] */
   float velocity_ = 0.0f;
   /** @brief 速度估计 [RPM] */

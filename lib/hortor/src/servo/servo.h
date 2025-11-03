@@ -136,14 +136,15 @@ class Servo {
 
   // ========== 内部设置 ==========
   /** @brief 传感器方向 */
-  int8_t GetEncoderDirection() const { return encoder_direction_; }
-  void SetEncoderDirection(const int8_t encoder_direction) {
-    encoder_direction_ = encoder_direction;
+  Reverse GetEncoderDirection() const { return encoder_.GetDirection(); }
+  void SetEncoderDirection(const Reverse encoder_direction) {
+    encoder_.SetDirection(encoder_direction);
   }
+
   /** @brief 电机方向 */
-  int8_t GetMotorDirection() const { return motor_direction_; }
-  void SetMotorDirection(const int8_t motor_direction) {
-    motor_direction_ = motor_direction;
+  Reverse GetMotorDirection() const { return motor_.GetDirection(); }
+  void SetMotorDirection(const Reverse motor_direction) {
+    motor_.SetDirection(motor_direction);
   }
 
   // ========== 当前状态 ==========
@@ -192,6 +193,23 @@ class Servo {
   void SetMaxPositionLimit(const uint32_t max_position_limit) {
     max_position_limit_ = max_position_limit;
   }
+
+  /** @brief 归零偏移 */
+  int32_t GetHomingOffset() const {
+    const auto kBits = encoder_.kResolutionBits;
+    const auto kTargetBits = kResolution.kBits;
+    const auto homing_offset = encoder_.GetHomingOffset();
+    return math::mapResolution(homing_offset, kBits, kTargetBits);
+  }
+
+  void SetHomingOffset(const int32_t homing_offset) {
+    const auto kBits = kResolution.kBits;
+    const auto kTargetBits = encoder_.kResolutionBits;
+    const auto mapped_offset =
+        math::mapResolution(homing_offset, kBits, kTargetBits);
+    encoder_.SetHomingOffset(mapped_offset);
+  }
+
   /** @brief 目标PWM */
   float GetGoalPwm() const { return goal_pwm_; }
   void SetGoalPwm(const float goal_pwm) { goal_pwm_ = goal_pwm; }
@@ -288,12 +306,6 @@ class Servo {
   /** @brief 控制模式 */
   MovingStatus moving_status_{};
 
-  // ========== 内部设置 ==========
-  /** @brief 传感器安装方向 */
-  int8_t encoder_direction_ = -1;
-  /** @brief 电机安装方向 */
-  int8_t motor_direction_ = 1;
-
   // ========== 当前状态 ==========
   /** @brief 当前位置 */
   uint32_t present_position_ = 0;
@@ -362,18 +374,17 @@ class Servo {
     // 处理编码器
     CHECK(encoder_.Process(dt));
     // 处理编码器PLL
-    CHECK(encoder_pll_.Process(
-        dt, encoder_.GetPosCounts(), encoder_.kResolution.kBits));
+    const auto pos = encoder_.GetPos();
+    CHECK(encoder_pll_.Process(dt, pos, encoder_.kResolution.kBits));
 
     // 获取当前位置
-    const auto direction = GetEncoderDirection();
     const auto reverse_mode_direction = GetReverseModeDirection();
-    SetPresentPosition(encoder_pll_.Pulse() * direction *
-                       reverse_mode_direction);
+    const auto pos_pll = encoder_pll_.Pos();
+    SetPresentPosition(pos_pll * reverse_mode_direction);
 
     // 获取当前速度
-    SetPresentVelocity(encoder_pll_.GetRpm() * direction *
-                       reverse_mode_direction);
+    const auto velocity = encoder_pll_.GetRpm();
+    SetPresentVelocity(velocity * reverse_mode_direction);
 
     // 获取当前电流
     float current_float;
@@ -465,9 +476,8 @@ class Servo {
    * @param pwm PWM值
    */
   void SetMotorPower(const float pwm) {
-    const auto direction = GetMotorDirection();
     const auto reverse_mode_direction = GetReverseModeDirection();
-    const auto pwm_set = pwm * direction * reverse_mode_direction;
+    const auto pwm_set = pwm * reverse_mode_direction;
     SetPresentPwm(pwm_set);
     motor_.SetPWM(pwm_set);
   }

@@ -24,11 +24,12 @@ Error MP6515::Init(const Config& config) {
     return Error::kInvalidParameter;
   }
 
+  CHECK(servo::Motor<MP6515>::Init(config.direction));
+
   pin_phase_ = config.pin_phase;
   pin_enbl_ = config.pin_enbl;
   pin_brake_ = config.pin_brake;
   pin_sleep_ = config.pin_sleep;
-
   // 配置引脚模式
   pinMode(pin_phase_, OUTPUT);
   pinMode(pin_enbl_, OUTPUT);

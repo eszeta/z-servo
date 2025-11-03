@@ -15,6 +15,7 @@
 #pragma once
 
 #include "hortor.h"
+#include "types.h"
 
 namespace hortor::servo {
 
@@ -32,12 +33,25 @@ class Motor {
     return static_cast<const Derived&>(*this);
   }
 
+  /** @brief 电机反转 */
+  Reverse reverse_ = Reverse::kNormal;
+
  public:
+  /**
+   * @brief 初始化电机驱动器
+   * @param reverse 电机反转
+   */
+  Error Init(const Reverse reverse) {
+    reverse_ = reverse;
+    return Error::kOk;
+  }
   /**
    * @brief 设置电机PWM
    * @param pwm (-1..1)
    */
-  void SetPWM(float pwm) { return AsDerived().SetPWMImpl(pwm); }
+  void SetPWM(float pwm) {
+    return AsDerived().SetPWMImpl(pwm * static_cast<int8_t>(reverse_));
+  }
 
   /**
    * @brief 制动（快速停止）
@@ -48,5 +62,16 @@ class Motor {
    * @brief 滑行（自由停止）
    */
   void Coast() { return AsDerived().CoastImpl(); }
+
+  /**
+   * @brief 获取电机反转
+   * @return 电机反转
+   */
+  Reverse GetReverse() const { return reverse_; }
+  /**
+   * @brief 设置电机反转
+   * @param reverse 电机反转
+   */
+  void SetReverse(const Reverse reverse) { reverse_ = reverse; }
 };
 }  // namespace hortor::servo

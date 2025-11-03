@@ -97,7 +97,7 @@ class Slave : public protocol::
   Error ApplyMotorConfig() {
     this->servo_->SetDriveMode(this->regmap_.GetDriveMode());
     this->servo_->SetOperatingMode(this->regmap_.GetOperatingMode());
-    // this->regmap_.GetHomingOffset();
+    this->servo_->SetHomingOffset(this->regmap_.GetHomingOffset());
     // this->regmap_.GetMovingThreshold();
     // this->regmap_.GetTemperatureLimit();
     // this->regmap_.GetMaxVoltageLimit();

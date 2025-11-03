@@ -34,6 +34,7 @@ using hortor::drivers::MT6701::BusType;
 using hortor::drivers::MT6701::MT6701;
 using hortor::info_led::InfoLED;
 using hortor::info_led::Mode;
+using hortor::servo::Reverse;
 using hortor::servo::Servo;
 using hortor::servo_slave::Slave;
 using hortor::utils::Commander;
@@ -83,10 +84,13 @@ void setup() {
   servo.GetMotor().Init({
       .pin_in1 = PA0,
       .pin_in2 = PA2,
-      .pin_nfault = 0,              // 如果硬件连接了 nFAULT，填入引脚号
-      .slow_decay_threshold = 0.3f  // 低于 30% 使用慢速衰减
+      .pin_nfault = 0,                // 如果硬件连接了 nFAULT，填入引脚号
+      .slow_decay_threshold = 0.3f,   // 低于 30% 使用慢速衰减
+      .direction = Reverse::kNormal,  // 电机方向
   });
-  servo.GetSensor().Init(&wire_sensor);
+  servo.GetSensor().Init({.wire = &wire_sensor,
+                          .direction = Reverse::kNormal,
+                          .homing_offset = 0});
   servo.GetCurrentSense().Init({.pin_adc = PA3,
                                 .ripropi_ohms = 1000.0f,
                                 .scaling_factor = 1500.0f,

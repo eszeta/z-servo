@@ -778,7 +778,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * 【功能说明】
    * - 归零偏移用于定义舵机的零位参考点
    * - 影响所有位置指令的计算
-   * - 实际目标位置 = Goal Position + Homing Offset
+   * - 实际目标位置 = Goal Position
    * - 修改后需要重启生效
    *
    * 【使用场景】
@@ -793,7 +793,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * 【相关寄存器】
    * - Goal Position: 目标位置会加上此偏移
-   * - Present Position: 当前位置显示不受影响
+   * - Present Position: 当前位置会加上此偏移
    * - Min/Max Position Limit: 限位范围不受影响
    * - Operating Mode: 不同模式下的行为差异
    *

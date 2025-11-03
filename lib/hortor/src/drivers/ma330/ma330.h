@@ -32,6 +32,13 @@ constexpr uint8_t kResolutionBits = 14;
  */
 class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
  public:
+  struct Config {
+    SPIClass *spi;
+    uint8_t cs_pin;
+    servo::Reverse direction;
+    int32_t homing_offset;
+  };
+
   explicit MA330() : servo::Encoder<MA330, kResolutionBits>() {}
   /**
    * @brief 初始化传感器
@@ -41,7 +48,7 @@ class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
    * 配置并初始化MT6701传感器，建立I2C通信，并执行基类初始化。
    * 必须在使用传感器前调用此方法。
    */
-  Error InitSPI(SPIClass *spi, const uint8_t cs_pin);
+  Error InitSPI(const Config &config);
 
   /**
    * @brief 获取原始角度值
