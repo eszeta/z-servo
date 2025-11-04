@@ -467,7 +467,9 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * | 2   | Profile Configuration      | 0: Velocity-based, 1: Time-based                                               |
    * | 3   | Torque On by Goal Update   | 0: 仅在 Torque Enable=1时执行命令                                              |
    * |     |                            | 1: 忽略 Torque Enable 状态，若 Torque Enable=0且收到命令则自动置 1 并执行      |
-   * | 4-7 | -                          | 保留（未使用）                                                                 |
+   * | 4   | Motor Reverse Mode         | 0: Normal, 1: Reverse                                                          |
+   * | 5   | Encoder Reverse Mode       | 0: Normal, 1: Reverse                                                          |
+   * | 6-7 | Reserved                   | 保留（未使用）                                                                 |
    *
    * 【反转模式 (Bit 0)】
    * - [0] Normal Mode: CCW(正), CW(反)
@@ -481,6 +483,16 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - [0] 标准：仅当 Torque Enable=1 时执行目标命令
    * - [1] 联动：忽略当前 Torque Enable 值；若为 0 且接收到命令，
    *             将自动置 Torque Enable=1 并执行命令
+   * 
+   * 【电机反转模式 (Bit 4)】
+   * - 电机正反转模式，修正最终输出轴方向不一致问题
+   * - [0] Normal Mode: 正
+   * - [1] Reverse Mode: 反
+   *
+   * 【编码器反转模式 (Bit 5)】
+   * - 编码器正反转模式，修正最终输出轴方向不一致问题
+   * - [0] Normal Mode: 正
+   * - [1] Reverse Mode: 反
    *
    * 【相关寄存器】
    * - Profile Velocity: Velocity-based 模式使用
@@ -1921,7 +1933,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
   //==============================================================================
   // 状态反馈组 (0xA0-0xBF, RAM，只读)
   //==============================================================================
-#pragma region "状态反馈组"\
+#pragma region "状态反馈组"
   /**
    * @brief 获取实时时钟 (R)
    * @param[out] realtime_tick 实时时钟（ms）

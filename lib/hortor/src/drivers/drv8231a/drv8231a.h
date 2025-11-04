@@ -47,7 +47,6 @@ class DRV8231A final : public servo::Motor<DRV8231A> {
     uint8_t pin_in2;                    // IN2 控制引脚
     uint8_t pin_nfault = 0;             // nFAULT 引脚（0 表示不使用）
     float slow_decay_threshold = 0.3f;  // 低速阈值（低于此值使用慢速衰减）
-    servo::Reverse direction;         // 电机方向
   };
 
   /**

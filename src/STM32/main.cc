@@ -34,8 +34,10 @@ using hortor::drivers::MT6701::BusType;
 using hortor::drivers::MT6701::MT6701;
 using hortor::info_led::InfoLED;
 using hortor::info_led::Mode;
+using hortor::protocol::I2cPortHandler;
 using hortor::servo::Reverse;
 using hortor::servo::Servo;
+using hortor::servo_slave::RegMap;
 using hortor::servo_slave::Slave;
 using hortor::utils::Commander;
 using hortor::utils::DebugEnable;
@@ -59,8 +61,15 @@ TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_slave(PB7, PA15);
 
 InfoLED info_led{};
+RegMap regmap{};
+I2cPortHandler port_handler{};
 Slave<ServoType> slave{};
+
+DRV8231A motor_driver{};
+MT6701<BusType::kI2C> encoder{};
+CurrentMirror current_sensor{};
 ServoType servo{};
+
 Monitor<ServoType> monitor{};
 Commander commander{};
 // 集中式任务调度器（固定容量，避免动态分配）
@@ -81,26 +90,29 @@ void setup() {
   wire_sensor.begin();
   wire_slave.begin();
 
-  servo.GetMotor().Init({
+  motor_driver.Init({
       .pin_in1 = PA0,
       .pin_in2 = PA2,
-      .pin_nfault = 0,                // 如果硬件连接了 nFAULT，填入引脚号
-      .slow_decay_threshold = 0.3f,   // 低于 30% 使用慢速衰减
-      .direction = Reverse::kNormal,  // 电机方向
+      .pin_nfault = 0,               // 如果硬件连接了 nFAULT，填入引脚号
+      .slow_decay_threshold = 0.3f,  // 低于 30% 使用慢速衰减
   });
-  servo.GetSensor().Init({.wire = &wire_sensor,
-                          .direction = Reverse::kNormal,
-                          .homing_offset = 0});
-  servo.GetCurrentSense().Init({.pin_adc = PA3,
-                                .ripropi_ohms = 1000.0f,
-                                .scaling_factor = 1500.0f,
-                                .adc_resolution_bits = 12,
-                                .adc_vref_volts = 3.3f,
-                                .calibration_samples = 50});
+  encoder.Init({.wire = &wire_sensor});
+  current_sensor.Init({.pin_adc = PA3,
+                       .ripropi_ohms = 1000.0f,
+                       .scaling_factor = 1500.0f,
+                       .adc_resolution_bits = 12,
+                       .adc_vref_volts = 3.3f,
+                       .calibration_samples = 50});
+
+  servo.LinkMotor(&motor_driver);
+  servo.LinkEncoder(&encoder);
+  servo.LinkCurrentSensor(&current_sensor);
   servo.Init();
 
-  slave.GetRegMap().Init();
-  slave.GetPortHandler().Init(&wire_slave);
+  regmap.Init();
+  port_handler.Init(&wire_slave);
+  slave.LinkRegMap(&regmap);
+  slave.LinkPortHandler(&port_handler);
   slave.LinkServo(&servo);
   slave.Init();
 

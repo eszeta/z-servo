@@ -52,7 +52,7 @@ class Slave {
    */
   Error Process(float dt) {
     bool is_complete = false;
-    CHECK(port_handler_.Process(protocol_, dt, inst_packet_, is_complete));
+    CHECK(port_handler_->Process(protocol_, dt, inst_packet_, is_complete));
     if (is_complete) {
       CHECK(Execute(inst_packet_));
     }
@@ -63,12 +63,14 @@ class Slave {
    * @brief 获取寄存器映射
    * @return 寄存器映射
    */
-  RegMapType& GetRegMap() { return regmap_; }
+  RegMapType* GetRegMap() { return regmap_; }
+  void LinkRegMap(RegMapType* regmap) { regmap_ = regmap; }
   /**
    * @brief 获取端口处理器
    * @return 端口处理器
    */
-  PortHandlerType& GetPortHandler() { return port_handler_; }
+  PortHandlerType* GetPortHandler() { return port_handler_; }
+  void LinkPortHandler(PortHandlerType* port_handler) { port_handler_ = port_handler; }
 
   /**
    * @brief 设置ID
@@ -175,7 +177,7 @@ class Slave {
     CHECK(AsDerived().ResponseImpl(reply_idx, parameter, parameter_size));
     CHECK(protocol_.CreateResponse(
         id_, status_, parameter, parameter_size, status_packet_));
-    CHECK(port_handler_.Response(status_packet_, reply_idx));
+    CHECK(port_handler_->Response(status_packet_, reply_idx));
     return Error::kOk;
   }
   /**
@@ -191,7 +193,7 @@ class Slave {
     if (data == nullptr || size == 0) {
       return Error::kInvalidParameter;
     }
-    CHECK(regmap_.WriteBytes(address, data, size));
+    CHECK(regmap_->WriteBytes(address, data, size));
     return AsDerived().WriteRegsImpl(address, data, size);
   }
   /**
@@ -214,7 +216,7 @@ class Slave {
     const uint8_t address = packet.parameter[0];
     const uint8_t size = packet.parameter[1];
     uint8_t buffer[128];
-    CHECK(regmap_.ReadBytes(address, size, buffer));
+    CHECK(regmap_->ReadBytes(address, size, buffer));
     if (response) {
       CHECK(Response(0, buffer, size));
     }
@@ -326,7 +328,7 @@ class Slave {
       if (id_ == target_id) {
         hit = true;
         response_idx = i;
-        CHECK(regmap_.ReadBytes(address, data_size, buffer));
+        CHECK(regmap_->ReadBytes(address, data_size, buffer));
       }
       parameter += 1;
     }
@@ -378,11 +380,11 @@ class Slave {
   /**
    * @brief 寄存器映射指针
    */
-  RegMapType regmap_{};
+  RegMapType* regmap_ = nullptr;
   /**
    * @brief 指令传输接口
    */
-  PortHandlerType port_handler_{};
+  PortHandlerType* port_handler_ = nullptr;
   /**
    * @brief 异步写缓冲区
    */

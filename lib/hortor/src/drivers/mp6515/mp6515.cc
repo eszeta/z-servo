@@ -24,7 +24,7 @@ Error MP6515::Init(const Config& config) {
     return Error::kInvalidParameter;
   }
 
-  CHECK(servo::Motor<MP6515>::Init(config.direction));
+  CHECK(servo::Motor<MP6515>::Init());
 
   pin_phase_ = config.pin_phase;
   pin_enbl_ = config.pin_enbl;

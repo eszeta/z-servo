@@ -35,8 +35,6 @@ class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
   struct Config {
     SPIClass *spi;
     uint8_t cs_pin;
-    servo::Reverse direction;
-    int32_t homing_offset;
   };
 
   explicit MA330() : servo::Encoder<MA330, kResolutionBits>() {}

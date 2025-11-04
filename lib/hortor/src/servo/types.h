@@ -101,4 +101,41 @@ enum class Reverse : int8_t {
   kReverse = -1,  // counterclockwise
 };
 
+/** 
+ * @brief 驱动模式 
+ */
+union DriveMode {
+  uint8_t value_ = 0;
+  struct {
+    bool reverse_mode_ : 1;              // 位0 0: 正转, 1: 反转
+    bool reserved_bit1_ : 1;             // 位1 - 保留
+    bool profile_configuration_ : 1;     // 位2 0: Velocity-based, 1:Time-based
+    bool torque_on_by_goal_update_ : 1;  // 位3
+                                         // 0:遵循TorqueEnable,
+                                         // 1:命令触发
+    bool moto_reverse_mode_ : 1;         // 位4 0: 正转, 1: 反转
+    bool encoder_reverse_mode_ : 1;      // 位5 0: 正转, 1: 反转
+    bool reserved_bits6_7_ : 2;          // 位6-7 - 保留（2位）
+  };
+};
+
+/** 
+ * @brief 运动状态
+ */
+union MovingStatus {
+  uint8_t value_ = 0;
+  struct {
+    bool in_position_ : 1;          // 位0: 已到达目标位置
+    bool profile_ongoing_ : 1;      // 位1: 轨迹进行中
+    bool reserved_bit2_ : 1;        // 位2: 保留
+    bool following_error_ : 1;      // 位3: 跟随误差
+    uint8_t velocity_profile_ : 2;  // 位4-5: 速度轨迹类型 (
+                                    //   00=Step,
+                                    //   01=Rect,
+                                    //   10=Tri,
+                                    //   11=Trap)
+    uint8_t reserved_bits6_7_ : 2;  // 位6-7: 保留
+  };
+};
+
 }  // namespace hortor::servo

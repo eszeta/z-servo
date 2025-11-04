@@ -41,8 +41,7 @@ class Motor {
    * @brief 初始化电机驱动器
    * @param reverse 电机反转
    */
-  Error Init(const Reverse reverse) {
-    reverse_ = reverse;
+  Error Init() {
     return Error::kOk;
   }
   /**

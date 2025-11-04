@@ -23,7 +23,7 @@ Error DRV8231A::Init(const Config& config) {
     return Error::kInvalidParameter;
   }
 
-  CHECK(servo::Motor<DRV8231A>::Init(config.direction));
+  CHECK(servo::Motor<DRV8231A>::Init());
 
   pin_in1_ = config.pin_in1;
   pin_in2_ = config.pin_in2;

@@ -93,8 +93,6 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
  public:
   struct Config {
     TwoWire* wire;
-    servo::Reverse direction;
-    int32_t homing_offset;
   };
   /**
    * @brief 构造函数
@@ -113,8 +111,7 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
    */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.wire, kI2CAddress));
-    CHECK(
-        MT6701Base<RegMapI2CBus>::Init(config.direction, config.homing_offset));
+    CHECK(MT6701Base<RegMapI2CBus>::Init());
     return Error::kOk;
   }
 };
@@ -133,8 +130,6 @@ class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
     SPIClass* spi;
     int cs_pin;
     SPISettings spi_settings;
-    servo::Reverse direction;
-    int32_t homing_offset;
   };
   /**
    * @brief 构造函数
@@ -155,8 +150,7 @@ class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
    */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.spi, config.cs_pin, config.spi_settings));
-    CHECK(
-        MT6701Base<RegMapSpiBus>::Init(config.direction, config.homing_offset));
+    CHECK(MT6701Base<RegMapSpiBus>::Init());
     return Error::kOk;
   }
 };

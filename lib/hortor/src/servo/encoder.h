@@ -61,7 +61,7 @@ class Encoder {
    * @return 当前总累积计数值
    */
   int32_t GetPos() const {
-    return pos_ + homing_offset_ * static_cast<int32_t>(reverse_);
+    return (pos_ + homing_offset_) * static_cast<int32_t>(reverse_);
   }
 
   /**
@@ -90,16 +90,13 @@ class Encoder {
    * 执行传感器初始化操作，包括初始读取和变量初始化。
    * 子类可以重写此方法以添加特定的初始化步骤。
    */
-  Error Init(const Reverse reverse, const int32_t homing_offset) {
+  Error Init() {
     // 读取初始原始值，等待传感器稳定后再次读取
     CHECK(GetRaw(rew_pos_));
     delay(10);
     CHECK(GetRaw(rew_pos_));
-
     // 初始化所有位置和速度状态变量
-    reverse_ = reverse;
-    homing_offset_ = homing_offset;
-    pos_ = pos_ * static_cast<int32_t>(reverse);
+    pos_ = static_cast<int32_t>(rew_pos_);
     return Error::kOk;
   }
 
@@ -124,7 +121,7 @@ class Encoder {
     }
 
     // 更新线性累加位置（可跨越多圈）
-    pos_ += delta_enc * static_cast<int32_t>(reverse_);
+    pos_ += delta_enc;
 
     // 更新原始值记录
     rew_pos_ = raw_new;
@@ -140,7 +137,7 @@ class Encoder {
   void SetToCenter() {
     const int32_t center_target = static_cast<int32_t>(kResolution.kMax / 2);
     const int32_t reverse_val = static_cast<int32_t>(reverse_);
-    const int32_t new_homing_offset = (center_target - pos_) * reverse_val;
+    const int32_t new_homing_offset = (center_target / reverse_val) - pos_;
     SetHomingOffset(new_homing_offset);
   }
 

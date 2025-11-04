@@ -26,7 +26,7 @@ template <typename ServoType>
 class Slave : public protocol::
                   Slave<Slave<ServoType>, RegMap, protocol::I2cPortHandler> {
  public:
-  ServoType& GetServo() { return *servo_; }
+  ServoType* GetServo() { return servo_; }
   /**
    * @brief 链接伺服电机
    * @param servo 伺服电机
@@ -39,14 +39,15 @@ class Slave : public protocol::
 
   Error Init() {
     CHECK((protocol::Slave<Slave, RegMap, protocol::I2cPortHandler>::Init()));
-    this->SetId(this->regmap_.GetId());
-    this->SetReturnLevel(this->regmap_.GetStatusReturnLevel());
     this->SetStatus(0);
+    CHECK(this->ApplyProtocolConfig());
+    CHECK(this->ApplyMotorConfig());
+    CHECK(this->UpdateMotorStatus());
     return Error::kOk;
   }
 
   Error ResetImpl() {
-    this->regmap_.RecoveryEeprom();
+    this->regmap_->RecoveryEeprom();
     return Error::kOk;
   }
 
@@ -54,7 +55,7 @@ class Slave : public protocol::
                       const uint8_t* data,
                       const size_t size) {
     if (TableBlocks::kEeprom.InBlock(address, size)) {
-      CHECK(this->regmap_.StoreEeprom());
+      CHECK(this->regmap_->StoreEeprom());
     }
     if (TableBlocks::kSetToCenter.InBlock(address, size)) {
       CHECK(ApplySetToCenter());
@@ -74,7 +75,7 @@ class Slave : public protocol::
 
   Error ProcessImpl(float dt) {
     realtime_tick_ += dt * 1000;
-    this->regmap_.SetRealtimeTick(realtime_tick_);
+    this->regmap_->SetRealtimeTick(realtime_tick_);
     return UpdateMotorStatus();
   }
 
@@ -89,16 +90,16 @@ class Slave : public protocol::
    * @brief 同步从机参数
    */
   Error ApplyProtocolConfig() {
-    this->SetId(this->regmap_.GetId());
-    this->SetReturnLevel(this->regmap_.GetStatusReturnLevel());
+    this->SetId(this->regmap_->GetId());
+    this->SetReturnLevel(this->regmap_->GetStatusReturnLevel());
     return Error::kOk;
   }
 
   Error ApplySetToCenter() {
-    if (this->regmap_.GetSetToCenter()) {
-      this->regmap_.SetSetToCenter(false);
+    if (this->regmap_->GetSetToCenter()) {
+      this->regmap_->SetSetToCenter(false);
       this->servo_->SetToCenter();
-      this->regmap_.SetHomingOffset(this->servo_->GetHomingOffset());
+      this->regmap_->SetHomingOffset(this->servo_->GetHomingOffset());
       return Error::kOk;
     }
     return Error::kOk;
@@ -108,53 +109,53 @@ class Slave : public protocol::
    * @return 错误码
    */
   Error ApplyMotorConfig() {
-    this->servo_->SetDriveMode(this->regmap_.GetDriveMode());
-    this->servo_->SetOperatingMode(this->regmap_.GetOperatingMode());
-    this->servo_->SetHomingOffset(this->regmap_.GetHomingOffset());
-    // this->regmap_.GetMovingThreshold();
-    // this->regmap_.GetTemperatureLimit();
-    // this->regmap_.GetMaxVoltageLimit();
-    // this->regmap_.GetMinVoltageLimit();
-    // this->regmap_.GetPwmLimit();
-    // this->regmap_.GetCurrentLimit();
-    // this->regmap_.GetVelocityLimit();
-    this->servo_->SetMaxPositionLimit(this->regmap_.GetMaxPositionLimit());
-    this->servo_->SetMinPositionLimit(this->regmap_.GetMinPositionLimit());
-    // this->regmap_.GetShutdown();
-    this->servo_->SetTorqueEnable(this->regmap_.GetTorqueEnable());
+    this->servo_->SetDriveMode(this->regmap_->GetDriveMode());
+    this->servo_->SetOperatingMode(this->regmap_->GetOperatingMode());
+    this->servo_->SetHomingOffset(this->regmap_->GetHomingOffset());
+    // this->regmap_->GetMovingThreshold();
+    // this->regmap_->GetTemperatureLimit();
+    // this->regmap_->GetMaxVoltageLimit();
+    // this->regmap_->GetMinVoltageLimit();
+    // this->regmap_->GetPwmLimit();
+    // this->regmap_->GetCurrentLimit();
+    // this->regmap_->GetVelocityLimit();
+    this->servo_->SetMaxPositionLimit(this->regmap_->GetMaxPositionLimit());
+    this->servo_->SetMinPositionLimit(this->regmap_->GetMinPositionLimit());
+    // this->regmap_->GetShutdown();
+    this->servo_->SetTorqueEnable(this->regmap_->GetTorqueEnable());
 
-    const auto vi = this->regmap_.GetVelocityIgain();
-    const auto vp = this->regmap_.GetVelocityPgain();
+    const auto vi = this->regmap_->GetVelocityIgain();
+    const auto vp = this->regmap_->GetVelocityPgain();
     this->servo_->SetVelocityPid(vp, vi, 0);
 
-    const auto pi = this->regmap_.GetPositionIgain();
-    const auto pp = this->regmap_.GetPositionPgain();
-    const auto pd = this->regmap_.GetPositionDgain();
+    const auto pi = this->regmap_->GetPositionIgain();
+    const auto pp = this->regmap_->GetPositionPgain();
+    const auto pd = this->regmap_->GetPositionDgain();
     this->servo_->SetPositionPid(pp, pi, pd);
 
-    this->servo_->SetFeedforward2ndGain(this->regmap_.GetFeedforward2ndGain());
-    this->servo_->SetFeedforward1stGain(this->regmap_.GetFeedforward1stGain());
-    this->servo_->SetGoalPwm(this->regmap_.GetGoalPwm());
-    // this->regmap_.GetGoalCurrent();
-    // this->regmap_.GetGoalVelocity();
+    this->servo_->SetFeedforward2ndGain(this->regmap_->GetFeedforward2ndGain());
+    this->servo_->SetFeedforward1stGain(this->regmap_->GetFeedforward1stGain());
+    this->servo_->SetGoalPwm(this->regmap_->GetGoalPwm());
+    // this->regmap_->GetGoalCurrent();
+    // this->regmap_->GetGoalVelocity();
     this->servo_->SetProfileAcceleration(
-        this->regmap_.GetProfileAcceleration());
-    this->servo_->SetProfileVelocity(this->regmap_.GetProfileVelocity());
-    this->servo_->SetGoalPosition(this->regmap_.GetGoalPosition());
+        this->regmap_->GetProfileAcceleration());
+    this->servo_->SetProfileVelocity(this->regmap_->GetProfileVelocity());
+    this->servo_->SetGoalPosition(this->regmap_->GetGoalPosition());
     return Error::kOk;
   }
 
   Error UpdateMotorStatus() {
-    this->regmap_.SetMovingStatus(this->servo_->GetMovingStatusValue());
-    this->regmap_.SetPresentPosition(this->servo_->GetPresentPosition());
-    this->regmap_.SetPresentVelocity(this->servo_->GetPresentVelocity());
-    this->regmap_.SetPresentCurrent(this->servo_->GetPresentCurrent());
-    this->regmap_.SetPresentInputVoltage(
+    this->regmap_->SetMovingStatus(this->servo_->GetMovingStatusValue());
+    this->regmap_->SetPresentPosition(this->servo_->GetPresentPosition());
+    this->regmap_->SetPresentVelocity(this->servo_->GetPresentVelocity());
+    this->regmap_->SetPresentCurrent(this->servo_->GetPresentCurrent());
+    this->regmap_->SetPresentInputVoltage(
         this->servo_->GetPresentInputVoltage());
-    this->regmap_.SetPresentTemperature(this->servo_->GetPresentTemperature());
-    this->regmap_.SetPresentPwm(this->servo_->GetPresentPwm());
-    this->regmap_.SetPositionTrajectory(this->servo_->GetPositionTrajectory());
-    this->regmap_.SetVelocityTrajectory(this->servo_->GetVelocityTrajectory());
+    this->regmap_->SetPresentTemperature(this->servo_->GetPresentTemperature());
+    this->regmap_->SetPresentPwm(this->servo_->GetPresentPwm());
+    this->regmap_->SetPositionTrajectory(this->servo_->GetPositionTrajectory());
+    this->regmap_->SetVelocityTrajectory(this->servo_->GetVelocityTrajectory());
     return Error::kOk;
   }
 };
