@@ -137,7 +137,7 @@ class Encoder {
    * 将当前位置设置为编码器量程的中心位置，通过调整 homing_offset_ 实现。
    * 调用此方法后，GetPos() 将返回 kResolution.kMax / 2。
    */
-  void Center() {
+  void SetToCenter() {
     const int32_t center_target = static_cast<int32_t>(kResolution.kMax / 2);
     const int32_t reverse_val = static_cast<int32_t>(reverse_);
     const int32_t new_homing_offset = (center_target - pos_) * reverse_val;

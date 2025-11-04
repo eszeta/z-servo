@@ -56,6 +56,9 @@ class Slave : public protocol::
     if (TableBlocks::kEeprom.InBlock(address, size)) {
       CHECK(this->regmap_.StoreEeprom());
     }
+    if (TableBlocks::kSetToCenter.InBlock(address, size)) {
+      CHECK(ApplySetToCenter());
+    }
     CHECK(ApplyProtocolConfig());
     CHECK(ApplyMotorConfig());
     CHECK(UpdateMotorStatus());
@@ -88,6 +91,16 @@ class Slave : public protocol::
   Error ApplyProtocolConfig() {
     this->SetId(this->regmap_.GetId());
     this->SetReturnLevel(this->regmap_.GetStatusReturnLevel());
+    return Error::kOk;
+  }
+
+  Error ApplySetToCenter() {
+    if (this->regmap_.GetSetToCenter()) {
+      this->regmap_.SetSetToCenter(false);
+      this->servo_->SetToCenter();
+      this->regmap_.SetHomingOffset(this->servo_->GetHomingOffset());
+      return Error::kOk;
+    }
     return Error::kOk;
   }
   /**

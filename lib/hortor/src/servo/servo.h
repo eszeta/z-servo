@@ -282,6 +282,11 @@ class Servo {
     return Error::kOk;
   }
 
+  /**
+   * @brief 设置为居中位置
+   */
+  void SetToCenter() { encoder_.SetToCenter(); }
+
  private:
   // ========== 传感器与电机相关==========
   /** @brief 电机驱动器 */
