@@ -32,12 +32,13 @@ constexpr uint8_t kResolutionBits = 14;
  */
 class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
  public:
-  struct Config : public servo::Encoder<MA330, kResolutionBits>::Config {
+  using EncoderBase = servo::Encoder<MA330, kResolutionBits>;
+
+  struct Config : public EncoderBase::Config {
     SPIClass *spi;
     uint8_t cs_pin;
   };
-
-  explicit MA330() : servo::Encoder<MA330, kResolutionBits>() {}
+  
   /**
    * @brief 初始化传感器
    * @param wire I2C通信接口指针

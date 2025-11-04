@@ -41,8 +41,6 @@ class Encoder {
   static constexpr math::Resolution<Bits> kResolution{};
   static constexpr uint8_t kResolutionBits = Bits;
 
-  explicit Encoder() {}
-
   /**
    * @brief 获取原始计数值
    * @return 当前原始计数值

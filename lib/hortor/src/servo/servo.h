@@ -46,10 +46,6 @@ class Servo {
  public:
   /** @brief 舵机分辨率（位数），决定了舵机的精度和量程 */
   static constexpr math::Resolution<ResolutionBits> kResolution{};
-  /**
-   * @brief 默认构造函数
-   */
-  Servo() {}
 
   /**
    * @brief 初始化舵机

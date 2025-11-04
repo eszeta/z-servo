@@ -18,9 +18,9 @@
 
 namespace hortor::protocol {
 
-InstProtocol::InstProtocol() {}
+InstProtocol::InstProtocol() = default;
 
-InstProtocol::~InstProtocol() {}
+InstProtocol::~InstProtocol() = default;
 
 Error InstProtocol::Process(InstPacket &packet,
                             const uint8_t recv_data,

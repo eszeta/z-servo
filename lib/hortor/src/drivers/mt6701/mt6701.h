@@ -45,10 +45,8 @@ class MT6701;
  */
 template <typename BusImpl>
 class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
- protected:
-  MT6701Base() = default;
-
  public:
+  using EncoderBase = servo::Encoder<MT6701Base<BusImpl>, kResolutionBits>;
   /**
    * @brief 获取控制器实例
    * @return 控制器实例引用
@@ -91,16 +89,9 @@ class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
 template <>
 class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
  public:
-  struct Config : public servo::Encoder<MT6701Base<RegMapI2CBus>,
-                                        kResolutionBits>::Config {
+  struct Config : public EncoderBase::Config {
     TwoWire* wire;
   };
-  /**
-   * @brief 构造函数
-   *
-   * 初始化MT6701传感器对象，设置分辨率为14位（0-16383范围）。
-   */
-  explicit MT6701() = default;
 
   /**
    * @brief 初始化传感器（I2C模式）
@@ -127,18 +118,11 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
 template <>
 class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
  public:
-  struct Config : public servo::Encoder<MT6701Base<RegMapSpiBus>,
-                                        kResolutionBits>::Config {
+  struct Config : public EncoderBase::Config {
     SPIClass* spi;
     int cs_pin;
     SPISettings spi_settings;
   };
-  /**
-   * @brief 构造函数
-   *
-   * 初始化MT6701传感器对象，设置分辨率为14位（0-16383范围）。
-   */
-  explicit MT6701() = default;
 
   /**
    * @brief 初始化传感器（SPI模式）

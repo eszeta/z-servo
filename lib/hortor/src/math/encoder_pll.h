@@ -25,7 +25,6 @@ namespace hortor::math {
 template <uint8_t Bits>
 class EncoderPll {
  public:
-  explicit EncoderPll() {}
   Error Init(uint16_t pos) {
     pos_ = static_cast<float>(pos);
     velocity_ = 0.0f;

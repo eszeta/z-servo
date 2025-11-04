@@ -20,7 +20,6 @@ namespace hortor::math {
 template <uint8_t Bits>
 struct Resolution {
  public:
-  constexpr explicit Resolution() {}
   /** @brief 目标分辨率（位数），决定了传感器的精度和量程 */
   static constexpr uint8_t kBits = Bits;
   /** @brief 最大值 */

@@ -30,11 +30,6 @@ namespace hortor::drivers::LSM6DSOW {
 class LSM6DSOW final : public servo::IMU<LSM6DSOW> {
  public:
   /**
-   * @brief 默认构造函数
-   */
-  explicit LSM6DSOW() = default;
-
-  /**
    * @brief 初始化I2C通信
    * @param wire I2C通信接口指针
    * @return 初始化结果
