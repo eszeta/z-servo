@@ -28,21 +28,22 @@
 #include <utils/task_scheduler.h>
 
 using hortor::Error;
-using hortor::drivers::current_mirror::CurrentMirror;
-using hortor::drivers::DRV8231A::DRV8231A;
-using hortor::drivers::MT6701::BusType;
-using hortor::drivers::MT6701::MT6701;
-using hortor::info_led::InfoLED;
-using hortor::info_led::Mode;
-using hortor::protocol::I2cPortHandler;
-using hortor::servo::Reverse;
-using hortor::servo::Servo;
-using hortor::servo_slave::RegMap;
-using hortor::servo_slave::Slave;
 using hortor::utils::Commander;
 using hortor::utils::DebugEnable;
 using hortor::utils::Monitor;
 using hortor::utils::TaskScheduler;
+using InfoLEDType = hortor::info_led::InfoLED;
+using InfoLEDMode = hortor::info_led::Mode;
+using InfoLEDInfoType = hortor::info_led::InfoLED::InfoType;
+using PortHandlerType = hortor::protocol::I2cPortHandler;
+using ReverseType = hortor::servo::Reverse;
+using SlaveRegMapType = hortor::servo_slave::RegMap;
+using BusType = hortor::drivers::MT6701::BusType;
+using EncoderType = hortor::drivers::MT6701::MT6701<BusType::kI2C>;
+using EncoderConfig = EncoderType::Config;
+using CurrentType = hortor::drivers::current_mirror::CurrentMirror;
+using MotorType = hortor::drivers::DRV8231A::DRV8231A;
+
 // 信息灯引脚
 constexpr auto kInfoLedPin = PA12;
 // 主控制循环频率 1000Hz
@@ -54,20 +55,22 @@ constexpr auto kResolutionBits = 12;
 
 // 伺服电机类型别名，简化复杂的模板类型
 using ServoType =
-    Servo<DRV8231A, MT6701<BusType::kI2C>, CurrentMirror, kResolutionBits>;
+    hortor::servo::Servo<MotorType, EncoderType, CurrentType, kResolutionBits>;
+
+using SlaveType = hortor::servo_slave::Slave<ServoType>;
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire wire_sensor(PA8, PA9);
 TwoWire wire_slave(PB7, PA15);
 
-InfoLED info_led{};
-RegMap regmap{};
-I2cPortHandler port_handler{};
-Slave<ServoType> slave{};
+InfoLEDType info_led{};
+SlaveRegMapType regmap{};
+PortHandlerType port_handler{};
+SlaveType slave{};
 
-DRV8231A motor_driver{};
-MT6701<BusType::kI2C> encoder{};
-CurrentMirror current_sensor{};
+MotorType motor_driver{};
+EncoderType encoder{};
+CurrentType current_sensor{};
 ServoType servo{};
 
 Monitor<ServoType> monitor{};
@@ -96,7 +99,13 @@ void setup() {
       .pin_nfault = 0,               // 如果硬件连接了 nFAULT，填入引脚号
       .slow_decay_threshold = 0.3f,  // 低于 30% 使用慢速衰减
   });
-  encoder.Init({.wire = &wire_sensor});
+
+  EncoderConfig encoder_config{};
+  encoder_config.homing_offset = 0;
+  encoder_config.reverse = ReverseType::kNormal;
+  encoder_config.wire = &wire_sensor;
+
+  encoder.Init(encoder_config);
   current_sensor.Init({.pin_adc = PA3,
                        .ripropi_ohms = 1000.0f,
                        .scaling_factor = 1500.0f,
@@ -119,8 +128,8 @@ void setup() {
   monitor.LinkPort(&serial_debug);
   monitor.LinkMotor(&servo);
 
-  info_led.Init(kInfoLedPin, Mode::kOpenDrain);
-  info_led.SetInfo(InfoLED::InfoType::kOk);
+  info_led.Init(kInfoLedPin, InfoLEDMode::kOpenDrain);
+  info_led.SetInfo(InfoLEDInfoType::kOk);
 
   // 注册任务：集中式调度
   scheduler.Register(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制

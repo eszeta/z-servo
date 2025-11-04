@@ -82,8 +82,8 @@ class Servo {
     drive_mode_.value_ = drive_mode;
     motor_->SetReverse(drive_mode_.moto_reverse_mode_ ? Reverse::kReverse
                                                       : Reverse::kNormal);
-    encoder_->SetReverse(drive_mode_.encoder_reverse_mode_ ? Reverse::kReverse
-                                                           : Reverse::kNormal);
+    // encoder_->SetReverse(drive_mode_.encoder_reverse_mode_ ? Reverse::kReverse
+    //                                                        : Reverse::kNormal);
   }
 
   int8_t GetReverseMode() const { return drive_mode_.reverse_mode_ ? -1 : 1; }
@@ -119,7 +119,7 @@ class Servo {
     const auto kTargetBits = encoder_->kResolutionBits;
     const auto mapped_offset =
         math::mapResolution(homing_offset, kBits, kTargetBits);
-    encoder_->SetHomingOffset(mapped_offset);
+    // encoder_->SetHomingOffset(mapped_offset);
   }
 
   /** @brief 位置下限 */

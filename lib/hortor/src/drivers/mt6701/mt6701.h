@@ -91,7 +91,8 @@ class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
 template <>
 class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
  public:
-  struct Config {
+  struct Config : public servo::Encoder<MT6701Base<RegMapI2CBus>,
+                                        kResolutionBits>::Config {
     TwoWire* wire;
   };
   /**
@@ -111,7 +112,7 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
    */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.wire, kI2CAddress));
-    CHECK(MT6701Base<RegMapI2CBus>::Init());
+    CHECK((MT6701Base<RegMapI2CBus>::Init(config)));
     return Error::kOk;
   }
 };
@@ -126,7 +127,8 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
 template <>
 class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
  public:
-  struct Config {
+  struct Config : public servo::Encoder<MT6701Base<RegMapSpiBus>,
+                                        kResolutionBits>::Config {
     SPIClass* spi;
     int cs_pin;
     SPISettings spi_settings;
@@ -150,7 +152,7 @@ class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
    */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.spi, config.cs_pin, config.spi_settings));
-    CHECK(MT6701Base<RegMapSpiBus>::Init());
+    CHECK(MT6701Base<RegMapSpiBus>::Init(config));
     return Error::kOk;
   }
 };

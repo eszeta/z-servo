@@ -32,22 +32,15 @@ namespace hortor::servo {
  */
 template <typename Derived, uint8_t Bits>
 class Encoder {
- protected:
-  /**
-   * @brief 获取派生类引用
-   * @return 派生类引用
-   */
-  Derived& AsDerived() { return static_cast<Derived&>(*this); }
-
-  /**
-   * @brief 获取派生类常量引用
-   * @return 派生类常量引用
-   */
-  const Derived& AsDerived() const {
-    return static_cast<const Derived&>(*this);
-  }
-
  public:
+  struct Config {
+    int32_t homing_offset;
+    Reverse reverse;
+  };
+  /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
+  static constexpr math::Resolution<Bits> kResolution{};
+  static constexpr uint8_t kResolutionBits = Bits;
+
   explicit Encoder() {}
 
   /**
@@ -60,9 +53,7 @@ class Encoder {
    * @brief 获取总累积计数值
    * @return 当前总累积计数值
    */
-  int32_t GetPos() const {
-    return (pos_ + homing_offset_) * static_cast<int32_t>(reverse_);
-  }
+  int32_t GetPos() const { return pos_; }
 
   /**
    * @brief 获取圈数
@@ -80,23 +71,31 @@ class Encoder {
   /** @brief 归零偏移 */
   int32_t GetHomingOffset() const { return homing_offset_; }
   void SetHomingOffset(const int32_t homing_offset) {
+    const auto delta_offset = homing_offset - homing_offset_;
+    pos_ += delta_offset;
     homing_offset_ = homing_offset;
   }
 
   /**
    * @brief 初始化传感器
-   * @param reverse 反转
    *
    * 执行传感器初始化操作，包括初始读取和变量初始化。
    * 子类可以重写此方法以添加特定的初始化步骤。
    */
-  Error Init() {
+  Error Init(const Config& config) {
     // 读取初始原始值，等待传感器稳定后再次读取
     CHECK(GetRaw(rew_pos_));
     delay(10);
     CHECK(GetRaw(rew_pos_));
-    // 初始化所有位置和速度状态变量
-    pos_ = static_cast<int32_t>(rew_pos_);
+
+    // 初始化状态变量
+    homing_offset_ = config.homing_offset;
+    reverse_ = config.reverse;
+
+    const auto reverse_val = static_cast<int32_t>(reverse_);
+    const auto local_pos = static_cast<int32_t>(rew_pos_) * reverse_val;
+    const auto normal_pos = math::mod(local_pos, kResolution.kEncoderCpr);
+    pos_ = math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
     return Error::kOk;
   }
 
@@ -112,16 +111,13 @@ class Encoder {
     CHECK(GetRaw(raw_new));
 
     // 计算位置增量（新位置 - 旧位置）
-    int32_t delta_enc = raw_new - rew_pos_;
-    delta_enc = math::mod(delta_enc, kResolution.kEncoderCpr);
+    const int32_t delta =
+        static_cast<int32_t>(raw_new) - static_cast<int32_t>(rew_pos_);
 
-    // 跨零点处理：选择最短路径
-    if (delta_enc > kResolution.kEncoderCpr / 2) {
-      delta_enc -= kResolution.kEncoderCpr;
-    }
+    const auto delta_enc = math::wrap_pm(delta, kResolution.kEncoderCpr);
 
-    // 更新线性累加位置（可跨越多圈）
-    pos_ += delta_enc;
+    // 更新线性累加位置
+    pos_ += delta_enc * static_cast<int32_t>(reverse_);
 
     // 更新原始值记录
     rew_pos_ = raw_new;
@@ -132,20 +128,33 @@ class Encoder {
    * @brief 置中
    *
    * 将当前位置设置为编码器量程的中心位置，通过调整 homing_offset_ 实现。
-   * 调用此方法后，GetPos() 将返回 kResolution.kMax / 2。
+   * 调用此方法后，GetPos() 将返回 kResolution.kEncoderCpr / 2。
    */
-  void SetToCenter() {
-    const int32_t center_target = static_cast<int32_t>(kResolution.kMax / 2);
-    const int32_t reverse_val = static_cast<int32_t>(reverse_);
-    const int32_t new_homing_offset = (center_target / reverse_val) - pos_;
-    SetHomingOffset(new_homing_offset);
+  Error SetToCenter() {
+    const auto center_target =
+        static_cast<int32_t>(kResolution.kEncoderCpr / 2);
+    const auto current_normalized =
+        math::mod(GetPos(), kResolution.kEncoderCpr);
+    const auto delta_to_center = center_target - current_normalized;
+    SetHomingOffset(homing_offset_ + delta_to_center);
+    return Error::kOk;
   }
 
-  /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
-  static constexpr math::Resolution<Bits> kResolution{};
-  static constexpr uint8_t kResolutionBits = Bits;
-
  protected:
+  /**
+   * @brief 获取派生类引用
+   * @return 派生类引用
+   */
+  Derived& AsDerived() { return static_cast<Derived&>(*this); }
+
+  /**
+   * @brief 获取派生类常量引用
+   * @return 派生类常量引用
+   */
+  const Derived& AsDerived() const {
+    return static_cast<const Derived&>(*this);
+  }
+
   /**
    * @brief 获取原始计数值
    * @return 传感器的原始计数值
