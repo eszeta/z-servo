@@ -235,6 +235,21 @@ class Servo {
     torque_enable_ = torque_enable;
   }
 
+  /** @brief 硬件错误状态 */
+  HardwareErrorStatusBits GetHardwareErrorStatus() const {
+    return hardware_error_status_;
+  }
+  uint8_t GetHardwareErrorStatusValue() const {
+    return hardware_error_status_.value_;
+  }
+  void SetHardwareErrorStatus(
+      const HardwareErrorStatusBits hardware_error_status) {
+    hardware_error_status_ = hardware_error_status;
+  }
+  void SetHardwareErrorStatus(const uint8_t hardware_error_status) {
+    hardware_error_status_.value_ = hardware_error_status;
+  }
+
 #pragma endregion  // "控制命令组"
 
   //==============================================================================
@@ -314,6 +329,10 @@ class Servo {
   void SetVelocityTrajectory(const float velocity_trajectory) {
     velocity_trajectory_ = velocity_trajectory;
   }
+
+  /** @brief 运动状态 */
+  bool GetMoving() const { return moving_; }
+  void SetMoving(const bool moving) { moving_ = moving; }
 
   /** @brief 运动详细状态 */
   MovingStatusBits GetMovingStatus() const { return moving_status_; }
@@ -453,6 +472,9 @@ class Servo {
   /** @brief 扭矩使能状态 */
   bool torque_enable_ = false;
 
+  /** @brief 硬件错误状态 */
+  HardwareErrorStatusBits hardware_error_status_{};
+
 #pragma endregion  // "控制命令组"
 
   //==============================================================================
@@ -477,6 +499,9 @@ class Servo {
   // 状态反馈组
   //==============================================================================
 #pragma region "状态反馈组"
+  /** @brief 运动状态 */
+  bool moving_ = false;
+
   /** @brief 运动详细状态 */
   MovingStatusBits moving_status_{};
 

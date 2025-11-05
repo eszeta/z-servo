@@ -73,6 +73,18 @@ class RegMap : public BusImpl {
   Error WriteRegField(const ControlTableItem<T>& item, const T value) {
     return BusImpl::WriteRegField(item.reg, value);
   }
+
+  /**
+   * @brief 写入 ControlTableItem 字段
+   * @tparam T 字段类型
+   * @param item ControlTableItem
+   * @param value 要写入的值
+   * @return 错误码
+   */
+  template <typename T>
+  Error WriteRegField(const ControlTableItem<T>& item, const bool value) {
+    return BusImpl::WriteRegField(item.reg, value ? static_cast<T>(1) : static_cast<T>(0));
+  }
 };
 
 }  // namespace hortor::protocol

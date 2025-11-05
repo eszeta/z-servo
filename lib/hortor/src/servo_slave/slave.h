@@ -190,6 +190,9 @@ class Slave : public protocol::
     const auto torque_enable = this->regmap_->GetTorqueEnable();
     this->servo_->SetTorqueEnable(torque_enable);
 
+    const auto hardware_error_status = this->regmap_->GetHardwareErrorStatus();
+    this->servo_->SetHardwareErrorStatus(hardware_error_status);
+
     //==============================================================================
     // 目标值组
     //==============================================================================
@@ -208,16 +211,42 @@ class Slave : public protocol::
   }
 
   Error UpdateMotorStatus() {
-    this->regmap_->SetMovingStatus(this->servo_->GetMovingStatusValue());
-    this->regmap_->SetPresentPosition(this->servo_->GetPresentPosition());
-    this->regmap_->SetPresentVelocity(this->servo_->GetPresentVelocity());
-    this->regmap_->SetPresentCurrent(this->servo_->GetPresentCurrent());
-    this->regmap_->SetPresentInputVoltage(
-        this->servo_->GetPresentInputVoltage());
-    this->regmap_->SetPresentTemperature(this->servo_->GetPresentTemperature());
-    this->regmap_->SetPresentPwm(this->servo_->GetPresentPwm());
-    this->regmap_->SetPositionTrajectory(this->servo_->GetPositionTrajectory());
-    this->regmap_->SetVelocityTrajectory(this->servo_->GetVelocityTrajectory());
+    const auto torque_enable = this->servo_->GetTorqueEnable();
+    this->regmap_->SetTorqueEnable(torque_enable);
+
+    const auto hardware_error_status =
+        this->servo_->GetHardwareErrorStatusValue();
+    this->regmap_->SetHardwareErrorStatus(hardware_error_status);
+
+    const auto moving = this->servo_->GetMoving();
+    this->regmap_->SetMoving(moving);
+
+    const auto moving_status = this->servo_->GetMovingStatusValue();
+    this->regmap_->SetMovingStatus(moving_status);
+
+    const auto present_position = this->servo_->GetPresentPosition();
+    this->regmap_->SetPresentPosition(present_position);
+
+    const auto present_velocity = this->servo_->GetPresentVelocity();
+    this->regmap_->SetPresentVelocity(present_velocity);
+
+    const auto present_current = this->servo_->GetPresentCurrent();
+    this->regmap_->SetPresentCurrent(present_current);
+
+    const auto present_input_voltage = this->servo_->GetPresentInputVoltage();
+    this->regmap_->SetPresentInputVoltage(present_input_voltage);
+
+    const auto present_temperature = this->servo_->GetPresentTemperature();
+    this->regmap_->SetPresentTemperature(present_temperature);
+
+    const auto present_pwm = this->servo_->GetPresentPwm();
+    this->regmap_->SetPresentPwm(present_pwm);
+
+    const auto position_trajectory = this->servo_->GetPositionTrajectory();
+    this->regmap_->SetPositionTrajectory(position_trajectory);
+
+    const auto velocity_trajectory = this->servo_->GetVelocityTrajectory();
+    this->regmap_->SetVelocityTrajectory(velocity_trajectory);
     return Error::kOk;
   }
 };

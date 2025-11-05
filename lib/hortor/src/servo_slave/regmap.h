@@ -636,7 +636,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * | 1   | Overheating Error      | 温度超过上限                  |
    * | 2   | Motor Encoder Error    | 编码器故障                    |
    * | 3   | Electrical Shock Error | 电气冲击                      |
-   * | 4   | Overload Error         | 过载（电流持续超限）          |
+   * | 4   | Overload Error         | 过载                          |
    *
    * 【相关寄存器】
    * - Hardware Error Status: 错误状态记录
@@ -1619,10 +1619,10 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 获取设置为居中位置 (W)
    * @return set_to_center 设置为居中位置
    */
-  uint8_t GetSetToCenter() {
+  bool GetSetToCenter() {
     uint8_t set_to_center = 0;
     ReadRegField(ControlTable::kSetToCenter, set_to_center);
-    return set_to_center;
+    return set_to_center != 0;
   }
 
   /**
@@ -1632,7 +1632,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * 【功能说明】
    * - 调整Homing Offset使Present Position为180°
    */
-  void SetSetToCenter(const uint8_t set_to_center) {
+  void SetSetToCenter(const bool set_to_center) {
     WriteRegField(ControlTable::kSetToCenter, set_to_center);
   }
 
@@ -1651,10 +1651,10 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * | Bit | 错误类型               | 说明                          |
    * |-----|------------------------|-------------------------------|
    * | 0   | Input Voltage Error    | 输入电压超出范围              |
-   * | 2   | Overheating Error      | 温度超过上限                  |
-   * | 3   | Motor Encoder Error    | 编码器故障                    |
-   * | 4   | Electrical Shock Error | 电气冲击                      |
-   * | 5   | Overload Error         | 过载                          |
+   * | 1   | Overheating Error      | 温度超过上限                  |
+   * | 2   | Motor Encoder Error    | 编码器故障                    |
+   * | 3   | Electrical Shock Error | 电气冲击                      |
+   * | 4   | Overload Error         | 过载                          |
    *
    * 【错误处理标准流程】
    * 1. 检测错误：调用 GetHardwareErrorStatus() 获取错误状态
@@ -1967,17 +1967,17 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  uint8_t GetMoving() {
+  bool GetMoving() {
     uint8_t moving;
     ReadRegField(ControlTable::kMoving, moving);
-    return moving;
+    return moving != 0;
   }
 
   /**
    * @brief 设置运动状态 (R)
    * @param[in] moving 运动状态
    */
-  void SetMoving(const uint8_t moving) {
+  void SetMoving(const bool moving) {
     WriteRegField(ControlTable::kMoving, moving);
   }
 

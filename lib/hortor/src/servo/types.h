@@ -148,8 +148,21 @@ union ShutdownBits {
     bool overheating_error_ : 1;       // 位1: 温度超过上限
     bool motor_encoder_error_ : 1;     // 位2: 编码器故障
     bool electrical_shock_error_ : 1;  // 位3: 电气冲击
-    bool overload_error_ : 1;          // 位4: 过载（电流持续超限）
+    bool overload_error_ : 1;          // 位4: 过载
   };
 };
 
+/** 
+ * @brief 硬件错误状态
+ */
+union HardwareErrorStatusBits {
+  uint8_t value_ = 0;
+  struct {
+    bool input_voltage_error_ : 1;     // 位0: 输入电压超出范围
+    bool overheating_error_ : 1;       // 位1: 温度超过上限
+    bool motor_encoder_error_ : 1;     // 位2: 编码器故障
+    bool electrical_shock_error_ : 1;  // 位3: 电气冲击
+    bool overload_error_ : 1;          // 位4: 过载
+  };
+};
 }  // namespace hortor::servo
