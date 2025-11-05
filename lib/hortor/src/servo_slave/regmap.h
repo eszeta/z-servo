@@ -235,6 +235,19 @@ constexpr uint16_t FeedforwardGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 4.0f);
 }
 
+/**
+ * @brief 将原始电流值转换为实际电流值
+ * @param raw 原始值 
+ * @return 实际电流值 
+ * 
+ * 转换公式: current = raw × 0.001A
+ * 范围: 0 × 0.001 = 0A 到 65535 × 0.001 = 65.535A
+ */
+constexpr float CurrentFromRaw(uint16_t raw) { return raw / 1000.0f; }
+constexpr uint16_t CurrentToRaw(float current) {
+  return static_cast<uint16_t>(current * 1000.0f);
+}
+
 }  // namespace
 
 /**
@@ -620,27 +633,10 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * | Bit | 错误类型               | 说明                          |
    * |-----|------------------------|-------------------------------|
    * | 0   | Input Voltage Error    | 输入电压超出范围              |
-   * | 2   | Overheating Error      | 温度超过上限                  |
-   * | 3   | Motor Encoder Error    | 编码器故障                    |
-   * | 4   | Electrical Shock Error | 电气冲击                      |
-   * | 5   | Overload Error         | 过载（电流持续超限）          |
-   *
-   * 【使用场景】
-   * - 安全保护：自动关断防止损坏
-   * - 故障处理：快速响应错误状态
-   * - 系统保护：确保系统安全运行
-   *
-   * 【典型设置】
-   * - 全保护：0b00111111 (63) - 所有错误都关断
-   * - 标准保护：0b00110100 (52) - 过热+电气冲击+过载
-   * - 最小保护：0b00100000 (32) - 仅过热保护
-   *
-   * 【错误处理流程】
-   * 1. 检测错误：调用 GetHardwareErrorStatus() 获取错误状态
-   * 2. 分析错误类型：检查各个错误位（Bit 0,2,3,4,5）
-   * 3. 排除故障原因：根据错误类型采取相应措施
-   * 4. 清除错误：调用 SetHardwareErrorStatus(0) 清除错误状态
-   * 5. 重新使能：调用 SetTorqueEnable(1) 重新使能力矩
+   * | 1   | Overheating Error      | 温度超过上限                  |
+   * | 2   | Motor Encoder Error    | 编码器故障                    |
+   * | 3   | Electrical Shock Error | 电气冲击                      |
+   * | 4   | Overload Error         | 过载（电流持续超限）          |
    *
    * 【相关寄存器】
    * - Hardware Error Status: 错误状态记录
@@ -716,8 +712,6 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 获取运动阈值 (R/W)
    * @param[out] rpm 运动阈值（RPM）
    *
-   * 范围: 0-468.763 RPM
-   *
    * 【功能说明】
    * - 运动阈值用于判断舵机是否在运动
    * - 影响 Moving Status 的更新
@@ -736,7 +730,6 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Moving: 简化的运动状态指示
    *
    * @note 用于检测运动状态，避免微小振动导致的误判
-   * @note 修改后需调用 StoreEeprom() 并重启生效
    */
   float GetMovingThreshold() {
     uint32_t raw;
@@ -909,20 +902,13 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
 
   /**
    * @brief 获取电流上限 (R/W)
-   * @param[out] current_limit 电流上限（mA）
-   *
-   * 范围: 0-1193 mA
+   * @param[out] current_limit 电流上限（A）
    *
    * 【功能说明】
    * - 限制电机输出电流
    * - 保护电机和驱动电路
    * - Current-based Position Control Mode 的最大电流
    * - 修改后需要重启生效
-   *
-   * 【典型参数】
-   * - 轻载应用: 200-500 mA
-   * - 一般应用: 500-800 mA
-   * - 重载应用: 800-1193 mA
    *
    * 【相关寄存器】
    * - Goal Current: 电流控制模式的目标值
@@ -932,15 +918,15 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @warning 长时间大电流运行会导致过热
    * @note Present Current 不会超过此值
    */
-  uint16_t GetCurrentLimit() {
+  float GetCurrentLimit() {
     uint16_t current_limit;
     ReadRegField(ControlTable::kCurrentLimit, current_limit);
-    return current_limit;
+    return CurrentFromRaw(current_limit);
   }
 
   /**
    * @brief 设置电流上限 (R/W)
-   * @param[in] current_limit 电流上限（mA）
+   * @param[in] current_limit 电流上限（A）
    */
   void SetCurrentLimit(const uint16_t current_limit) {
     WriteRegField(ControlTable::kCurrentLimit, current_limit);
@@ -1472,7 +1458,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * 4. 选择的 Profile 类型存储在 Moving Status(123) 的 Bit 4-5
    * 5. Profile Generator 计算期望轨迹:
    *    - Position Trajectory(140): 期望位置轨迹
-   *    - Velocity Trajectory(136): 期望速度轨迹
+   *    - Velocity Trajectory: 期望速度轨迹
    * 6. 控制器跟踪期望轨迹驱动电机
    *
    * 【运动中更新 Goal Position】
@@ -1808,9 +1794,9 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
 
   /**
    * @brief 获取目标电流 (R/W)
-   * @return goal_current 目标电流（mA）
+   * @return goal_current 目标电流（A）
    *
-   * 范围: -1193 ~ 1193 mA
+   * 范围: -65.535 ~ 65.535 A
    *
    * 【功能说明】
    * - 设置电机输出电流目标值
@@ -1819,12 +1805,6 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * 中作为最大电流限制
    * - 负值表示反向电流
    * - 受 Current Limit 限制
-   *
-   * 【典型参数】
-   * - 停止: 0 mA（无输出）
-   * - 轻载: ±100-300 mA（轻负载）
-   * - 中载: ±300-600 mA（中等负载）
-   * - 重载: ±600-1193 mA（重负载）
    *
    * 【相关寄存器】
    * - Operating Mode: 决定电流控制模式
@@ -1836,15 +1816,15 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
   uint16_t GetGoalCurrent() {
     uint16_t goal_current;
     ReadRegField(ControlTable::kGoalCurrent, goal_current);
-    return goal_current;
+    return CurrentFromRaw(goal_current);
   }
 
   /**
    * @brief 设置目标电流 (R/W)
-   * @param[in] goal_current 目标电流（mA）
+   * @param[in] goal_current 目标电流（0.001A）
    */
-  void SetGoalCurrent(const uint16_t goal_current) {
-    WriteRegField(ControlTable::kGoalCurrent, goal_current);
+  void SetGoalCurrent(const float goal_current) {
+    WriteRegField(ControlTable::kGoalCurrent, CurrentToRaw(goal_current));
   }
 
   /**
@@ -2112,9 +2092,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
 
   /**
    * @brief 获取当前电流 (R)
-   * @return present_current 当前电流（mA）
-   *
-   * 范围: 0-1193 mA
+   * @return present_current 当前电流（A）
    *
    * 【功能说明】
    * - 显示当前通过电机的电流
@@ -2129,18 +2107,18 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  uint16_t GetPresentCurrent() {
+  float GetPresentCurrent() {
     uint16_t present_current;
     ReadRegField(ControlTable::kPresentCurrent, present_current);
-    return present_current;
+    return CurrentFromRaw(present_current);
   }
 
   /**
    * @brief 设置当前电流 (R)
    * @param[in] present_current 当前电流
    */
-  void SetPresentCurrent(const uint16_t present_current) {
-    WriteRegField(ControlTable::kPresentCurrent, present_current);
+  void SetPresentCurrent(const float present_current) {
+    WriteRegField(ControlTable::kPresentCurrent, CurrentToRaw(present_current));
   }
 
   /**
@@ -2225,16 +2203,16 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * 【功能说明】
    * - Profile 生成的期望速度轨迹值
-   * - 存储在 Velocity Trajectory(136) 寄存器中
+   * - 存储在 Velocity Trajectory 寄存器中
    * - 作为速度控制器的参考输入
    * - 实时更新，反映 Profile 计算的期望速度
    * - 与 Present Velocity 对比可得速度跟踪误差
    *
    * 【控制流程】
-   * Goal Position → [Profile Generator] → Velocity Trajectory(136) → [Velocity
+   * Goal Position → [Profile Generator] → Velocity Trajectory → [Velocity
    * PID] → PWM
    * - Profile Generator 根据 Goal Position 生成期望速度轨迹
-   * - 期望速度轨迹存储在 Velocity Trajectory(136) 中
+   * - 期望速度轨迹存储在 Velocity Trajectory 中
    * - Velocity PID 控制器跟踪 Velocity Trajectory
    * - 输出 PWM 驱动电机
    *

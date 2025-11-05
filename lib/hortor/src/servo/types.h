@@ -104,7 +104,7 @@ enum class Reverse : int8_t {
 /** 
  * @brief 驱动模式 
  */
-union DriveMode {
+union DriveModeBits {
   uint8_t value_ = 0;
   struct {
     bool reverse_mode_ : 1;              // 位0 0: 正转, 1: 反转
@@ -122,7 +122,7 @@ union DriveMode {
 /** 
  * @brief 运动状态
  */
-union MovingStatus {
+union MovingStatusBits {
   uint8_t value_ = 0;
   struct {
     bool in_position_ : 1;          // 位0: 已到达目标位置
@@ -135,6 +135,20 @@ union MovingStatus {
                                     //   10=Tri,
                                     //   11=Trap)
     uint8_t reserved_bits6_7_ : 2;  // 位6-7: 保留
+  };
+};
+
+/** 
+ * @brief 关断条件
+ */
+union ShutdownBits {
+  uint8_t value_ = 0;
+  struct {
+    bool input_voltage_error_ : 1;     // 位0: 输入电压超出范围
+    bool overheating_error_ : 1;       // 位1: 温度超过上限
+    bool motor_encoder_error_ : 1;     // 位2: 编码器故障
+    bool electrical_shock_error_ : 1;  // 位3: 电气冲击
+    bool overload_error_ : 1;          // 位4: 过载（电流持续超限）
   };
 };
 

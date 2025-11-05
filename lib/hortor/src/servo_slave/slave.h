@@ -109,21 +109,57 @@ class Slave : public protocol::
    * @return 错误码
    */
   Error ApplyMotorConfig() {
-    this->servo_->SetDriveMode(this->regmap_->GetDriveMode());
-    this->servo_->SetOperatingMode(this->regmap_->GetOperatingMode());
-    this->servo_->SetHomingOffset(this->regmap_->GetHomingOffset());
-    // this->regmap_->GetMovingThreshold();
-    // this->regmap_->GetTemperatureLimit();
-    // this->regmap_->GetMaxVoltageLimit();
-    // this->regmap_->GetMinVoltageLimit();
-    // this->regmap_->GetPwmLimit();
-    // this->regmap_->GetCurrentLimit();
-    // this->regmap_->GetVelocityLimit();
-    this->servo_->SetMaxPositionLimit(this->regmap_->GetMaxPositionLimit());
-    this->servo_->SetMinPositionLimit(this->regmap_->GetMinPositionLimit());
-    // this->regmap_->GetShutdown();
-    this->servo_->SetTorqueEnable(this->regmap_->GetTorqueEnable());
+    //==============================================================================
+    // 运行模式组
+    //==============================================================================
+    const auto drive_mode = this->regmap_->GetDriveMode();
+    this->servo_->SetDriveMode(drive_mode);
 
+    const auto operating_mode = this->regmap_->GetOperatingMode();
+    this->servo_->SetOperatingMode(operating_mode);
+
+    const auto shutdown = this->regmap_->GetShutdown();
+    this->servo_->SetShutdown(shutdown);
+
+    //==============================================================================
+    // 位置配置组
+    //==============================================================================
+    const auto homing_offset = this->regmap_->GetHomingOffset();
+    this->servo_->SetHomingOffset(homing_offset);
+
+    const auto moving_threshold = this->regmap_->GetMovingThreshold();
+    this->servo_->SetMovingThreshold(moving_threshold);
+
+    //==============================================================================
+    // 保护限制组
+    //==============================================================================
+    const auto temperature_limit = this->regmap_->GetTemperatureLimit();
+    this->servo_->SetTemperatureLimit(temperature_limit);
+
+    const auto max_voltage_limit = this->regmap_->GetMaxVoltageLimit();
+    this->servo_->SetMaxVoltageLimit(max_voltage_limit);
+
+    const auto min_voltage_limit = this->regmap_->GetMinVoltageLimit();
+    this->servo_->SetMinVoltageLimit(min_voltage_limit);
+
+    const auto pwm_limit = this->regmap_->GetPwmLimit();
+    this->servo_->SetPwmLimit(pwm_limit);
+
+    const auto current_limit = this->regmap_->GetCurrentLimit();
+    this->servo_->SetCurrentLimit(current_limit);
+
+    const auto velocity_limit = this->regmap_->GetVelocityLimit();
+    this->servo_->SetVelocityLimit(velocity_limit);
+
+    const auto max_position_limit = this->regmap_->GetMaxPositionLimit();
+    this->servo_->SetMaxPositionLimit(max_position_limit);
+
+    const auto min_position_limit = this->regmap_->GetMinPositionLimit();
+    this->servo_->SetMinPositionLimit(min_position_limit);
+
+    //==============================================================================
+    // PID 参数组
+    //==============================================================================
     const auto vi = this->regmap_->GetVelocityIgain();
     const auto vp = this->regmap_->GetVelocityPgain();
     this->servo_->SetVelocityPid(vp, vi, 0);
@@ -133,15 +169,41 @@ class Slave : public protocol::
     const auto pd = this->regmap_->GetPositionDgain();
     this->servo_->SetPositionPid(pp, pi, pd);
 
-    this->servo_->SetFeedforward2ndGain(this->regmap_->GetFeedforward2ndGain());
+    const auto feedforward_2nd_gain = this->regmap_->GetFeedforward2ndGain();
+    this->servo_->SetFeedforward2ndGain(feedforward_2nd_gain);
+
+    const auto feedforward_1st_gain = this->regmap_->GetFeedforward1stGain();
     this->servo_->SetFeedforward1stGain(this->regmap_->GetFeedforward1stGain());
-    this->servo_->SetGoalPwm(this->regmap_->GetGoalPwm());
-    // this->regmap_->GetGoalCurrent();
-    // this->regmap_->GetGoalVelocity();
-    this->servo_->SetProfileAcceleration(
-        this->regmap_->GetProfileAcceleration());
-    this->servo_->SetProfileVelocity(this->regmap_->GetProfileVelocity());
-    this->servo_->SetGoalPosition(this->regmap_->GetGoalPosition());
+
+    //==============================================================================
+    // 轨迹配置组
+    //==============================================================================
+    const auto profile_acceleration = this->regmap_->GetProfileAcceleration();
+    this->servo_->SetProfileAcceleration(profile_acceleration);
+
+    const auto profile_velocity = this->regmap_->GetProfileVelocity();
+    this->servo_->SetProfileVelocity(profile_velocity);
+
+    //==============================================================================
+    // 控制命令组
+    //==============================================================================
+    const auto torque_enable = this->regmap_->GetTorqueEnable();
+    this->servo_->SetTorqueEnable(torque_enable);
+
+    //==============================================================================
+    // 目标值组
+    //==============================================================================
+    const auto goal_pwm = this->regmap_->GetGoalPwm();
+    this->servo_->SetGoalPwm(goal_pwm);
+
+    const auto goal_current = this->regmap_->GetGoalCurrent();
+    this->servo_->SetGoalCurrent(goal_current);
+
+    const auto goal_velocity = this->regmap_->GetGoalVelocity();
+    this->servo_->SetGoalVelocity(goal_velocity);
+
+    const auto goal_position = this->regmap_->GetGoalPosition();
+    this->servo_->SetGoalPosition(goal_position);
     return Error::kOk;
   }
 
