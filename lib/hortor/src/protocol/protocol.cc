@@ -82,12 +82,12 @@ Error InstProtocol::Process(InstPacket &packet,
     }
     case PacketState::kChecksum: {
       const uint8_t checksum = packet.CalculateChecksum();
-      if (checksum != recv_data) {
-        packet_state_ = PacketState::kHeader1;
-        return Error::kInvalidPacket;
-      }
       packet.SetChecksum(recv_data);
       is_complete = true;
+      if (checksum != recv_data) {
+        packet_state_ = PacketState::kHeader1;
+        return Error::kChecksumError;
+      }
       break;
     }
     default: {
@@ -99,14 +99,14 @@ Error InstProtocol::Process(InstPacket &packet,
 }
 
 Error InstProtocol::CreateResponse(const uint8_t id,
-                                   const uint8_t status,
+                                   const StatusErrorBits &status,
                                    const uint8_t *parameter,
                                    const size_t parameter_size,
                                    StatusPacket &packet) {
   packet.header1 = 0xff;
   packet.header2 = 0xff;
   packet.id = id;
-  packet.instructionOrError = status;
+  packet.instructionOrError = status.value;
   if (parameter == nullptr) {
     packet.SetParameterSize(0);
   } else {

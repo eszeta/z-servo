@@ -39,7 +39,6 @@ class Slave : public protocol::
 
   Error Init() {
     CHECK((protocol::Slave<Slave, RegMap, protocol::I2cPortHandler>::Init()));
-    this->SetStatus(0);
     CHECK(this->ApplyProtocolConfig());
     CHECK(this->ApplyMotorConfig());
     CHECK(this->UpdateMotorStatus());
@@ -66,17 +65,21 @@ class Slave : public protocol::
     return Error::kOk;
   }
 
-  Error ResponseImpl(const uint8_t reply_idx,
-                     const uint8_t* parameter,
-                     const size_t parameter_size) {
-    this->SetStatus(0);
-    return Error::kOk;
-  }
-
   Error ProcessImpl(float dt) {
     realtime_tick_ += dt * 1000;
     this->regmap_->SetRealtimeTick(realtime_tick_);
-    return UpdateMotorStatus();
+    CHECK(UpdateMotorStatus());
+    return UpdateStatus();
+  }
+
+  Error UpdateStatus() {
+    const auto hardware_error = this->servo_->GetHardwareErrorStatus();
+    this->status_.input_voltage_error = hardware_error.input_voltage_error;
+    this->status_.angle_limit_error = hardware_error.angle_limit_error;
+    this->status_.overheating_error = hardware_error.overheating_error;
+    this->status_.range_error = hardware_error.range_error;
+    this->status_.overload_error = hardware_error.overload_error;
+    return Error::kOk;
   }
 
  private:

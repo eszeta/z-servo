@@ -1655,35 +1655,8 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * | 2   | Motor Encoder Error    | 编码器故障                    |
    * | 3   | Electrical Shock Error | 电气冲击                      |
    * | 4   | Overload Error         | 过载                          |
-   *
-   * 【错误处理标准流程】
-   * 1. 检测错误：调用 GetHardwareErrorStatus() 获取错误状态
-   * 2. 分析错误类型：检查各个错误位（Bit 0,2,3,4,5）
-   * 3. 排除故障原因：根据错误类型采取相应措施
-   * 4. 清除错误：调用 SetHardwareErrorStatus(0) 清除错误状态
-   * 5. 重新使能：调用 SetTorqueEnable(1) 重新使能力矩
-   *
-   * 【常见错误及解决方法】
-   *
-   * Input Voltage Error (Bit 0):
-   *   原因：电源电压超出 [Min Voltage Limit, Max Voltage Limit]
-   *   解决：1) 检查电源稳定性 2) 调整电压限制范围
-   *
-   * Overheating Error (Bit 2):
-   *   原因：温度超过 Temperature Limit
-   *   解决：1) 降低负载 2) 改善散热 3) 降低速度/电流限制
-   *
-   * Motor Encoder Error (Bit 3):
-   *   原因：磁编码器故障或磁铁脱落
-   *   解决：1) 检查磁铁安装 2) 硬件故障需返修
-   *
-   * Electrical Shock Error (Bit 4):
-   *   原因：电路瞬态冲击或电磁干扰
-   *   解决：1) 改善布线 2) 添加滤波电容
-   *
-   * Overload Error (Bit 5):
-   *   原因：负载过大或堵转，电流持续超限
-   *   解决：1) 减小负载 2) 增加 Current Limit 3) 检查机械卡死
+   * | 5   | Angle Limit Error      | 角度超出范围                  |
+   * | 6   | Range Error            | 范围错误                      |
    *
    * 【相关寄存器】
    * - Shutdown: 决定哪些错误会自动关断力矩

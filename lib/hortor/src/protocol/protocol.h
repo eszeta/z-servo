@@ -136,7 +136,7 @@ class InstProtocol {
 
   Error Process(InstPacket &packet, const uint8_t recv_data, bool &is_complete);
   Error CreateResponse(const uint8_t id,
-                       const uint8_t status,
+                       const StatusErrorBits &status,
                        const uint8_t *parameter,
                        const size_t parameter_size,
                        StatusPacket &packet);

@@ -78,6 +78,10 @@ enum class Error : uint8_t {
    */
   kInvalidState = 10,
   /**
+   * @brief 校验和错误
+   */
+  kChecksumError = 11,
+  /**
    * @brief 未实现
    */
   kNotImplemented = 11,

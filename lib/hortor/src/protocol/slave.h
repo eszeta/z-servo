@@ -70,7 +70,9 @@ class Slave {
    * @return 端口处理器
    */
   PortHandlerType* GetPortHandler() { return port_handler_; }
-  void LinkPortHandler(PortHandlerType* port_handler) { port_handler_ = port_handler; }
+  void LinkPortHandler(PortHandlerType* port_handler) {
+    port_handler_ = port_handler;
+  }
 
   /**
    * @brief 设置ID
@@ -94,16 +96,6 @@ class Slave {
    * @return 返回级别
    */
   uint8_t GetReturnLevel() const { return return_level_; }
-  /**
-   * @brief 设置状态
-   * @param status 状态
-   */
-  void SetStatus(const uint8_t status) { status_ = status; }
-  /**
-   * @brief 获取状态
-   * @return 状态
-   */
-  uint8_t GetStatus() const { return status_; }
 
  protected:
   Derived& AsDerived() { return static_cast<Derived&>(*this); }
@@ -122,8 +114,9 @@ class Slave {
       return Error::kOk;
     }
     const auto instruction = packet.instructionOrError;
-    const auto response = CheckResponse(instruction, return_level_);
-
+    const auto response = CheckResponse(instruction);
+    status_.instruction_error = false;
+    status_.range_error = false;
     switch (instruction) {
       case Instruction::kPing: {
         CHECK(PingHandler(packet));
@@ -158,7 +151,8 @@ class Slave {
         break;
       }
       default: {
-        return Error::kInvalidInstruction;
+        CHECK(InstructionError(response));
+        break;
       }
     }
     return Error::kOk;
@@ -174,12 +168,12 @@ class Slave {
   Error Response(const uint8_t reply_idx,
                  const uint8_t* parameter,
                  const size_t parameter_size) {
-    CHECK(AsDerived().ResponseImpl(reply_idx, parameter, parameter_size));
     CHECK(protocol_.CreateResponse(
         id_, status_, parameter, parameter_size, status_packet_));
     CHECK(port_handler_->Response(status_packet_, reply_idx));
     return Error::kOk;
   }
+  
   /**
    * @brief 写寄存器
    * @param address 地址
@@ -263,6 +257,13 @@ class Slave {
    */
   Error ActionHandler(const InstPacket& packet, const bool response) {
     const uint8_t* buffer = async_write_buffer_;
+    if (async_write_buffer_size_ == 0) {
+      if (response) {
+        status_.instruction_error = true;
+        CHECK(Response(0, nullptr, 0));
+      }
+      return Error::kOk;
+    }
     while (async_write_buffer_size_ > 0) {
       const InstPacket* const reg_write_packet =
           reinterpret_cast<const InstPacket*>(buffer);
@@ -309,31 +310,30 @@ class Slave {
     return Error::kOk;
   }
   /**
-   * @brief 同步读指令
+   * @brief 批量读取指令
    * @param packet 指令包
    * @param response 是否响应
    * @return 错误码
    */
   Error BulkReadHandler(const InstPacket& packet, const bool response) {
-    const uint8_t address = packet.parameter[0];
-    const uint8_t data_size = packet.parameter[1];
     const uint8_t parameter_size = packet.GetParameterSize();
-    const uint8_t block_count = parameter_size - 2;
-    bool hit = false;
+    const uint8_t block_count = (parameter_size - 1) / 3;
     uint8_t response_idx = 0;
     uint8_t buffer[128];
-    const uint8_t* parameter = packet.parameter + 2;
+    const uint8_t* parameter = packet.parameter + 1;
     for (uint8_t i = 0; i < block_count; i++) {
-      const uint8_t target_id = parameter[0];
+      const uint8_t target_id = parameter[1];
       if (id_ == target_id) {
-        hit = true;
+        const uint8_t data_size = parameter[0];
+        const uint8_t address = parameter[2];
         response_idx = i;
         CHECK(regmap_->ReadBytes(address, data_size, buffer));
+        if (response) {
+          CHECK(Response(response_idx, buffer, data_size));
+        }
+        return Error::kOk;
       }
-      parameter += 1;
-    }
-    if (response && hit) {
-      CHECK(Response(response_idx, buffer, data_size));
+      parameter += 3;
     }
     return Error::kOk;
   }
@@ -350,9 +350,21 @@ class Slave {
     return AsDerived().ResetImpl();
   }
 
-  bool CheckResponse(const uint8_t instruction,
-                     const uint8_t return_level) const {
-    switch (return_level) {
+  /**
+   * @brief 指令错误
+   * @param response 是否响应
+   * @return 错误码
+   */
+  Error InstructionError(const bool response) {
+    status_.instruction_error = true;
+    if (response) {
+      CHECK(Response(0, nullptr, 0));
+    }
+    return Error::kInvalidInstruction;
+  }
+
+  bool CheckResponse(const uint8_t instruction) const {
+    switch (return_level_) {
       case 0:
         return instruction == Instruction::kPing;
       case 1:
@@ -376,7 +388,7 @@ class Slave {
   /**
    * @brief 状态
    */
-  uint8_t status_ = 0;
+  StatusErrorBits status_{};
   /**
    * @brief 寄存器映射指针
    */

@@ -62,14 +62,14 @@ class Servo {
     drive_mode_ = drive_mode;
   }
   void SetDriveMode(const uint8_t drive_mode) {
-    drive_mode_.value_ = drive_mode;
-    motor_->SetReverse(drive_mode_.moto_reverse_mode_ ? Reverse::kReverse
-                                                      : Reverse::kNormal);
-    encoder_->SetReverse(drive_mode_.encoder_reverse_mode_ ? Reverse::kReverse
-                                                           : Reverse::kNormal);
+    drive_mode_.value = drive_mode;
+    motor_->SetReverse(drive_mode_.moto_reverse_mode ? Reverse::kReverse
+                                                     : Reverse::kNormal);
+    encoder_->SetReverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
+                                                          : Reverse::kNormal);
   }
 
-  int8_t GetReverseMode() const { return drive_mode_.reverse_mode_ ? -1 : 1; }
+  int8_t GetReverseMode() const { return drive_mode_.reverse_mode ? -1 : 1; }
 
   /** @brief 舵机模式 */
   OperatingMode GetOperatingMode() const { return operating_mode_; }
@@ -83,7 +83,7 @@ class Servo {
   /** @brief 关断条件 */
   ShutdownBits GetShutdown() const { return shutdown_; }
   void SetShutdown(const ShutdownBits shutdown) { shutdown_ = shutdown; }
-  void SetShutdown(const uint8_t shutdown) { shutdown_.value_ = shutdown; }
+  void SetShutdown(const uint8_t shutdown) { shutdown_.value = shutdown; }
 
 #pragma endregion  // "运行模式组"
 
@@ -240,14 +240,14 @@ class Servo {
     return hardware_error_status_;
   }
   uint8_t GetHardwareErrorStatusValue() const {
-    return hardware_error_status_.value_;
+    return hardware_error_status_.value;
   }
   void SetHardwareErrorStatus(
       const HardwareErrorStatusBits hardware_error_status) {
     hardware_error_status_ = hardware_error_status;
   }
   void SetHardwareErrorStatus(const uint8_t hardware_error_status) {
-    hardware_error_status_.value_ = hardware_error_status;
+    hardware_error_status_.value = hardware_error_status;
   }
 
 #pragma endregion  // "控制命令组"
@@ -336,12 +336,12 @@ class Servo {
 
   /** @brief 运动详细状态 */
   MovingStatusBits GetMovingStatus() const { return moving_status_; }
-  uint8_t GetMovingStatusValue() const { return moving_status_.value_; }
+  uint8_t GetMovingStatusValue() const { return moving_status_.value; }
   void SetMovingStatus(const MovingStatusBits control_mode) {
     moving_status_ = control_mode;
   }
   void SetMovingStatus(const uint8_t moving_status) {
-    moving_status_.value_ = moving_status;
+    moving_status_.value = moving_status;
   }
 
 #pragma endregion  // "状态反馈组"

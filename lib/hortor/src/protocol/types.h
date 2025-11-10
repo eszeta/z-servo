@@ -71,4 +71,46 @@ struct ControlTableBlock {
   }
 };
 
+union StatusErrorBits {
+  uint8_t value = 0;
+  struct {
+    /**
+     * @brief 输入电压超出范围 bit0
+     * @note 当输入电压超出电压限制时，它会被设为1
+     */
+    bool input_voltage_error : 1;
+    /**
+     * @brief 角度超出范围 bit1
+     * @note 当角度超出角度限制时，它会被设为1
+     */
+    bool angle_limit_error : 1;
+    /**
+     * @brief 温度超过上限 bit2
+     * @note 当温度超过温度限制时，它会被设为1
+     */
+    bool overheating_error : 1;
+    /**
+     * @brief 范围错误 bit3
+     * @note 当指令超出使用范围时，它会被设为1
+     */
+    bool range_error : 1;
+    /**
+     * @brief 校验和错误 bit4
+     * @note 当所传输的指令数据包的校验和不正确时，它会被设为1
+     */
+    bool checksum_error : 1;
+    /**
+     * @brief 过载错误 bit5
+     * @note 当当前负载无法通过设定的扭矩进行控制时，其值设为1
+     */
+    bool overload_error : 1;
+    /**
+     * @brief 指令错误 bit6
+     * @note 若发送未定义的指令或在未发送Reg Write指令的情况下发送action指令，则将其设为1 
+     */
+    bool instruction_error : 1;
+    bool reserved_bit7 : 1;  // 位7: 保留（保留位）
+  };
+};
+
 }  // namespace hortor::protocol
