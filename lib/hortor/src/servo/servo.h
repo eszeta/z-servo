@@ -25,6 +25,7 @@
 #include "math/pid.h"
 #include "motor.h"
 #include "types.h"
+#include "utils/timeout_limiter.h"
 
 namespace hortor::servo {
 
@@ -50,7 +51,10 @@ class Servo {
   /**
    * @brief 初始化舵机
    */
-  Error Init() { return Error::kOk; }
+  Error Init() {
+    current_timeout_limiter_.SetTimeoutDuration(0.3f);
+    return Error::kOk;
+  }
 
   //==============================================================================
   // 运行模式组
@@ -68,8 +72,6 @@ class Servo {
     encoder_->SetReverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
                                                           : Reverse::kNormal);
   }
-
-  int8_t GetReverseMode() const { return drive_mode_.reverse_mode ? -1 : 1; }
 
   /** @brief 舵机模式 */
   OperatingMode GetOperatingMode() const { return operating_mode_; }
@@ -139,12 +141,16 @@ class Servo {
 
   /** @brief PWM上限 */
   float GetPwmLimit() const { return pwm_limit_; }
-  void SetPwmLimit(const float pwm_limit) { pwm_limit_ = pwm_limit; }
+  void SetPwmLimit(const float pwm_limit) {
+    pwm_limit_ = pwm_limit;
+    position_pid_.SetOutputLimit(pwm_limit);
+  }
 
   /** @brief 电流上限 */
   float GetCurrentLimit() const { return current_limit_; }
   void SetCurrentLimit(const float current_limit) {
     current_limit_ = current_limit;
+    current_timeout_limiter_.SetThreshold(current_limit);
   }
 
   /** @brief 速度上限 */
@@ -163,6 +169,13 @@ class Servo {
   uint32_t GetMaxPositionLimit() const { return max_position_limit_; }
   void SetMaxPositionLimit(const uint32_t max_position_limit) {
     max_position_limit_ = max_position_limit;
+  }
+
+  /** @brief 保护时间 */
+  float GetProtectionTime() const { return protection_time_; }
+  void SetProtectionTime(const float protection_time) {
+    protection_time_ = protection_time;
+    current_timeout_limiter_.SetTimeoutDuration(protection_time);
   }
 
 #pragma endregion  // "保护限制组"
@@ -367,6 +380,7 @@ class Servo {
    */
   Error Process(float dt) {
     CHECK(RefreshPresent(dt));
+    CHECK(CheckPresent(dt));
     CHECK(ExecuteOperatingMode(dt));
     return Error::kOk;
   }
@@ -421,7 +435,8 @@ class Servo {
   uint32_t max_position_limit_ = kResolution.kMax;
   /** @brief 位置下限 */
   uint32_t min_position_limit_ = 0;
-
+  /** @brief 保护时间 */
+  float protection_time_ = 0.0f;
 #pragma endregion  // "保护限制组"
 
   //==============================================================================
@@ -547,6 +562,9 @@ class Servo {
   /** @brief 电流传感器 */
   CurrentType *current_sensor_ = nullptr;
 
+  /** @brief 电流超时限制器 */
+  utils::TimeoutLimiter current_timeout_limiter_{};
+
 #pragma endregion  // "硬件抽象层"
 
   /**
@@ -574,6 +592,16 @@ class Servo {
     float current_float;
     CHECK(current_sensor_->GetCurrent(current_float));
     SetPresentCurrent(GetCurrentLpf().Compute(current_float, dt));
+    return Error::kOk;
+  }
+
+  Error CheckPresent(float dt) {
+    const auto present_current = GetPresentCurrent();
+    hardware_error_status_.overload_error =
+        current_timeout_limiter_.Process(present_current, dt);
+    if (hardware_error_status_.overload_error) {
+      SetTorqueEnable(false);
+    }
     return Error::kOk;
   }
 
@@ -630,8 +658,7 @@ class Servo {
    * 4. 前馈与 PID 控制器基于期望轨迹计算电机的 PWM 输出。
    * 5. Goal PWM 对计算得到的 PWM 施加上限并决定最终 PWM 值。
    * 6. 最终 PWM 通过逆变器作用于电机，驱动舵机输出端运动。
-   * 7. 结果更新到 Present Position、Present Velocity、Present PWM 与
-   * Present Current。
+   * 7. 结果更新到 Present Position、Present Velocity、Present PWM 与 Present Current。
    */
   void positionMode(float dt) {
     const auto limited_goal_position = GetLimitedGoalPosition();
@@ -660,10 +687,8 @@ class Servo {
    * @param pwm PWM值
    */
   void SetMotorPower(const float pwm) {
-    const auto reverse = GetReverseMode();
-    const auto pwm_set = pwm * reverse;
-    SetPresentPwm(pwm_set);
-    motor_->SetPWM(pwm_set);
+    SetPresentPwm(pwm);
+    motor_->SetPWM(pwm);
   }
 
   /**

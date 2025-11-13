@@ -16,38 +16,56 @@
 
 #include <Arduino.h>
 
+#include <type_traits>
+
 #include "hortor.h"
 #include "utils/bit_utils.h"
 
 namespace hortor::regmap {
 
-// 模板特化实现组合类型选择
-template <typename T, size_t Size = sizeof(T)>
-struct CombinedTypeImpl;
-
 template <typename T>
-struct CombinedTypeImpl<T, 1> {
-  using type = uint16_t;
+struct CombinedTypeImpl {
+  static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
+                "Unsupported size for CombinedType");
+
+  // 根据大小选择无符号类型
+  using UnsignedCombinedType = std::conditional_t<
+      sizeof(T) == 1,
+      uint16_t,
+      std::conditional_t<sizeof(T) == 2, uint32_t, uint64_t>>;
+
+  // 根据大小选择有符号类型
+  using SignedCombinedType =
+      std::conditional_t<sizeof(T) == 1,
+                         int16_t,
+                         std::conditional_t<sizeof(T) == 2, int32_t, int64_t>>;
+
+  using UnsignedType = std::conditional_t<
+      sizeof(T) == 1,
+      uint8_t,
+      std::conditional_t<sizeof(T) == 2, uint16_t, uint32_t>>;
+
+  using CombinedType = std::conditional_t<std::is_signed_v<T>,
+                                          SignedCombinedType,
+                                          UnsignedCombinedType>;
 };
 
 template <typename T>
-struct CombinedTypeImpl<T, 2> {
-  using type = uint32_t;
-};
-
+using UCType = typename CombinedTypeImpl<T>::UnsignedCombinedType;
 template <typename T>
-struct CombinedTypeImpl<T, 4> {
-  using type = uint64_t;
-};
-
+using CType = typename CombinedTypeImpl<T>::CombinedType;
 template <typename T>
-using CombinedType = typename CombinedTypeImpl<T>::type;
+using UType = typename CombinedTypeImpl<T>::UnsignedType;
 
 template <typename T>
 struct RegField;
-typedef RegField<uint8_t> RegField08;
-typedef RegField<uint16_t> RegField16;
-typedef RegField<uint32_t> RegField32;
+
+typedef RegField<uint8_t> RegFieldU08;
+typedef RegField<uint16_t> RegFieldU16;
+typedef RegField<uint32_t> RegFieldU32;
+typedef RegField<int8_t> RegFieldS08;
+typedef RegField<int16_t> RegFieldS16;
+typedef RegField<int32_t> RegFieldS32;
 
 /**
  * @brief 寄存器位域描述结构
@@ -56,7 +74,7 @@ typedef RegField<uint32_t> RegField32;
  * 用于描述寄存器中的特定位域。
  */
 template <typename T = uint8_t>
-struct __packed RegField {
+struct RegField {
  public:
   static constexpr size_t kSize = sizeof(T);
   const uint8_t address;  // 寄存器地址
@@ -86,10 +104,18 @@ struct __packed RegField {
    * @param data 寄存器数据
    * @return 特定位域的值
    */
-  static constexpr T GetValue(const RegField<T>& field, const T data) noexcept {
+  static constexpr T GetValue(const RegField<T>& field,
+                              const UType<T> data) noexcept {
     using utils::bit_utils::CreateMask;
-    const auto mask = CreateMask<T>(field.shift, field.bits);
-    return (data & mask) >> field.shift;
+    const auto mask = CreateMask<UType<T>>(field.shift, field.bits);
+    const auto extracted = (data & mask) >> field.shift;
+    if constexpr (std::is_signed_v<T>) {
+      constexpr auto target_bits = sizeof(T) * 8;
+      const auto shift_amount = target_bits - field.bits;
+      return static_cast<T>(extracted << shift_amount) >> shift_amount;
+    } else {
+      return extracted;
+    }
   }
 
   /**
@@ -101,12 +127,11 @@ struct __packed RegField {
    * @return 更新后的寄存器数据
    */
   static constexpr void SetValue(const RegField<T>& field,
-                                 const T data,
                                  const T value,
-                                 T& out) noexcept {
+                                 UType<T>& data) noexcept {
     using utils::bit_utils::CreateMask;
-    const T mask = CreateMask<T>(field.shift, field.bits);
-    out = (data & ~mask) | ((value << field.shift) & mask);
+    const auto mask = CreateMask<UType<T>>(field.shift, field.bits);
+    data = (data & ~mask) | ((value << field.shift) & mask);
   }
 
   /**
@@ -117,17 +142,26 @@ struct __packed RegField {
    * @param low_data 低位字节
    * @return 组合后的寄存器数据
    */
-  static constexpr auto GetCombinedValue(const RegField<T>& high_field,
-                                         const RegField<T>& low_field,
-                                         const T high_data,
-                                         const T low_data) noexcept {
+  static constexpr CType<T> GetCombinedValue(const RegField<T>& high_field,
+                                             const RegField<T>& low_field,
+                                             const UType<T> high_data,
+                                             const UType<T> low_data) noexcept {
     static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
                   "Unsupported size");
-    const auto high =
-        static_cast<CombinedType<T>>(GetValue(high_field, high_data));
-    const auto low =
-        static_cast<CombinedType<T>>(GetValue(low_field, low_data));
-    return (high << low_field.bits) | low;
+    using utils::bit_utils::CreateMask;
+    const UType<T> high = GetValue(high_field, high_data);
+    const UType<T> low = GetValue(low_field, low_data);
+    const auto high_mask = CreateMask<UType<T>>(0, high_field.bits);
+    const auto low_mask = CreateMask<UType<T>>(0, low_field.bits);
+    const auto extracted =
+        ((high & high_mask) << low_field.bits) | (low & low_mask);
+    if constexpr (std::is_signed_v<T>) {
+      constexpr auto target_bits = sizeof(CType<T>) * 8;
+      const auto shift_amount = target_bits - high_field.bits - low_field.bits;
+      return static_cast<CType<T>>(extracted << shift_amount) >> shift_amount;
+    } else {
+      return extracted;
+    }
   }
 
   /**
@@ -142,17 +176,15 @@ struct __packed RegField {
    */
   static constexpr void SetCombinedValue(const RegField<T>& high_field,
                                          const RegField<T>& low_field,
-                                         const T high_data,
-                                         const T low_data,
-                                         const CombinedType<T> value,
-                                         T& out_high_data,
-                                         T& out_low_data) noexcept {
+                                         const CType<T> value,
+                                         UType<T>& high_data,
+                                         UType<T>& low_data) noexcept {
     static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
                   "Unsupported size");
-    const auto lowValue = static_cast<T>(value);
-    const auto highValue = static_cast<T>(value >> low_field.bits);
-    SetValue(low_field, low_data, lowValue, out_low_data);
-    SetValue(high_field, high_data, highValue, out_high_data);
+    const auto lowValue = static_cast<UType<T>>(value);
+    const auto highValue = static_cast<UType<T>>(value >> low_field.bits);
+    SetValue(low_field, lowValue, low_data);
+    SetValue(high_field, highValue, high_data);
   }
 };
 
@@ -163,7 +195,7 @@ struct __packed RegField {
  * @return 特定位域的值
  */
 template <typename T>
-constexpr T GetValue(const RegField<T>& field, const T data) noexcept {
+constexpr T GetValue(const RegField<T>& field, const UType<T> data) noexcept {
   return RegField<T>::GetValue(field, data);
 }
 
@@ -176,10 +208,9 @@ constexpr T GetValue(const RegField<T>& field, const T data) noexcept {
  */
 template <typename T>
 constexpr void SetValue(const RegField<T>& field,
-                        const T data,
                         const T value,
-                        T& out) noexcept {
-  RegField<T>::SetValue(field, data, value, out);
+                        UType<T>& data) noexcept {
+  RegField<T>::SetValue(field, value, data);
 }
 
 /**
@@ -191,10 +222,10 @@ constexpr void SetValue(const RegField<T>& field,
  * @return 组合后的寄存器数据
  */
 template <typename T>
-constexpr auto GetCombinedValue(const RegField<T>& high_field,
-                                const RegField<T>& low_field,
-                                const T high_data,
-                                const T low_data) noexcept {
+constexpr CType<T> GetCombinedValue(const RegField<T>& high_field,
+                                    const RegField<T>& low_field,
+                                    const UType<T> high_data,
+                                    const UType<T> low_data) noexcept {
   return RegField<T>::GetCombinedValue(
       high_field, low_field, high_data, low_data);
 }
@@ -212,18 +243,11 @@ constexpr auto GetCombinedValue(const RegField<T>& high_field,
 template <typename T>
 constexpr void SetCombinedValue(const RegField<T>& high_field,
                                 const RegField<T>& low_field,
-                                const T high_data,
-                                const T low_data,
-                                const CombinedType<T> value,
-                                T& out_high_data,
-                                T& out_low_data) noexcept {
-  RegField<T>::SetCombinedValue(high_field,
-                                low_field,
-                                high_data,
-                                low_data,
-                                value,
-                                out_high_data,
-                                out_low_data);
+                                const CType<T> value,
+                                UType<T>& high_data,
+                                UType<T>& low_data) noexcept {
+  RegField<T>::SetCombinedValue(
+      high_field, low_field, value, high_data, low_data);
 }
 
 }  // namespace hortor::regmap

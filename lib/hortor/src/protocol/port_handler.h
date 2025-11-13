@@ -62,15 +62,15 @@ class PortHandler {
 
   /**
    * @brief 设置响应延迟
-   * @param response_delay 响应延迟时间（毫秒）
+   * @param response_delay 响应延迟时间（秒）
    */
-  void SetResponseDelay(const uint16_t response_delay) {
+  void SetResponseDelay(const float response_delay) {
     response_delay_ = response_delay;
   }
 
  protected:
   StatusPacket status_packet_{};  // 状态包缓冲区
-  uint16_t response_delay_ = 0;   // 响应延迟（毫秒）
+  float response_delay_ = 0.0f;   // 响应延迟（秒）
 };
 
 }  // namespace hortor::protocol

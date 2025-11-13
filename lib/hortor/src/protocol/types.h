@@ -50,7 +50,7 @@ enum : uint8_t {
 constexpr uint8_t kBroadcastId = 0xfe;
 
 template <typename T = uint8_t>
-struct __packed ControlTableItem {
+struct ControlTableItem {
   const regmap::RegField<T> reg;
   const T default_value;
 

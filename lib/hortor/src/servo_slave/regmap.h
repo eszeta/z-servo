@@ -37,200 +37,128 @@ namespace {
 
 /**
  * @brief 将原始电压值转换为实际电压值
- * @param raw 原始值 (0-160)
- * @return 实际电压值 (0.0-16.0V)
- *
+ * @param raw 原始值
+ * @return 实际电压值
+ * 原始单位：0.1V，转换单位：V
  * 转换公式: voltage = raw × 0.1V
- * 范围: 0 × 0.1 = 0.0V 到 160 × 0.1 = 16.0V
  */
 constexpr float VoltageFromRaw(uint16_t raw) { return raw * 0.1f; }
 
-/**
- * @brief 将实际电压值转换为原始值
- * @param voltage 实际电压值 (0.0-16.0V)
- * @return 原始值 (0-160)
- */
+/** @brief 将实际电压值转换为原始值 */
 constexpr uint16_t VoltageToRaw(float voltage) {
   return static_cast<uint16_t>(voltage * 10.0f);
 }
 
 /**
  * @brief 将原始 PWM 值转换为实际 PWM 百分比
- * @param raw 原始值 (0-885)
+ * @param raw 原始值
  * @return 实际 PWM 百分比 (-100.0% 到 100.0%)
- *
+ * 原始单位：0.113%，转换单位：%
  * 转换公式: percent = raw × 0.113%
- * 范围: 0 × 0.113 = 0% 到 885 × 0.113 = 100%
- *
- * @note 负值表示反向旋转
  */
-constexpr float PwmFromRaw(uint16_t raw) { return raw * 0.113f; }
+constexpr float PwmFromRaw(int16_t raw) { return raw * 0.113f; }
 
-/**
- * @brief 将实际 PWM 百分比转换为原始值
- * @param percent 实际 PWM 百分比 (-100.0% 到 100.0%)
- * @return 原始值 (0-885)
- */
-constexpr uint16_t PwmToRaw(float percent) {
-  return static_cast<uint16_t>(percent / 0.113f);
+/** @brief 将实际 PWM 百分比转换为原始值 */
+constexpr int16_t PwmToRaw(float percent) {
+  return static_cast<int16_t>(percent / 0.113f);
 }
 
 /**
  * @brief 将原始速度值转换为实际速度值
- * @param raw 原始值 (0-2047)
- * @return 实际速度值 (-468.763 到 468.763 RPM)
+ * @param raw 原始值 
+ * @return 实际速度值
  *
  * 转换公式: rpm = raw × 0.229 RPM
- * 范围: 0 × 0.229 = 0 RPM 到 2047 × 0.229 = 468.763 RPM
- *
+ * 原始单位：0.229 RPM，转换单位：RPM
  * @note 负值表示反向旋转
  */
 constexpr float VelocityFromRaw(uint32_t raw) { return raw * 0.229f; }
 
-/**
- * @brief 将实际速度值转换为原始值
- * @param rpm 实际速度值 (-468.763 到 468.763 RPM)
- * @return 原始值 (0-2047)
- */
+/** @brief 将实际速度值转换为原始值 */
 constexpr uint32_t VelocityToRaw(float rpm) {
   return static_cast<uint32_t>(rpm / 0.229f);
 }
 
 /**
  * @brief 将原始加速度值转换为实际加速度值
- * @param raw 原始值 (0-32767)
- * @return 实际加速度值 (0-7,032,024.959 rev/min²)
- *
+ * @param raw 原始值
+ * @return 实际加速度值
+ * 原始单位：214.577 rev/min²，转换单位：rev/min²
  * 转换公式: acc = raw × 214.577 rev/min²
- * 范围: 0 × 214.577 = 0 到 32767 × 214.577 = 7,032,024.959 rev/min²
- *
- * @note 仅在 Velocity-based Profile 模式下使用
  */
 constexpr float AccelerationFromRaw(uint32_t raw) { return raw * 214.577f; }
 
-/**
- * @brief 将实际加速度值转换为原始值
- * @param acc 实际加速度值 (0-7,032,024.959 rev/min²)
- * @return 原始值 (0-32767)
- */
+/** @brief 将实际加速度值转换为原始值 */
 constexpr uint32_t AccelerationToRaw(float acc) {
   return static_cast<uint32_t>(acc / 214.577f);
 }
 
 /**
- * @brief 将原始延迟值转换为实际延迟时间
- * @param raw 原始值 (0-254)
- * @return 实际延迟时间 (0-508 μs)
- *
- * 转换公式: delay = raw × 2μs
- * 范围: 0 × 2 = 0μs 到 254 × 2 = 508μs
+ * @brief 将原始ms转换为实际秒
+ * @param raw 原始值
+ * @return 实际秒
+ * 原始单位：20ms，转换单位：s
+ * 转换公式: seconds = raw × 0.02  
  */
-constexpr uint16_t DelayFromRaw(uint8_t raw) { return raw * 2; }
+constexpr float MsFromRaw(uint8_t raw) { return raw * 0.02f; }
 
-/**
- * @brief 将实际延迟时间转换为原始值
- * @param us 实际延迟时间 (0-508 μs)
- * @return 原始值 (0-254)
- */
-constexpr uint8_t DelayToRaw(uint16_t us) {
-  return static_cast<uint8_t>(us / 2);
-}
-
-/**
- * @brief 将原始看门狗值转换为实际时间
- * @param raw 原始值 (0-254)
- * @return 实际看门狗时间 (0-5080 ms)
- *
- * 转换公式: time = raw × 20ms
- * 范围: 0 × 20 = 0ms 到 254 × 20 = 5080ms
- *
- * @note 0 表示禁用看门狗功能
- */
-constexpr uint16_t WatchdogFromRaw(uint8_t raw) { return raw * 20; }
-
-/**
- * @brief 将实际看门狗时间转换为原始值
- * @param ms 实际看门狗时间 (0-5080 ms)
- * @return 原始值 (0-254)
- */
-constexpr uint8_t WatchdogToRaw(uint16_t ms) {
-  return static_cast<uint8_t>(ms / 20);
+/** @brief 将实际秒转换为原始值 */
+constexpr uint8_t MsToRaw(float seconds) {
+  return static_cast<uint8_t>(seconds / 0.02f);
 }
 
 /**
  * @brief 将原始 P 增益值转换为实际增益值
- * @param raw 原始值 (0-16383)
- * @return 实际 P 增益值 (0.0-127.99)
- *
+ * @param raw 原始值
+ * @return 实际 P 增益值
+ * 原始单位：128.0，转换单位：-
  * 转换公式: gain = raw / 128.0
- * 范围: 0 / 128 = 0.0 到 16383 / 128 = 127.99
  */
 constexpr float PidPGainFromRaw(uint16_t raw) { return raw / 128.0f; }
 
-/**
- * @brief 将实际 P 增益值转换为原始值
- * @param gain 实际 P 增益值 (0.0-127.99)
- * @return 原始值 (0-16383)
- */
+/** @brief 将实际 P 增益值转换为原始值 */
 constexpr uint16_t PidPGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 128.0f);
 }
 
 /**
  * @brief 将原始 I 增益值转换为实际增益值
- * @param raw 原始值 (0-16383)
- * @return 实际 I 增益值 (0.0-0.25)
- *
+ * @param raw 原始值
+ * @return 实际 I 增益值
+ * 原始单位：65536.0，转换单位：-
  * 转换公式: gain = raw / 65536.0
- * 范围: 0 / 65536 = 0.0 到 16383 / 65536 = 0.25
  */
 constexpr float PidIGainFromRaw(uint16_t raw) { return raw / 65536.0f; }
 
-/**
- * @brief 将实际 I 增益值转换为原始值
- * @param gain 实际 I 增益值 (0.0-0.25)
- * @return 原始值 (0-16383)
- */
+/** @brief 将实际 I 增益值转换为原始值  */
 constexpr uint16_t PidIGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 65536.0f);
 }
 
 /**
  * @brief 将原始 D 增益值转换为实际增益值
- * @param raw 原始值 (0-16383)
- * @return 实际 D 增益值 (0.0-1023.9)
- *
+ * @param raw 原始值
+ * @return 实际 D 增益值
+ * 原始单位：16.0，转换单位：-
  * 转换公式: gain = raw / 16.0
- * 范围: 0 / 16 = 0.0 到 16383 / 16 = 1023.9
  */
 constexpr float PidDGainFromRaw(uint16_t raw) { return raw / 16.0f; }
 
-/**
- * @brief 将实际 D 增益值转换为原始值
- * @param gain 实际 D 增益值 (0.0-1023.9)
- * @return 原始值 (0-16383)
- */
+/** @brief 将实际 D 增益值转换为原始值 */
 constexpr uint16_t PidDGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 16.0f);
 }
 
 /**
  * @brief 将原始前馈增益值转换为实际增益值
- * @param raw 原始值 (0-16383)
- * @return 实际前馈增益值 (0.0-4095.75)
- *
+ * @param raw 原始值
+ * @return 实际前馈增益值
+ * 原始单位：4.0，转换单位：-
  * 转换公式: gain = raw / 4.0
- * 范围: 0 / 4 = 0.0 到 16383 / 4 = 4095.75
- *
- * @note 实际使用中通常限制在 0.0-127.99 范围内
  */
 constexpr float FeedforwardGainFromRaw(uint16_t raw) { return raw / 4.0f; }
 
-/**
- * @brief 将实际前馈增益值转换为原始值
- * @param gain 实际前馈增益值 (0.0-4095.75)
- * @return 原始值 (0-16383)
- */
+/** @brief 将实际前馈增益值转换为原始值 */
 constexpr uint16_t FeedforwardGainToRaw(float gain) {
   return static_cast<uint16_t>(gain * 4.0f);
 }
@@ -239,11 +167,12 @@ constexpr uint16_t FeedforwardGainToRaw(float gain) {
  * @brief 将原始电流值转换为实际电流值
  * @param raw 原始值 
  * @return 实际电流值 
- * 
+ * 原始单位：0.001A，转换单位：A
  * 转换公式: current = raw × 0.001A
- * 范围: 0 × 0.001 = 0A 到 65535 × 0.001 = 65.535A
  */
 constexpr float CurrentFromRaw(uint16_t raw) { return raw / 1000.0f; }
+
+/** @brief 将实际电流值转换为原始值 */
 constexpr uint16_t CurrentToRaw(float current) {
   return static_cast<uint16_t>(current * 1000.0f);
 }
@@ -412,7 +341,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
   uint16_t GetReturnDelayTime() {
     uint8_t raw;
     ReadRegField(ControlTable::kReturnDelayTime, raw);
-    return DelayFromRaw(raw);
+    return raw * 2;
   }
 
   /**
@@ -422,7 +351,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @note 在多舵机串联时，适当的延迟可避免总线冲突
    */
   void SetReturnDelayTime(const uint16_t microseconds) {
-    WriteRegField(ControlTable::kReturnDelayTime, DelayToRaw(microseconds));
+    WriteRegField(ControlTable::kReturnDelayTime, microseconds / 2);
   }
 
   /**
@@ -473,45 +402,31 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - 修改后需要重启生效
    *
    * 【位域定义】
-   * | Bit | 名称                       | 说明                                                                           |
-   * |-----|----------------------------|--------------------------------------------------------------------------------|
-   * | 0   | Reverse Mode               | 0: Normal, 1: Reverse                                                          |
-   * | 1   | -                          | 保留（未使用）                                                                 |
-   * | 2   | Profile Configuration      | 0: Velocity-based, 1: Time-based                                               |
-   * | 3   | Torque On by Goal Update   | 0: 仅在 Torque Enable=1时执行命令                                              |
-   * |     |                            | 1: 忽略 Torque Enable 状态，若 Torque Enable=0且收到命令则自动置 1 并执行      |
-   * | 4   | Motor Reverse Mode         | 0: Normal, 1: Reverse                                                          |
-   * | 5   | Encoder Reverse Mode       | 0: Normal, 1: Reverse                                                          |
-   * | 6-7 | Reserved                   | 保留（未使用）                                                                 |
-   *
-   * 【反转模式 (Bit 0)】
-   * - [0] Normal Mode: CCW(正), CW(反)
-   * - [1] Reverse Mode: CCW(反), CW(正)
+   * | Bit | 名称                       | 说明                              |
+   * |-----|----------------------------|-----------------------------------|
+   * | 0   | Motor Reverse Mode         | 0: Normal, 1: Reverse             |
+   * | 1   | Encoder Reverse Mode       | 0: Normal, 1: Reverse             |
+   * | 2   | Profile Configuration      | 0: Velocity-based, 1: Time-based  |
+   * | 3   | Reserved                   | 保留（未使用）                    |
+   * | 4   | Reserved                   | 保留（未使用）                    |
+   * | 5   | Reserved                   | 保留（未使用）                    |
+   * | 6   | Reserved                   | 保留（未使用）                    |
+   * | 7   | Reserved                   | 保留（未使用）                    |
    *
    * 【Profile 配置 (Bit 2)】
    * - 0: Velocity-based Profile - 使用速度和加速度参数
    * - 1: Time-based Profile - 使用时间参数（毫秒）
-
-   * 【扭矩联动 (Bit 3: Torque On by Goal Update)】
-   * - [0] 标准：仅当 Torque Enable=1 时执行目标命令
-   * - [1] 联动：忽略当前 Torque Enable 值；若为 0 且接收到命令，
-   *             将自动置 Torque Enable=1 并执行命令
    * 
    * 【电机反转模式 (Bit 4)】
    * - 电机正反转模式，修正最终输出轴方向不一致问题
-   * - [0] Normal Mode: 正
-   * - [1] Reverse Mode: 反
    *
    * 【编码器反转模式 (Bit 5)】
    * - 编码器正反转模式，修正最终输出轴方向不一致问题
-   * - [0] Normal Mode: 正
-   * - [1] Reverse Mode: 反
    *
    * 【相关寄存器】
    * - Profile Velocity: Velocity-based 模式使用
    * - Profile Acceleration: 两种模式都使用（Time-based 模式为加速时间）
    * - Operating Mode: 工作模式设置
-   * - Torque Enable: 扭矩使能控制（与 Bit3 行为相关）
    */
   uint8_t GetDriveMode() {
     uint8_t drive_mode;
@@ -889,7 +804,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
   float GetPwmLimit() {
     uint16_t raw;
     ReadRegField(ControlTable::kPwmLimit, raw);
-    return PwmFromRaw(raw);
+    return PwmFromRaw(static_cast<int16_t>(raw));
   }
 
   /**
@@ -1049,6 +964,24 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    */
   void SetMinPositionLimit(const uint32_t min_position_limit) {
     WriteRegField(ControlTable::kMinPositionLimit, min_position_limit);
+  }
+
+  /**
+   * @brief 获取保护时间 (R/W)
+   * @return protection_time 保护时间（ms）
+   */
+  uint8_t GetProtectionTime() {
+    uint8_t protection_time;
+    ReadRegField(ControlTable::kProtectionTime, protection_time);
+    return MsFromRaw(protection_time);
+  }
+
+  /**
+   * @brief 设置保护时间 (R/W)
+   * @param[in] protection_time 保护时间（ms）
+   */
+  void SetProtectionTime(const uint8_t protection_time) {
+    WriteRegField(ControlTable::kProtectionTime, MsToRaw(protection_time));
   }
 
 #pragma endregion  // "保护限制组"
@@ -1708,7 +1641,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
   uint16_t GetBusWatchdog() {
     uint8_t raw;
     ReadRegField(ControlTable::kBusWatchdog, raw);
-    return WatchdogFromRaw(raw);
+    return MsFromRaw(raw);
   }
 
   /**
@@ -1716,7 +1649,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @param[in] milliseconds 看门狗时间（ms）
    */
   void SetBusWatchdog(const uint16_t milliseconds) {
-    WriteRegField(ControlTable::kBusWatchdog, WatchdogToRaw(milliseconds));
+    WriteRegField(ControlTable::kBusWatchdog, MsToRaw(milliseconds));
   }
 
 #pragma endregion  // "控制命令组"
@@ -2050,7 +1983,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Torque Enable: 力矩使能状态
    */
   float GetPresentPwm() {
-    uint16_t raw;
+    int16_t raw;
     ReadRegField(ControlTable::kPresentPwm, raw);
     return PwmFromRaw(raw);
   }

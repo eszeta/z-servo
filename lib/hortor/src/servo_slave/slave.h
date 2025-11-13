@@ -160,6 +160,9 @@ class Slave : public protocol::
     const auto min_position_limit = this->regmap_->GetMinPositionLimit();
     this->servo_->SetMinPositionLimit(min_position_limit);
 
+    const auto protection_time = this->regmap_->GetProtectionTime();
+    this->servo_->SetProtectionTime(protection_time);
+
     //==============================================================================
     // PID 参数组
     //==============================================================================

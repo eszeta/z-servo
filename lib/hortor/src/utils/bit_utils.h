@@ -125,7 +125,7 @@ constexpr T ToggleBit(const T data, const uint8_t idx) noexcept {
  */
 template <typename T>
 constexpr T CreateMask(const uint8_t startBit, const uint8_t numBits) noexcept {
-  return ((1U << numBits) - 1) << startBit;
+  return static_cast<T>(((1U << numBits) - 1) << startBit);
 }
 
 /**

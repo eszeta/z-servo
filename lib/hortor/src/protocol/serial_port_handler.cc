@@ -27,9 +27,9 @@
 namespace hortor::protocol {
 
 Error SerialPortHandler::ProcessImpl(InstProtocol &protocol,
-                                         const float dt,
-                                         InstPacket &inst_packet,
-                                         bool &is_complete) {
+                                     const float dt,
+                                     InstPacket &inst_packet,
+                                     bool &is_complete) {
   // 延时回包
   delay_time_ -= dt;
   if (delay_time_ <= 0 && response_pending_) {
@@ -50,11 +50,10 @@ Error SerialPortHandler::ProcessImpl(InstProtocol &protocol,
 }
 
 Error SerialPortHandler::ResponseImpl(const StatusPacket &packet,
-                                          const uint8_t reply_idx) {
+                                      const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);
-  delay_time_ =
-      response_delay_ * (reply_idx + 1) * math::kMilliToSec;  // 毫秒转秒
+  delay_time_ = response_delay_ * (reply_idx + 1);
   response_pending_ = true;
   return Error::kOk;
 }

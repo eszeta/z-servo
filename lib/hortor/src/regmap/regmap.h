@@ -102,9 +102,9 @@ class RegMap {
    */
   template <typename T>
   Error WriteRegField(const RegField<T>& reg, T value) {
-    T data;
+    UType<T> data;
     CHECK(Read(reg.address, data));
-    SetValue(reg, data, value, data);
+    SetValue(reg, value, data);
     CHECK(Write(reg.address, data));
     return Error::kOk;
   }
@@ -134,8 +134,7 @@ class RegMap {
     T high_value, low_value;
     CHECK(Read(high.address, high_value));
     CHECK(Read(low.address, low_value));
-    SetCombinedValue(
-        high, low, high_value, low_value, value, high_value, low_value);
+    SetCombinedValue(high, low, value, high_value, low_value);
     CHECK(Write(high.address, high_value));
     CHECK(Write(low.address, low_value));
     return Error::kOk;

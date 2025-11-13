@@ -107,15 +107,14 @@ enum class Reverse : int8_t {
 union DriveModeBits {
   uint8_t value = 0;
   struct {
-    bool reverse_mode : 1;              // 位0 0: 正转, 1: 反转
-    bool reserved_bit1 : 1;             // 位1 - 保留
-    bool profile_configuration : 1;     // 位2 0: Velocity-based, 1:Time-based
-    bool torque_on_by_goal_update : 1;  // 位3
-                                        // 0:遵循TorqueEnable,
-                                        // 1:命令触发
-    bool moto_reverse_mode : 1;         // 位4 0: 正转, 1: 反转
-    bool encoder_reverse_mode : 1;      // 位5 0: 正转, 1: 反转
-    bool reserved_bits6_7 : 2;          // 位6-7 - 保留（2位）
+    bool moto_reverse_mode : 1;      // 位0 0: 正转, 1: 反转
+    bool encoder_reverse_mode : 1;   // 位1 0: 正转, 1: 反转
+    bool profile_configuration : 1;  // 位2 0: Velocity-based, 1:Time-based
+    bool reserved_bit3 : 1;          // 位3 保留
+    bool reserved_bit4 : 1;          // 位4 保留
+    bool reserved_bit5 : 1;          // 位5 保留
+    bool reserved_bit6 : 1;          // 位6 保留
+    bool reserved_bit7 : 1;          // 位7 保留
   };
 };
 
