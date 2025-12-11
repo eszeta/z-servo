@@ -99,14 +99,14 @@ class Slave : public protocol::
   }
 
   Error ApplySetToCenter() {
-    if (this->regmap_->GetSetToCenter()) {
-      this->regmap_->SetSetToCenter(false);
-      this->servo_->SetToCenter();
-      this->regmap_->SetHomingOffset(this->servo_->GetHomingOffset());
-      return Error::kOk;
+    if (this->regmap_->GetAlignToPosition()) {
+      const auto align_to_position = this->regmap_->GetAlignToPosition();
+      this->servo_->AlignToPosition(align_to_position);
+      this->regmap_->SetAlignToPosition(0);
     }
     return Error::kOk;
   }
+
   /**
    * @brief 同步电机参数
    * @return 错误码

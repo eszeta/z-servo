@@ -139,12 +139,12 @@ constexpr auto kProfileVelocity = CTIU32(0x74, 0);
 constexpr auto kTorqueEnable = CTIU08(0x80, 0);
 /** @brief LED开关 (0/1) | 单位: - | 访问: RW */
 constexpr auto kDxlLed = CTIU08(0x81, 0);
-/** @brief 设置为居中位置 | 单位: - | 访问: W */
-constexpr auto kSetToCenter = CTIU08(0x82, 0);
+/** @brief 对齐到目标位置 | 单位: pulse | 访问: W */
+constexpr auto kAlignToPosition = CTIU16(0x82, 0);
 /** @brief 硬件错误状态 | 单位: - | 访问: R */
-constexpr auto kHardwareErrorStatus = CTIU08(0x83, 0);
+constexpr auto kHardwareErrorStatus = CTIU08(0x84, 0);
 /** @brief 总线看门狗 | 单位: 20ms | 访问: RW */
-constexpr auto kBusWatchdog = CTIU08(0x84, 0);
+constexpr auto kBusWatchdog = CTIU08(0x85, 0);
 /* 0x85-0x8F: 保留，用于控制命令组扩展 */
 
 /* 目标值组 (0x90-0x9F, 16字节) */
@@ -199,8 +199,8 @@ constexpr static ControlTableBlock kRam = {
         ControlTable::kPresentTemperature.reg.kSize};
 
 constexpr static ControlTableBlock kSetToCenter = {
-    ControlTable::kSetToCenter.reg.address,
-    ControlTable::kSetToCenter.reg.address +
-        ControlTable::kSetToCenter.reg.kSize};
+    ControlTable::kAlignToPosition.reg.address,
+    ControlTable::kAlignToPosition.reg.address +
+        ControlTable::kAlignToPosition.reg.kSize};
 };  // namespace TableBlocks
 }  // namespace hortor::servo_slave

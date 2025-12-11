@@ -388,7 +388,7 @@ class Servo {
   /**
    * @brief 设置为居中位置
    */
-  void SetToCenter() { encoder_->SetToCenter(); }
+  void AlignToPosition(uint32_t target) { encoder_->AlignToPosition(target); }
 
  private:
   //==============================================================================

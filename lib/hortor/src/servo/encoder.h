@@ -45,7 +45,7 @@ class Encoder {
    * @brief 获取原始计数值
    * @return 当前原始计数值
    */
-  uint16_t GetRewPos() const { return rew_pos_; }
+  uint32_t GetRewPos() const { return rew_pos_; }
 
   /**
    * @brief 获取总累积计数值
@@ -93,7 +93,19 @@ class Encoder {
     const auto reverse_val = static_cast<int32_t>(reverse_);
     const auto local_pos = static_cast<int32_t>(rew_pos_) * reverse_val;
     const auto normal_pos = math::mod(local_pos, kResolution.kEncoderCpr);
-    pos_ = math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
+    const auto pos_with_offset =
+        math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
+
+    // 启动贴边小窗口，将接近 360° 的读数视为 -0.x°
+    constexpr float kEdgeWindowDeg = 1.0f;  // 可按需改为 0.5f 等
+    const float edge_counts_f =
+        (static_cast<float>(kResolution.kEncoderCpr) / 360.0f) * kEdgeWindowDeg;
+    const int32_t edge_threshold = max(ceil(edge_counts_f), 1.0f);
+    if (pos_with_offset > kResolution.kEncoderCpr - edge_threshold) {
+      pos_ = pos_with_offset - kResolution.kEncoderCpr;
+    } else {
+      pos_ = pos_with_offset;
+    }
     return Error::kOk;
   }
 
@@ -105,7 +117,7 @@ class Encoder {
    */
   Error Process(float dt) {
     // 读取新的原始计数值
-    uint16_t raw_new;
+    uint32_t raw_new;
     CHECK(GetRaw(raw_new));
 
     // 计算位置增量（新位置 - 旧位置）
@@ -123,18 +135,16 @@ class Encoder {
   }
 
   /**
-   * @brief 置中
+   * @brief 对齐到目标位置
    *
-   * 将当前位置设置为编码器量程的中心位置，通过调整 homing_offset_ 实现。
-   * 调用此方法后，GetPos() 将返回 kResolution.kEncoderCpr / 2。
+    * 将当前位置对齐到目标位置，通过调整 homing_offset_ 实现。
+    * 调用此方法后，GetPos() 将返回目标位置。
    */
-  Error SetToCenter() {
-    const auto center_target =
-        static_cast<int32_t>(kResolution.kEncoderCpr / 2);
+  Error AlignToPosition(uint32_t target) {
     const auto current_normalized =
         math::mod(GetPos(), kResolution.kEncoderCpr);
-    const auto delta_to_center = center_target - current_normalized;
-    SetHomingOffset(homing_offset_ + delta_to_center);
+    const auto delta_to_target = target - current_normalized;
+    SetHomingOffset(homing_offset_ + delta_to_target);
     return Error::kOk;
   }
 
@@ -159,11 +169,11 @@ class Encoder {
    *
    * 子类必须实现此方法以提供特定传感器的原始计数值读取功能。
    */
-  Error GetRaw(uint16_t& out_raw) { return AsDerived().GetRawImpl(out_raw); }
+  Error GetRaw(uint32_t& out_raw) { return AsDerived().GetRawImpl(out_raw); }
 
   // ========== 状态变量 ==========
   /** @brief 原始值 [0, CPR-1] */
-  uint16_t rew_pos_ = 0;
+  uint32_t rew_pos_ = 0;
   /** @brief 线性累加位置 [-∞, +∞] */
   int32_t pos_ = 0;
   /** @brief 反转 */

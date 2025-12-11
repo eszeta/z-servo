@@ -1549,24 +1549,24 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
   }
 
   /**
-   * @brief 获取设置为居中位置 (W)
-   * @return set_to_center 设置为居中位置
+   * @brief 获取对齐到目标位置 (W)
+   * @return align_to_position 对齐到目标位置
    */
-  bool GetSetToCenter() {
-    uint8_t set_to_center = 0;
-    ReadRegField(ControlTable::kSetToCenter, set_to_center);
-    return set_to_center != 0;
+  uint16_t GetAlignToPosition() {
+    uint16_t align_to_position = 0;
+    ReadRegField(ControlTable::kAlignToPosition, align_to_position);
+    return align_to_position != 0;
   }
 
   /**
    * @brief 设置设置为居中位置 (W)
-   * @param[in] set_to_center 设置为居中位置
+   * @param[in] align_to_position 对齐到目标位置
    * 范围: 0-1
    * 【功能说明】
-   * - 调整Homing Offset使Present Position为180°
+   * - 调整Homing Offset使Present Position为目标位置
    */
-  void SetSetToCenter(const bool set_to_center) {
-    WriteRegField(ControlTable::kSetToCenter, set_to_center);
+  void SetAlignToPosition(const uint16_t align_to_position) {
+    WriteRegField(ControlTable::kAlignToPosition, align_to_position);
   }
 
   /**
