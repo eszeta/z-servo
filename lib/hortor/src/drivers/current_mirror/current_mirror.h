@@ -36,7 +36,7 @@ class CurrentMirror : public servo::Current<CurrentMirror> {
    * @param current 当前测量的电流值（安培）
    * @return Error 错误码
    */
-  Error GetCurrentImpl(float& current);
+  Error ReadCurrentImpl(float& current);
 
  private:
   /** @brief ADC电压转换系数 */

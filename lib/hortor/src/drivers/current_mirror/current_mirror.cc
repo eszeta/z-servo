@@ -48,7 +48,7 @@ Error CurrentMirror::CalibrateOffsets() {
   return Error::kOk;
 }
 
-Error CurrentMirror::GetCurrentImpl(float& current) {
+Error CurrentMirror::ReadCurrentImpl(float& current) {
   float voltage;
   CHECK(ReadADCVoltage(voltage));
 

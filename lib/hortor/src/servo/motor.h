@@ -30,9 +30,7 @@ class Motor {
    * @brief 初始化电机驱动器
    * @param reverse 电机反转
    */
-  Error Init() {
-    return Error::kOk;
-  }
+  Error Init() { return Error::kOk; }
   /**
    * @brief 设置电机PWM
    * @param pwm (-1..1)

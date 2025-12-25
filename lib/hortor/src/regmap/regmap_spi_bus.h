@@ -23,7 +23,7 @@ class RegMapSpiBus : public RegMap<RegMapSpiBus> {
    * @param spi_settings SPI通信设置
    * @return 错误码，成功返回OK
    */
-  Error Init(SPIClass *spi, int cs_pin, const SPISettings &spi_settings);
+  Error Init(SPIClass* spi, int cs_pin, const SPISettings& spi_settings);
 
   /**
    * @brief 写寄存器实现
@@ -33,7 +33,7 @@ class RegMapSpiBus : public RegMap<RegMapSpiBus> {
    * @return 错误码，成功返回OK
    */
   Error WriteBytesImpl(const uint8_t address,
-                       const uint8_t *data,
+                       const uint8_t* data,
                        const size_t size);
 
   /**
@@ -43,11 +43,11 @@ class RegMapSpiBus : public RegMap<RegMapSpiBus> {
    * @param data 读取数据的存储指针
    * @return 错误码，成功返回OK
    */
-  Error ReadBytesImpl(const uint8_t address, const size_t size, uint8_t *data);
+  Error ReadBytesImpl(const uint8_t address, const size_t size, uint8_t* data);
 
  protected:
   /** @brief SPI通信接口指针 */
-  SPIClass *spi_{};
+  SPIClass* spi_{};
   /** @brief 片选引脚编号 */
   int cs_pin_{};
   /** @brief SPI通信设置 */

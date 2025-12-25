@@ -41,7 +41,7 @@ class Servo {
    * @brief 初始化舵机
    */
   Error Init() {
-    current_timeout_limiter_.SetTimeoutDuration(0.3f);
+    current_timeout_limiter_.set_timeout_duration(0.3f);
     return Error::kOk;
   }
 
@@ -58,8 +58,8 @@ class Servo {
     drive_mode_.value = drive_mode;
     motor_->SetReverse(drive_mode_.moto_reverse_mode ? Reverse::kReverse
                                                      : Reverse::kNormal);
-    encoder_->SetReverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
-                                                          : Reverse::kNormal);
+    encoder_->set_reverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
+                                                           : Reverse::kNormal);
   }
 
   /** @brief 舵机模式 */
@@ -95,7 +95,7 @@ class Servo {
     const auto kTargetBits = encoder_->kResolutionBits;
     const auto mapped_offset =
         math::mapResolution(homing_offset, kBits, kTargetBits);
-    encoder_->SetHomingOffset(mapped_offset);
+    encoder_->set_homing_offset(mapped_offset);
   }
 
   /** @brief 运动阈值 */
@@ -132,14 +132,14 @@ class Servo {
   float GetPwmLimit() const { return pwm_limit_; }
   void SetPwmLimit(const float pwm_limit) {
     pwm_limit_ = pwm_limit;
-    position_pid_.SetOutputLimit(pwm_limit);
+    position_pid_.set_limit(pwm_limit);
   }
 
   /** @brief 电流上限 */
   float GetCurrentLimit() const { return current_limit_; }
   void SetCurrentLimit(const float current_limit) {
     current_limit_ = current_limit;
-    current_timeout_limiter_.SetThreshold(current_limit);
+    current_timeout_limiter_.set_threshold(current_limit);
   }
 
   /** @brief 速度上限 */
@@ -164,7 +164,7 @@ class Servo {
   float GetProtectionTime() const { return protection_time_; }
   void SetProtectionTime(const float protection_time) {
     protection_time_ = protection_time;
-    current_timeout_limiter_.SetTimeoutDuration(protection_time);
+    current_timeout_limiter_.set_timeout_duration(protection_time);
   }
 
 #pragma endregion  // "保护限制组"
@@ -174,25 +174,25 @@ class Servo {
   //==============================================================================
 #pragma region "PID 参数组"
   /** @brief 位置环 PID 控制器 */
-  math::Pid &GetPositionPid() { return position_pid_; }
+  math::Pid& GetPositionPid() { return position_pid_; }
   void SetPositionPid(const float kp, const float ki, const float kd) {
-    position_pid_.SetProportionalGain(kp);
-    position_pid_.SetIntegralGain(ki);
-    position_pid_.SetDerivativeGain(kd);
+    position_pid_.set_kp(kp);
+    position_pid_.set_ki(ki);
+    position_pid_.set_kd(kd);
   }
 
   /** @brief 速度环 PID 控制器 */
-  math::Pid &GetVelocityPid() { return velocity_pid_; }
+  math::Pid& GetVelocityPid() { return velocity_pid_; }
   void SetVelocityPid(const float kp, const float ki, const float kd) {
-    velocity_pid_.SetProportionalGain(kp);
-    velocity_pid_.SetIntegralGain(ki);
-    velocity_pid_.SetDerivativeGain(kd);
+    velocity_pid_.set_kp(kp);
+    velocity_pid_.set_ki(ki);
+    velocity_pid_.set_kd(kd);
   }
 
   /** @brief 电流低通滤波器 */
-  math::LowPassFilter &GetCurrentLpf() { return current_lpf_; }
+  math::LowPassFilter& GetCurrentLpf() { return current_lpf_; }
   void SetCurrentLpf(const float time_constant) {
-    current_lpf_.SetTimeConstant(time_constant);
+    current_lpf_.set_time_constant(time_constant);
   }
 
   /** @brief 一阶前馈增益（速度前馈，已转换为浮点数） */
@@ -349,18 +349,18 @@ class Servo {
 #pragma endregion  // "状态反馈组"
 
   /** @brief 编码器 */
-  EncoderType *GetEncoder() { return encoder_; }
-  void LinkEncoder(EncoderType *encoder) { encoder_ = encoder; }
+  EncoderType* GetEncoder() { return encoder_; }
+  void LinkEncoder(EncoderType* encoder) { encoder_ = encoder; }
 
   /** @brief 电流传感器 */
-  CurrentType *GetCurrentSensor() { return current_sensor_; }
-  void LinkCurrentSensor(CurrentType *current_sensor) {
+  CurrentType* GetCurrentSensor() { return current_sensor_; }
+  void LinkCurrentSensor(CurrentType* current_sensor) {
     current_sensor_ = current_sensor;
   }
 
   /** @brief 电机驱动器 */
-  MotorType *GetMotor() { return motor_; }
-  void LinkMotor(MotorType *motor) { motor_ = motor; }
+  MotorType* GetMotor() { return motor_; }
+  void LinkMotor(MotorType* motor) { motor_ = motor; }
 
   /**
    * @brief 处理舵机逻辑
@@ -433,18 +433,12 @@ class Servo {
   //==============================================================================
 #pragma region "PID 参数组"
   /** @brief 速度环 PID 控制器 */
-  math::Pid velocity_pid_{math::Pid::Config{.proportional_gain = 0.0f,
-                                            .integral_gain = 0.0f,
-                                            .derivative_gain = 0.0f,
-                                            .antiwindup_gain = 0.0f,
-                                            .output_limit = 1.0f}};
+  math::Pid velocity_pid_{math::Pid::Config{
+      .kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .ka = 0.0f, .limit = 1.0f}};
 
   /** @brief 位置环 PID 控制器 */
-  math::Pid position_pid_{math::Pid::Config{.proportional_gain = 0.0f,
-                                            .integral_gain = 0.0f,
-                                            .derivative_gain = 0.0f,
-                                            .antiwindup_gain = 0.0f,
-                                            .output_limit = 1.0f}};
+  math::Pid position_pid_{math::Pid::Config{
+      .kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .ka = 0.0f, .limit = 1.0f}};
 
   /** @brief 电流低通滤波器 */
   math::LowPassFilter current_lpf_{};
@@ -540,16 +534,16 @@ class Servo {
   //==============================================================================
 #pragma region "硬件抽象层"
   /** @brief 电机驱动器 */
-  MotorType *motor_ = nullptr;
+  MotorType* motor_ = nullptr;
 
   /** @brief 角度传感器 */
-  EncoderType *encoder_ = nullptr;
+  EncoderType* encoder_ = nullptr;
 
   /** @brief 编码器PLL */
   math::EncoderPll<ResolutionBits> encoder_pll_{};
 
   /** @brief 电流传感器 */
-  CurrentType *current_sensor_ = nullptr;
+  CurrentType* current_sensor_ = nullptr;
 
   /** @brief 电流超时限制器 */
   utils::TimeoutLimiter current_timeout_limiter_{};
@@ -565,21 +559,21 @@ class Servo {
     // 处理编码器
     CHECK(encoder_->Process(dt));
     // 处理编码器PLL
-    const auto pos = encoder_->GetPos();
+    const auto pos = encoder_->pos();
     CHECK(encoder_pll_.Process(dt, pos, encoder_->kResolution.kBits));
 
     // 获取当前位置
-    const auto reverse = encoder_->GetReverse();
-    const auto pos_pll = encoder_pll_.Pos();
+    const auto reverse = encoder_->reverse();
+    const auto pos_pll = encoder_pll_.pos();
     SetPresentPosition(pos_pll * static_cast<int8_t>(reverse));
 
     // 获取当前速度
-    const auto velocity = encoder_pll_.GetRpm();
+    const auto velocity = encoder_pll_.rpm();
     SetPresentVelocity(velocity * static_cast<int8_t>(reverse));
 
     // 获取当前电流
     float current_float;
-    CHECK(current_sensor_->GetCurrent(current_float));
+    CHECK(current_sensor_->ReadCurrent(current_float));
     SetPresentCurrent(GetCurrentLpf().Compute(current_float, dt));
     return Error::kOk;
   }

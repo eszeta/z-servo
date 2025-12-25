@@ -19,7 +19,7 @@ class LowPassFilter {
    * @param time_constant - 低通滤波器时间常数(秒)，必须大于0
    */
   explicit LowPassFilter(float time_constant = 0.1f) {
-    SetTimeConstant(time_constant);
+    set_time_constant(time_constant);
     y_prev_ = 0.0f;
   }
 
@@ -48,7 +48,7 @@ class LowPassFilter {
    * @brief 设置时间常数
    * @param time_constant - 时间常数(秒)，必须大于0
    */
-  void SetTimeConstant(float time_constant) {
+  void set_time_constant(float time_constant) {
     if (time_constant > 0.0f) {
       time_constant_ = time_constant;
     }
@@ -58,7 +58,7 @@ class LowPassFilter {
    * @brief 获取时间常数
    * @return 时间常数(秒)
    */
-  float GetTimeConstant() const { return time_constant_; }
+  float time_constant() const { return time_constant_; }
 
   /**
    * @brief 重置滤波器状态

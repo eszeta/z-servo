@@ -10,10 +10,10 @@
 
 namespace hortor::protocol {
 
-Error I2cPortHandler::ProcessImpl(InstProtocol &protocol,
-                                      const float dt,
-                                      InstPacket &inst_packet,
-                                      bool &is_complete) {
+Error I2cPortHandler::ProcessImpl(InstProtocol& protocol,
+                                  const float dt,
+                                  InstPacket& inst_packet,
+                                  bool& is_complete) {
   while (wire_->available()) {
     uint8_t data = wire_->read();
     CHECK(protocol.Process(inst_packet, data, is_complete));
@@ -21,8 +21,8 @@ Error I2cPortHandler::ProcessImpl(InstProtocol &protocol,
   return Error::kOk;
 }
 
-Error I2cPortHandler::ResponseImpl(const StatusPacket &packet,
-                                       const uint8_t reply_idx) {
+Error I2cPortHandler::ResponseImpl(const StatusPacket& packet,
+                                   const uint8_t reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);
   return Error::kOk;

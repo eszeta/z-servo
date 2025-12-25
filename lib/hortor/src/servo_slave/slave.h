@@ -56,7 +56,7 @@ class Slave : public protocol::
 
   Error ProcessImpl(float dt) {
     realtime_tick_ += dt * 1000;
-    this->regmap_->SetRealtimeTick(realtime_tick_);
+    this->regmap_->WriteRealtimeTick(realtime_tick_);
     CHECK(UpdateMotorStatus());
     return UpdateStatus();
   }
@@ -82,16 +82,16 @@ class Slave : public protocol::
    * @brief 同步从机参数
    */
   Error ApplyProtocolConfig() {
-    this->SetId(this->regmap_->GetId());
-    this->SetReturnLevel(this->regmap_->GetStatusReturnLevel());
+    this->set_id(this->regmap_->ReadId());
+    this->set_return_level(this->regmap_->ReadStatusReturnLevel());
     return Error::kOk;
   }
 
   Error ApplySetToCenter() {
-    if (this->regmap_->GetAlignToPosition()) {
-      const auto align_to_position = this->regmap_->GetAlignToPosition();
+    if (this->regmap_->ReadAlignToPosition()) {
+      const auto align_to_position = this->regmap_->ReadAlignToPosition();
       this->servo_->AlignToPosition(align_to_position);
-      this->regmap_->SetAlignToPosition(0);
+      this->regmap_->WriteAlignToPosition(0);
     }
     return Error::kOk;
   }
@@ -104,144 +104,145 @@ class Slave : public protocol::
     //==============================================================================
     // 运行模式组
     //==============================================================================
-    const auto drive_mode = this->regmap_->GetDriveMode();
+    const auto drive_mode = this->regmap_->ReadDriveMode();
     this->servo_->SetDriveMode(drive_mode);
 
-    const auto operating_mode = this->regmap_->GetOperatingMode();
+    const auto operating_mode = this->regmap_->ReadOperatingMode();
     this->servo_->SetOperatingMode(operating_mode);
 
-    const auto shutdown = this->regmap_->GetShutdown();
+    const auto shutdown = this->regmap_->ReadShutdown();
     this->servo_->SetShutdown(shutdown);
 
     //==============================================================================
     // 位置配置组
     //==============================================================================
-    const auto homing_offset = this->regmap_->GetHomingOffset();
+    const auto homing_offset = this->regmap_->ReadHomingOffset();
     this->servo_->SetHomingOffset(homing_offset);
 
-    const auto moving_threshold = this->regmap_->GetMovingThreshold();
+    const auto moving_threshold = this->regmap_->ReadMovingThreshold();
     this->servo_->SetMovingThreshold(moving_threshold);
 
     //==============================================================================
     // 保护限制组
     //==============================================================================
-    const auto temperature_limit = this->regmap_->GetTemperatureLimit();
+    const auto temperature_limit = this->regmap_->ReadTemperatureLimit();
     this->servo_->SetTemperatureLimit(temperature_limit);
 
-    const auto max_voltage_limit = this->regmap_->GetMaxVoltageLimit();
+    const auto max_voltage_limit = this->regmap_->ReadMaxVoltageLimit();
     this->servo_->SetMaxVoltageLimit(max_voltage_limit);
 
-    const auto min_voltage_limit = this->regmap_->GetMinVoltageLimit();
+    const auto min_voltage_limit = this->regmap_->ReadMinVoltageLimit();
     this->servo_->SetMinVoltageLimit(min_voltage_limit);
 
-    const auto pwm_limit = this->regmap_->GetPwmLimit();
+    const auto pwm_limit = this->regmap_->ReadPwmLimit();
     this->servo_->SetPwmLimit(pwm_limit);
 
-    const auto current_limit = this->regmap_->GetCurrentLimit();
+    const auto current_limit = this->regmap_->ReadCurrentLimit();
     this->servo_->SetCurrentLimit(current_limit);
 
-    const auto velocity_limit = this->regmap_->GetVelocityLimit();
+    const auto velocity_limit = this->regmap_->ReadVelocityLimit();
     this->servo_->SetVelocityLimit(velocity_limit);
 
-    const auto max_position_limit = this->regmap_->GetMaxPositionLimit();
+    const auto max_position_limit = this->regmap_->ReadMaxPositionLimit();
     this->servo_->SetMaxPositionLimit(max_position_limit);
 
-    const auto min_position_limit = this->regmap_->GetMinPositionLimit();
+    const auto min_position_limit = this->regmap_->ReadMinPositionLimit();
     this->servo_->SetMinPositionLimit(min_position_limit);
 
-    const auto protection_time = this->regmap_->GetProtectionTime();
+    const auto protection_time = this->regmap_->ReadProtectionTime();
     this->servo_->SetProtectionTime(protection_time);
 
     //==============================================================================
     // PID 参数组
     //==============================================================================
-    const auto vi = this->regmap_->GetVelocityIgain();
-    const auto vp = this->regmap_->GetVelocityPgain();
+    const auto vi = this->regmap_->ReadVelocityIgain();
+    const auto vp = this->regmap_->ReadVelocityPgain();
     this->servo_->SetVelocityPid(vp, vi, 0);
 
-    const auto pi = this->regmap_->GetPositionIgain();
-    const auto pp = this->regmap_->GetPositionPgain();
-    const auto pd = this->regmap_->GetPositionDgain();
+    const auto pi = this->regmap_->ReadPositionIgain();
+    const auto pp = this->regmap_->ReadPositionPgain();
+    const auto pd = this->regmap_->ReadPositionDgain();
     this->servo_->SetPositionPid(pp, pi, pd);
 
-    const auto feedforward_2nd_gain = this->regmap_->GetFeedforward2ndGain();
+    const auto feedforward_2nd_gain = this->regmap_->ReadFeedforward2ndGain();
     this->servo_->SetFeedforward2ndGain(feedforward_2nd_gain);
 
-    const auto feedforward_1st_gain = this->regmap_->GetFeedforward1stGain();
-    this->servo_->SetFeedforward1stGain(this->regmap_->GetFeedforward1stGain());
+    const auto feedforward_1st_gain = this->regmap_->ReadFeedforward1stGain();
+    this->servo_->SetFeedforward1stGain(
+        this->regmap_->ReadFeedforward1stGain());
 
     //==============================================================================
     // 轨迹配置组
     //==============================================================================
-    const auto profile_acceleration = this->regmap_->GetProfileAcceleration();
+    const auto profile_acceleration = this->regmap_->ReadProfileAcceleration();
     this->servo_->SetProfileAcceleration(profile_acceleration);
 
-    const auto profile_velocity = this->regmap_->GetProfileVelocity();
+    const auto profile_velocity = this->regmap_->ReadProfileVelocity();
     this->servo_->SetProfileVelocity(profile_velocity);
 
     //==============================================================================
     // 控制命令组
     //==============================================================================
-    const auto torque_enable = this->regmap_->GetTorqueEnable();
+    const auto torque_enable = this->regmap_->ReadTorqueEnable();
     this->servo_->SetTorqueEnable(torque_enable);
 
-    const auto hardware_error_status = this->regmap_->GetHardwareErrorStatus();
+    const auto hardware_error_status = this->regmap_->ReadHardwareErrorStatus();
     this->servo_->SetHardwareErrorStatus(hardware_error_status);
 
     //==============================================================================
     // 目标值组
     //==============================================================================
-    const auto goal_pwm = this->regmap_->GetGoalPwm();
+    const auto goal_pwm = this->regmap_->ReadGoalPwm();
     this->servo_->SetGoalPwm(goal_pwm);
 
-    const auto goal_current = this->regmap_->GetGoalCurrent();
+    const auto goal_current = this->regmap_->ReadGoalCurrent();
     this->servo_->SetGoalCurrent(goal_current);
 
-    const auto goal_velocity = this->regmap_->GetGoalVelocity();
+    const auto goal_velocity = this->regmap_->ReadGoalVelocity();
     this->servo_->SetGoalVelocity(goal_velocity);
 
-    const auto goal_position = this->regmap_->GetGoalPosition();
+    const auto goal_position = this->regmap_->ReadGoalPosition();
     this->servo_->SetGoalPosition(goal_position);
     return Error::kOk;
   }
 
   Error UpdateMotorStatus() {
     const auto torque_enable = this->servo_->GetTorqueEnable();
-    this->regmap_->SetTorqueEnable(torque_enable);
+    this->regmap_->WriteTorqueEnable(torque_enable);
 
     const auto hardware_error_status =
         this->servo_->GetHardwareErrorStatusValue();
-    this->regmap_->SetHardwareErrorStatus(hardware_error_status);
+    this->regmap_->WriteHardwareErrorStatus(hardware_error_status);
 
     const auto moving = this->servo_->GetMoving();
-    this->regmap_->SetMoving(moving);
+    this->regmap_->WriteMoving(moving);
 
     const auto moving_status = this->servo_->GetMovingStatusValue();
-    this->regmap_->SetMovingStatus(moving_status);
+    this->regmap_->WriteMovingStatus(moving_status);
 
     const auto present_position = this->servo_->GetPresentPosition();
-    this->regmap_->SetPresentPosition(present_position);
+    this->regmap_->WritePresentPosition(present_position);
 
     const auto present_velocity = this->servo_->GetPresentVelocity();
-    this->regmap_->SetPresentVelocity(present_velocity);
+    this->regmap_->WritePresentVelocity(present_velocity);
 
     const auto present_current = this->servo_->GetPresentCurrent();
-    this->regmap_->SetPresentCurrent(present_current);
+    this->regmap_->WritePresentCurrent(present_current);
 
     const auto present_input_voltage = this->servo_->GetPresentInputVoltage();
-    this->regmap_->SetPresentInputVoltage(present_input_voltage);
+    this->regmap_->WritePresentInputVoltage(present_input_voltage);
 
     const auto present_temperature = this->servo_->GetPresentTemperature();
-    this->regmap_->SetPresentTemperature(present_temperature);
+    this->regmap_->WritePresentTemperature(present_temperature);
 
     const auto present_pwm = this->servo_->GetPresentPwm();
-    this->regmap_->SetPresentPwm(present_pwm);
+    this->regmap_->WritePresentPwm(present_pwm);
 
     const auto position_trajectory = this->servo_->GetPositionTrajectory();
-    this->regmap_->SetPositionTrajectory(position_trajectory);
+    this->regmap_->WritePositionTrajectory(position_trajectory);
 
     const auto velocity_trajectory = this->servo_->GetVelocityTrajectory();
-    this->regmap_->SetVelocityTrajectory(velocity_trajectory);
+    this->regmap_->WriteVelocityTrajectory(velocity_trajectory);
     return Error::kOk;
   }
 };

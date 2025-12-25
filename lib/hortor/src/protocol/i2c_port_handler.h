@@ -24,7 +24,7 @@ class I2cPortHandler : public PortHandler<I2cPortHandler> {
    * @param wire I2C对象
    * @return 错误码
    */
-  Error Init(TwoWire *wire) {
+  Error Init(TwoWire* wire) {
     wire_ = wire;
     return Error::kOk;
   }
@@ -37,10 +37,10 @@ class I2cPortHandler : public PortHandler<I2cPortHandler> {
    * @param is_complete 是否完成
    * @return 错误码
    */
-  Error ProcessImpl(InstProtocol &protocol,
+  Error ProcessImpl(InstProtocol& protocol,
                     const float dt,
-                    InstPacket &inst_packet,
-                    bool &is_complete);
+                    InstPacket& inst_packet,
+                    bool& is_complete);
 
   /**
    * @brief 发送响应数据实现
@@ -48,7 +48,7 @@ class I2cPortHandler : public PortHandler<I2cPortHandler> {
    * @param reply_idx 回复索引
    * @return 错误码
    */
-  Error ResponseImpl(const StatusPacket &packet, const uint8_t reply_idx);
+  Error ResponseImpl(const StatusPacket& packet, const uint8_t reply_idx);
 
   /**
    * @brief I2C 接收事件回调
@@ -64,7 +64,7 @@ class I2cPortHandler : public PortHandler<I2cPortHandler> {
   Error OnRequest();
 
  private:
-  TwoWire *wire_ = nullptr;
+  TwoWire* wire_ = nullptr;
 };
 
 }  // namespace hortor::protocol

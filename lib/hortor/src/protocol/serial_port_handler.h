@@ -28,7 +28,7 @@ class SerialPortHandler : public PortHandler<SerialPortHandler> {
    * @param serial 串口
    * @return 错误码
    */
-  Error Init(HardwareSerial *serial) {
+  Error Init(HardwareSerial* serial) {
     serial_ = serial;
     return Error::kOk;
   }
@@ -41,10 +41,10 @@ class SerialPortHandler : public PortHandler<SerialPortHandler> {
    * @param is_complete 是否完成
    * @return 错误码
    */
-  Error ProcessImpl(InstProtocol &protocol,
+  Error ProcessImpl(InstProtocol& protocol,
                     const float dt,
-                    InstPacket &inst_packet,
-                    bool &is_complete);
+                    InstPacket& inst_packet,
+                    bool& is_complete);
 
   /**
    * @brief 发送响应数据实现
@@ -52,10 +52,10 @@ class SerialPortHandler : public PortHandler<SerialPortHandler> {
    * @param reply_idx 回复索引
    * @return 错误码
    */
-  Error ResponseImpl(const StatusPacket &packet, const uint8_t reply_idx);
+  Error ResponseImpl(const StatusPacket& packet, const uint8_t reply_idx);
 
  private:
-  HardwareSerial *serial_ = nullptr;
+  HardwareSerial* serial_ = nullptr;
   uint32_t delay_time_ = 0;
   bool response_pending_ = false;
 };

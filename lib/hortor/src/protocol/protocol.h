@@ -123,12 +123,12 @@ class InstProtocol {
   InstProtocol();
   ~InstProtocol();
 
-  Error Process(InstPacket &packet, const uint8_t recv_data, bool &is_complete);
+  Error Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete);
   Error CreateResponse(const uint8_t id,
-                       const StatusErrorBits &status,
-                       const uint8_t *parameter,
+                       const StatusErrorBits& status,
+                       const uint8_t* parameter,
                        const size_t parameter_size,
-                       StatusPacket &packet);
+                       StatusPacket& packet);
 
  private:
   uint8_t param_pos_ = 0;

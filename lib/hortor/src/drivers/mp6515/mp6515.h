@@ -24,10 +24,10 @@ namespace hortor::drivers::MP6515 {
 class MP6515 final : public servo::Motor<MP6515> {
  public:
   struct Config {
-    uint8_t pin_phase;       // PHASE 相位引脚
-    uint8_t pin_enbl;        // ENABLE 使能引脚（PWM）
-    uint8_t pin_brake;       // BRAKE 制动引脚
-    uint8_t pin_sleep;       // SLEEP 睡眠引脚
+    uint8_t pin_phase;  // PHASE 相位引脚
+    uint8_t pin_enbl;   // ENABLE 使能引脚（PWM）
+    uint8_t pin_brake;  // BRAKE 制动引脚
+    uint8_t pin_sleep;  // SLEEP 睡眠引脚
   };
 
   /**

@@ -187,7 +187,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 获取型号编号 (R)
    * @return model_number 型号编号
    */
-  uint16_t GetModelNumber() {
+  uint16_t ReadModelNumber() {
     uint16_t model_number;
     ReadRegField(ControlTable::kModelNumber, model_number);
     return model_number;
@@ -197,7 +197,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置型号编号 (R)
    * @param model_number 型号编号
    */
-  void SetModelNumber(const uint16_t model_number) {
+  void WriteModelNumber(const uint16_t model_number) {
     WriteRegField(ControlTable::kModelNumber, model_number);
   }
 
@@ -205,7 +205,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 获取型号信息 (R)
    * @return model_information 型号信息
    */
-  uint32_t GetModelInformation() {
+  uint32_t ReadModelInformation() {
     uint32_t model_information;
     ReadRegField(ControlTable::kModelInformation, model_information);
     return model_information;
@@ -215,7 +215,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置型号信息 (R)
    * @param model_information 型号信息
    */
-  void SetModelInformation(const uint32_t model_information) {
+  void WriteModelInformation(const uint32_t model_information) {
     WriteRegField(ControlTable::kModelInformation, model_information);
   }
 
@@ -223,7 +223,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 获取固件版本 (R)
    * @return firmware_version 固件版本
    */
-  uint8_t GetFirmwareVersion() {
+  uint8_t ReadFirmwareVersion() {
     uint8_t firmware_version;
     ReadRegField(ControlTable::kFirmwareVersion, firmware_version);
     return firmware_version;
@@ -233,7 +233,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置固件版本 (R)
    * @param firmware_version 固件版本
    */
-  void SetFirmwareVersion(const uint8_t firmware_version) {
+  void WriteFirmwareVersion(const uint8_t firmware_version) {
     WriteRegField(ControlTable::kFirmwareVersion, firmware_version);
   }
 
@@ -248,7 +248,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - 用于多舵机系统中的地址识别
    * - 同一总线上不能有重复的 ID
    */
-  uint8_t GetId() {
+  uint8_t ReadId() {
     uint8_t id;
     ReadRegField(ControlTable::kId, id);
     return id;
@@ -258,7 +258,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置舵机 ID (R/W)
    * @param[in] id 舵机 ID (0-252)
    */
-  void SetId(const uint8_t id) { WriteRegField(ControlTable::kId, id); }
+  void WriteId(const uint8_t id) { WriteRegField(ControlTable::kId, id); }
 
 #pragma endregion  // "设备信息组"
 
@@ -293,7 +293,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * 【相关寄存器】
    * - Return Delay Time: 返回延迟设置
    */
-  uint8_t GetBaudRate() {
+  uint8_t ReadBaudRate() {
     uint8_t baud_rate;
     ReadRegField(ControlTable::kBaudRate, baud_rate);
     return baud_rate;
@@ -303,7 +303,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置波特率索引 (R/W)
    * @param[in] baud_rate 波特率索引 (0-7)
    */
-  void SetBaudRate(const uint8_t baud_rate) {
+  void WriteBaudRate(const uint8_t baud_rate) {
     WriteRegField(ControlTable::kBaudRate, baud_rate);
   }
 
@@ -327,7 +327,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @note 在多舵机串联时，适当的延迟可避免总线冲突
    * @note 修改后需调用 StoreEeprom() 并重启生效
    */
-  uint16_t GetReturnDelayTime() {
+  uint16_t ReadReturnDelayTime() {
     uint8_t raw;
     ReadRegField(ControlTable::kReturnDelayTime, raw);
     return raw * 2;
@@ -339,7 +339,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 在多舵机串联时，适当的延迟可避免总线冲突
    */
-  void SetReturnDelayTime(const uint16_t microseconds) {
+  void WriteReturnDelayTime(const uint16_t microseconds) {
     WriteRegField(ControlTable::kReturnDelayTime, microseconds / 2);
   }
 
@@ -360,7 +360,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - 2: 所有指令都返回状态包（默认）
    *
    */
-  uint8_t GetStatusReturnLevel() {
+  uint8_t ReadStatusReturnLevel() {
     uint8_t status_return_level = 0;
     ReadRegField(ControlTable::kStatusReturnLevel, status_return_level);
     return status_return_level;
@@ -370,7 +370,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置状态返回级别 (R/W)
    * @param[in] status_return_level 状态返回级别 (0-2)
    */
-  void SetStatusReturnLevel(const uint8_t status_return_level) {
+  void WriteStatusReturnLevel(const uint8_t status_return_level) {
     WriteRegField(ControlTable::kStatusReturnLevel, status_return_level);
   }
 
@@ -417,7 +417,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Profile Acceleration: 两种模式都使用（Time-based 模式为加速时间）
    * - Operating Mode: 工作模式设置
    */
-  uint8_t GetDriveMode() {
+  uint8_t ReadDriveMode() {
     uint8_t drive_mode;
     ReadRegField(ControlTable::kDriveMode, drive_mode);
     return drive_mode;
@@ -427,7 +427,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置驱动模式 (R/W)
    * @param[in] drive_mode 驱动模式位域
    */
-  void SetDriveMode(const uint8_t drive_mode) {
+  void WriteDriveMode(const uint8_t drive_mode) {
     WriteRegField(ControlTable::kDriveMode, drive_mode);
   }
 
@@ -507,7 +507,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @warning 更改工作模式时，必须先将 Torque Enable 设置为 0
    * @note 不同模式下使用的控制寄存器不同，详见各 Goal 寄存器说明
    */
-  uint8_t GetOperatingMode() {
+  uint8_t ReadOperatingMode() {
     uint8_t operating_mode = 0;
     ReadRegField(ControlTable::kOperatingMode, operating_mode);
     return operating_mode;
@@ -517,7 +517,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置工作模式 (R/W)
    * @param[in] operating_mode 工作模式
    */
-  void SetOperatingMode(const uint8_t operating_mode) {
+  void WriteOperatingMode(const uint8_t operating_mode) {
     WriteRegField(ControlTable::kOperatingMode, operating_mode);
   }
 
@@ -548,7 +548,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Temperature Limit: 温度保护阈值
    * - Voltage Limits: 电压保护阈值
    */
-  uint8_t GetShutdown() {
+  uint8_t ReadShutdown() {
     uint8_t shutdown = 0;
     ReadRegField(ControlTable::kShutdown, shutdown);
     return shutdown;
@@ -558,7 +558,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置关断条件 (R/W)
    * @param[in] shutdown 关断条件位域
    */
-  void SetShutdown(const uint8_t shutdown) {
+  void WriteShutdown(const uint8_t shutdown) {
     WriteRegField(ControlTable::kShutdown, shutdown);
   }
 
@@ -597,7 +597,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Min/Max Position Limit: 限位范围不受影响
    * - Operating Mode: 不同模式下的行为差异
    */
-  int32_t GetHomingOffset() {
+  int32_t ReadHomingOffset() {
     uint32_t raw;
     ReadRegField(ControlTable::kHomingOffset, raw);
     return static_cast<int32_t>(raw);
@@ -607,7 +607,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置归零偏移 (R/W)
    * @param[in] homing_offset 归零偏移（pulse）
    */
-  void SetHomingOffset(const int32_t homing_offset) {
+  void WriteHomingOffset(const int32_t homing_offset) {
     WriteRegField(ControlTable::kHomingOffset,
                   static_cast<uint32_t>(homing_offset));
   }
@@ -635,7 +635,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 用于检测运动状态，避免微小振动导致的误判
    */
-  float GetMovingThreshold() {
+  float ReadMovingThreshold() {
     uint32_t raw;
     ReadRegField(ControlTable::kMovingThreshold, raw);
     return VelocityFromRaw(raw);
@@ -645,7 +645,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置运动阈值 (R/W)
    * @param[in] rpm 运动阈值（RPM）
    */
-  void SetMovingThreshold(const float rpm) {
+  void WriteMovingThreshold(const float rpm) {
     WriteRegField(ControlTable::kMovingThreshold, VelocityToRaw(rpm));
   }
 
@@ -678,7 +678,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Shutdown: 关断条件设置
    * - Hardware Error Status: 错误状态
    */
-  uint8_t GetTemperatureLimit() {
+  uint8_t ReadTemperatureLimit() {
     uint8_t temperature_limit;
     ReadRegField(ControlTable::kTemperatureLimit, temperature_limit);
     return temperature_limit;
@@ -688,7 +688,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置温度上限 (R/W)
    * @param[in] temperature_limit 温度上限（°C）
    */
-  void SetTemperatureLimit(const uint8_t temperature_limit) {
+  void WriteTemperatureLimit(const uint8_t temperature_limit) {
     WriteRegField(ControlTable::kTemperatureLimit, temperature_limit);
   }
 
@@ -715,7 +715,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Min Voltage Limit: 最低电压限制
    * - Shutdown: 关断条件设置
    */
-  float GetMaxVoltageLimit() {
+  float ReadMaxVoltageLimit() {
     uint16_t raw;
     ReadRegField(ControlTable::kMaxVoltageLimit, raw);
     return VoltageFromRaw(raw);
@@ -725,7 +725,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置最高电压限制 (R/W)
    * @param[in] voltage 最高电压限制（V）
    */
-  void SetMaxVoltageLimit(const float voltage) {
+  void WriteMaxVoltageLimit(const float voltage) {
     WriteRegField(ControlTable::kMaxVoltageLimit, VoltageToRaw(voltage));
   }
 
@@ -752,7 +752,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - Max Voltage Limit: 最高电压限制
    * - Shutdown: 关断条件设置
    */
-  float GetMinVoltageLimit() {
+  float ReadMinVoltageLimit() {
     uint16_t raw;
     ReadRegField(ControlTable::kMinVoltageLimit, raw);
     return VoltageFromRaw(raw);
@@ -762,7 +762,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置最低电压限制 (R/W)
    * @param[in] voltage 最低电压限制（V）
    */
-  void SetMinVoltageLimit(const float voltage) {
+  void WriteMinVoltageLimit(const float voltage) {
     WriteRegField(ControlTable::kMinVoltageLimit, VoltageToRaw(voltage));
   }
 
@@ -790,7 +790,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note Goal PWM 和 Present PWM 不会超过此值
    */
-  float GetPwmLimit() {
+  float ReadPwmLimit() {
     uint16_t raw;
     ReadRegField(ControlTable::kPwmLimit, raw);
     return PwmFromRaw(static_cast<int16_t>(raw));
@@ -800,7 +800,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置 PWM 上限 (R/W)
    * @param[in] percent PWM 上限（%）
    */
-  void SetPwmLimit(const float percent) {
+  void WritePwmLimit(const float percent) {
     WriteRegField(ControlTable::kPwmLimit, PwmToRaw(percent));
   }
 
@@ -822,7 +822,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @warning 长时间大电流运行会导致过热
    * @note Present Current 不会超过此值
    */
-  float GetCurrentLimit() {
+  float ReadCurrentLimit() {
     uint16_t current_limit;
     ReadRegField(ControlTable::kCurrentLimit, current_limit);
     return CurrentFromRaw(current_limit);
@@ -832,7 +832,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置电流上限 (R/W)
    * @param[in] current_limit 电流上限（A）
    */
-  void SetCurrentLimit(const uint16_t current_limit) {
+  void WriteCurrentLimit(const uint16_t current_limit) {
     WriteRegField(ControlTable::kCurrentLimit, current_limit);
   }
 
@@ -862,7 +862,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 实际速度还受 PWM Limit 和 Current Limit 限制
    */
-  float GetVelocityLimit() {
+  float ReadVelocityLimit() {
     uint32_t raw;
     ReadRegField(ControlTable::kVelocityLimit, raw);
     return VelocityFromRaw(raw);
@@ -872,7 +872,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置速度上限 (R/W)
    * @param[in] rpm 速度上限（RPM）
    */
-  void SetVelocityLimit(const float rpm) {
+  void WriteVelocityLimit(const float rpm) {
     WriteRegField(ControlTable::kVelocityLimit, VelocityToRaw(rpm));
   }
 
@@ -900,7 +900,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 确保 Max Position Limit >= Min Position Limit
    */
-  uint32_t GetMaxPositionLimit() {
+  uint32_t ReadMaxPositionLimit() {
     uint32_t max_position_limit;
     ReadRegField(ControlTable::kMaxPositionLimit, max_position_limit);
     return max_position_limit;
@@ -913,7 +913,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @warning 如果设置不当，可能导致舵机无法移动
    * @note 修改后需调用 StoreEeprom() 并重启生效
    */
-  void SetMaxPositionLimit(const uint32_t max_position_limit) {
+  void WriteMaxPositionLimit(const uint32_t max_position_limit) {
     WriteRegField(ControlTable::kMaxPositionLimit, max_position_limit);
   }
 
@@ -941,7 +941,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 确保 Max Position Limit >= Min Position Limit
    */
-  uint32_t GetMinPositionLimit() {
+  uint32_t ReadMinPositionLimit() {
     uint32_t min_position_limit = 0;
     ReadRegField(ControlTable::kMinPositionLimit, min_position_limit);
     return min_position_limit;
@@ -951,7 +951,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置位置下限 (R/W)
    * @param[in] min_position_limit 位置下限（pulse）
    */
-  void SetMinPositionLimit(const uint32_t min_position_limit) {
+  void WriteMinPositionLimit(const uint32_t min_position_limit) {
     WriteRegField(ControlTable::kMinPositionLimit, min_position_limit);
   }
 
@@ -959,7 +959,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 获取保护时间 (R/W)
    * @return protection_time 保护时间（ms）
    */
-  uint8_t GetProtectionTime() {
+  uint8_t ReadProtectionTime() {
     uint8_t protection_time;
     ReadRegField(ControlTable::kProtectionTime, protection_time);
     return MsFromRaw(protection_time);
@@ -969,7 +969,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置保护时间 (R/W)
    * @param[in] protection_time 保护时间（ms）
    */
-  void SetProtectionTime(const uint8_t protection_time) {
+  void WriteProtectionTime(const uint8_t protection_time) {
     WriteRegField(ControlTable::kProtectionTime, MsToRaw(protection_time));
   }
 
@@ -1014,7 +1014,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 Velocity Control Mode 和 Position Control Mode 有效
    */
-  float GetVelocityIgain() {
+  float ReadVelocityIgain() {
     uint16_t raw;
     ReadRegField(ControlTable::kVelocityIgain, raw);
     return PidIGainFromRaw(raw);
@@ -1024,7 +1024,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置速度环 I 增益 (R/W)
    * @param[in] velocity_igain I 增益
    */
-  void SetVelocityIgain(const float velocity_igain) {
+  void WriteVelocityIgain(const float velocity_igain) {
     WriteRegField(ControlTable::kVelocityIgain, PidIGainToRaw(velocity_igain));
   }
 
@@ -1053,7 +1053,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 Velocity Control Mode 和 Position Control Mode 有效
    */
-  float GetVelocityPgain() {
+  float ReadVelocityPgain() {
     uint16_t raw;
     ReadRegField(ControlTable::kVelocityPgain, raw);
     return PidPGainFromRaw(raw);
@@ -1063,7 +1063,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置速度环 P 增益 (R/W)
    * @param[in] velocity_pgain P 增益
    */
-  void SetVelocityPgain(const float velocity_pgain) {
+  void WriteVelocityPgain(const float velocity_pgain) {
     WriteRegField(ControlTable::kVelocityPgain, PidPGainToRaw(velocity_pgain));
   }
 
@@ -1098,7 +1098,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @warning D 增益过大会放大高频噪声
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float GetPositionDgain() {
+  float ReadPositionDgain() {
     uint16_t raw;
     ReadRegField(ControlTable::kPositionDgain, raw);
     return PidDGainFromRaw(raw);
@@ -1108,7 +1108,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置位置环 D 增益 (R/W)
    * @param[in] position_dgain D 增益
    */
-  void SetPositionDgain(const float position_dgain) {
+  void WritePositionDgain(const float position_dgain) {
     WriteRegField(ControlTable::kPositionDgain, PidDGainToRaw(position_dgain));
   }
 
@@ -1143,7 +1143,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @warning I 增益过大会导致系统不稳定
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float GetPositionIgain() {
+  float ReadPositionIgain() {
     uint16_t raw;
     ReadRegField(ControlTable::kPositionIgain, raw);
     return PidIGainFromRaw(raw);
@@ -1153,7 +1153,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置位置环 I 增益 (R/W)
    * @param[in] position_igain I 增益
    */
-  void SetPositionIgain(const float position_igain) {
+  void WritePositionIgain(const float position_igain) {
     WriteRegField(ControlTable::kPositionIgain, PidIGainToRaw(position_igain));
   }
 
@@ -1187,7 +1187,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float GetPositionPgain() {
+  float ReadPositionPgain() {
     uint16_t raw;
     ReadRegField(ControlTable::kPositionPgain, raw);
     return PidPGainFromRaw(raw);
@@ -1197,7 +1197,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置位置环 P 增益 (R/W)
    * @param[in] position_pgain P 增益
    */
-  void SetPositionPgain(const float position_pgain) {
+  void WritePositionPgain(const float position_pgain) {
     WriteRegField(ControlTable::kPositionPgain, PidPGainToRaw(position_pgain));
   }
 
@@ -1231,7 +1231,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float GetFeedforward2ndGain() {
+  float ReadFeedforward2ndGain() {
     uint16_t raw;
     ReadRegField(ControlTable::kFeedforward2ndGain, raw);
     return FeedforwardGainFromRaw(raw);
@@ -1241,7 +1241,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置前馈二阶增益 (R/W)
    * @param[in] feedforward_2nd_gain 前馈二阶增益
    */
-  void SetFeedforward2ndGain(const float feedforward_2nd_gain) {
+  void WriteFeedforward2ndGain(const float feedforward_2nd_gain) {
     WriteRegField(ControlTable::kFeedforward2ndGain,
                   FeedforwardGainToRaw(feedforward_2nd_gain));
   }
@@ -1276,7 +1276,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float GetFeedforward1stGain() {
+  float ReadFeedforward1stGain() {
     uint16_t raw;
     ReadRegField(ControlTable::kFeedforward1stGain, raw);
     return FeedforwardGainFromRaw(raw);
@@ -1286,7 +1286,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置前馈一阶增益 (R/W)
    * @param[in] feedforward_1st_gain 前馈一阶增益
    */
-  void SetFeedforward1stGain(const float feedforward_1st_gain) {
+  void WriteFeedforward1stGain(const float feedforward_1st_gain) {
     WriteRegField(ControlTable::kFeedforward1stGain,
                   FeedforwardGainToRaw(feedforward_1st_gain));
   }
@@ -1346,7 +1346,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @note 在 Velocity Control Mode 中也使用此参数控制加速度
    * @note Time-based模式下单位为ms，当前实现假设Velocity-based模式
    */
-  float GetProfileAcceleration() {
+  float ReadProfileAcceleration() {
     uint32_t raw;
     ReadRegField(ControlTable::kProfileAcceleration, raw);
     return AccelerationFromRaw(raw);
@@ -1356,7 +1356,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置轨迹加速度
    * @param[in] acceleration 轨迹加速度（rev/min²，Velocity-based模式）
    */
-  void SetProfileAcceleration(const float acceleration) {
+  void WriteProfileAcceleration(const float acceleration) {
     WriteRegField(ControlTable::kProfileAcceleration,
                   AccelerationToRaw(acceleration));
   }
@@ -1450,7 +1450,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    * @note Time-based模式下单位为ms，当前实现假设Velocity-based模式
    */
-  float GetProfileVelocity() {
+  float ReadProfileVelocity() {
     uint32_t raw;
     ReadRegField(ControlTable::kProfileVelocity, raw);
     return VelocityFromRaw(raw);
@@ -1460,7 +1460,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置轨迹速度
    * @param[in] rpm 轨迹速度（RPM，Velocity-based模式）
    */
-  void SetProfileVelocity(const float rpm) {
+  void WriteProfileVelocity(const float rpm) {
     WriteRegField(ControlTable::kProfileVelocity, VelocityToRaw(rpm));
   }
 
@@ -1497,7 +1497,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @warning 使能力矩后电机会立即执行控制指令，注意安全
    * @note 禁用力矩时，Present Position 等反馈值仍然有效
    */
-  uint8_t GetTorqueEnable() {
+  uint8_t ReadTorqueEnable() {
     uint8_t torque_enable = 0;
     ReadRegField(ControlTable::kTorqueEnable, torque_enable);
     return torque_enable;
@@ -1507,7 +1507,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置力矩使能 (R/W)
    * @param[in] torque_enable 力矩使能 (0: 禁用, 1: 使能)
    */
-  void SetTorqueEnable(const uint8_t torque_enable) {
+  void WriteTorqueEnable(const uint8_t torque_enable) {
     WriteRegField(ControlTable::kTorqueEnable, torque_enable);
   }
 
@@ -1523,7 +1523,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - 1: LED 开启
    * - 用于状态指示和调试
    */
-  uint8_t GetDxlLed() {
+  uint8_t ReadDxlLed() {
     uint8_t dxl_led = 0;
     ReadRegField(ControlTable::kDxlLed, dxl_led);
     return dxl_led;
@@ -1533,7 +1533,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置 LED 开关 (R/W)
    * @param[in] dxl_led LED 状态 (0: 关, 1: 开)
    */
-  void SetDxlLed(const uint8_t dxl_led) {
+  void WriteDxlLed(const uint8_t dxl_led) {
     WriteRegField(ControlTable::kDxlLed, dxl_led);
   }
 
@@ -1541,7 +1541,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 获取对齐到目标位置 (W)
    * @return align_to_position 对齐到目标位置
    */
-  uint16_t GetAlignToPosition() {
+  uint16_t ReadAlignToPosition() {
     uint16_t align_to_position = 0;
     ReadRegField(ControlTable::kAlignToPosition, align_to_position);
     return align_to_position != 0;
@@ -1554,7 +1554,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * 【功能说明】
    * - 调整Homing Offset使Present Position为目标位置
    */
-  void SetAlignToPosition(const uint16_t align_to_position) {
+  void WriteAlignToPosition(const uint16_t align_to_position) {
     WriteRegField(ControlTable::kAlignToPosition, align_to_position);
   }
 
@@ -1589,7 +1589,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 如果 Shutdown 对应位启用，发生错误会自动关断力矩
    */
-  uint8_t GetHardwareErrorStatus() {
+  uint8_t ReadHardwareErrorStatus() {
     uint8_t hardware_error_status = 0;
     ReadRegField(ControlTable::kHardwareErrorStatus, hardware_error_status);
     return hardware_error_status;
@@ -1599,7 +1599,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置硬件错误状态 (R)
    * @param[in] hardware_error_status 硬件错误状态位域
    */
-  void SetHardwareErrorStatus(const uint8_t hardware_error_status) {
+  void WriteHardwareErrorStatus(const uint8_t hardware_error_status) {
     WriteRegField(ControlTable::kHardwareErrorStatus, hardware_error_status);
   }
 
@@ -1627,7 +1627,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 看门狗超时会自动关断力矩，需要重新使能
    */
-  uint16_t GetBusWatchdog() {
+  uint16_t ReadBusWatchdog() {
     uint8_t raw;
     ReadRegField(ControlTable::kBusWatchdog, raw);
     return MsFromRaw(raw);
@@ -1637,7 +1637,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置总线看门狗 (R/W)
    * @param[in] milliseconds 看门狗时间（ms）
    */
-  void SetBusWatchdog(const uint16_t milliseconds) {
+  void WriteBusWatchdog(const uint16_t milliseconds) {
     WriteRegField(ControlTable::kBusWatchdog, MsToRaw(milliseconds));
   }
 
@@ -1673,7 +1673,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 PWM Control Mode 有效
    */
-  float GetGoalPwm() {
+  float ReadGoalPwm() {
     uint16_t raw;
     ReadRegField(ControlTable::kGoalPwm, raw);
     return PwmFromRaw(raw);
@@ -1683,7 +1683,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置目标 PWM (R/W)
    * @param[in] percent 目标 PWM（%）
    */
-  void SetGoalPwm(const float percent) {
+  void WriteGoalPwm(const float percent) {
     WriteRegField(ControlTable::kGoalPwm, PwmToRaw(percent));
   }
 
@@ -1708,7 +1708,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 在 Current Control Mode 中作为控制目标，在 Current-based Position Control Mode 中作为限制
    */
-  uint16_t GetGoalCurrent() {
+  uint16_t ReadGoalCurrent() {
     uint16_t goal_current;
     ReadRegField(ControlTable::kGoalCurrent, goal_current);
     return CurrentFromRaw(goal_current);
@@ -1718,7 +1718,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置目标电流 (R/W)
    * @param[in] goal_current 目标电流（0.001A）
    */
-  void SetGoalCurrent(const float goal_current) {
+  void WriteGoalCurrent(const float goal_current) {
     WriteRegField(ControlTable::kGoalCurrent, CurrentToRaw(goal_current));
   }
 
@@ -1749,7 +1749,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 Velocity Control Mode 中作为控制目标
    */
-  float GetGoalVelocity() {
+  float ReadGoalVelocity() {
     uint32_t raw;
     ReadRegField(ControlTable::kGoalVelocity, raw);
     return VelocityFromRaw(raw);
@@ -1759,7 +1759,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置目标速度 (R/W)
    * @param[in] rpm 目标速度（RPM）
    */
-  void SetGoalVelocity(const float rpm) {
+  void WriteGoalVelocity(const float rpm) {
     WriteRegField(ControlTable::kGoalVelocity, VelocityToRaw(rpm));
   }
 
@@ -1788,7 +1788,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    * @note 运动中更新 Goal Position 会平滑过渡到新轨迹
    */
-  int32_t GetGoalPosition() {
+  int32_t ReadGoalPosition() {
     uint32_t raw;
     ReadRegField(ControlTable::kGoalPosition, raw);
     return static_cast<int32_t>(raw);
@@ -1798,7 +1798,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置目标位置 (RW)
    * @param[in] goal_position 目标位置（pulse）
    */
-  void SetGoalPosition(const int32_t goal_position) {
+  void WriteGoalPosition(const int32_t goal_position) {
     WriteRegField(ControlTable::kGoalPosition,
                   static_cast<uint32_t>(goal_position));
   }
@@ -1824,7 +1824,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  uint16_t GetRealtimeTick() {
+  uint16_t ReadRealtimeTick() {
     uint16_t realtime_tick;
     ReadRegField(ControlTable::kRealtimeTick, realtime_tick);
     return realtime_tick;
@@ -1834,7 +1834,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置实时时钟 (R)
    * @param[in] realtime_tick 实时时钟
    */
-  void SetRealtimeTick(const uint16_t realtime_tick) {
+  void WriteRealtimeTick(const uint16_t realtime_tick) {
     WriteRegField(ControlTable::kRealtimeTick, realtime_tick);
   }
 
@@ -1862,7 +1862,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  bool GetMoving() {
+  bool ReadMoving() {
     uint8_t moving;
     ReadRegField(ControlTable::kMoving, moving);
     return moving != 0;
@@ -1872,7 +1872,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置运动状态 (R)
    * @param[in] moving 运动状态
    */
-  void SetMoving(const bool moving) {
+  void WriteMoving(const bool moving) {
     WriteRegField(ControlTable::kMoving, moving);
   }
 
@@ -1940,7 +1940,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  uint8_t GetMovingStatus() {
+  uint8_t ReadMovingStatus() {
     uint8_t moving_status;
     ReadRegField(ControlTable::kMovingStatus, moving_status);
     return moving_status;
@@ -1950,7 +1950,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置详细运动状态 (R)
    * @param[in] moving_status 详细运动状态位域
    */
-  void SetMovingStatus(const uint8_t moving_status) {
+  void WriteMovingStatus(const uint8_t moving_status) {
     WriteRegField(ControlTable::kMovingStatus, moving_status);
   }
 
@@ -1971,7 +1971,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - PWM Limit: PWM 限制值
    * - Torque Enable: 力矩使能状态
    */
-  float GetPresentPwm() {
+  float ReadPresentPwm() {
     int16_t raw;
     ReadRegField(ControlTable::kPresentPwm, raw);
     return PwmFromRaw(raw);
@@ -1981,7 +1981,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置当前 PWM (R)
    * @param[in] present_pwm 当前 PWM
    */
-  void SetPresentPwm(const uint16_t present_pwm) {
+  void WritePresentPwm(const uint16_t present_pwm) {
     WriteRegField(ControlTable::kPresentPwm, present_pwm);
   }
 
@@ -2002,7 +2002,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  float GetPresentCurrent() {
+  float ReadPresentCurrent() {
     uint16_t present_current;
     ReadRegField(ControlTable::kPresentCurrent, present_current);
     return CurrentFromRaw(present_current);
@@ -2012,7 +2012,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置当前电流 (R)
    * @param[in] present_current 当前电流
    */
-  void SetPresentCurrent(const float present_current) {
+  void WritePresentCurrent(const float present_current) {
     WriteRegField(ControlTable::kPresentCurrent, CurrentToRaw(present_current));
   }
 
@@ -2037,7 +2037,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  float GetPresentVelocity() {
+  float ReadPresentVelocity() {
     uint32_t raw;
     ReadRegField(ControlTable::kPresentVelocity, raw);
     return VelocityFromRaw(raw);
@@ -2047,7 +2047,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置当前速度 (R)
    * @param[in] present_velocity 当前速度
    */
-  void SetPresentVelocity(const uint32_t present_velocity) {
+  void WritePresentVelocity(const uint32_t present_velocity) {
     WriteRegField(ControlTable::kPresentVelocity, present_velocity);
   }
 
@@ -2075,7 +2075,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  int32_t GetPresentPosition() {
+  int32_t ReadPresentPosition() {
     uint32_t raw;
     ReadRegField(ControlTable::kPresentPosition, raw);
     return static_cast<int32_t>(raw);
@@ -2085,7 +2085,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置当前位置 (R)
    * @param[in] present_position 当前位置
    */
-  void SetPresentPosition(const int32_t present_position) {
+  void WritePresentPosition(const int32_t present_position) {
     WriteRegField(ControlTable::kPresentPosition,
                   static_cast<uint32_t>(present_position));
   }
@@ -2119,7 +2119,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  float GetVelocityTrajectory() {
+  float ReadVelocityTrajectory() {
     uint32_t raw;
     ReadRegField(ControlTable::kVelocityTrajectory, raw);
     return VelocityFromRaw(raw);
@@ -2129,7 +2129,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置速度轨迹 (R)
    * @param[in] velocity_trajectory 速度轨迹
    */
-  void SetVelocityTrajectory(const uint32_t velocity_trajectory) {
+  void WriteVelocityTrajectory(const uint32_t velocity_trajectory) {
     WriteRegField(ControlTable::kVelocityTrajectory, velocity_trajectory);
   }
 
@@ -2154,7 +2154,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  int32_t GetPositionTrajectory() {
+  int32_t ReadPositionTrajectory() {
     uint32_t raw;
     ReadRegField(ControlTable::kPositionTrajectory, raw);
     return static_cast<int32_t>(raw);
@@ -2164,7 +2164,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置位置轨迹 (R)
    * @param[in] position_trajectory 位置轨迹
    */
-  void SetPositionTrajectory(const int32_t position_trajectory) {
+  void WritePositionTrajectory(const int32_t position_trajectory) {
     WriteRegField(ControlTable::kPositionTrajectory,
                   static_cast<uint32_t>(position_trajectory));
   }
@@ -2189,7 +2189,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    *
    * @note 此寄存器为只读，由系统自动更新
    */
-  float GetPresentInputVoltage() {
+  float ReadPresentInputVoltage() {
     uint16_t raw;
     ReadRegField(ControlTable::kPresentInputVoltage, raw);
     return VoltageFromRaw(raw);
@@ -2199,7 +2199,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置当前输入电压 (R)
    * @param present_input_voltage 当前输入电压
    */
-  void SetPresentInputVoltage(const uint16_t present_input_voltage) {
+  void WritePresentInputVoltage(const uint16_t present_input_voltage) {
     WriteRegField(ControlTable::kPresentInputVoltage, present_input_voltage);
   }
 
@@ -2215,7 +2215,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * - 实时更新，反映当前温度
    * - 温度过高会触发保护
    */
-  uint8_t GetPresentTemperature() {
+  uint8_t ReadPresentTemperature() {
     uint8_t present_temperature;
     ReadRegField(ControlTable::kPresentTemperature, present_temperature);
     return present_temperature;
@@ -2225,7 +2225,7 @@ class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
    * @brief 设置当前温度 (R)
    * @param present_temperature 当前温度
    */
-  void SetPresentTemperature(const uint8_t present_temperature) {
+  void WritePresentTemperature(const uint8_t present_temperature) {
     WriteRegField(ControlTable::kPresentTemperature, present_temperature);
   }
 

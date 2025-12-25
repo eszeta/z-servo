@@ -75,9 +75,9 @@ class RegMap : public BusImpl {
    * 配置MT6701传感器工作在UVW模式，适用于无刷电机控制。
    * 极对数参数应与电机的极对数匹配。
    */
-  Error SetUvmMode(const uint8_t pairs) {
-    CHECK(SetUVWPolePair(pairs));
-    CHECK(SetMode(Mode::kUVW));
+  Error WriteUvmMode(const uint8_t pairs) {
+    CHECK(WriteUVWPolePair(pairs));
+    CHECK(WriteMode(Mode::kUVW));
     return Error::kOk;
   }
 
@@ -91,13 +91,13 @@ class RegMap : public BusImpl {
    * 配置MT6701传感器工作在ABZ模式，提供增量式编码器输出。
    * 可以设置分辨率、Z信号宽度和迟滞参数。
    */
-  Error SetAbzMode(const uint16_t pulses_per_round,
-                   const PulseWidth z_pulse_width,
-                   const Hyst hysteresis) {
-    CHECK(SetPulseWidth(z_pulse_width));
-    CHECK(SetHyst(hysteresis));
-    CHECK(SetABZPulsePerRound(pulses_per_round));
-    CHECK(SetMode(Mode::kABZ));
+  Error WriteAbzMode(const uint16_t pulses_per_round,
+                     const PulseWidth z_pulse_width,
+                     const Hyst hysteresis) {
+    CHECK(WritePulseWidth(z_pulse_width));
+    CHECK(WriteHyst(hysteresis));
+    CHECK(WriteABZPulsePerRound(pulses_per_round));
+    CHECK(WriteMode(Mode::kABZ));
     return Error::kOk;
   }
 
@@ -109,7 +109,7 @@ class RegMap : public BusImpl {
    * 配置MT6701传感器的UVW输出使用负逻辑（-a-b-z而不是abz）。
    * 注意：此功能仅在QFN封装的MT6701芯片上可用。
    */
-  Error SetNaNbNzEnable(bool enable) {  // 仅适用于QFN版本
+  Error WriteNaNbNzEnable(bool enable) {  // 仅适用于QFN版本
     CHECK(this->WriteRegField(MT6701Regs::kUVM_MUX, enable));
     return Error::kOk;
   }
@@ -123,9 +123,9 @@ class RegMap : public BusImpl {
    * 配置MT6701传感器工作在模拟输出模式，并设置输出范围。
    * 输出电压将在起始角度和停止角度之间线性变化。
    */
-  Error SetAnalogMode(const float start = 0.0f, const float stop = 360.0f) {
-    CHECK(SetStartStop(start, stop));
-    CHECK(SetOutMode(OutMode::kAnalog));
+  Error WriteAnalogMode(const float start = 0.0f, const float stop = 360.0f) {
+    CHECK(WriteStartStop(start, stop));
+    CHECK(WriteOutMode(OutMode::kAnalog));
     return Error::kOk;
   }
 
@@ -138,11 +138,11 @@ class RegMap : public BusImpl {
    * 配置MT6701传感器工作在PWM输出模式，并设置频率和极性。
    * PWM占空比将随角度线性变化。
    */
-  Error SetPwmMode(const PwmFreq frequency = PwmFreq::kPWMFreq497_2,
-                   const PwmPol polarity = PwmPol::kHigh) {
-    CHECK(SetOutMode(OutMode::kPWM));
-    CHECK(SetPwmFreq(frequency));
-    CHECK(SetPwmPolarity(polarity));
+  Error WritePwmMode(const PwmFreq frequency = PwmFreq::kPWMFreq497_2,
+                     const PwmPol polarity = PwmPol::kHigh) {
+    CHECK(WriteOutMode(OutMode::kPWM));
+    CHECK(WritePwmFreq(frequency));
+    CHECK(WritePwmPolarity(polarity));
     return Error::kOk;
   }
 
@@ -154,7 +154,7 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器的角度计数方向。
    * 可以选择顺时针或逆时针方向作为角度增加的方向。
    */
-  Error SetDirection(const Direction direction) {
+  Error WriteDirection(const Direction direction) {
     CHECK(
         this->WriteRegField(MT6701Regs::kDIR, static_cast<uint8_t>(direction)));
     return Error::kOk;
@@ -195,7 +195,7 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器在ABZ模式下的分辨率（每圈脉冲数）。
    * 此参数决定了A和B信号的精度。
    */
-  Error SetABZPulsePerRound(uint16_t pulses) {
+  Error WriteABZPulsePerRound(uint16_t pulses) {
     pulses--;
     if (pulses >= 1024) {
       return Error::kOutOfRange;
@@ -213,7 +213,7 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器在UVW模式下的极对数。
    * 此参数应与电机的极对数匹配，以确保正确的换相。
    */
-  Error SetUVWPolePair(uint8_t pairs) {
+  Error WriteUVWPolePair(uint8_t pairs) {
     pairs--;
     if (pairs >= 16) {
       return Error::kOutOfRange;
@@ -230,7 +230,7 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器的基本工作模式。
    * 可以选择UVW模式（适用于无刷电机）或ABZ模式（增量式编码器）。
    */
-  Error SetMode(Mode mode) {
+  Error WriteMode(Mode mode) {
     CHECK(
         this->WriteRegField(MT6701Regs::kABZ_MUX, static_cast<uint8_t>(mode)));
     return Error::kOk;
@@ -244,7 +244,7 @@ class RegMap : public BusImpl {
    * 使用原始值设置MT6701传感器的零位偏移。
    * 此方法使用12位分辨率的原始值（0-4096范围）。
    */
-  Error SetZeroRaw(uint16_t zero) {
+  Error WriteZeroRaw(uint16_t zero) {
     CHECK(this->WriteRegField(MT6701Regs::kZERO_8, MT6701Regs::kZERO_0, zero));
     return Error::kOk;
   }
@@ -257,8 +257,8 @@ class RegMap : public BusImpl {
    * 使用角度值设置MT6701传感器的零位偏移。
    * 此方法使用浮点角度值（0-360度范围）。
    */
-  Error SetZero(float zero) {
-    return SetZeroRaw(static_cast<uint16_t>(zero * 4096 / 360.0f));
+  Error WriteZero(float zero) {
+    return WriteZeroRaw(static_cast<uint16_t>(zero * 4096 / 360.0f));
   }
 
   /**
@@ -269,7 +269,7 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器的迟滞参数，用于抑制角度输出的抖动。
    * 较大的迟滞值可以减少噪声，但会降低灵敏度。
    */
-  Error SetHyst(Hyst hysteresis) {
+  Error WriteHyst(Hyst hysteresis) {
     CHECK(this->WriteRegField(MT6701Regs::kHYST_2,
                               MT6701Regs::kHYST_0,
                               static_cast<uint16_t>(hysteresis)));
@@ -286,7 +286,7 @@ class RegMap : public BusImpl {
    * 此方法使用12位分辨率的原始值（0-4096范围）。
    * 注意：停止角度必须大于起始角度。
    */
-  Error SetStartStopRaw(uint16_t start, uint16_t stop) {
+  Error WriteStartStopRaw(uint16_t start, uint16_t stop) {
     // 检查参数范围
     if (start >= 4096 || stop >= 4096) {
       return Error::kOutOfRange;
@@ -314,12 +314,12 @@ class RegMap : public BusImpl {
    * 此方法使用浮点角度值（0-360度范围）。
    * 注意：停止角度必须大于起始角度。
    */
-  Error SetStartStop(float start, float stop) {
+  Error WriteStartStop(float start, float stop) {
     uint16_t start_u16 = static_cast<uint16_t>(start * 4096 / 360.0f);
     uint16_t stop_u16 = static_cast<uint16_t>(stop * 4096 / 360.0f);
     start_u16 = start_u16 >= 4096 ? 4095 : start_u16;
     stop_u16 = stop_u16 >= 4096 ? 4095 : stop_u16;
-    return SetStartStopRaw(start_u16, stop_u16);
+    return WriteStartStopRaw(start_u16, stop_u16);
   }
 
   /**
@@ -329,7 +329,7 @@ class RegMap : public BusImpl {
    *
    * 设置MT6701传感器在ABZ模式下Z信号的脉冲宽度。
    */
-  Error SetPulseWidth(PulseWidth width) {
+  Error WritePulseWidth(PulseWidth width) {
     CHECK(this->WriteRegField(MT6701Regs::kPULSE_WIDTH,
                               static_cast<uint8_t>(width)));
     return Error::kOk;
@@ -341,7 +341,7 @@ class RegMap : public BusImpl {
    *
    * 获取MT6701传感器的当前Z信号脉冲宽度。
    */
-  Error GetPulseWidth(PulseWidth& width) {
+  Error ReadPulseWidth(PulseWidth& width) {
     uint8_t value;
     CHECK(this->ReadRegField(MT6701Regs::kPULSE_WIDTH, value));
     width = static_cast<PulseWidth>(value);
@@ -354,7 +354,7 @@ class RegMap : public BusImpl {
    *
    * 设置MT6701传感器PWM输出模式的频率。
    */
-  Error SetPwmFreq(PwmFreq freq) {
+  Error WritePwmFreq(PwmFreq freq) {
     CHECK(
         this->WriteRegField(MT6701Regs::kPWM_FREQ, static_cast<uint8_t>(freq)));
     return Error::kOk;
@@ -366,7 +366,7 @@ class RegMap : public BusImpl {
    *
    * 获取MT6701传感器的当前PWM输出频率。
    */
-  Error GetPwmFreq(PwmFreq& freq) {
+  Error ReadPwmFreq(PwmFreq& freq) {
     uint8_t value;
     CHECK(this->ReadRegField(MT6701Regs::kPWM_FREQ, value));
     freq = static_cast<PwmFreq>(value);
@@ -381,7 +381,7 @@ class RegMap : public BusImpl {
    * 高电平有效时，占空比随角度增加而增加；
    * 低电平有效时，占空比随角度增加而减少。
    */
-  Error SetPwmPolarity(PwmPol polarity) {
+  Error WritePwmPolarity(PwmPol polarity) {
     CHECK(this->WriteRegField(MT6701Regs::kPWM_POL,
                               static_cast<uint8_t>(polarity)));
     return Error::kOk;
@@ -393,7 +393,7 @@ class RegMap : public BusImpl {
    *
    * 获取MT6701传感器的当前PWM输出极性。
    */
-  Error GetPwmPolarity(PwmPol& polarity) {
+  Error ReadPwmPolarity(PwmPol& polarity) {
     uint8_t value;
     CHECK(this->ReadRegField(MT6701Regs::kPWM_POL, value));
     polarity = static_cast<PwmPol>(value);
@@ -407,7 +407,7 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器的输出信号类型。
    * 可以选择模拟输出（电压随角度变化）或PWM输出（占空比随角度变化）。
    */
-  Error SetOutMode(const OutMode mode) {
+  Error WriteOutMode(const OutMode mode) {
     CHECK(
         this->WriteRegField(MT6701Regs::kOUT_MODE, static_cast<uint8_t>(mode)));
     return Error::kOk;
@@ -419,7 +419,7 @@ class RegMap : public BusImpl {
    *
    * 获取MT6701传感器的当前输出模式。
    */
-  Error GetOutMode(OutMode& mode) {
+  Error ReadOutMode(OutMode& mode) {
     uint8_t value;
     CHECK(this->ReadRegField(MT6701Regs::kOUT_MODE, value));
     mode = static_cast<OutMode>(value);

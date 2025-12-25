@@ -31,13 +31,13 @@ class Monitor {
    * @brief 使用监控
    * @param serial 串口
    */
-  void LinkPort(Print *serial) { monitorPort_ = serial; }
+  void LinkPort(Print* serial) { monitorPort_ = serial; }
 
   /**·
    * @brief 链接电机
    * @param servo 伺服电机
    */
-  void LinkMotor(ServoType *servo) { servo_ = servo; }
+  void LinkMotor(ServoType* servo) { servo_ = servo; }
 
   /**
    * @brief 处理监控
@@ -82,10 +82,10 @@ class Monitor {
   /**
    * @brief 伺服电机
    */
-  ServoType *servo_ = nullptr;
+  ServoType* servo_ = nullptr;
   /**
    * @brief 监控输出
    */
-  Print *monitorPort_ = nullptr;
+  Print* monitorPort_ = nullptr;
 };
 }  // namespace hortor::utils

@@ -18,31 +18,31 @@ namespace hortor::drivers::MA330 {
  */
 class RegMap : public RegMapSpiBus {
  public:
-  Error GetZero(uint16_t& zero);
-  Error GetBiasCurrentTrimming(uint8_t& bias_current_trimming);
+  Error ReadZero(uint16_t& zero);
+  Error ReadBiasCurrentTrimming(uint8_t& bias_current_trimming);
   Error IsEnableTrimmingX(bool& enable);
   Error IsEnableTrimmingY(bool& enable);
-  Error GetPulsesPerTurn(uint16_t& pulses_per_turn);
-  Error GetIndexLength(uint8_t& index_length);
-  Error GetNumberPolePairs(uint8_t& number_pole_pairs);
-  Error GetRotationDirection(uint8_t& direction);
-  Error GetFilterWidth(uint8_t& filter_width);
-  Error GetHysteresis(uint8_t& hysteresis);
-  Error GetFieldStrengthHighThreshold(uint8_t& high_threshold);
-  Error GetFieldStrengthLowThreshold(uint8_t& low_threshold);
-  Error GetFieldStrength(FieldStrength& field_strength);
+  Error ReadPulsesPerTurn(uint16_t& pulses_per_turn);
+  Error ReadIndexLength(uint8_t& index_length);
+  Error ReadNumberPolePairs(uint8_t& number_pole_pairs);
+  Error ReadRotationDirection(uint8_t& direction);
+  Error ReadFilterWidth(uint8_t& filter_width);
+  Error ReadHysteresis(uint8_t& hysteresis);
+  Error ReadFieldStrengthHighThreshold(uint8_t& high_threshold);
+  Error ReadFieldStrengthLowThreshold(uint8_t& low_threshold);
+  Error ReadFieldStrength(FieldStrength& field_strength);
 
-  Error SetZero(uint16_t zero);
-  Error SetBiasCurrentTrimming(uint8_t bias_current_trimming);
-  Error SetTrimmingEnabled(bool Xenabled, bool Yenabled);
-  Error SetPulsesPerTurn(uint16_t pulses_per_turn);
-  Error SetIndexLength(uint8_t index_length);
-  Error SetNumberPolePairs(uint8_t number_pole_pairs);
-  Error SetRotationDirection(uint8_t direction);
-  Error SetFilterWidth(uint8_t filter_width);
-  Error SetHysteresis(uint8_t hysteresis);
-  Error SetFieldStrengthThresholds(uint8_t high_threshold,
-                                   uint8_t low_threshold);
+  Error WriteZero(uint16_t zero);
+  Error WriteBiasCurrentTrimming(uint8_t bias_current_trimming);
+  Error WriteTrimmingEnabled(bool Xenabled, bool Yenabled);
+  Error WritePulsesPerTurn(uint16_t pulses_per_turn);
+  Error WriteIndexLength(uint8_t index_length);
+  Error WriteNumberPolePairs(uint8_t number_pole_pairs);
+  Error WriteRotationDirection(uint8_t direction);
+  Error WriteFilterWidth(uint8_t filter_width);
+  Error WriteHysteresis(uint8_t hysteresis);
+  Error WriteFieldStrengthThresholds(uint8_t high_threshold,
+                                     uint8_t low_threshold);
 };
 
 }  // namespace hortor::drivers::MA330

@@ -36,8 +36,8 @@ class Current {
    * @param current 以安培(A)为单位的电流值
    * @return Error 错误码
    */
-  Error GetCurrent(float& current) {
-    return AsDerived().GetCurrentImpl(current);
+  Error ReadCurrent(float& current) {
+    return AsDerived().ReadCurrentImpl(current);
   }
 
   /**
@@ -47,10 +47,10 @@ class Current {
    * @return Error 错误码
    */
   Error ReadAverageCurrents(int n, float& current) {
-    CHECK(GetCurrent(current));
+    CHECK(ReadCurrent(current));
     for (int i = 0; i < n; ++i) {
       float new_current;
-      CHECK(GetCurrent(new_current));
+      CHECK(ReadCurrent(new_current));
       current = current * 0.6f + 0.4f * new_current;
       delay(3);
     }

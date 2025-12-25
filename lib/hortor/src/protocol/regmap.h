@@ -38,7 +38,6 @@ class RegMap : public BusImpl {
   }
 
  public:
-
   /**
    * @brief 读取 ControlTableItem 字段
    * @tparam T 字段类型
@@ -72,7 +71,8 @@ class RegMap : public BusImpl {
    */
   template <typename T>
   Error WriteRegField(const ControlTableItem<T>& item, const bool value) {
-    return BusImpl::WriteRegField(item.reg, value ? static_cast<T>(1) : static_cast<T>(0));
+    return BusImpl::WriteRegField(
+        item.reg, value ? static_cast<T>(1) : static_cast<T>(0));
   }
 };
 

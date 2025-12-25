@@ -42,7 +42,7 @@ class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
    *
    * 返回控制器实例的引用，用于直接操作传感器的配置和状态。
    */
-  RegMap<BusImpl>& GetRegMap() { return regmap_; }
+  RegMap<BusImpl>& regmap() { return regmap_; }
 
   /**
    * @brief 获取原始角度值
@@ -52,9 +52,9 @@ class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
    * 通过总线接口读取MT6701传感器的当前角度值。
    * 该方法实现了基类的纯虚函数。
    */
-  Error GetRawImpl(uint32_t& out_raw) {
+  Error ReadRawImpl(uint32_t& out_raw) {
     uint16_t raw;
-    Status status = Status::kNormal;  
+    Status status = Status::kNormal;
     bool button_pushed = false;
     bool track_loss = false;
     CHECK(regmap_.ReadRaw(raw, status, button_pushed, track_loss));

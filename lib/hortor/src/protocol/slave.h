@@ -52,13 +52,13 @@ class Slave {
    * @brief 获取寄存器映射
    * @return 寄存器映射
    */
-  RegMapType* GetRegMap() { return regmap_; }
+  RegMapType* regmap() { return regmap_; }
   void LinkRegMap(RegMapType* regmap) { regmap_ = regmap; }
   /**
    * @brief 获取端口处理器
    * @return 端口处理器
    */
-  PortHandlerType* GetPortHandler() { return port_handler_; }
+  PortHandlerType* port_handler() { return port_handler_; }
   void LinkPortHandler(PortHandlerType* port_handler) {
     port_handler_ = port_handler;
   }
@@ -67,24 +67,24 @@ class Slave {
    * @brief 设置ID
    * @param id ID
    */
-  void SetId(const uint8_t id) { id_ = id; }
+  void set_id(const uint8_t id) { id_ = id; }
   /**
    * @brief 获取ID
    * @return ID
    */
-  uint8_t GetId() const { return id_; }
+  uint8_t id() const { return id_; }
   /**
    * @brief 设置返回级别
    * @param return_level 返回级别
    */
-  void SetReturnLevel(const uint8_t return_level) {
+  void set_return_level(const uint8_t return_level) {
     return_level_ = return_level;
   }
   /**
    * @brief 获取返回级别
    * @return 返回级别
    */
-  uint8_t GetReturnLevel() const { return return_level_; }
+  uint8_t return_level() const { return return_level_; }
 
  protected:
   Derived& AsDerived() { return static_cast<Derived&>(*this); }
@@ -162,7 +162,7 @@ class Slave {
     CHECK(port_handler_->Response(status_packet_, reply_idx));
     return Error::kOk;
   }
-  
+
   /**
    * @brief 写寄存器
    * @param address 地址

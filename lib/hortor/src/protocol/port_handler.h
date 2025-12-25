@@ -31,11 +31,11 @@ class PortHandler {
    * @param is_complete 是否完成
    * @return 错误码
    */
-  Error Process(InstProtocol &protocol,
+  Error Process(InstProtocol& protocol,
                 const float dt,
-                InstPacket &inst_packet,
-                bool &is_complete) {
-    return static_cast<Derived *>(this)->ProcessImpl(
+                InstPacket& inst_packet,
+                bool& is_complete) {
+    return static_cast<Derived*>(this)->ProcessImpl(
         protocol, dt, inst_packet, is_complete);
   }
 
@@ -45,8 +45,8 @@ class PortHandler {
    * @param reply_idx 回复索引
    * @return 错误码
    */
-  Error Response(const StatusPacket &packet, const uint8_t reply_idx) {
-    return static_cast<Derived *>(this)->ResponseImpl(packet, reply_idx);
+  Error Response(const StatusPacket& packet, const uint8_t reply_idx) {
+    return static_cast<Derived*>(this)->ResponseImpl(packet, reply_idx);
   }
 
   /**

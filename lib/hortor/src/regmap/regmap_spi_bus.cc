@@ -8,9 +8,9 @@
 
 namespace hortor::regmap {
 
-Error RegMapSpiBus::Init(SPIClass *spi,
+Error RegMapSpiBus::Init(SPIClass* spi,
                          const int cs_pin,
-                         const SPISettings &spi_settings) {
+                         const SPISettings& spi_settings) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }
@@ -23,7 +23,7 @@ Error RegMapSpiBus::Init(SPIClass *spi,
 }
 
 Error RegMapSpiBus::WriteBytesImpl(const uint8_t address,
-                                   const uint8_t *data,
+                                   const uint8_t* data,
                                    const size_t size) {
   if (!spi_ || !data) {
     return Error::kInvalidParameter;
@@ -31,7 +31,7 @@ Error RegMapSpiBus::WriteBytesImpl(const uint8_t address,
   spi_->beginTransaction(spi_settings_);
   if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
   spi_->transfer(address);
-  spi_->transfer(const_cast<uint8_t *>(data), nullptr, size);
+  spi_->transfer(const_cast<uint8_t*>(data), nullptr, size);
   if (cs_pin_ >= 0) digitalWrite(cs_pin_, HIGH);
   spi_->endTransaction();
   return Error::kOk;
@@ -39,7 +39,7 @@ Error RegMapSpiBus::WriteBytesImpl(const uint8_t address,
 
 Error RegMapSpiBus::ReadBytesImpl(const uint8_t address,
                                   const size_t size,
-                                  uint8_t *data) {
+                                  uint8_t* data) {
   if (!spi_) {
     return Error::kInvalidParameter;
   }

@@ -30,7 +30,22 @@ class TaskScheduler {
   static constexpr float kMicroToSec = 1.0f / 1000000.0f;
 
   explicit TaskScheduler(uint32_t max_tasks = kDefaultMaxTasks)
-      : max_tasks_(max_tasks), num_tasks_(0), min_period_us_(0) {}
+      : capacity_(max_tasks), size_(0), min_period_us_(0) {}
+
+  /**
+   * @brief 获取当前已注册任务中最小周期（微秒）
+   */
+  uint32_t min_period_us() const { return min_period_us_; }
+
+  /**
+   * @brief 返回已注册任务数量
+   */
+  uint32_t size() const { return size_; }
+
+  /**
+   * @brief 最大容量
+   */
+  uint32_t capacity() const { return capacity_; }
 
   /**
    * @brief 注册任务
@@ -42,18 +57,18 @@ class TaskScheduler {
     if (callback == nullptr || rate_hz == 0) {
       return Error::kInvalidParameter;
     }
-    if (num_tasks_ >= max_tasks_) {
+    if (size_ >= capacity_) {
       return Error::kInvalidParameter;
     }
     const auto period_us = 1000000u / rate_hz;
     if (period_us == 0u) {
       return Error::kInvalidParameter;
     }
-    const uint32_t idx = num_tasks_;
+    const uint32_t idx = size_;
     tasks_[idx].callback = callback;
     tasks_[idx].period_us = period_us;
     tasks_[idx].last_time_us = micros() - period_us;
-    num_tasks_ += 1;
+    size_ += 1;
     if (period_us < min_period_us_) {
       min_period_us_ = period_us;
     }
@@ -67,7 +82,7 @@ class TaskScheduler {
    */
   Error TickNonBlocking() {
     const uint32_t now = micros();
-    for (uint32_t i = 0; i < num_tasks_; ++i) {
+    for (uint32_t i = 0; i < size_; ++i) {
       TaskDesc& t = tasks_[i];
       const uint32_t elapsed = now - t.last_time_us;
       if (elapsed >= t.period_us) {
@@ -88,7 +103,7 @@ class TaskScheduler {
     const uint32_t start = micros();
     CHECK(TickNonBlocking());
 
-    const uint32_t min_period = GetMinPeriodUs();
+    const uint32_t min_period = min_period_us();
     const uint32_t elapsed = micros() - start;
     if (elapsed < min_period) {
       delayMicroseconds(min_period - elapsed);
@@ -96,26 +111,11 @@ class TaskScheduler {
     return Error::kOk;
   }
 
-  /**
-   * @brief 获取当前已注册任务中最小周期（微秒）
-   */
-  uint32_t GetMinPeriodUs() const { return min_period_us_; }
-
-  /**
-   * @brief 返回已注册任务数量
-   */
-  uint32_t Size() const { return num_tasks_; }
-
-  /**
-   * @brief 最大容量
-   */
-  uint32_t Capacity() const { return max_tasks_; }
-
  private:
   static constexpr uint32_t kDefaultMaxTasks = 16u;
 
-  uint32_t max_tasks_;
-  uint32_t num_tasks_;
+  uint32_t capacity_;
+  uint32_t size_;
   TaskDesc tasks_[kDefaultMaxTasks];
   uint32_t min_period_us_;
 };

@@ -11,9 +11,9 @@ InstProtocol::InstProtocol() = default;
 
 InstProtocol::~InstProtocol() = default;
 
-Error InstProtocol::Process(InstPacket &packet,
+Error InstProtocol::Process(InstPacket& packet,
                             const uint8_t recv_data,
-                            bool &is_complete) {
+                            bool& is_complete) {
   is_complete = false;
   switch (packet_state_) {
     case PacketState::kHeader1: {
@@ -88,10 +88,10 @@ Error InstProtocol::Process(InstPacket &packet,
 }
 
 Error InstProtocol::CreateResponse(const uint8_t id,
-                                   const StatusErrorBits &status,
-                                   const uint8_t *parameter,
+                                   const StatusErrorBits& status,
+                                   const uint8_t* parameter,
                                    const size_t parameter_size,
-                                   StatusPacket &packet) {
+                                   StatusPacket& packet) {
   packet.header1 = 0xff;
   packet.header2 = 0xff;
   packet.id = id;

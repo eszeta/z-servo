@@ -24,10 +24,10 @@ class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
   using EncoderBase = servo::Encoder<MA330, kResolutionBits>;
 
   struct Config : public EncoderBase::Config {
-    SPIClass *spi;
+    SPIClass* spi;
     uint8_t cs_pin;
   };
-  
+
   /**
    * @brief 初始化传感器
    * @param wire I2C通信接口指针
@@ -36,7 +36,7 @@ class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
    * 配置并初始化MT6701传感器，建立I2C通信，并执行基类初始化。
    * 必须在使用传感器前调用此方法。
    */
-  Error Init(const Config &config) {
+  Error Init(const Config& config) {
     CHECK(regmap_.Init(
         config.spi, config.cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
     CHECK((servo::Encoder<MA330, kResolutionBits>::Init(config)));
@@ -50,7 +50,7 @@ class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
    * 通过I2C接口读取MT6701传感器的当前角度值。
    * 该方法实现了基类的纯虚函数。
    */
-  Error GetRawImpl(uint32_t &out_raw) {
+  Error ReadRawImpl(uint32_t& out_raw) {
     uint16_t raw;
     CHECK(regmap_.ReadRaw(raw));
     out_raw = static_cast<uint32_t>(raw);
@@ -63,7 +63,7 @@ class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
    *
    * 返回寄存器映射实例的指针，用于直接操作传感器的配置和状态。
    */
-  RegMap *GetRegMap() { return &regmap_; }
+  RegMap* regmap() { return &regmap_; }
 
  private:
   /** @brief 寄存器映射实例（包含SPI通信层），负责与传感器的具体通信操作 */

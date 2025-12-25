@@ -10,15 +10,15 @@ namespace hortor::utils {
 class TimeoutLimiter {
  public:
   /** @brief 设置阈值 */
-  void SetThreshold(float threshold) { threshold_ = threshold; }
+  void set_threshold(float threshold) { threshold_ = threshold; }
   /** @brief 获取阈值 */
-  float GetThreshold() const { return threshold_; }
+  float threshold() const { return threshold_; }
   /** @brief 设置超时时间 */
-  void SetTimeoutDuration(float timeout_duration) {
+  void set_timeout_duration(float timeout_duration) {
     timeout_duration_ = timeout_duration;
   }
   /** @brief 获取超时时间 */
-  float GetTimeoutDuration() const { return timeout_duration_; }
+  float timeout_duration() const { return timeout_duration_; }
 
   /** @brief 处理 */
   bool Process(float current_value, float dt) {

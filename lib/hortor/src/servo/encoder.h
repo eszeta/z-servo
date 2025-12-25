@@ -34,30 +34,30 @@ class Encoder {
    * @brief 获取原始计数值
    * @return 当前原始计数值
    */
-  uint32_t GetRewPos() const { return rew_pos_; }
+  uint32_t rew_pos() const { return rew_pos_; }
 
   /**
    * @brief 获取总累积计数值
    * @return 当前总累积计数值
    */
-  int32_t GetPos() const { return pos_; }
+  int32_t pos() const { return pos_; }
 
   /**
    * @brief 获取圈数
    * @return 圈数
    */
-  int32_t GetRevolutions() const { return GetPos() / kResolution.kEncoderCpr; }
+  int32_t revolutions() const { return pos() / kResolution.kEncoderCpr; }
 
   /**
    * @brief 获取反转
    * @return 反转
    */
-  Reverse GetReverse() const { return reverse_; }
-  void SetReverse(const Reverse reverse) { reverse_ = reverse; }
+  Reverse reverse() const { return reverse_; }
+  void set_reverse(const Reverse reverse) { reverse_ = reverse; }
 
   /** @brief 归零偏移 */
-  int32_t GetHomingOffset() const { return homing_offset_; }
-  void SetHomingOffset(const int32_t homing_offset) {
+  int32_t homing_offset() const { return homing_offset_; }
+  void set_homing_offset(const int32_t homing_offset) {
     const auto delta_offset = homing_offset - homing_offset_;
     pos_ += delta_offset;
     homing_offset_ = homing_offset;
@@ -71,9 +71,9 @@ class Encoder {
    */
   Error Init(const Config& config) {
     // 读取初始原始值，等待传感器稳定后再次读取
-    CHECK(GetRaw(rew_pos_));
+    CHECK(ReadRaw(rew_pos_));
     delay(10);
-    CHECK(GetRaw(rew_pos_));
+    CHECK(ReadRaw(rew_pos_));
 
     // 初始化状态变量
     homing_offset_ = config.homing_offset;
@@ -107,7 +107,7 @@ class Encoder {
   Error Process(float dt) {
     // 读取新的原始计数值
     uint32_t raw_new;
-    CHECK(GetRaw(raw_new));
+    CHECK(ReadRaw(raw_new));
 
     // 计算位置增量（新位置 - 旧位置）
     const int32_t delta =
@@ -130,10 +130,9 @@ class Encoder {
     * 调用此方法后，GetPos() 将返回目标位置。
    */
   Error AlignToPosition(uint32_t target) {
-    const auto current_normalized =
-        math::mod(GetPos(), kResolution.kEncoderCpr);
+    const auto current_normalized = math::mod(pos(), kResolution.kEncoderCpr);
     const auto delta_to_target = target - current_normalized;
-    SetHomingOffset(homing_offset_ + delta_to_target);
+    set_homing_offset(homing_offset_ + delta_to_target);
     return Error::kOk;
   }
 
@@ -158,7 +157,7 @@ class Encoder {
    *
    * 子类必须实现此方法以提供特定传感器的原始计数值读取功能。
    */
-  Error GetRaw(uint32_t& out_raw) { return AsDerived().GetRawImpl(out_raw); }
+  Error ReadRaw(uint32_t& out_raw) { return AsDerived().ReadRawImpl(out_raw); }
 
   // ========== 状态变量 ==========
   /** @brief 原始值 [0, CPR-1] */
