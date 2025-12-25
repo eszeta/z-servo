@@ -4,7 +4,7 @@
 #include "regmap_spi_bus.h"
 
 #include "regmap.h"
-#include "servo/types.h"
+#include "base/types.h"
 
 namespace hortor::regmap {
 

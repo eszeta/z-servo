@@ -4,12 +4,13 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <base/servo.h>
 #include <drivers/current_mirror/current_mirror.h>
 #include <drivers/drv8231a/drv8231a.h>
+#include <drivers/lsm6dsow/lsm6dsow.h>
 #include <drivers/mt6701/mt6701.h>
 #include <info_led/info_led.h>
 #include <math/math.h>
-#include <servo/servo.h>
 #include <servo_slave/slave.h>
 #include <utils/commander.h>
 #include <utils/debug_print.h>

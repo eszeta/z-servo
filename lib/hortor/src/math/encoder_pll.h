@@ -7,7 +7,7 @@
 
 #include "hortor.h"
 #include "resolution.h"
-#include "servo/types.h"
+#include "base/types.h"
 
 namespace hortor::math {
 

@@ -6,7 +6,7 @@
 #include <Arduino.h>
 
 #include "regmap/reg_field.h"
-#include "servo/types.h"
+#include "base/types.h"
 
 namespace hortor::protocol {
 /**

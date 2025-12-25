@@ -173,7 +173,9 @@ constexpr uint16_t CurrentToRaw(float current) {
  *
  * 继承自 protocol::RegMap，使用 MMIO 总线实现。
  */
-class RegMap : public protocol::RegMap<RegMap, regmap::RegMapMmio> {
+class RegMap;
+using RegMapBase = protocol::RegMap<RegMap, regmap::RegMapMmio>;
+class RegMap : public RegMapBase {
  public:
   Error Init();
 

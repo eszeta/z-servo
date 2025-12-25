@@ -50,7 +50,7 @@ void loop() {
 
 #else
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   RUN_UNITY_TESTS();
   return 0;
 }

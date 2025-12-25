@@ -15,9 +15,6 @@ namespace hortor::servo {
 
 /**
  * @brief 传感器基类，提供编码器传感器的通用接口和功能实现
- *
- * 该类实现了编码器传感器的基本功能，包括计数值读取、速度计算和圈数统计。
- * 子类需要实现GetRaw()方法以提供特定传感器的原始计数值。
  */
 template <typename Derived, uint8_t Bits>
 class Encoder {
@@ -26,9 +23,9 @@ class Encoder {
     int32_t homing_offset;
     Reverse reverse;
   };
-  /** @brief 传感器分辨率（位数），决定了传感器的精度和量程 */
+
+  /** @brief 传感器分辨率（编译期常量，存储在Flash） */
   static constexpr math::Resolution<Bits> kResolution{};
-  static constexpr uint8_t kResolutionBits = Bits;
 
   /**
    * @brief 获取原始计数值
@@ -138,26 +135,12 @@ class Encoder {
 
  protected:
   /**
-   * @brief 获取派生类引用
-   * @return 派生类引用
-   */
-  Derived& AsDerived() { return static_cast<Derived&>(*this); }
-
-  /**
-   * @brief 获取派生类常量引用
-   * @return 派生类常量引用
-   */
-  const Derived& AsDerived() const {
-    return static_cast<const Derived&>(*this);
-  }
-
-  /**
    * @brief 获取原始计数值
    * @return 传感器的原始计数值
    *
    * 子类必须实现此方法以提供特定传感器的原始计数值读取功能。
    */
-  Error ReadRaw(uint32_t& out_raw) { return AsDerived().ReadRawImpl(out_raw); }
+  Error ReadRaw(uint32_t& out_raw) { return static_cast<Derived*>(this)->ReadRawImpl(out_raw); }
 
   // ========== 状态变量 ==========
   /** @brief 原始值 [0, CPR-1] */

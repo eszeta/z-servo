@@ -12,8 +12,14 @@
 
 namespace hortor::servo_slave {
 template <typename ServoType>
-class Slave : public protocol::
-                  Slave<Slave<ServoType>, RegMap, protocol::I2cPortHandler> {
+class Slave;
+
+template <typename ServoType>
+using SlaveBase =
+    protocol::Slave<Slave<ServoType>, RegMap, protocol::I2cPortHandler>;
+
+template <typename ServoType>
+class Slave : public SlaveBase<ServoType> {
  public:
   ServoType* GetServo() { return servo_; }
   /**
@@ -27,21 +33,22 @@ class Slave : public protocol::
   }
 
   Error Init() {
-    CHECK((protocol::Slave<Slave, RegMap, protocol::I2cPortHandler>::Init()));
+    CHECK((SlaveBase<ServoType>::Init()));
     CHECK(this->ApplyProtocolConfig());
     CHECK(this->ApplyMotorConfig());
     CHECK(this->UpdateMotorStatus());
     return Error::kOk;
   }
 
-  Error ResetImpl() {
-    this->regmap_->RecoveryEeprom();
+  Error AfterResetHandlerImpl(const protocol::InstPacket& packet,
+                              const bool response) {
+    CHECK(this->regmap_->RecoveryEeprom());
     return Error::kOk;
   }
 
-  Error WriteRegsImpl(const uint8_t address,
-                      const uint8_t* data,
-                      const size_t size) {
+  Error AfterWriteRegsImpl(const uint8_t address,
+                           const uint8_t* data,
+                           const size_t size) {
     if (TableBlocks::kEeprom.InBlock(address, size)) {
       CHECK(this->regmap_->StoreEeprom());
     }
@@ -54,7 +61,7 @@ class Slave : public protocol::
     return Error::kOk;
   }
 
-  Error ProcessImpl(float dt) {
+  Error AfterProcessImpl(float dt) {
     realtime_tick_ += dt * 1000;
     this->regmap_->WriteRealtimeTick(realtime_tick_);
     CHECK(UpdateMotorStatus());

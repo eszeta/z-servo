@@ -15,21 +15,6 @@ namespace hortor::servo {
  */
 template <typename Derived>
 class Current {
- protected:
-  /**
-   * @brief 获取派生类引用
-   * @return 派生类引用
-   */
-  Derived& AsDerived() { return static_cast<Derived&>(*this); }
-
-  /**
-   * @brief 获取派生类常量引用
-   * @return 派生类常量引用
-   */
-  const Derived& AsDerived() const {
-    return static_cast<const Derived&>(*this);
-  }
-
  public:
   /**
    * @brief 获取当前电流读数
@@ -37,7 +22,7 @@ class Current {
    * @return Error 错误码
    */
   Error ReadCurrent(float& current) {
-    return AsDerived().ReadCurrentImpl(current);
+    return static_cast<Derived*>(this)->ReadCurrentImpl(current);
   }
 
   /**

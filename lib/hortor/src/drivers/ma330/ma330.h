@@ -5,10 +5,10 @@
 
 #include <SPI.h>
 
+#include "base/encoder.h"
+#include "base/types.h"
 #include "regmap.h"
 #include "regmap_spi_bus.h"
-#include "servo/encoder.h"
-#include "servo/types.h"
 
 namespace hortor::drivers::MA330 {
 constexpr uint8_t kResolutionBits = 14;
@@ -19,11 +19,11 @@ constexpr uint8_t kResolutionBits = 14;
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本实现使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
-class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
+class MA330;
+using MA330Base = servo::Encoder<MA330, kResolutionBits>;
+class MA330 final : public MA330Base {
  public:
-  using EncoderBase = servo::Encoder<MA330, kResolutionBits>;
-
-  struct Config : public EncoderBase::Config {
+  struct Config : public MA330Base::Config {
     SPIClass* spi;
     uint8_t cs_pin;
   };
@@ -39,7 +39,7 @@ class MA330 final : public servo::Encoder<MA330, kResolutionBits> {
   Error Init(const Config& config) {
     CHECK(regmap_.Init(
         config.spi, config.cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
-    CHECK((servo::Encoder<MA330, kResolutionBits>::Init(config)));
+    CHECK(MA330Base::Init(config));
     return Error::kOk;
   }
 

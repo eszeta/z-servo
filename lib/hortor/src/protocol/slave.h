@@ -5,20 +5,21 @@
 
 #include <Arduino.h>
 
+#include "base/servo.h"
 #include "hortor.h"
 #include "port_handler.h"
 #include "protocol.h"
 #include "regmap.h"
-#include "servo/servo.h"
 #include "types.h"
 
 namespace hortor::protocol {
 
 /**
- * @brief 协议从机类
+ * @brief 协议从机类（CRTP 基类）
  *
+ * @tparam Derived 派生类类型（CRTP）
  * @tparam RegMapType 寄存器映射类型
- * @tparam PortHandlerType 端口处理器类型（CRTP 派生类）
+ * @tparam PortHandlerType 端口处理器类型
  */
 template <typename Derived, typename RegMapType, typename PortHandlerType>
 class Slave {
@@ -45,7 +46,17 @@ class Slave {
     if (is_complete) {
       CHECK(Execute(inst_packet_));
     }
-    return AsDerived().ProcessImpl(dt);
+    CHECK(AfterProcess(dt));
+    return Error::kOk;
+  }
+
+  /**
+   * @brief 处理指令实现（派生类可重写）
+   * @param dt 时间间隔(秒)
+   * @return 错误码
+   */
+  Error AfterProcess(float dt) {
+    return static_cast<Derived*>(this)->AfterProcessImpl(dt);
   }
 
   /**
@@ -87,10 +98,6 @@ class Slave {
   uint8_t return_level() const { return return_level_; }
 
  protected:
-  Derived& AsDerived() { return static_cast<Derived&>(*this); }
-  const Derived& AsDerived() const {
-    return static_cast<const Derived&>(*this);
-  }
   /**
    * @brief 执行指令
    * @param data 指令数据
@@ -177,8 +184,23 @@ class Slave {
       return Error::kInvalidParameter;
     }
     CHECK(regmap_->WriteBytes(address, data, size));
-    return AsDerived().WriteRegsImpl(address, data, size);
+    CHECK(AfterWriteRegs(address, data, size));
+    return Error::kOk;
   }
+
+  /**
+   * @brief 写寄存器实现（派生类可重写）
+   * @param address 地址
+   * @param data 数据
+   * @param size 大小
+   * @return 错误码
+   */
+  Error AfterWriteRegs(const uint8_t address,
+                       const uint8_t* data,
+                       const size_t size) {
+    return static_cast<Derived*>(this)->AfterWriteRegsImpl(address, data, size);
+  }
+  
   /**
    * @brief PING指令
    * @param packet 指令包
@@ -336,7 +358,18 @@ class Slave {
     if (response) {
       CHECK(Response(0, nullptr, 0));
     }
-    return AsDerived().ResetImpl();
+    CHECK(AfterResetHandler(packet, response));
+    return Error::kOk;
+  }
+
+  /**
+   * @brief 批量读取指令实现（派生类可重写）
+   * @param packet 指令包
+   * @param response 是否响应
+   * @return 错误码
+   */
+  Error AfterResetHandler(const InstPacket& packet, const bool response) {
+    return static_cast<Derived*>(this)->AfterResetHandlerImpl(packet, response);
   }
 
   /**
@@ -364,6 +397,36 @@ class Slave {
         return true;
     }
     return false;
+  }
+
+  /**
+   * @brief 处理指令实现（派生类可重写）
+   * @param dt 时间间隔(秒)
+   * @return 错误码
+   */
+  Error AfterProcessImpl(float dt) { return Error::kOk; }
+
+  /**
+   * @brief 写寄存器实现（派生类可重写）
+   * @param address 地址
+   * @param data 数据
+   * @param size 大小
+   * @return 错误码
+   */
+  Error AfterWriteRegsImpl(const uint8_t address,
+                           const uint8_t* data,
+                           const size_t size) {
+    return Error::kOk;
+  }
+
+  /**
+   * @brief 恢复指令实现（派生类可重写）
+   * @param packet 指令包
+   * @param response 是否响应
+   * @return 错误码
+   */
+  Error AfterResetHandlerImpl(const InstPacket& packet, const bool response) {
+    return Error::kOk;
   }
 
   /**

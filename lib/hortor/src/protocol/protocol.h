@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 
+#include "base/types.h"
 #include "hortor.h"
-#include "servo/types.h"
 #include "types.h"
 
 namespace hortor::protocol {

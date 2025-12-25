@@ -23,10 +23,6 @@ namespace hortor::servo {
  *
  * 该类实现了舵机的核心控制功能，包括位置控制、速度控制、电流控制等。
  * 支持多种控制模式，并提供完整的PID控制和保护功能。
- *
- * @tparam MotorType 电机驱动器类型，必须继承自 Motor<MotorType>
- * @tparam EncoderType 编码器传感器类型，必须继承自 Encoder<EncoderType>
- * @tparam CurrentType 电流传感器类型，必须继承自 Current<CurrentType>
  */
 template <typename MotorType,
           typename EncoderType,
@@ -56,8 +52,8 @@ class Servo {
   }
   void SetDriveMode(const uint8_t drive_mode) {
     drive_mode_.value = drive_mode;
-    motor_->SetReverse(drive_mode_.moto_reverse_mode ? Reverse::kReverse
-                                                     : Reverse::kNormal);
+    motor_->set_reverse(drive_mode_.moto_reverse_mode ? Reverse::kReverse
+                                                      : Reverse::kNormal);
     encoder_->set_reverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
                                                            : Reverse::kNormal);
   }
@@ -84,15 +80,15 @@ class Servo {
 #pragma region "位置配置组"
   /** @brief 归零偏移 */
   int32_t GetHomingOffset() const {
-    const auto kBits = encoder_->kResolutionBits;
+    const auto kBits = encoder_->kResolution.kBits;
     const auto kTargetBits = kResolution.kBits;
-    const auto homing_offset = encoder_->GetHomingOffset();
+    const auto homing_offset = encoder_->homing_offset();
     return math::mapResolution(homing_offset, kBits, kTargetBits);
   }
 
   void SetHomingOffset(const int32_t homing_offset) {
     const auto kBits = kResolution.kBits;
-    const auto kTargetBits = encoder_->kResolutionBits;
+    const auto kTargetBits = encoder_->kResolution.kBits;
     const auto mapped_offset =
         math::mapResolution(homing_offset, kBits, kTargetBits);
     encoder_->set_homing_offset(mapped_offset);

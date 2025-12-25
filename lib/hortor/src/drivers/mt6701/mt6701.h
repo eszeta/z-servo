@@ -6,11 +6,11 @@
 #include <SPI.h>
 #include <Wire.h>
 
+#include "base/encoder.h"
+#include "base/types.h"
 #include "regmap.h"
 #include "regmap_i2c_bus.h"
 #include "regmap_spi_bus.h"
-#include "servo/encoder.h"
-#include "servo/types.h"
 #include "types.h"
 
 namespace hortor::drivers::MT6701 {
@@ -33,9 +33,14 @@ class MT6701;
  * 使用CRTP模式继承servo::Encoder，提供统一的传感器接口。
  */
 template <typename BusImpl>
-class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
+class MT6701Base;
+
+template <typename BusImpl>
+using MT6701BaseBase = servo::Encoder<MT6701Base<BusImpl>, kResolutionBits>;
+
+template <typename BusImpl>
+class MT6701Base : public MT6701BaseBase<BusImpl> {
  public:
-  using EncoderBase = servo::Encoder<MT6701Base<BusImpl>, kResolutionBits>;
   /**
    * @brief 获取控制器实例
    * @return 控制器实例引用
@@ -77,10 +82,12 @@ class MT6701Base : public servo::Encoder<MT6701Base<BusImpl>, kResolutionBits> {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本特化使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
+
+using I2CBase = MT6701Base<RegMapI2CBus>;
 template <>
-class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
+class MT6701<BusType::kI2C> final : public I2CBase {
  public:
-  struct Config : public EncoderBase::Config {
+  struct Config : public I2CBase::Config {
     TwoWire* wire;
   };
 
@@ -94,7 +101,7 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
    */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.wire, kI2CAddress));
-    CHECK((MT6701Base<RegMapI2CBus>::Init(config)));
+    CHECK(I2CBase::Init(config));
     return Error::kOk;
   }
 };
@@ -106,10 +113,11 @@ class MT6701<BusType::kI2C> final : public MT6701Base<RegMapI2CBus> {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本特化使用SPI接口与传感器通信，支持角度读取和状态查询。
  */
+using SPIBase = MT6701Base<RegMapSpiBus>;
 template <>
-class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
+class MT6701<BusType::kSPI> final : public SPIBase {
  public:
-  struct Config : public EncoderBase::Config {
+  struct Config : public SPIBase::Config {
     SPIClass* spi;
     int cs_pin;
     SPISettings spi_settings;
@@ -127,7 +135,7 @@ class MT6701<BusType::kSPI> final : public MT6701Base<RegMapSpiBus> {
    */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.spi, config.cs_pin, config.spi_settings));
-    CHECK(MT6701Base<RegMapSpiBus>::Init(config));
+    CHECK(SPIBase::Init(config));
     return Error::kOk;
   }
 };

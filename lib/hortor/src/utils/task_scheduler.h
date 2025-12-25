@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 
-#include "servo/types.h"
+#include "base/types.h"
 
 namespace hortor::utils {
 

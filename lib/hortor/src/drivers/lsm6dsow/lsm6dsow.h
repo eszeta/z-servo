@@ -6,9 +6,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "base/imu.h"
 #include "regmap.h"
 #include "regmap/regmap_i2c_bus.h"
-#include "servo/imu.h"
 #include "types.h"
 
 namespace hortor::drivers::LSM6DSOW {
@@ -16,14 +16,16 @@ namespace hortor::drivers::LSM6DSOW {
 /**
  * @brief LSM6DSOW传感器类，继承自IMU类，提供与LSM6DSOW传感器的接口
  */
-class LSM6DSOW final : public servo::IMU<LSM6DSOW> {
+class LSM6DSOW;
+using LSM6DSOWBase = servo::IMU<LSM6DSOW>;
+class LSM6DSOW final : public LSM6DSOWBase {
  public:
   /**
    * @brief 初始化I2C通信
    * @param wire I2C通信接口指针
    * @return 初始化结果
    */
-  Error InitI2C(TwoWire* wire) {
+  Error Init(TwoWire* wire) {
     CHECK(regmap_.Init(wire, kI2CAddress));
     return Error::kOk;
   }

@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include "base/types.h"
 #include "hortor.h"
 #include "regmap/reg_field.h"
-#include "servo/types.h"
 
 namespace hortor::regmap {
 
@@ -20,21 +20,6 @@ namespace hortor::regmap {
  */
 template <typename Derived>
 class RegMap {
- protected:
-  /**
-   * @brief 获取派生类引用
-   * @return 派生类引用
-   */
-  Derived& AsDerived() { return static_cast<Derived&>(*this); }
-
-  /**
-   * @brief 获取派生类常量引用
-   * @return 派生类常量引用
-   */
-  const Derived& AsDerived() const {
-    return static_cast<const Derived&>(*this);
-  }
-
  public:
   /**
    * @brief 写寄存器
@@ -58,7 +43,7 @@ class RegMap {
   Error WriteBytes(const uint8_t address,
                    const uint8_t* data,
                    const size_t size) {
-    return AsDerived().WriteBytesImpl(address, data, size);
+    return static_cast<Derived*>(this)->WriteBytesImpl(address, data, size);
   }
 
   /**
@@ -80,7 +65,7 @@ class RegMap {
    * @return 错误码，成功返回OK
    */
   Error ReadBytes(const uint8_t address, const size_t size, uint8_t* data) {
-    return AsDerived().ReadBytesImpl(address, size, data);
+    return static_cast<Derived*>(this)->ReadBytesImpl(address, size, data);
   }
 
   /**

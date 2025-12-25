@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "regmap_i2c_bus.h"
-#include "servo/types.h"
+#include "base/types.h"
 #include "types.h"
 
 namespace hortor::drivers::MT6701 {
