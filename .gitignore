@@ -36,7 +36,8 @@
 .vscode
 .idea
 .vs/
-.cursor/
+.cursor/*
+!.cursor/rules/
 *.swp
 *.swo
 *.swn

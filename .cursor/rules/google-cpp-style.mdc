@@ -1,0 +1,83 @@
+---
+description: Google C++ 命名与结构规范
+alwaysApply: true
+---
+
+# 命名规则速查表
+
+| 类型 | 格式 | ✅ 正确 | ❌ 错误 |
+|---|---|-----|-----|
+| 类型（类/结构体/枚举/typedef） | `PascalCase` | `UrlTable`, `PropertiesMap` | `url_table`, `URL_Table` |
+| 函数 | `PascalCase` | `AddEntry()`, `DeleteUrl()` | `add_entry()`, `deleteURL()` |
+| 变量 | `snake_case` | `table_name`, `count` | `tableName`, `TableName` |
+| 类成员变量 | `snake_case_` | `table_name_`, `count_` | `tableName_`, `m_count` |
+| 结构体成员 | `snake_case` | `num_entries` | `numEntries` |
+| 常量 | `kPascalCase` | `kDaysInWeek`, `kMaxSize` | `DAYS_IN_WEEK`, `days_in_week` |
+| 枚举值 | `kPascalCase` | `kOk`, `kErrorNotFound` | `OK`, `ERROR_NOT_FOUND` |
+| 命名空间 | `snake_case` | `websearch::index` | `webSearch` |
+| 宏 | `UPPER_SNAKE_CASE` | `ROUND(x)`, `PI_ROUNDED` | `Round(x)` |
+
+## 访问器命名特殊规则
+
+```cpp
+// ✅ Getter 不用 Get 前缀
+int count() const { return count_; }
+
+// ✅ Setter 用 set_ 前缀
+void set_count(int count) { count_ = count; }
+
+// ❌ 错误：不应使用 Get/Set
+int GetCount() const;
+void SetCount(int count);
+```
+
+---
+
+# 类结构规范
+
+## 访问修饰符顺序（强制）
+
+```cpp
+class Foo {
+ public:     // 1. public 首先
+  // ...
+ protected:  // 2. protected 其次
+  // ...
+ private:    // 3. private 最后
+  // ...
+};
+```
+
+## 成员顺序（推荐）
+
+每个访问修饰符组内：类型定义 → 静态常量 → 静态函数 → 构造/赋值 → 析构 → 成员函数 → 数据成员
+
+---
+
+# 其他规范
+
+## 文件头（强制）
+
+```cpp
+// Copyright 2025 ES_ZETA
+// SPDX-License-Identifier: Apache-2.0
+```
+
+## 注释要求
+
+- 公共类必须有注释说明其用途
+- 公共 API 函数必须有注释说明功能、参数、返回值
+
+---
+
+# 检查清单
+
+- [ ] 命名规则符合速查表
+- [ ] Getter/Setter 命名正确（无 Get，有 set_）
+- [ ] 文件头有版权声明
+- [ ] 访问修饰符顺序：public → protected → private
+- [ ] 公共类和函数有注释
+
+---
+
+**参考**：[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
