@@ -5,9 +5,9 @@
 
 #include <SPI.h>
 
+#include "base/types.h"
 #include "hortor.h"
 #include "regmap.h"
-#include "base/types.h"
 
 namespace hortor::regmap {
 

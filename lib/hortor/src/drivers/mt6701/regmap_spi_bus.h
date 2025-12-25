@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 
-#include "regmap/regmap_spi_bus.h"
 #include "base/types.h"
+#include "regmap/regmap_spi_bus.h"
 #include "types.h"
 
 namespace hortor::drivers::MT6701 {

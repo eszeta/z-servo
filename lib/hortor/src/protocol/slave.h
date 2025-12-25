@@ -200,7 +200,7 @@ class Slave {
                        const size_t size) {
     return static_cast<Derived*>(this)->AfterWriteRegsImpl(address, data, size);
   }
-  
+
   /**
    * @brief PING指令
    * @param packet 指令包

@@ -5,8 +5,8 @@
 
 #include <Wire.h>
 
-#include "regmap.h"
 #include "base/types.h"
+#include "regmap.h"
 
 namespace hortor::regmap {
 

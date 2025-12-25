@@ -140,7 +140,9 @@ class Encoder {
    *
    * 子类必须实现此方法以提供特定传感器的原始计数值读取功能。
    */
-  Error ReadRaw(uint32_t& out_raw) { return static_cast<Derived*>(this)->ReadRawImpl(out_raw); }
+  Error ReadRaw(uint32_t& out_raw) {
+    return static_cast<Derived*>(this)->ReadRawImpl(out_raw);
+  }
 
   // ========== 状态变量 ==========
   /** @brief 原始值 [0, CPR-1] */

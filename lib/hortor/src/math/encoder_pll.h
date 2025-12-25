@@ -5,9 +5,9 @@
 
 #include <Arduino.h>
 
+#include "base/types.h"
 #include "hortor.h"
 #include "resolution.h"
-#include "base/types.h"
 
 namespace hortor::math {
 
