@@ -51,6 +51,11 @@ class Monitor {
       monitorPort_->println(servo_->GetGoalPosition());
     }
 
+    if (variables_ & MonitorBitmap::kPosition) {
+      monitorPort_->print(F(">position:"));
+      monitorPort_->println(servo_->GetPresentPosition());
+    }
+
     if (variables_ & MonitorBitmap::kPwm) {
       monitorPort_->print(F(">pwm:"));
       monitorPort_->println(servo_->GetPresentPwm(), kDecimals);
@@ -64,11 +69,6 @@ class Monitor {
     if (variables_ & MonitorBitmap::kVelocity) {
       monitorPort_->print(F(">velocity:"));
       monitorPort_->println(servo_->GetPresentVelocity(), kDecimals);
-    }
-
-    if (variables_ & MonitorBitmap::kPosition) {
-      monitorPort_->print(F(">position:"));
-      monitorPort_->println(servo_->GetPresentPosition());
     }
 
     return Error::kOk;

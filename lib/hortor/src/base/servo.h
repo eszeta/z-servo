@@ -54,7 +54,7 @@ class Servo {
     drive_mode_.value = drive_mode;
     motor_->set_reverse(drive_mode_.moto_reverse_mode ? Reverse::kReverse
                                                       : Reverse::kNormal);
-    encoder_->set_reverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
+    encoder_pll_.encoder()->set_reverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
                                                            : Reverse::kNormal);
   }
 
@@ -80,18 +80,18 @@ class Servo {
 #pragma region "位置配置组"
   /** @brief 归零偏移 */
   int32_t GetHomingOffset() const {
-    const auto kBits = encoder_->kResolution.kBits;
+    const auto kBits = encoder_pll_.encoder()->kResolution.kBits;
     const auto kTargetBits = kResolution.kBits;
-    const auto homing_offset = encoder_->homing_offset();
+    const auto homing_offset = encoder_pll_.encoder()->homing_offset();
     return math::mapResolution(homing_offset, kBits, kTargetBits);
   }
 
   void SetHomingOffset(const int32_t homing_offset) {
     const auto kBits = kResolution.kBits;
-    const auto kTargetBits = encoder_->kResolution.kBits;
+    const auto kTargetBits = encoder_pll_.encoder()->kResolution.kBits;
     const auto mapped_offset =
         math::mapResolution(homing_offset, kBits, kTargetBits);
-    encoder_->set_homing_offset(mapped_offset);
+    encoder_pll_.encoder()->set_homing_offset(mapped_offset);
   }
 
   /** @brief 运动阈值 */
@@ -283,14 +283,14 @@ class Servo {
   //==============================================================================
 #pragma region "状态反馈组"
   /** @brief 当前位置 */
-  uint32_t GetPresentPosition() const { return present_position_; }
-  void SetPresentPosition(const uint32_t present_position) {
+  int32_t GetPresentPosition() const { return present_position_; }
+  void SetPresentPosition(const int32_t present_position) {
     present_position_ = present_position;
   }
 
   /** @brief 当前速度 */
-  uint32_t GetPresentVelocity() const { return present_velocity_; }
-  void SetPresentVelocity(const uint32_t present_velocity) {
+  int32_t GetPresentVelocity() const { return present_velocity_; }
+  void SetPresentVelocity(const int32_t present_velocity) {
     present_velocity_ = present_velocity;
   }
 
@@ -345,8 +345,8 @@ class Servo {
 #pragma endregion  // "状态反馈组"
 
   /** @brief 编码器 */
-  EncoderType* GetEncoder() { return encoder_; }
-  void LinkEncoder(EncoderType* encoder) { encoder_ = encoder; }
+  EncoderType* GetEncoder() { return encoder_pll_.encoder(); }
+  void LinkEncoder(EncoderType* encoder) { encoder_pll_.LinkEncoder(encoder); }
 
   /** @brief 电流传感器 */
   CurrentType* GetCurrentSensor() { return current_sensor_; }
@@ -373,7 +373,7 @@ class Servo {
   /**
    * @brief 设置为居中位置
    */
-  void AlignToPosition(uint32_t target) { encoder_->AlignToPosition(target); }
+  void AlignToPosition(uint32_t target) { encoder_pll_.encoder()->AlignToPosition(target); }
 
  private:
   //==============================================================================
@@ -506,10 +506,10 @@ class Servo {
   float present_current_ = 0.0f;
 
   /** @brief 当前速度 */
-  uint32_t present_velocity_ = 0;
+  int32_t present_velocity_ = 0;
 
   /** @brief 当前位置 */
-  uint32_t present_position_ = 0;
+  int32_t present_position_ = 0;
 
   /** @brief 速度轨迹 */
   float velocity_trajectory_ = 0.0f;
@@ -532,11 +532,8 @@ class Servo {
   /** @brief 电机驱动器 */
   MotorType* motor_ = nullptr;
 
-  /** @brief 角度传感器 */
-  EncoderType* encoder_ = nullptr;
-
   /** @brief 编码器PLL */
-  math::EncoderPll<ResolutionBits> encoder_pll_{};
+  math::EncoderPll<EncoderType, ResolutionBits> encoder_pll_{};
 
   /** @brief 电流传感器 */
   CurrentType* current_sensor_ = nullptr;
@@ -552,20 +549,16 @@ class Servo {
    * @return 错误码
    */
   Error RefreshPresent(float dt) {
-    // 处理编码器
-    CHECK(encoder_->Process(dt));
     // 处理编码器PLL
-    const auto pos = encoder_->pos();
-    CHECK(encoder_pll_.Process(dt, pos, encoder_->kResolution.kBits));
+    CHECK(encoder_pll_.Process(dt));
 
     // 获取当前位置
-    const auto reverse = encoder_->reverse();
     const auto pos_pll = encoder_pll_.pos();
-    SetPresentPosition(pos_pll * static_cast<int8_t>(reverse));
+    SetPresentPosition(pos_pll);
 
     // 获取当前速度
     const auto velocity = encoder_pll_.rpm();
-    SetPresentVelocity(velocity * static_cast<int8_t>(reverse));
+    SetPresentVelocity(velocity);
 
     // 获取当前电流
     float current_float;

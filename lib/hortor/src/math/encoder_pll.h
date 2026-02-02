@@ -11,7 +11,7 @@
 
 namespace hortor::math {
 
-template <uint8_t Bits>
+template <typename EncoderType, uint8_t Bits>
 class EncoderPll {
  public:
   Error Init(uint16_t pos) {
@@ -19,6 +19,10 @@ class EncoderPll {
     velocity_ = 0.0f;
     return Error::kOk;
   }
+
+  void LinkEncoder(EncoderType* encoder) { encoder_ = encoder; }
+
+  auto encoder() const { return encoder_; }
 
   /**
    * @brief 获取估计位置
@@ -44,7 +48,10 @@ class EncoderPll {
    * @param encoder_bits 编码器分辨率
    * @return 错误码
    */
-  Error Process(float dt, int32_t pos_counts, uint8_t encoder_bits) {
+  Error Process(float dt) {
+    CHECK(encoder_->Process(dt));
+    const auto pos_counts = encoder_->pos();
+    const auto encoder_bits = encoder_->kResolution.kBits;
     const auto mapped =
         math::mapResolution(pos_counts, encoder_bits, kResolution.kBits);
     // PLL 预测步骤：使用当前速度估计预测下一个位置
@@ -83,6 +90,9 @@ class EncoderPll {
   float velocity_ = 0.0f;
   /** @brief 速度估计 [RPM] */
   float rpm_ = 0.0f;
+
+  /** @brief 角度传感器 */
+  EncoderType* encoder_ = nullptr;
 };
 
 }  // namespace hortor::math
