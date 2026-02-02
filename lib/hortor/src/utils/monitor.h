@@ -31,13 +31,13 @@ class Monitor {
    * @brief 使用监控
    * @param serial 串口
    */
-  void LinkPort(Print* serial) { monitorPort_ = serial; }
+  void set_port(Print* serial) { monitorPort_ = serial; }
 
   /**·
    * @brief 链接电机
    * @param servo 伺服电机
    */
-  void LinkMotor(ServoType* servo) { servo_ = servo; }
+  void set_servo(ServoType* servo) { servo_ = servo; }
 
   /**
    * @brief 处理监控
@@ -48,27 +48,27 @@ class Monitor {
 
     if (variables_ & MonitorBitmap::kTarget) {
       monitorPort_->print(F(">target:"));
-      monitorPort_->println(servo_->GetGoalPosition());
+      monitorPort_->println(servo_->goal_position());
     }
 
     if (variables_ & MonitorBitmap::kPosition) {
       monitorPort_->print(F(">position:"));
-      monitorPort_->println(servo_->GetPresentPosition());
+      monitorPort_->println(servo_->present_position());
     }
 
     if (variables_ & MonitorBitmap::kPwm) {
       monitorPort_->print(F(">pwm:"));
-      monitorPort_->println(servo_->GetPresentPwm(), kDecimals);
+      monitorPort_->println(servo_->present_pwm(), kDecimals);
     }
 
     if (variables_ & MonitorBitmap::kCurrent) {
       monitorPort_->print(F(">current:"));
-      monitorPort_->println(servo_->GetPresentCurrent(), kDecimals);
+      monitorPort_->println(servo_->present_current(), kDecimals);
     }
 
     if (variables_ & MonitorBitmap::kVelocity) {
       monitorPort_->print(F(">velocity:"));
-      monitorPort_->println(servo_->GetPresentVelocity(), kDecimals);
+      monitorPort_->println(servo_->present_velocity(), kDecimals);
     }
 
     return Error::kOk;

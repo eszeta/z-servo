@@ -494,10 +494,10 @@ class RegMap : public RegMapBase {
    * - 适用场景：开环控制、调试测试
    *
    * 【模式切换流程】
-   * 1. SetTorqueEnable(0) - 必须先关闭力矩
-   * 2. SetOperatingMode(new_mode) - 设置新模式
+   * 1. WriteTorqueEnable(0) - 必须先关闭力矩
+   * 2. WriteOperatingMode(new_mode) - 设置新模式
    * 3. 设置该模式的目标值（Goal Position/Velocity/Current/PWM）
-   * 4. SetTorqueEnable(1) - 重新使能力矩
+   * 4. WriteTorqueEnable(1) - 重新使能力矩
    *
    * 【相关寄存器】
    * - Goal Position: 模式 3,4,5 使用
@@ -1487,8 +1487,8 @@ class RegMap : public RegMapBase {
    * - 发生 Shutdown 错误时会自动变为 0
    *
    * 【操作流程】
-   * 1. 使能力矩：SetTorqueEnable(1) - 电机会立即执行控制指令
-   * 2. 禁用力矩：SetTorqueEnable(0) - 电机可以自由转动
+   * 1. 使能力矩：WriteTorqueEnable(1) - 电机会立即执行控制指令
+   * 2. 禁用力矩：WriteTorqueEnable(0) - 电机可以自由转动
    * 3. 模式切换：必须先禁用，再切换模式，最后重新使能
    *
    * 【相关寄存器】

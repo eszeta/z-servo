@@ -20,9 +20,9 @@ class EncoderPll {
     return Error::kOk;
   }
 
-  void LinkEncoder(EncoderType* encoder) { encoder_ = encoder; }
-
-  auto encoder() const { return encoder_; }
+  EncoderType* encoder() const { return encoder_; }
+  
+  void set_encoder(EncoderType* encoder) { encoder_ = encoder; }
 
   /**
    * @brief 获取估计位置
