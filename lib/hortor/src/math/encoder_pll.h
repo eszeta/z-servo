@@ -21,7 +21,7 @@ class EncoderPll {
   }
 
   EncoderType* encoder() const { return encoder_; }
-  
+
   void set_encoder(EncoderType* encoder) { encoder_ = encoder; }
 
   /**
@@ -50,10 +50,10 @@ class EncoderPll {
    */
   Error Process(float dt) {
     CHECK(encoder_->Process(dt));
-    const auto pos_counts = encoder_->pos();
+    const auto pos = encoder_->pos();
     const auto encoder_bits = encoder_->kResolution.kBits;
     const auto mapped =
-        math::mapResolution(pos_counts, encoder_bits, kResolution.kBits);
+        math::mapResolution(pos, encoder_bits, kResolution.kBits);
     // PLL 预测步骤：使用当前速度估计预测下一个位置
     pos_ += dt * velocity_;
 

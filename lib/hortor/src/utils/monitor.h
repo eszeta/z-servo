@@ -46,30 +46,35 @@ class Monitor {
   Error Process(float dt) {
     if (!monitorPort_) return Error::kOk;
 
-    if (variables_ & MonitorBitmap::kTarget) {
-      monitorPort_->print(F(">target:"));
-      monitorPort_->println(servo_->goal_position());
-    }
+    // if (variables_ & MonitorBitmap::kTarget) {
+    //   monitorPort_->print(F(">target:"));
+    //   monitorPort_->println(servo_->goal_position());
+    // }
 
     if (variables_ & MonitorBitmap::kPosition) {
       monitorPort_->print(F(">position:"));
       monitorPort_->println(servo_->present_position());
     }
 
-    if (variables_ & MonitorBitmap::kPwm) {
-      monitorPort_->print(F(">pwm:"));
-      monitorPort_->println(servo_->present_pwm(), kDecimals);
+    if (variables_ & MonitorBitmap::kPosition) {
+      monitorPort_->print(F(">raw_position:"));
+      monitorPort_->println(servo_->encoder()->raw_pos());
     }
 
-    if (variables_ & MonitorBitmap::kCurrent) {
-      monitorPort_->print(F(">current:"));
-      monitorPort_->println(servo_->present_current(), kDecimals);
-    }
+    // if (variables_ & MonitorBitmap::kPwm) {
+    //   monitorPort_->print(F(">pwm:"));
+    //   monitorPort_->println(servo_->present_pwm(), kDecimals);
+    // }
 
-    if (variables_ & MonitorBitmap::kVelocity) {
-      monitorPort_->print(F(">velocity:"));
-      monitorPort_->println(servo_->present_velocity(), kDecimals);
-    }
+    // if (variables_ & MonitorBitmap::kCurrent) {
+    //   monitorPort_->print(F(">current:"));
+    //   monitorPort_->println(servo_->present_current(), kDecimals);
+    // }
+
+    // if (variables_ & MonitorBitmap::kVelocity) {
+    //   monitorPort_->print(F(">velocity:"));
+    //   monitorPort_->println(servo_->present_velocity(), kDecimals);
+    // }
 
     return Error::kOk;
   }

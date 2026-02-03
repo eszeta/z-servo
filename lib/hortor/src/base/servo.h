@@ -15,6 +15,7 @@
 #include "motor.h"
 #include "types.h"
 #include "utils/timeout_limiter.h"
+#include "utils/debug_print.h"
 
 namespace hortor::servo {
 
