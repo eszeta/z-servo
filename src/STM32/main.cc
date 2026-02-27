@@ -79,7 +79,8 @@ void setup() {
 
   serial_debug.begin(115200);
   DebugEnable(&serial_debug);
-
+  hortor::utils::DebugPrintln(F("setup"));
+  
   wire_sensor.begin();
   wire_slave.begin();
 
@@ -103,20 +104,20 @@ void setup() {
                        .adc_vref_volts = 3.3f,
                        .calibration_samples = 50});
 
-  servo.LinkMotor(&motor_driver);
-  servo.LinkEncoder(&encoder);
-  servo.LinkCurrentSensor(&current_sensor);
+  servo.set_motor(&motor_driver);
+  servo.set_encoder(&encoder);
+  servo.set_current_sensor(&current_sensor);
   servo.Init();
 
   regmap.Init();
   port_handler.Init(&wire_slave);
-  slave.LinkRegMap(&regmap);
-  slave.LinkPortHandler(&port_handler);
-  slave.LinkServo(&servo);
+  slave.set_regmap(&regmap);
+  slave.set_port_handler(&port_handler);
+  slave.set_servo(&servo);
   slave.Init();
 
-  monitor.LinkPort(&serial_debug);
-  monitor.LinkMotor(&servo);
+  monitor.set_port(&serial_debug);
+  monitor.set_servo(&servo);
 
   info_led.Init(kInfoLedPin, InfoLEDMode::kOpenDrain);
   info_led.SetInfo(InfoLEDInfoType::kOk);

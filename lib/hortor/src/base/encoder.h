@@ -31,7 +31,7 @@ class Encoder {
    * @brief 获取原始计数值
    * @return 当前原始计数值
    */
-  uint32_t rew_pos() const { return rew_pos_; }
+  uint32_t raw_pos() const { return raw_pos_; }
 
   /**
    * @brief 获取总累积计数值
@@ -50,7 +50,10 @@ class Encoder {
    * @return 反转
    */
   Reverse reverse() const { return reverse_; }
-  void set_reverse(const Reverse reverse) { reverse_ = reverse; }
+  void set_reverse(const Reverse reverse) {
+    reverse_ = reverse;
+    recalibrate();
+  }
 
   /** @brief 归零偏移 */
   int32_t homing_offset() const { return homing_offset_; }
@@ -68,31 +71,14 @@ class Encoder {
    */
   Error Init(const Config& config) {
     // 读取初始原始值，等待传感器稳定后再次读取
-    CHECK(ReadRaw(rew_pos_));
+    CHECK(ReadRaw(raw_pos_));
     delay(10);
-    CHECK(ReadRaw(rew_pos_));
 
     // 初始化状态变量
     homing_offset_ = config.homing_offset;
     reverse_ = config.reverse;
 
-    const auto reverse_val = static_cast<int32_t>(reverse_);
-    const auto local_pos = static_cast<int32_t>(rew_pos_) * reverse_val;
-    const auto normal_pos = math::mod(local_pos, kResolution.kEncoderCpr);
-    const auto pos_with_offset =
-        math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
-
-    // 启动贴边小窗口，将接近 360° 的读数视为 -0.x°
-    constexpr float kEdgeWindowDeg = 1.0f;  // 可按需改为 0.5f 等
-    const float edge_counts_f =
-        (static_cast<float>(kResolution.kEncoderCpr) / 360.0f) * kEdgeWindowDeg;
-    const int32_t edge_threshold = max(ceil(edge_counts_f), 1.0f);
-    if (pos_with_offset > kResolution.kEncoderCpr - edge_threshold) {
-      pos_ = pos_with_offset - kResolution.kEncoderCpr;
-    } else {
-      pos_ = pos_with_offset;
-    }
-    return Error::kOk;
+    return recalibrate();
   }
 
   /**
@@ -108,15 +94,14 @@ class Encoder {
 
     // 计算位置增量（新位置 - 旧位置）
     const int32_t delta =
-        static_cast<int32_t>(raw_new) - static_cast<int32_t>(rew_pos_);
+        static_cast<int32_t>(raw_new) - static_cast<int32_t>(raw_pos_);
 
     const auto delta_enc = math::wrap_pm(delta, kResolution.kEncoderCpr);
 
     // 更新线性累加位置
     pos_ += delta_enc * static_cast<int32_t>(reverse_);
-
     // 更新原始值记录
-    rew_pos_ = raw_new;
+    raw_pos_ = raw_new;
     return Error::kOk;
   }
 
@@ -144,9 +129,30 @@ class Encoder {
     return static_cast<Derived*>(this)->ReadRawImpl(out_raw);
   }
 
+  Error recalibrate() {
+    CHECK(ReadRaw(raw_pos_));
+    const auto reverse_val = static_cast<int32_t>(reverse_);
+    const auto local_pos = static_cast<int32_t>(raw_pos_) * reverse_val;
+    const auto normal_pos = math::mod(local_pos, kResolution.kEncoderCpr);
+    const auto pos_with_offset =
+        math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
+
+    // 启动贴边小窗口，将接近 360° 的读数视为 -0.x°
+    constexpr float kEdgeWindowDeg = 1.0f;  // 可按需改为 0.5f 等
+    const float edge_counts_f =
+        (static_cast<float>(kResolution.kEncoderCpr) / 360.0f) * kEdgeWindowDeg;
+    const int32_t edge_threshold = max(ceil(edge_counts_f), 1.0f);
+    if (pos_with_offset > kResolution.kEncoderCpr - edge_threshold) {
+      pos_ = pos_with_offset - kResolution.kEncoderCpr;
+    } else {
+      pos_ = pos_with_offset;
+    }
+    return Error::kOk;
+  }
+
   // ========== 状态变量 ==========
   /** @brief 原始值 [0, CPR-1] */
-  uint32_t rew_pos_ = 0;
+  uint32_t raw_pos_ = 0;
   /** @brief 线性累加位置 [-∞, +∞] */
   int32_t pos_ = 0;
   /** @brief 反转 */

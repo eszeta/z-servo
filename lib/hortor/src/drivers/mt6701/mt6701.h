@@ -85,7 +85,7 @@ class MT6701Base : public MT6701BaseBase<BusImpl> {
 
 using I2CBase = MT6701Base<RegMapI2CBus>;
 template <>
-class MT6701<BusType::kI2C> final : public I2CBase {
+class MT6701<BusType::kI2C> : public I2CBase {
  public:
   struct Config : public I2CBase::Config {
     TwoWire* wire;
@@ -115,7 +115,7 @@ class MT6701<BusType::kI2C> final : public I2CBase {
  */
 using SPIBase = MT6701Base<RegMapSpiBus>;
 template <>
-class MT6701<BusType::kSPI> final : public SPIBase {
+class MT6701<BusType::kSPI> : public SPIBase {
  public:
   struct Config : public SPIBase::Config {
     SPIClass* spi;

@@ -21,7 +21,7 @@ constexpr uint8_t kResolutionBits = 14;
  */
 class MA330;
 using MA330Base = servo::Encoder<MA330, kResolutionBits>;
-class MA330 final : public MA330Base {
+class MA330 : public MA330Base {
  public:
   struct Config : public MA330Base::Config {
     SPIClass* spi;

@@ -15,6 +15,7 @@
 #include "motor.h"
 #include "types.h"
 #include "utils/timeout_limiter.h"
+#include "utils/debug_print.h"
 
 namespace hortor::servo {
 
@@ -46,31 +47,32 @@ class Servo {
   //==============================================================================
 #pragma region "运行模式组"
   /** @brief 驱动模式 */
-  DriveModeBits GetDriveMode() const { return drive_mode_; }
-  void SetDriveMode(const DriveModeBits drive_mode) {
+  DriveModeBits drive_mode() const { return drive_mode_; }
+  void set_drive_mode(const DriveModeBits drive_mode) {
     drive_mode_ = drive_mode;
   }
-  void SetDriveMode(const uint8_t drive_mode) {
+  void set_drive_mode(const uint8_t drive_mode) {
     drive_mode_.value = drive_mode;
     motor_->set_reverse(drive_mode_.moto_reverse_mode ? Reverse::kReverse
                                                       : Reverse::kNormal);
-    encoder_->set_reverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
-                                                           : Reverse::kNormal);
+    encoder_pll_.encoder()->set_reverse(drive_mode_.encoder_reverse_mode
+                                            ? Reverse::kReverse
+                                            : Reverse::kNormal);
   }
 
   /** @brief 舵机模式 */
-  OperatingMode GetOperatingMode() const { return operating_mode_; }
-  void SetOperatingMode(const OperatingMode operating_mode) {
+  OperatingMode operating_mode() const { return operating_mode_; }
+  void set_operating_mode(const OperatingMode operating_mode) {
     operating_mode_ = operating_mode;
   }
-  void SetOperatingMode(const uint8_t operating_mode) {
+  void set_operating_mode(const uint8_t operating_mode) {
     operating_mode_ = static_cast<OperatingMode>(operating_mode);
   }
 
   /** @brief 关断条件 */
-  ShutdownBits GetShutdown() const { return shutdown_; }
-  void SetShutdown(const ShutdownBits shutdown) { shutdown_ = shutdown; }
-  void SetShutdown(const uint8_t shutdown) { shutdown_.value = shutdown; }
+  ShutdownBits shutdown() const { return shutdown_; }
+  void set_shutdown(const ShutdownBits shutdown) { shutdown_ = shutdown; }
+  void set_shutdown(const uint8_t shutdown) { shutdown_.value = shutdown; }
 
 #pragma endregion  // "运行模式组"
 
@@ -79,24 +81,24 @@ class Servo {
   //==============================================================================
 #pragma region "位置配置组"
   /** @brief 归零偏移 */
-  int32_t GetHomingOffset() const {
-    const auto kBits = encoder_->kResolution.kBits;
+  int32_t homing_offset() const {
+    const auto kBits = encoder_pll_.encoder()->kResolution.kBits;
     const auto kTargetBits = kResolution.kBits;
-    const auto homing_offset = encoder_->homing_offset();
+    const auto homing_offset = encoder_pll_.encoder()->homing_offset();
     return math::mapResolution(homing_offset, kBits, kTargetBits);
   }
 
-  void SetHomingOffset(const int32_t homing_offset) {
+  void set_homing_offset(const int32_t homing_offset) {
     const auto kBits = kResolution.kBits;
-    const auto kTargetBits = encoder_->kResolution.kBits;
+    const auto kTargetBits = encoder_pll_.encoder()->kResolution.kBits;
     const auto mapped_offset =
         math::mapResolution(homing_offset, kBits, kTargetBits);
-    encoder_->set_homing_offset(mapped_offset);
+    encoder_pll_.encoder()->set_homing_offset(mapped_offset);
   }
 
   /** @brief 运动阈值 */
-  float GetMovingThreshold() const { return moving_threshold_; }
-  void SetMovingThreshold(const float moving_threshold) {
+  float moving_threshold() const { return moving_threshold_; }
+  void set_moving_threshold(const float moving_threshold) {
     moving_threshold_ = moving_threshold;
   }
 
@@ -107,58 +109,58 @@ class Servo {
   //==============================================================================
 #pragma region "保护限制组"
   /** @brief 温度上限 */
-  uint8_t GetTemperatureLimit() const { return temperature_limit_; }
-  void SetTemperatureLimit(const uint8_t temperature_limit) {
+  uint8_t temperature_limit() const { return temperature_limit_; }
+  void set_temperature_limit(const uint8_t temperature_limit) {
     temperature_limit_ = temperature_limit;
   }
 
   /** @brief 最高电压限制 */
-  float GetMaxVoltageLimit() const { return max_voltage_limit_; }
-  void SetMaxVoltageLimit(const float max_voltage_limit) {
+  float max_voltage_limit() const { return max_voltage_limit_; }
+  void set_max_voltage_limit(const float max_voltage_limit) {
     max_voltage_limit_ = max_voltage_limit;
   }
 
   /** @brief 最低电压限制 */
-  float GetMinVoltageLimit() const { return min_voltage_limit_; }
-  void SetMinVoltageLimit(const float min_voltage_limit) {
+  float min_voltage_limit() const { return min_voltage_limit_; }
+  void set_min_voltage_limit(const float min_voltage_limit) {
     min_voltage_limit_ = min_voltage_limit;
   }
 
   /** @brief PWM上限 */
-  float GetPwmLimit() const { return pwm_limit_; }
-  void SetPwmLimit(const float pwm_limit) {
+  float pwm_limit() const { return pwm_limit_; }
+  void set_pwm_limit(const float pwm_limit) {
     pwm_limit_ = pwm_limit;
     position_pid_.set_limit(pwm_limit);
   }
 
   /** @brief 电流上限 */
-  float GetCurrentLimit() const { return current_limit_; }
-  void SetCurrentLimit(const float current_limit) {
+  float current_limit() const { return current_limit_; }
+  void set_current_limit(const float current_limit) {
     current_limit_ = current_limit;
     current_timeout_limiter_.set_threshold(current_limit);
   }
 
   /** @brief 速度上限 */
-  float GetVelocityLimit() const { return velocity_limit_; }
-  void SetVelocityLimit(const float velocity_limit) {
+  float velocity_limit() const { return velocity_limit_; }
+  void set_velocity_limit(const float velocity_limit) {
     velocity_limit_ = velocity_limit;
   }
 
   /** @brief 位置下限 */
-  uint32_t GetMinPositionLimit() const { return min_position_limit_; }
-  void SetMinPositionLimit(const uint32_t min_position_limit) {
+  uint32_t min_position_limit() const { return min_position_limit_; }
+  void set_min_position_limit(const uint32_t min_position_limit) {
     min_position_limit_ = min_position_limit;
   }
 
   /** @brief 位置上限 */
-  uint32_t GetMaxPositionLimit() const { return max_position_limit_; }
-  void SetMaxPositionLimit(const uint32_t max_position_limit) {
+  uint32_t max_position_limit() const { return max_position_limit_; }
+  void set_max_position_limit(const uint32_t max_position_limit) {
     max_position_limit_ = max_position_limit;
   }
 
   /** @brief 保护时间 */
-  float GetProtectionTime() const { return protection_time_; }
-  void SetProtectionTime(const float protection_time) {
+  float protection_time() const { return protection_time_; }
+  void set_protection_time(const float protection_time) {
     protection_time_ = protection_time;
     current_timeout_limiter_.set_timeout_duration(protection_time);
   }
@@ -170,36 +172,36 @@ class Servo {
   //==============================================================================
 #pragma region "PID 参数组"
   /** @brief 位置环 PID 控制器 */
-  math::Pid& GetPositionPid() { return position_pid_; }
-  void SetPositionPid(const float kp, const float ki, const float kd) {
+  math::Pid& position_pid() { return position_pid_; }
+  void set_position_pid(const float kp, const float ki, const float kd) {
     position_pid_.set_kp(kp);
     position_pid_.set_ki(ki);
     position_pid_.set_kd(kd);
   }
 
   /** @brief 速度环 PID 控制器 */
-  math::Pid& GetVelocityPid() { return velocity_pid_; }
-  void SetVelocityPid(const float kp, const float ki, const float kd) {
+  math::Pid& velocity_pid() { return velocity_pid_; }
+  void set_velocity_pid(const float kp, const float ki, const float kd) {
     velocity_pid_.set_kp(kp);
     velocity_pid_.set_ki(ki);
     velocity_pid_.set_kd(kd);
   }
 
   /** @brief 电流低通滤波器 */
-  math::LowPassFilter& GetCurrentLpf() { return current_lpf_; }
-  void SetCurrentLpf(const float time_constant) {
+  math::LowPassFilter& current_lpf() { return current_lpf_; }
+  void set_current_lpf(const float time_constant) {
     current_lpf_.set_time_constant(time_constant);
   }
 
   /** @brief 一阶前馈增益（速度前馈，已转换为浮点数） */
-  float GetFeedforward1stGain() const { return feedforward_1st_gain_; }
-  void SetFeedforward1stGain(const float feedforward_1st_gain) {
+  float feedforward_1st_gain() const { return feedforward_1st_gain_; }
+  void set_feedforward_1st_gain(const float feedforward_1st_gain) {
     feedforward_1st_gain_ = feedforward_1st_gain;
   }
 
   /** @brief 二阶前馈增益（加速度前馈，已转换为浮点数） */
-  float GetFeedforward2ndGain() const { return feedforward_2nd_gain_; }
-  void SetFeedforward2ndGain(const float feedforward_2nd_gain) {
+  float feedforward_2nd_gain() const { return feedforward_2nd_gain_; }
+  void set_feedforward_2nd_gain(const float feedforward_2nd_gain) {
     feedforward_2nd_gain_ = feedforward_2nd_gain;
   }
 
@@ -210,14 +212,14 @@ class Servo {
   //==============================================================================
 #pragma region "轨迹配置组"
   /** @brief 轨迹速度（RPM，Velocity-based 模式） */
-  float GetProfileVelocity() const { return profile_velocity_; }
-  void SetProfileVelocity(const float profile_velocity) {
+  float profile_velocity() const { return profile_velocity_; }
+  void set_profile_velocity(const float profile_velocity) {
     profile_velocity_ = profile_velocity;
   }
 
   /** @brief 轨迹加速度（rev/min²，Velocity-based 模式） */
-  float GetProfileAcceleration() const { return profile_acceleration_; }
-  void SetProfileAcceleration(const float profile_acceleration) {
+  float profile_acceleration() const { return profile_acceleration_; }
+  void set_profile_acceleration(const float profile_acceleration) {
     profile_acceleration_ = profile_acceleration;
   }
 
@@ -228,23 +230,23 @@ class Servo {
   //==============================================================================
 #pragma region "控制命令组"
   /** @brief 扭矩使能状态 */
-  bool GetTorqueEnable() const { return torque_enable_; }
-  void SetTorqueEnable(const bool torque_enable) {
+  bool torque_enable() const { return torque_enable_; }
+  void set_torque_enable(const bool torque_enable) {
     torque_enable_ = torque_enable;
   }
 
   /** @brief 硬件错误状态 */
-  HardwareErrorStatusBits GetHardwareErrorStatus() const {
+  HardwareErrorStatusBits hardware_error_status() const {
     return hardware_error_status_;
   }
-  uint8_t GetHardwareErrorStatusValue() const {
+  uint8_t hardware_error_status_value() const {
     return hardware_error_status_.value;
   }
-  void SetHardwareErrorStatus(
+  void set_hardware_error_status(
       const HardwareErrorStatusBits hardware_error_status) {
     hardware_error_status_ = hardware_error_status;
   }
-  void SetHardwareErrorStatus(const uint8_t hardware_error_status) {
+  void set_hardware_error_status(const uint8_t hardware_error_status) {
     hardware_error_status_.value = hardware_error_status;
   }
 
@@ -255,24 +257,24 @@ class Servo {
   //==============================================================================
 #pragma region "目标值组"
   /** @brief 目标PWM */
-  float GetGoalPwm() const { return goal_pwm_; }
-  void SetGoalPwm(const float goal_pwm) { goal_pwm_ = goal_pwm; }
+  float goal_pwm() const { return goal_pwm_; }
+  void set_goal_pwm(const float goal_pwm) { goal_pwm_ = goal_pwm; }
 
   /** @brief 目标电流 */
-  float GetGoalCurrent() const { return goal_current_; }
-  void SetGoalCurrent(const float goal_current) {
+  float goal_current() const { return goal_current_; }
+  void set_goal_current(const float goal_current) {
     goal_current_ = goal_current;
   }
 
   /** @brief 目标速度 */
-  float GetGoalVelocity() const { return goal_velocity_; }
-  void SetGoalVelocity(const float goal_velocity) {
+  float goal_velocity() const { return goal_velocity_; }
+  void set_goal_velocity(const float goal_velocity) {
     goal_velocity_ = goal_velocity;
   }
 
   /** @brief 目标位置 */
-  int32_t GetGoalPosition() const { return goal_position_; }
-  void SetGoalPosition(const int32_t goal_position) {
+  int32_t goal_position() const { return goal_position_; }
+  void set_goal_position(const int32_t goal_position) {
     goal_position_ = goal_position;
   }
 
@@ -283,80 +285,80 @@ class Servo {
   //==============================================================================
 #pragma region "状态反馈组"
   /** @brief 当前位置 */
-  uint32_t GetPresentPosition() const { return present_position_; }
-  void SetPresentPosition(const uint32_t present_position) {
+  int32_t present_position() const { return present_position_; }
+  void set_present_position(const int32_t present_position) {
     present_position_ = present_position;
   }
 
   /** @brief 当前速度 */
-  uint32_t GetPresentVelocity() const { return present_velocity_; }
-  void SetPresentVelocity(const uint32_t present_velocity) {
+  int32_t present_velocity() const { return present_velocity_; }
+  void set_present_velocity(const int32_t present_velocity) {
     present_velocity_ = present_velocity;
   }
 
   /** @brief 当前电流 */
-  float GetPresentCurrent() const { return present_current_; }
-  void SetPresentCurrent(const float present_current) {
+  float present_current() const { return present_current_; }
+  void set_present_current(const float present_current) {
     present_current_ = present_current;
   }
 
   /** @brief 当前输入电压 */
-  float GetPresentInputVoltage() const { return present_input_voltage_; }
-  void SetPresentInputVoltage(const float present_input_voltage) {
+  float present_input_voltage() const { return present_input_voltage_; }
+  void set_present_input_voltage(const float present_input_voltage) {
     present_input_voltage_ = present_input_voltage;
   }
 
   /** @brief 当前温度 */
-  float GetPresentTemperature() const { return present_temperature_; }
-  void SetPresentTemperature(const float present_temperature) {
+  float present_temperature() const { return present_temperature_; }
+  void set_present_temperature(const float present_temperature) {
     present_temperature_ = present_temperature;
   }
 
   /** @brief 当前PWM */
-  float GetPresentPwm() const { return present_pwm_; }
-  void SetPresentPwm(const float present_pwm) { present_pwm_ = present_pwm; }
+  float present_pwm() const { return present_pwm_; }
+  void set_present_pwm(const float present_pwm) { present_pwm_ = present_pwm; }
 
   /** @brief 位置轨迹（Profile 生成的期望位置） */
-  int32_t GetPositionTrajectory() const { return position_trajectory_; }
-  void SetPositionTrajectory(const int32_t position_trajectory) {
+  int32_t position_trajectory() const { return position_trajectory_; }
+  void set_position_trajectory(const int32_t position_trajectory) {
     position_trajectory_ = position_trajectory;
   }
 
   /** @brief 速度轨迹（Position PID 输出或 Profile 生成的期望速度） */
-  float GetVelocityTrajectory() const { return velocity_trajectory_; }
-  void SetVelocityTrajectory(const float velocity_trajectory) {
+  float velocity_trajectory() const { return velocity_trajectory_; }
+  void set_velocity_trajectory(const float velocity_trajectory) {
     velocity_trajectory_ = velocity_trajectory;
   }
 
   /** @brief 运动状态 */
-  bool GetMoving() const { return moving_; }
-  void SetMoving(const bool moving) { moving_ = moving; }
+  bool moving() const { return moving_; }
+  void set_moving(const bool moving) { moving_ = moving; }
 
   /** @brief 运动详细状态 */
-  MovingStatusBits GetMovingStatus() const { return moving_status_; }
-  uint8_t GetMovingStatusValue() const { return moving_status_.value; }
-  void SetMovingStatus(const MovingStatusBits control_mode) {
+  MovingStatusBits moving_status() const { return moving_status_; }
+  uint8_t moving_status_value() const { return moving_status_.value; }
+  void set_moving_status(const MovingStatusBits control_mode) {
     moving_status_ = control_mode;
   }
-  void SetMovingStatus(const uint8_t moving_status) {
+  void set_moving_status(const uint8_t moving_status) {
     moving_status_.value = moving_status;
   }
 
 #pragma endregion  // "状态反馈组"
 
   /** @brief 编码器 */
-  EncoderType* GetEncoder() { return encoder_; }
-  void LinkEncoder(EncoderType* encoder) { encoder_ = encoder; }
+  EncoderType* encoder() { return encoder_pll_.encoder(); }
+  void set_encoder(EncoderType* encoder) { encoder_pll_.set_encoder(encoder); }
 
   /** @brief 电流传感器 */
-  CurrentType* GetCurrentSensor() { return current_sensor_; }
-  void LinkCurrentSensor(CurrentType* current_sensor) {
+  CurrentType* current_sensor() { return current_sensor_; }
+  void set_current_sensor(CurrentType* current_sensor) {
     current_sensor_ = current_sensor;
   }
 
   /** @brief 电机驱动器 */
-  MotorType* GetMotor() { return motor_; }
-  void LinkMotor(MotorType* motor) { motor_ = motor; }
+  MotorType* motor() { return motor_; }
+  void set_motor(MotorType* motor) { motor_ = motor; }
 
   /**
    * @brief 处理舵机逻辑
@@ -373,7 +375,9 @@ class Servo {
   /**
    * @brief 设置为居中位置
    */
-  void AlignToPosition(uint32_t target) { encoder_->AlignToPosition(target); }
+  void AlignToPosition(uint32_t target) {
+    encoder_pll_.encoder()->AlignToPosition(target);
+  }
 
  private:
   //==============================================================================
@@ -506,10 +510,10 @@ class Servo {
   float present_current_ = 0.0f;
 
   /** @brief 当前速度 */
-  uint32_t present_velocity_ = 0;
+  int32_t present_velocity_ = 0;
 
   /** @brief 当前位置 */
-  uint32_t present_position_ = 0;
+  int32_t present_position_ = 0;
 
   /** @brief 速度轨迹 */
   float velocity_trajectory_ = 0.0f;
@@ -532,11 +536,8 @@ class Servo {
   /** @brief 电机驱动器 */
   MotorType* motor_ = nullptr;
 
-  /** @brief 角度传感器 */
-  EncoderType* encoder_ = nullptr;
-
   /** @brief 编码器PLL */
-  math::EncoderPll<ResolutionBits> encoder_pll_{};
+  math::EncoderPll<EncoderType, ResolutionBits> encoder_pll_{};
 
   /** @brief 电流传感器 */
   CurrentType* current_sensor_ = nullptr;
@@ -552,34 +553,30 @@ class Servo {
    * @return 错误码
    */
   Error RefreshPresent(float dt) {
-    // 处理编码器
-    CHECK(encoder_->Process(dt));
     // 处理编码器PLL
-    const auto pos = encoder_->pos();
-    CHECK(encoder_pll_.Process(dt, pos, encoder_->kResolution.kBits));
+    CHECK(encoder_pll_.Process(dt));
 
     // 获取当前位置
-    const auto reverse = encoder_->reverse();
     const auto pos_pll = encoder_pll_.pos();
-    SetPresentPosition(pos_pll * static_cast<int8_t>(reverse));
+    set_present_position(pos_pll);
 
     // 获取当前速度
     const auto velocity = encoder_pll_.rpm();
-    SetPresentVelocity(velocity * static_cast<int8_t>(reverse));
+    set_present_velocity(velocity);
 
     // 获取当前电流
     float current_float;
     CHECK(current_sensor_->ReadCurrent(current_float));
-    SetPresentCurrent(GetCurrentLpf().Compute(current_float, dt));
+    set_present_current(current_lpf().Compute(current_float, dt));
     return Error::kOk;
   }
 
   Error CheckPresent(float dt) {
-    const auto present_current = GetPresentCurrent();
+    const auto current = present_current();
     hardware_error_status_.overload_error =
-        current_timeout_limiter_.Process(present_current, dt);
+        current_timeout_limiter_.Process(current, dt);
     if (hardware_error_status_.overload_error) {
-      SetTorqueEnable(false);
+      set_torque_enable(false);
     }
     return Error::kOk;
   }
@@ -590,10 +587,10 @@ class Servo {
    * @return 错误码
    */
   Error ExecuteOperatingMode(float dt) {
-    if (!GetTorqueEnable()) {
+    if (!torque_enable()) {
       return Error::kOk;
     }
-    switch (GetOperatingMode()) {
+    switch (operating_mode()) {
       case OperatingMode::kCurrent: {
         /* code */
         break;
@@ -643,11 +640,11 @@ class Servo {
     const auto limited_goal_position = GetLimitedGoalPosition();
     const auto velocityTrajectory = 0;
     const auto positionTrajectory = limited_goal_position;
-    SetPositionTrajectory(positionTrajectory);
-    SetVelocityTrajectory(velocityTrajectory);
+    set_position_trajectory(positionTrajectory);
+    set_velocity_trajectory(velocityTrajectory);
     const auto error = positionTrajectory - present_position_;
-    const auto velocity_ff = velocityTrajectory * GetFeedforward1stGain();
-    const auto acceleration_ff = 0.0f * GetFeedforward2ndGain();
+    const auto velocity_ff = velocityTrajectory * feedforward_1st_gain();
+    const auto acceleration_ff = 0.0f * feedforward_2nd_gain();
     const auto feedforward = velocity_ff + acceleration_ff;
     const auto pwm = position_pid_.Compute(error, dt, feedforward);
     SetMotorPower(pwm);
@@ -666,7 +663,7 @@ class Servo {
    * @param pwm PWM值
    */
   void SetMotorPower(const float pwm) {
-    SetPresentPwm(pwm);
+    set_present_pwm(pwm);
     motor_->SetPWM(pwm);
   }
 

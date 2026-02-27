@@ -64,14 +64,13 @@ class Slave {
    * @return 寄存器映射
    */
   RegMapType* regmap() { return regmap_; }
-  void LinkRegMap(RegMapType* regmap) { regmap_ = regmap; }
-
+  void set_regmap(RegMapType* regmap) { regmap_ = regmap; }
   /**
    * @brief 获取端口处理器
    * @return 端口处理器
    */
   PortHandlerType* port_handler() { return port_handler_; }
-  void LinkPortHandler(PortHandlerType* port_handler) {
+  void set_port_handler(PortHandlerType* port_handler) {
     port_handler_ = port_handler;
   }
 
