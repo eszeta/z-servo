@@ -43,6 +43,12 @@ struct ControlTableItem {
   const regmap::RegField<T> reg;
   const T default_value;
 
+  /** @brief 复制构造函数 */
+  ControlTableItem(const ControlTableItem& other) = delete;
+
+  /** @brief 赋值操作符 */
+  ControlTableItem& operator=(const ControlTableItem& other) = delete;
+
   constexpr ControlTableItem(const uint8_t address,
                              const uint8_t shift,
                              const uint8_t bits,

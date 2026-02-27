@@ -26,7 +26,7 @@ class Monitor {
   /**
    * @brief 监控输出小数位数
    */
-  constexpr static uint8_t kDecimals = 4;  // 监控输出数据的小数位数
+  static constexpr uint8_t kDecimals = 4;  // 监控输出数据的小数位数
   /**
    * @brief 使用监控
    * @param serial 串口

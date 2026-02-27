@@ -78,7 +78,7 @@ class RegMap {
   Error WriteRegField(const RegField<T>& reg, T value) {
     UType<T> data;
     CHECK(Read(reg.address, data));
-    SetValue(reg, value, data);
+    reg.SetValue(value, data);
     CHECK(Write(reg.address, data));
     return Error::kOk;
   }
@@ -124,7 +124,7 @@ class RegMap {
   Error ReadRegField(const RegField<T>& reg, T& value) {
     T data;
     CHECK(Read(reg.address, data));
-    value = GetValue(reg, data);
+    value = reg.GetValue(data);
     return Error::kOk;
   }
 

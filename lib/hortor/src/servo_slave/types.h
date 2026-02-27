@@ -19,25 +19,32 @@ constexpr uint32_t kBaudrateTable[] = {
  * 仿照XL330的控制表
  */
 namespace ControlTable {
+
 // constexpr 工厂函数，用于创建 ControlTableItem
 constexpr auto CTIU08(uint8_t addr, uint8_t val = 0) {
   return protocol::ControlTableItem<uint8_t>(addr, 0, 8, val);
 }
+
 constexpr auto CTIU16(uint16_t addr, uint16_t val = 0) {
   return protocol::ControlTableItem<uint16_t>(addr, 0, 16, val);
 }
+
 constexpr auto CTIU32(uint32_t addr, uint32_t val = 0) {
   return protocol::ControlTableItem<uint32_t>(addr, 0, 32, val);
 }
+
 constexpr auto CTI08(uint8_t addr, int8_t val = 0) {
   return protocol::ControlTableItem<int8_t>(addr, 0, 8, val);
 }
+
 constexpr auto CTI16(uint16_t addr, int16_t val = 0) {
   return protocol::ControlTableItem<int16_t>(addr, 0, 16, val);
 }
+
 constexpr auto CTI32(uint32_t addr, int32_t val = 0) {
   return protocol::ControlTableItem<int32_t>(addr, 0, 32, val);
 }
+
 /*-------------------- EEPROM 区（掉电保存） --------------------*/
 /* 设备信息组 (0x00-0x0F, 16字节) */
 /** @brief 型号编号 | 单位: - | 访问: R */
@@ -172,22 +179,22 @@ constexpr auto kPresentInputVoltage = CTIU16(0xB8, 0);
 constexpr auto kPresentTemperature = CTIU08(0xBA, 0);
 /* 0xBB-0xBF: 保留，用于状态反馈组扩展 */
 
-constexpr static size_t kTotalSize =
+constexpr size_t kTotalSize =
     kPresentTemperature.reg.address + kPresentTemperature.reg.kSize;
 };  // namespace ControlTable
 
 namespace TableBlocks {
-constexpr static ControlTableBlock kEeprom = {
+constexpr ControlTableBlock kEeprom = {
     ControlTable::kModelNumber.reg.address,
     ControlTable::kProfileVelocity.reg.address +
         ControlTable::kProfileVelocity.reg.kSize};
 
-constexpr static ControlTableBlock kRam = {
+constexpr ControlTableBlock kRam = {
     ControlTable::kTorqueEnable.reg.address,
     ControlTable::kPresentTemperature.reg.address +
         ControlTable::kPresentTemperature.reg.kSize};
 
-constexpr static ControlTableBlock kSetToCenter = {
+constexpr ControlTableBlock kAlignToPosition = {
     ControlTable::kAlignToPosition.reg.address,
     ControlTable::kAlignToPosition.reg.address +
         ControlTable::kAlignToPosition.reg.kSize};

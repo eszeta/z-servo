@@ -93,14 +93,13 @@ struct RegField {
    * @param data 寄存器数据
    * @return 特定位域的值
    */
-  static constexpr T GetValue(const RegField<T>& field,
-                              const UType<T> data) noexcept {
+  constexpr T GetValue(const UType<T> data) const noexcept {
     using utils::bit_utils::CreateMask;
-    const auto mask = CreateMask<UType<T>>(field.shift, field.bits);
-    const auto extracted = (data & mask) >> field.shift;
+    const auto mask = CreateMask<UType<T>>(shift, bits);
+    const auto extracted = (data & mask) >> shift;
     if constexpr (std::is_signed_v<T>) {
       constexpr auto target_bits = sizeof(T) * 8;
-      const auto shift_amount = target_bits - field.bits;
+      const auto shift_amount = target_bits - bits;
       return static_cast<T>(extracted << shift_amount) >> shift_amount;
     } else {
       return extracted;
@@ -115,65 +114,10 @@ struct RegField {
    * @param out 更新后的寄存器数据
    * @return 更新后的寄存器数据
    */
-  static constexpr void SetValue(const RegField<T>& field,
-                                 const T value,
-                                 UType<T>& data) noexcept {
+  constexpr void SetValue(const T value, UType<T>& data) const noexcept {
     using utils::bit_utils::CreateMask;
-    const auto mask = CreateMask<UType<T>>(field.shift, field.bits);
-    data = (data & ~mask) | ((value << field.shift) & mask);
-  }
-
-  /**
-   * @brief 组合寄存器操作（用于跨越多个字节的值）
-   * @param high_field 高位字节寄存器位域描述
-   * @param low_field 低位字节寄存器位域描述
-   * @param high_data 高位字节
-   * @param low_data 低位字节
-   * @return 组合后的寄存器数据
-   */
-  static constexpr CType<T> GetCombinedValue(const RegField<T>& high_field,
-                                             const RegField<T>& low_field,
-                                             const UType<T> high_data,
-                                             const UType<T> low_data) noexcept {
-    static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
-                  "Unsupported size");
-    using utils::bit_utils::CreateMask;
-    const UType<T> high = GetValue(high_field, high_data);
-    const UType<T> low = GetValue(low_field, low_data);
-    const auto high_mask = CreateMask<UType<T>>(0, high_field.bits);
-    const auto low_mask = CreateMask<UType<T>>(0, low_field.bits);
-    const auto extracted =
-        ((high & high_mask) << low_field.bits) | (low & low_mask);
-    if constexpr (std::is_signed_v<T>) {
-      constexpr auto target_bits = sizeof(CType<T>) * 8;
-      const auto shift_amount = target_bits - high_field.bits - low_field.bits;
-      return static_cast<CType<T>>(extracted << shift_amount) >> shift_amount;
-    } else {
-      return extracted;
-    }
-  }
-
-  /**
-   * @brief 设置组合值
-   * @param high_field 高位字节寄存器位域描述
-   * @param low_field 低位字节寄存器位域描述
-   * @param high_data 高位字节
-   * @param low_data 低位字节
-   * @param value 组合值
-   * @param out_high_data 更新后的高位字节
-   * @param out_low_data 更新后的低位字节
-   */
-  static constexpr void SetCombinedValue(const RegField<T>& high_field,
-                                         const RegField<T>& low_field,
-                                         const CType<T> value,
-                                         UType<T>& high_data,
-                                         UType<T>& low_data) noexcept {
-    static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
-                  "Unsupported size");
-    const auto lowValue = static_cast<UType<T>>(value);
-    const auto highValue = static_cast<UType<T>>(value >> low_field.bits);
-    SetValue(low_field, lowValue, low_data);
-    SetValue(high_field, highValue, high_data);
+    const auto mask = CreateMask<UType<T>>(shift, bits);
+    data = (data & ~mask) | ((value << shift) & mask);
   }
 };
 
@@ -185,7 +129,7 @@ struct RegField {
  */
 template <typename T>
 constexpr T GetValue(const RegField<T>& field, const UType<T> data) noexcept {
-  return RegField<T>::GetValue(field, data);
+  return field.GetValue(data);
 }
 
 /**
@@ -199,7 +143,7 @@ template <typename T>
 constexpr void SetValue(const RegField<T>& field,
                         const T value,
                         UType<T>& data) noexcept {
-  RegField<T>::SetValue(field, value, data);
+  field.SetValue(field, value, data);
 }
 
 /**
@@ -215,8 +159,22 @@ constexpr CType<T> GetCombinedValue(const RegField<T>& high_field,
                                     const RegField<T>& low_field,
                                     const UType<T> high_data,
                                     const UType<T> low_data) noexcept {
-  return RegField<T>::GetCombinedValue(
-      high_field, low_field, high_data, low_data);
+  static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
+                "Unsupported size");
+  using utils::bit_utils::CreateMask;
+  const UType<T> high = high_field.GetValue(high_data);
+  const UType<T> low = low_field.GetValue(low_data);
+  const auto high_mask = CreateMask<UType<T>>(0, high_field.bits);
+  const auto low_mask = CreateMask<UType<T>>(0, low_field.bits);
+  const auto extracted =
+      ((high & high_mask) << low_field.bits) | (low & low_mask);
+  if constexpr (std::is_signed_v<T>) {
+    constexpr auto target_bits = sizeof(CType<T>) * 8;
+    const auto shift_amount = target_bits - high_field.bits - low_field.bits;
+    return static_cast<CType<T>>(extracted << shift_amount) >> shift_amount;
+  } else {
+    return extracted;
+  }
 }
 
 /**
@@ -235,8 +193,12 @@ constexpr void SetCombinedValue(const RegField<T>& high_field,
                                 const CType<T> value,
                                 UType<T>& high_data,
                                 UType<T>& low_data) noexcept {
-  RegField<T>::SetCombinedValue(
-      high_field, low_field, value, high_data, low_data);
+  static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
+                "Unsupported size");
+  const auto lowValue = static_cast<UType<T>>(value);
+  const auto highValue = static_cast<UType<T>>(value >> low_field.bits);
+  low_field.SetValue(lowValue, low_data);
+  high_field.SetValue(highValue, high_data);
 }
 
 }  // namespace hortor::regmap

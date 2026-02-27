@@ -52,8 +52,8 @@ class Slave : public SlaveBase<ServoType> {
     if (TableBlocks::kEeprom.InBlock(address, size)) {
       CHECK(this->regmap_->StoreEeprom());
     }
-    if (TableBlocks::kSetToCenter.InBlock(address, size)) {
-      CHECK(ApplySetToCenter());
+    if (TableBlocks::kAlignToPosition.InBlock(address, size)) {
+      CHECK(ApplyAlignToPosition());
     }
     CHECK(ApplyProtocolConfig());
     CHECK(ApplyMotorConfig());
@@ -94,7 +94,7 @@ class Slave : public SlaveBase<ServoType> {
     return Error::kOk;
   }
 
-  Error ApplySetToCenter() {
+  Error ApplyAlignToPosition() {
     if (this->regmap_->ReadAlignToPosition()) {
       const auto align_to_position = this->regmap_->ReadAlignToPosition();
       this->servo_->AlignToPosition(align_to_position);

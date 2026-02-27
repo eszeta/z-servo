@@ -77,7 +77,7 @@ class CurrentMirror : public servo::Current<CurrentMirror> {
 
  private:
   /** @brief ADC电压转换系数 */
-  constexpr static float kAdcVoltageConv = 3.3f / 1024.0f;
+  static constexpr float kAdcVoltageConv = 3.3f / 1024.0f;
   /**
    * @brief 校准ADC零点偏移
    * @details 通过多次采样计算ADC的零点偏移值

@@ -17,6 +17,10 @@
 #include "regmap/regmap_mmio.h"
 #include "types.h"
 
+#ifndef EEPROM_DISABLE
+#include <EEPROM.h>
+#endif
+
 namespace hortor::servo_slave {
 
 //==============================================================================
@@ -177,7 +181,21 @@ class RegMap;
 using RegMapBase = protocol::RegMap<RegMap, regmap::RegMapMmio>;
 class RegMap : public RegMapBase {
  public:
-  Error Init();
+  Error Init() {
+    CHECK(regmap::RegMapMmio::Init(table_, sizeof(table_)));
+    CHECK(LoadEeprom());
+    if (IsEepromEmpty()) {
+      CHECK(RecoveryEeprom());
+    }
+    return Error::kOk;
+  }
+
+  template <typename T>
+  constexpr Error RestoreEeprom(
+      const hortor::protocol::ControlTableItem<T>& item) {
+    CHECK(WriteRegField(item, item.default_value));
+    return Error::kOk;
+  }
 
   //==============================================================================
   // 设备信息组 (0x00-0x0F, EEPROM，只读)
@@ -2233,11 +2251,95 @@ class RegMap : public RegMapBase {
 
 #pragma endregion  // "状态反馈组"
 
-  Error RecoveryEeprom();
-  Error LoadEeprom();
-  Error StoreEeprom();
+  /**
+   * @brief 恢复 EEPROM 为默认值
+   * @return 错误码
+   */
+  Error RecoveryEeprom() {
+    RestoreEeprom(ControlTable::kModelNumber);
+    RestoreEeprom(ControlTable::kModelInformation);
+    RestoreEeprom(ControlTable::kFirmwareVersion);
+    RestoreEeprom(ControlTable::kId);
+    RestoreEeprom(ControlTable::kBaudRate);
+    RestoreEeprom(ControlTable::kReturnDelayTime);
+    RestoreEeprom(ControlTable::kStatusReturnLevel);
+    RestoreEeprom(ControlTable::kDriveMode);
+    RestoreEeprom(ControlTable::kOperatingMode);
+    RestoreEeprom(ControlTable::kShutdown);
+    RestoreEeprom(ControlTable::kHomingOffset);
+    RestoreEeprom(ControlTable::kMovingThreshold);
+    RestoreEeprom(ControlTable::kTemperatureLimit);
+    RestoreEeprom(ControlTable::kMaxVoltageLimit);
+    RestoreEeprom(ControlTable::kMinVoltageLimit);
+    RestoreEeprom(ControlTable::kPwmLimit);
+    RestoreEeprom(ControlTable::kCurrentLimit);
+    RestoreEeprom(ControlTable::kVelocityLimit);
+    RestoreEeprom(ControlTable::kMaxPositionLimit);
+    RestoreEeprom(ControlTable::kMinPositionLimit);
+    RestoreEeprom(ControlTable::kProtectionTime);
+    RestoreEeprom(ControlTable::kVelocityIgain);
+    RestoreEeprom(ControlTable::kVelocityPgain);
+    RestoreEeprom(ControlTable::kPositionDgain);
+    RestoreEeprom(ControlTable::kPositionIgain);
+    RestoreEeprom(ControlTable::kPositionPgain);
+    RestoreEeprom(ControlTable::kFeedforward2ndGain);
+    RestoreEeprom(ControlTable::kFeedforward1stGain);
+    RestoreEeprom(ControlTable::kProfileAcceleration);
+    RestoreEeprom(ControlTable::kProfileVelocity);
+    CHECK(StoreEeprom());
+    return Error::kOk;
+  }
 
- private:
+  /**
+   * @brief 加载 EEPROM
+   * @return 错误码
+   */
+  Error LoadEeprom() {
+#ifndef EEPROM_DISABLE
+    int pos = 0;
+    for (uint8_t address = TableBlocks::kEeprom.begin;
+         address < TableBlocks::kEeprom.end;
+         address++) {
+      regs_[address] = EEPROM.read(pos++);
+    }
+#endif
+    return Error::kOk;
+  }
+
+  /**
+   * @brief 存储 EEPROM
+   * @return 错误码
+   */
+  Error StoreEeprom() {
+#ifndef EEPROM_DISABLE
+    int pos = 0;
+    for (uint8_t address = TableBlocks::kEeprom.begin;
+         address < TableBlocks::kEeprom.end;
+         address++) {
+      EEPROM.update(pos++, regs_[address]);
+    }
+#endif
+    return Error::kOk;
+  }
+
+  /**
+   * @brief 检测 EEPROM 存档是否为空（未初始化）
+   * @return true 若 EEPROM 区全为 0xFF 或 0x00
+   *
+   * 擦除后的 Flash/EEPROM 通常为 0xFF；EEPROM_DISABLE 时 table_ 初始化为 0。
+   */
+  bool IsEepromEmpty() const {
+    const auto first = regs_[TableBlocks::kEeprom.begin];
+    const auto begin = TableBlocks::kEeprom.begin;
+    const auto end = TableBlocks::kEeprom.end;
+    for (uint8_t address = begin; address < end; address++) {
+      if (regs_[address] != first) {
+        return false;
+      }
+    }
+    return first == 0x00 || first == 0xFF;
+  }
+
   uint8_t table_[ControlTable::kTotalSize] = {};
 };
 
