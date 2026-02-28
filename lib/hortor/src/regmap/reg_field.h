@@ -12,39 +12,30 @@
 
 namespace hortor::regmap {
 
+/// 按 sizeof(T) 索引的类型映射表
 template <typename T>
-struct CombinedTypeImpl {
+struct RegFieldTypes {
   static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
-                "Unsupported size for CombinedType");
+                "Unsupported RegField element size");
 
-  // 根据大小选择无符号类型
-  using UnsignedCombinedType = std::conditional_t<
-      sizeof(T) == 1,
-      uint16_t,
-      std::conditional_t<sizeof(T) == 2, uint32_t, uint64_t>>;
+  static constexpr size_t kIndex =
+      sizeof(T) == 1 ? 0 : (sizeof(T) == 2 ? 1 : 2);
 
-  // 根据大小选择有符号类型
-  using SignedCombinedType =
-      std::conditional_t<sizeof(T) == 1,
-                         int16_t,
-                         std::conditional_t<sizeof(T) == 2, int32_t, int64_t>>;
+  /// 单寄存器存储类型（与 T 同宽，无符号，用于位域操作）
+  using Storage =
+      std::tuple_element_t<kIndex, std::tuple<uint8_t, uint16_t, uint32_t>>;
 
-  using UnsignedType = std::conditional_t<
-      sizeof(T) == 1,
-      uint8_t,
-      std::conditional_t<sizeof(T) == 2, uint16_t, uint32_t>>;
-
-  using CombinedType = std::conditional_t<std::is_signed_v<T>,
-                                          SignedCombinedType,
-                                          UnsignedCombinedType>;
+  /// 跨寄存器拼接后的值类型（如 high<<8|low），保持 T 的符号性
+  using Merged = std::conditional_t<
+      std::is_signed_v<T>,
+      std::tuple_element_t<kIndex, std::tuple<int16_t, int32_t, int64_t>>,
+      std::tuple_element_t<kIndex, std::tuple<uint16_t, uint32_t, uint64_t>>>;
 };
 
 template <typename T>
-using UCType = typename CombinedTypeImpl<T>::UnsignedCombinedType;
+using RegStorage = typename RegFieldTypes<T>::Storage;
 template <typename T>
-using CType = typename CombinedTypeImpl<T>::CombinedType;
-template <typename T>
-using UType = typename CombinedTypeImpl<T>::UnsignedType;
+using RegMerged = typename RegFieldTypes<T>::Merged;
 
 template <typename T>
 struct RegField;
@@ -88,9 +79,9 @@ struct RegField {
    * @return 特定位域的值
    */
   static constexpr T GetValue(const RegField<T>& field,
-                              const UType<T> data) noexcept {
+                              const RegStorage<T> data) noexcept {
     using utils::bit_utils::CreateMask;
-    const auto mask = CreateMask<UType<T>>(field.shift, field.bits);
+    const auto mask = CreateMask<RegStorage<T>>(field.shift, field.bits);
     const auto extracted = (data & mask) >> field.shift;
     if constexpr (std::is_signed_v<T>) {
       constexpr auto target_bits = sizeof(T) * 8;
@@ -110,9 +101,9 @@ struct RegField {
    */
   static constexpr void SetValue(const RegField<T>& field,
                                  const T value,
-                                 UType<T>& data) noexcept {
+                                 RegStorage<T>& data) noexcept {
     using utils::bit_utils::CreateMask;
-    const auto mask = CreateMask<UType<T>>(field.shift, field.bits);
+    const auto mask = CreateMask<RegStorage<T>>(field.shift, field.bits);
     data = (data & ~mask) | ((value << field.shift) & mask);
   }
 
@@ -124,21 +115,21 @@ struct RegField {
    * @param low_data 低位字节
    * @return 组合后的寄存器数据
    */
-  static constexpr CType<T> GetCombinedValue(const RegField<T>& high_field,
+  static constexpr RegMerged<T> GetCombinedValue(const RegField<T>& high_field,
                                              const RegField<T>& low_field,
-                                             const UType<T> high_data,
-                                             const UType<T> low_data) noexcept {
+                                             const RegStorage<T> high_data,
+                                             const RegStorage<T> low_data) noexcept {
     using utils::bit_utils::CreateMask;
-    const UType<T> high = GetValue(high_field, high_data);
-    const UType<T> low = GetValue(low_field, low_data);
-    const auto high_mask = CreateMask<UType<T>>(0, high_field.bits);
-    const auto low_mask = CreateMask<UType<T>>(0, low_field.bits);
+    const RegStorage<T> high = GetValue(high_field, high_data);
+    const RegStorage<T> low = GetValue(low_field, low_data);
+    const auto high_mask = CreateMask<RegStorage<T>>(0, high_field.bits);
+    const auto low_mask = CreateMask<RegStorage<T>>(0, low_field.bits);
     const auto extracted =
         ((high & high_mask) << low_field.bits) | (low & low_mask);
     if constexpr (std::is_signed_v<T>) {
-      constexpr auto target_bits = sizeof(CType<T>) * 8;
+      constexpr auto target_bits = sizeof(RegMerged<T>) * 8;
       const auto shift_amount = target_bits - high_field.bits - low_field.bits;
-      return static_cast<CType<T>>(extracted << shift_amount) >> shift_amount;
+      return static_cast<RegMerged<T>>(extracted << shift_amount) >> shift_amount;
     } else {
       return extracted;
     }
@@ -156,11 +147,11 @@ struct RegField {
    */
   static constexpr void SetCombinedValue(const RegField<T>& high_field,
                                          const RegField<T>& low_field,
-                                         const CType<T> value,
-                                         UType<T>& high_data,
-                                         UType<T>& low_data) noexcept {
-    const auto lowValue = static_cast<UType<T>>(value);
-    const auto highValue = static_cast<UType<T>>(value >> low_field.bits);
+                                         const RegMerged<T> value,
+                                         RegStorage<T>& high_data,
+                                         RegStorage<T>& low_data) noexcept {
+    const auto lowValue = static_cast<RegStorage<T>>(value);
+    const auto highValue = static_cast<RegStorage<T>>(value >> low_field.bits);
     SetValue(low_field, lowValue, low_data);
     SetValue(high_field, highValue, high_data);
   }

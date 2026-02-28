@@ -76,7 +76,7 @@ class RegMap {
    */
   template <typename T>
   Error WriteRegField(const RegField<T>& reg, T value) {
-    UType<T> data;
+    RegStorage<T> data;
     CHECK(Read(reg.address, data));
     RegField<T>::SetValue(reg, value, data);
     CHECK(Write(reg.address, data));
