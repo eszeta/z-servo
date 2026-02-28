@@ -78,7 +78,7 @@ class RegMap {
   Error WriteRegField(const RegField<T>& reg, T value) {
     UType<T> data;
     CHECK(Read(reg.address, data));
-    reg.SetValue(value, data);
+    RegField<T>::SetValue(reg, value, data);
     CHECK(Write(reg.address, data));
     return Error::kOk;
   }
@@ -108,7 +108,7 @@ class RegMap {
     T high_value, low_value;
     CHECK(Read(high.address, high_value));
     CHECK(Read(low.address, low_value));
-    SetCombinedValue(high, low, value, high_value, low_value);
+    RegField<T>::SetCombinedValue(high, low, value, high_value, low_value);
     CHECK(Write(high.address, high_value));
     CHECK(Write(low.address, low_value));
     return Error::kOk;
@@ -124,7 +124,7 @@ class RegMap {
   Error ReadRegField(const RegField<T>& reg, T& value) {
     T data;
     CHECK(Read(reg.address, data));
-    value = reg.GetValue(data);
+    value = RegField<T>::GetValue(reg, data);
     return Error::kOk;
   }
 
@@ -156,7 +156,7 @@ class RegMap {
     T high_value, low_value;
     CHECK(Read(high.address, high_value));
     CHECK(Read(low.address, low_value));
-    value = GetCombinedValue(high, low, high_value, low_value);
+    value = RegField<T>::GetCombinedValue(high, low, high_value, low_value);
     return Error::kOk;
   }
 };
