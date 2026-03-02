@@ -47,6 +47,24 @@ struct ControlTableItem : regmap::Field<T, Address, Shift, Bits> {
   static constexpr T kDefault = default_value;
 };
 
+template <uint8_t Address, uint8_t default_value>
+using RegU8 = ControlTableItem<uint8_t, Address, 0, 16, default_value>;
+
+template <uint8_t Address, uint16_t default_value>
+using RegU16 = ControlTableItem<uint16_t, Address, 0, 16, default_value>;
+
+template <uint8_t Address, uint32_t default_value>
+using RegU32 = ControlTableItem<uint32_t, Address, 0, 32, default_value>;
+
+template <uint8_t Address, int8_t default_value>
+using RegS8 = ControlTableItem<int8_t, Address, 0, 8, default_value>;
+
+template <uint8_t Address, int16_t default_value>
+using RegS16 = ControlTableItem<int16_t, Address, 0, 16, default_value>;
+
+template <uint8_t Address, int32_t default_value>
+using RegS32 = ControlTableItem<int32_t, Address, 0, 32, default_value>;
+
 struct ControlTableBlock {
   const uint8_t begin;
   const uint8_t end;

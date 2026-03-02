@@ -86,17 +86,17 @@ constexpr uint32_t AccelerationToRaw(float acc) {
 }
 
 /**
- * @brief 将原始ms转换为实际秒
+ * @brief 将原始ms转换为实际毫秒
  * @param raw 原始值
- * @return 实际秒
- * 原始单位：20ms，转换单位：s
- * 转换公式: seconds = raw × 0.02  
+ * @return 实际毫秒
+ * 原始单位：20ms，转换单位：ms
+ * 转换公式: milliseconds = raw × 20ms  
  */
-constexpr float MsFromRaw(uint8_t raw) { return raw * 0.02f; }
+constexpr float MsFromRaw(uint8_t raw) { return raw * 20.0f; }
 
-/** @brief 将实际秒转换为原始值 */
-constexpr uint8_t MsToRaw(float seconds) {
-  return static_cast<uint8_t>(seconds / 0.02f);
+/** @brief 将实际毫秒转换为原始值 */
+constexpr uint8_t MsToRaw(float milliseconds) {
+  return static_cast<uint8_t>(milliseconds / 20.0f);
 }
 
 /**

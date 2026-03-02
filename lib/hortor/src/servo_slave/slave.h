@@ -52,7 +52,7 @@ class Slave : public SlaveBase<ServoType> {
     if (TableBlocks::kEeprom.InBlock(address, size)) {
       CHECK(this->regmap_->StoreEeprom());
     }
-    if (TableBlocks::kAlignToPosition.InBlock(address, size)) {
+    if (TableBlocks::kAlign.InBlock(address, size)) {
       CHECK(ApplyAlignToPosition());
     }
     CHECK(ApplyProtocolConfig());

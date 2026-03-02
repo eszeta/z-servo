@@ -121,46 +121,46 @@ constexpr uint8_t kI2CAddress = 0x06;
  * 定义MT6701传感器的寄存器地址和位域，用于通过I2C接口配置传感器。
  * 使用RegisterUtils工具类简化寄存器操作。
  */
-struct MT6701Regs {
-  template <uint8_t Address, uint8_t Shift, uint8_t Bits>
-  using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
+namespace MT6701Regs {
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
 
-  template <uint8_t Address, uint8_t Shift, uint8_t Bits>
-  using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
 
-  // 角度相关寄存器，用于读取当前角度值
-  struct kANGLE_6 : FieldU08<0x03, 0, 8> {};
-  struct kANGLE_0 : FieldU08<0x04, 2, 6> {};
+// 角度相关寄存器，用于读取当前角度值
+struct kANGLE_6 : FieldU08<0x03, 0, 8> {};
+struct kANGLE_0 : FieldU08<0x04, 2, 6> {};
 
-  // 模式选择寄存器，用于配置传感器工作模式
-  struct kUVM_MUX : FieldB08<0x25, 7, 1> {};
-  struct kABZ_MUX : FieldU08<0x29, 6, 1> {};
-  struct kDIR : FieldU08<0x29, 1, 1> {};
+// 模式选择寄存器，用于配置传感器工作模式
+struct kUVM_MUX : FieldB08<0x25, 7, 1> {};
+struct kABZ_MUX : FieldU08<0x29, 6, 1> {};
+struct kDIR : FieldU08<0x29, 1, 1> {};
 
-  // 分辨率设置寄存器，用于配置UVW和ABZ模式的分辨率
-  struct kUVM_RES_0 : FieldU08<0x30, 4, 4> {};
-  struct kABZ_RES_8 : FieldU08<0x30, 0, 2> {};
-  struct kABZ_RES_0 : FieldU08<0x31, 0, 8> {};
+// 分辨率设置寄存器，用于配置UVW和ABZ模式的分辨率
+struct kUVM_RES_0 : FieldU08<0x30, 4, 4> {};
+struct kABZ_RES_8 : FieldU08<0x30, 0, 2> {};
+struct kABZ_RES_0 : FieldU08<0x31, 0, 8> {};
 
-  // 零位和迟滞设置，用于配置零位偏移和迟滞参数
-  struct kZERO_8 : FieldU08<0x32, 0, 4> {};
-  struct kZERO_0 : FieldU08<0x33, 0, 8> {};
-  struct kHYST_2 : FieldU08<0x32, 7, 1> {};
-  struct kHYST_0 : FieldU08<0x34, 6, 2> {};
+// 零位和迟滞设置，用于配置零位偏移和迟滞参数
+struct kZERO_8 : FieldU08<0x32, 0, 4> {};
+struct kZERO_0 : FieldU08<0x33, 0, 8> {};
+struct kHYST_2 : FieldU08<0x32, 7, 1> {};
+struct kHYST_0 : FieldU08<0x34, 6, 2> {};
 
-  // 脉冲宽度设置，用于配置ABZ模式下Z信号的脉冲宽度
-  struct kPULSE_WIDTH : FieldU08<0x32, 4, 3> {};
+// 脉冲宽度设置，用于配置ABZ模式下Z信号的脉冲宽度
+struct kPULSE_WIDTH : FieldU08<0x32, 4, 3> {};
 
-  // PWM相关设置，用于配置PWM输出的参数
-  struct kPWM_FREQ : FieldU08<0x38, 7, 1> {};
-  struct kPWM_POL : FieldU08<0x38, 6, 1> {};
-  struct kOUT_MODE : FieldU08<0x38, 5, 1> {};
+// PWM相关设置，用于配置PWM输出的参数
+struct kPWM_FREQ : FieldU08<0x38, 7, 1> {};
+struct kPWM_POL : FieldU08<0x38, 6, 1> {};
+struct kOUT_MODE : FieldU08<0x38, 5, 1> {};
 
-  // 模拟输出范围设置，用于配置模拟输出模式的起始和结束角度
-  struct kA_STOP_8 : FieldU08<0x3E, 4, 4> {};
-  struct kA_START_8 : FieldU08<0x3E, 0, 4> {};
-  struct kA_START_0 : FieldU08<0x3F, 0, 8> {};
-  struct kA_STOP_0 : FieldU08<0x40, 0, 8> {};
-};
+// 模拟输出范围设置，用于配置模拟输出模式的起始和结束角度
+struct kA_STOP_8 : FieldU08<0x3E, 4, 4> {};
+struct kA_START_8 : FieldU08<0x3E, 0, 4> {};
+struct kA_START_0 : FieldU08<0x3F, 0, 8> {};
+struct kA_STOP_0 : FieldU08<0x40, 0, 8> {};
+};  // namespace MT6701Regs
 
 };  // namespace hortor::drivers::MT6701
