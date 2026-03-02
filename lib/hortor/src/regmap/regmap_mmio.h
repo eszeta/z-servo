@@ -33,7 +33,7 @@ class RegMapMmio : public RegMap<RegMapMmio> {
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteBytesImpl(const uint8_t address,
+  Error WriteImpl(const uint8_t address,
                        const uint8_t* data,
                        const size_t size);
 
@@ -44,7 +44,7 @@ class RegMapMmio : public RegMap<RegMapMmio> {
    * @param data 读取数据的存储指针
    * @return 错误码，成功返回OK
    */
-  Error ReadBytesImpl(const uint8_t address, const size_t size, uint8_t* data);
+  Error ReadImpl(const uint8_t address, const size_t size, uint8_t* data);
 
  protected:
   /** @brief 寄存器基地址 */

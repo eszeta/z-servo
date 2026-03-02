@@ -19,7 +19,7 @@ Error RegMapI2CBus::Init(TwoWire* wire, const int address) {
   return Error::kOk;
 }
 
-Error RegMapI2CBus::WriteBytesImpl(const uint8_t address,
+Error RegMapI2CBus::WriteImpl(const uint8_t address,
                                    const uint8_t* data,
                                    const size_t size) {
   if (!wire_ || !data) {
@@ -34,7 +34,7 @@ Error RegMapI2CBus::WriteBytesImpl(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegMapI2CBus::ReadBytesImpl(const uint8_t address,
+Error RegMapI2CBus::ReadImpl(const uint8_t address,
                                   const size_t size,
                                   uint8_t* data) {
   if (!wire_ || !data) {

@@ -15,22 +15,27 @@ enum class FieldStrength : uint8_t {
 };
 
 namespace MA330Regs {
-using RegFieldU08 = regmap::RegFieldU08;
-constexpr RegFieldU08 kZ_L{0x00, 0, 8};
-constexpr RegFieldU08 kZ_H{0x01, 0, 8};
-constexpr RegFieldU08 kBCT{0x02, 0, 8};
-constexpr RegFieldU08 kETX{0x03, 0, 1};
-constexpr RegFieldU08 kETY{0x03, 1, 1};
-constexpr RegFieldU08 kILIP{0x04, 2, 4};
-constexpr RegFieldU08 kPPT_L{0x04, 6, 2};
-constexpr RegFieldU08 kPPT_H{0x05, 0, 8};
-constexpr RegFieldU08 kMGHT{0x06, 2, 3};
-constexpr RegFieldU08 kMGLT{0x06, 5, 3};
-constexpr RegFieldU08 kNPP{0x07, 5, 3};
-constexpr RegFieldU08 kRD{0x09, 7, 1};
-constexpr RegFieldU08 kFW{0x0E, 0, 8};
-constexpr RegFieldU08 kHYS{0x10, 0, 8};
-constexpr RegFieldU08 kMGL_MGH{0x1B, 6, 2};
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
+
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
+
+struct kZ_L : FieldU08<0x00, 0, 8> {};
+struct kZ_H : FieldU08<0x01, 0, 8> {};
+struct kBCT : FieldU08<0x02, 0, 8> {};
+struct kETX : FieldB08<0x03, 0, 1> {};
+struct kETY : FieldB08<0x03, 1, 1> {};
+struct kILIP : FieldU08<0x04, 2, 4> {};
+struct kPPT_L : FieldU08<0x04, 6, 2> {};
+struct kPPT_H : FieldU08<0x05, 0, 8> {};
+struct kMGHT : FieldU08<0x06, 2, 3> {};
+struct kMGLT : FieldU08<0x06, 5, 3> {};
+struct kNPP : FieldU08<0x07, 5, 3> {};
+struct kRD : FieldU08<0x09, 7, 1> {};
+struct kFW : FieldU08<0x0E, 0, 8> {};
+struct kHYS : FieldU08<0x10, 0, 8> {};
+struct kMGL_MGH : FieldU08<0x1B, 6, 2> {};
 };  // namespace MA330Regs
 
 }  // namespace hortor::drivers::MA330

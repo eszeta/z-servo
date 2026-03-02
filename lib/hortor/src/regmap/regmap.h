@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "base/noncopyable.h"
 #include "base/types.h"
 #include "hortor.h"
 #include "regmap/reg_field.h"
@@ -16,10 +17,10 @@ namespace hortor::regmap {
  * 使用 CRTP (Curiously Recurring Template Pattern) 实现编译期静态多态，
  * 消除虚函数和 std::function 的运行时开销。
  *
- * @tparam Derived 派生类类型，必须实现 WriteBytesImpl 和 ReadBytesImpl 方法
+ * @tparam Derived 派生类类型，必须实现 WriteImpl 和 ReadImpl 方法
  */
 template <typename Derived>
-class RegMap {
+class RegMap : public hortor::Noncopyable {
  public:
   /**
    * @brief 写寄存器
@@ -29,8 +30,7 @@ class RegMap {
    */
   template <typename T>
   Error Write(const uint8_t address, const T data) {
-    return WriteBytes(
-        address, reinterpret_cast<const uint8_t*>(&data), sizeof(T));
+    return Write(address, reinterpret_cast<const uint8_t*>(&data), sizeof(T));
   }
 
   /**
@@ -40,10 +40,8 @@ class RegMap {
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteBytes(const uint8_t address,
-                   const uint8_t* data,
-                   const size_t size) {
-    return static_cast<Derived*>(this)->WriteBytesImpl(address, data, size);
+  Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
+    return static_cast<Derived*>(this)->WriteImpl(address, data, size);
   }
 
   /**
@@ -54,7 +52,7 @@ class RegMap {
    */
   template <typename T>
   Error Read(const uint8_t address, T& data) {
-    return ReadBytes(address, sizeof(T), reinterpret_cast<uint8_t*>(&data));
+    return Read(address, sizeof(T), reinterpret_cast<uint8_t*>(&data));
   }
 
   /**
@@ -64,81 +62,46 @@ class RegMap {
    * @param data 读取数据的存储指针
    * @return 错误码，成功返回OK
    */
-  Error ReadBytes(const uint8_t address, const size_t size, uint8_t* data) {
-    return static_cast<Derived*>(this)->ReadBytesImpl(address, size, data);
+  Error Read(const uint8_t address, const size_t size, uint8_t* data) {
+    return static_cast<Derived*>(this)->ReadImpl(address, size, data);
   }
 
   /**
    * @brief 通用的寄存器读写模板函数
-   * @param reg 寄存器字段定义
    * @param value 要写入的值
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
   template <typename T>
-  Error WriteRegField(const RegField<T>& reg, T value) {
-    RegStorage<T> data;
-    CHECK(Read(reg.address, data));
-    RegField<T>::SetValue(reg, value, data);
-    CHECK(Write(reg.address, data));
+  Error WriteField(typename T::Type value) {
+    typename T::Storage data;
+    CHECK(Read(T::kAddress, data));
+    T::SetValue(value, data);
+    CHECK(Write(T::kAddress, data));
     return Error::kOk;
   }
 
-  /**
-   * @brief 通用的寄存器读写模板函数
-   * @param reg 寄存器字段定义
-   * @param value 要写入的值
-   * @return 错误码，成功返回OK，否则参见Error错误码
-   */
-  template <typename T>
-  Error WriteRegField(const RegField<T>& reg, bool value) {
-    return WriteRegField(reg, value ? 1 : 0);
-  }
-
-  /**
-   * @brief 通用的寄存器读写模板函数
-   * @param high 高位寄存器字段定义
-   * @param low 低位寄存器字段定义
-   * @param value 要写入的值
-   * @return 错误码，成功返回OK，否则参见Error错误码
-   */
-  template <typename T>
-  Error WriteRegField(const RegField<T>& high,
-                      const RegField<T>& low,
-                      uint16_t value) {
-    T high_value, low_value;
-    CHECK(Read(high.address, high_value));
-    CHECK(Read(low.address, low_value));
-    RegField<T>::SetCombinedValue(high, low, value, high_value, low_value);
-    CHECK(Write(high.address, high_value));
-    CHECK(Write(low.address, low_value));
+  template <typename T, typename High, typename Low>
+  Error WriteField(T value) {
+    typename High::Storage high_data;
+    typename Low::Storage low_data;
+    CHECK(Read(High::kAddress, high_data));
+    CHECK(Read(Low::kAddress, low_data));
+    Merged2<T, High, Low>::SetValue(value, high_data, low_data);
+    CHECK(Write(High::kAddress, high_data));
+    CHECK(Write(Low::kAddress, low_data));
     return Error::kOk;
   }
 
   /**
    * @brief 通用的寄存器读取模板函数
-   * @param reg 寄存器字段定义
    * @param value 读取值的存储指针
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
   template <typename T>
-  Error ReadRegField(const RegField<T>& reg, T& value) {
-    T data;
-    CHECK(Read(reg.address, data));
-    value = RegField<T>::GetValue(reg, data);
-    return Error::kOk;
-  }
-
-  /**
-   * @brief 通用的寄存器读取模板函数
-   * @param reg 寄存器字段定义
-   * @param value 读取值的存储指针
-   * @return 错误码，成功返回OK，否则参见Error错误码
-   */
-  template <typename T>
-  Error ReadRegField(const RegField<T>& reg, bool& value) {
-    uint8_t data;
-    CHECK(ReadRegField(reg, data));
-    value = data != 0;
+  Error ReadField(typename T::Type& value) {
+    typename T::Storage data;
+    CHECK(Read(T::kAddress, data));
+    value = T::GetValue(data);
     return Error::kOk;
   }
 
@@ -149,14 +112,13 @@ class RegMap {
    * @param value 要写入的值
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  template <typename T>
-  Error ReadRegField(const RegField<T>& high,
-                     const RegField<T>& low,
-                     uint16_t& value) {
-    T high_value, low_value;
-    CHECK(Read(high.address, high_value));
-    CHECK(Read(low.address, low_value));
-    value = RegField<T>::GetCombinedValue(high, low, high_value, low_value);
+  template <typename T, typename High, typename Low>
+  Error ReadField(T& value) {
+    typename High::Storage high_data;
+    typename Low::Storage low_data;
+    CHECK(Read(High::kAddress, high_data));
+    CHECK(Read(Low::kAddress, low_data));
+    value = Merged2<T, High, Low>::GetValue(high_data, low_data);
     return Error::kOk;
   }
 };

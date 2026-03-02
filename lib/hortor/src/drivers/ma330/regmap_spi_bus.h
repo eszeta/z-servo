@@ -23,7 +23,13 @@ class RegMapSpiBus : public regmap::RegMapSpiBus {
    * @param data 要写入的数据
    * @return 错误码
    */
-  Error Write(const uint8_t address, const uint8_t data);
+  Error Write(const uint8_t address, const uint8_t data) {
+    uint16_t cmd = 0x8000 | ((address & 0x1F) << 8) | data;
+    transfer16(cmd);
+    delay(20);  // 20ms delay required
+    transfer16(0x0000);
+    return Error::kOk;
+  }
 
   /**
    * @brief 读寄存器 MA330特殊SPI读实现
@@ -31,7 +37,14 @@ class RegMapSpiBus : public regmap::RegMapSpiBus {
    * @param data 读取数据的存储指针
    * @return 错误码
    */
-  Error Read(const uint8_t address, uint8_t* data);
+  Error Read(const uint8_t address, uint8_t* data) {
+    uint16_t cmd = 0x4000 | ((address & 0x001F) << 8);
+    uint16_t value = transfer16(cmd);
+    delayMicroseconds(1);
+    value = transfer16(0x0000);
+    *data = value >> 8;
+    return Error::kOk;
+  };
 
   /**
    * @brief 读取原始角度数据
@@ -40,10 +53,20 @@ class RegMapSpiBus : public regmap::RegMapSpiBus {
    *
    * 通过SPI接口从MA330传感器读取当前角度值。
    */
-  Error ReadRaw(uint16_t& angle_raw);
+  Error ReadRaw(uint16_t& angle_raw) {
+    angle_raw = transfer16(0x0000);
+    return Error::kOk;
+  }
 
  private:
-  uint16_t transfer16(uint16_t outValue);
+  uint16_t transfer16(uint16_t outValue) {
+    spi_->beginTransaction(spi_settings_);
+    if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
+    uint16_t value = spi_->transfer16(outValue);
+    if (cs_pin_ >= 0) digitalWrite(cs_pin_, HIGH);
+    spi_->endTransaction();
+    return value;
+  }
 };
 
 }  // namespace hortor::drivers::MA330

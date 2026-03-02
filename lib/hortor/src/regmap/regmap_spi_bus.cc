@@ -22,7 +22,7 @@ Error RegMapSpiBus::Init(SPIClass* spi,
   return Error::kOk;
 }
 
-Error RegMapSpiBus::WriteBytesImpl(const uint8_t address,
+Error RegMapSpiBus::WriteImpl(const uint8_t address,
                                    const uint8_t* data,
                                    const size_t size) {
   if (!spi_ || !data) {
@@ -37,7 +37,7 @@ Error RegMapSpiBus::WriteBytesImpl(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegMapSpiBus::ReadBytesImpl(const uint8_t address,
+Error RegMapSpiBus::ReadImpl(const uint8_t address,
                                   const size_t size,
                                   uint8_t* data) {
   if (!spi_) {

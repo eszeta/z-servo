@@ -17,7 +17,7 @@ Error RegMapMmio::Init(uint8_t* regs, const size_t size) {
   return Error::kOk;
 }
 
-Error RegMapMmio::WriteBytesImpl(const uint8_t address,
+Error RegMapMmio::WriteImpl(const uint8_t address,
                                  const uint8_t* data,
                                  const size_t size) {
   if (address + size > size_) {
@@ -29,7 +29,7 @@ Error RegMapMmio::WriteBytesImpl(const uint8_t address,
   return Error::kOk;
 }
 
-Error RegMapMmio::ReadBytesImpl(const uint8_t address,
+Error RegMapMmio::ReadImpl(const uint8_t address,
                                 const size_t size,
                                 uint8_t* data) {
   if (address + size > size_) {

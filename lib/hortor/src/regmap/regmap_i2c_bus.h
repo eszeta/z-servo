@@ -42,7 +42,7 @@ class RegMapI2CBus : public RegMap<RegMapI2CBus> {
    * @param size 数据长度
    * @return 错误码，成功返回OK
    */
-  Error WriteBytesImpl(const uint8_t address,
+  Error WriteImpl(const uint8_t address,
                        const uint8_t* data,
                        const size_t size);
 
@@ -53,7 +53,7 @@ class RegMapI2CBus : public RegMap<RegMapI2CBus> {
    * @param data 读取数据的存储指针
    * @return 错误码，成功返回OK
    */
-  Error ReadBytesImpl(const uint8_t address, const size_t size, uint8_t* data);
+  Error ReadImpl(const uint8_t address, const size_t size, uint8_t* data);
 
  protected:
   /** @brief I2C通信接口指针，指向Arduino Wire对象 */

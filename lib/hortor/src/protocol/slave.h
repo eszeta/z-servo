@@ -9,7 +9,6 @@
 #include "hortor.h"
 #include "port_handler.h"
 #include "protocol.h"
-#include "regmap.h"
 #include "types.h"
 
 namespace hortor::protocol {
@@ -186,7 +185,7 @@ class Slave {
     if (data == nullptr || size == 0) {
       return Error::kInvalidParameter;
     }
-    CHECK(regmap_->WriteBytes(address, data, size));
+    CHECK(regmap_->Write(address, data, size));
     CHECK(AfterWriteRegs(address, data, size));
     return Error::kOk;
   }
@@ -225,7 +224,7 @@ class Slave {
     const uint8_t address = packet.parameter[0];
     const uint8_t size = packet.parameter[1];
     uint8_t buffer[128];
-    CHECK(regmap_->ReadBytes(address, size, buffer));
+    CHECK(regmap_->Read(address, size, buffer));
     if (response) {
       CHECK(Response(0, buffer, size));
     }
@@ -346,7 +345,7 @@ class Slave {
         const uint8_t data_size = parameter[0];
         const uint8_t address = parameter[2];
         response_idx = i;
-        CHECK(regmap_->ReadBytes(address, data_size, buffer));
+        CHECK(regmap_->Read(address, data_size, buffer));
         if (response) {
           CHECK(Response(response_idx, buffer, data_size));
         }

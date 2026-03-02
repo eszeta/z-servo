@@ -14,9 +14,9 @@ namespace hortor {
  * 执行表达式并检查返回的错误码。如果发生错误，立即返回该错误码。
  * 用于简化连续操作的错误处理。
  */
-#define CHECK(x)                               \
+#define CHECK(...)                             \
   do {                                         \
-    hortor::Error err = (x);                   \
+    hortor::Error err = (__VA_ARGS__);         \
     if (err != hortor::Error::kOk) return err; \
   } while (0)
 

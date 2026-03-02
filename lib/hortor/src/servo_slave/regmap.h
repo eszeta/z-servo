@@ -13,7 +13,6 @@
 
 #include <Arduino.h>
 
-#include "protocol/regmap.h"
 #include "regmap/regmap_mmio.h"
 #include "types.h"
 
@@ -173,13 +172,9 @@ constexpr uint16_t CurrentToRaw(float current) {
 }  // namespace
 
 /**
- * @brief 伺服从机寄存器映射实现（CRTP模式）
- *
- * 继承自 protocol::RegMap，使用 MMIO 总线实现。
+ * @brief 伺服从机寄存器映射实现
  */
-class RegMap;
-using RegMapBase = protocol::RegMap<RegMap, regmap::RegMapMmio>;
-class RegMap : public RegMapBase {
+class RegMap : public regmap::RegMapMmio {
  public:
   Error Init() {
     CHECK(regmap::RegMapMmio::Init(table_, sizeof(table_)));
@@ -191,9 +186,8 @@ class RegMap : public RegMapBase {
   }
 
   template <typename T>
-  constexpr Error RestoreEeprom(
-      const hortor::protocol::ControlTableItem<T>& item) {
-    CHECK(WriteRegField(item, item.default_value));
+  constexpr Error RestoreEeprom() {
+    CHECK(this->template WriteField<T>(T::kDefault));
     return Error::kOk;
   }
 
@@ -209,7 +203,7 @@ class RegMap : public RegMapBase {
    */
   uint16_t ReadModelNumber() {
     uint16_t model_number;
-    ReadRegField(ControlTable::kModelNumber, model_number);
+    ReadField<ControlTable::kModelNumber>(model_number);
     return model_number;
   }
 
@@ -218,7 +212,7 @@ class RegMap : public RegMapBase {
    * @param model_number 型号编号
    */
   void WriteModelNumber(const uint16_t model_number) {
-    WriteRegField(ControlTable::kModelNumber, model_number);
+    WriteField<ControlTable::kModelNumber>(model_number);
   }
 
   /**
@@ -227,7 +221,7 @@ class RegMap : public RegMapBase {
    */
   uint32_t ReadModelInformation() {
     uint32_t model_information;
-    ReadRegField(ControlTable::kModelInformation, model_information);
+    ReadField<ControlTable::kModelInformation>(model_information);
     return model_information;
   }
 
@@ -236,7 +230,7 @@ class RegMap : public RegMapBase {
    * @param model_information 型号信息
    */
   void WriteModelInformation(const uint32_t model_information) {
-    WriteRegField(ControlTable::kModelInformation, model_information);
+    WriteField<ControlTable::kModelInformation>(model_information);
   }
 
   /**
@@ -245,7 +239,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadFirmwareVersion() {
     uint8_t firmware_version;
-    ReadRegField(ControlTable::kFirmwareVersion, firmware_version);
+    ReadField<ControlTable::kFirmwareVersion>(firmware_version);
     return firmware_version;
   }
 
@@ -254,7 +248,7 @@ class RegMap : public RegMapBase {
    * @param firmware_version 固件版本
    */
   void WriteFirmwareVersion(const uint8_t firmware_version) {
-    WriteRegField(ControlTable::kFirmwareVersion, firmware_version);
+    WriteField<ControlTable::kFirmwareVersion>(firmware_version);
   }
 
   /**
@@ -270,7 +264,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadId() {
     uint8_t id;
-    ReadRegField(ControlTable::kId, id);
+    ReadField<ControlTable::kId>(id);
     return id;
   }
 
@@ -278,7 +272,7 @@ class RegMap : public RegMapBase {
    * @brief 设置舵机 ID (R/W)
    * @param[in] id 舵机 ID (0-252)
    */
-  void WriteId(const uint8_t id) { WriteRegField(ControlTable::kId, id); }
+  void WriteId(const uint8_t id) { WriteField<ControlTable::kId>(id); }
 
 #pragma endregion  // "设备信息组"
 
@@ -315,7 +309,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadBaudRate() {
     uint8_t baud_rate;
-    ReadRegField(ControlTable::kBaudRate, baud_rate);
+    ReadField<ControlTable::kBaudRate>(baud_rate);
     return baud_rate;
   }
 
@@ -324,7 +318,7 @@ class RegMap : public RegMapBase {
    * @param[in] baud_rate 波特率索引 (0-7)
    */
   void WriteBaudRate(const uint8_t baud_rate) {
-    WriteRegField(ControlTable::kBaudRate, baud_rate);
+    WriteField<ControlTable::kBaudRate>(baud_rate);
   }
 
   /**
@@ -349,7 +343,7 @@ class RegMap : public RegMapBase {
    */
   uint16_t ReadReturnDelayTime() {
     uint8_t raw;
-    ReadRegField(ControlTable::kReturnDelayTime, raw);
+    ReadField<ControlTable::kReturnDelayTime>(raw);
     return raw * 2;
   }
 
@@ -360,7 +354,7 @@ class RegMap : public RegMapBase {
    * @note 在多舵机串联时，适当的延迟可避免总线冲突
    */
   void WriteReturnDelayTime(const uint16_t microseconds) {
-    WriteRegField(ControlTable::kReturnDelayTime, microseconds / 2);
+    WriteField<ControlTable::kReturnDelayTime>(microseconds / 2);
   }
 
   /**
@@ -382,7 +376,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadStatusReturnLevel() {
     uint8_t status_return_level = 0;
-    ReadRegField(ControlTable::kStatusReturnLevel, status_return_level);
+    ReadField<ControlTable::kStatusReturnLevel>(status_return_level);
     return status_return_level;
   }
 
@@ -391,7 +385,7 @@ class RegMap : public RegMapBase {
    * @param[in] status_return_level 状态返回级别 (0-2)
    */
   void WriteStatusReturnLevel(const uint8_t status_return_level) {
-    WriteRegField(ControlTable::kStatusReturnLevel, status_return_level);
+    WriteField<ControlTable::kStatusReturnLevel>(status_return_level);
   }
 
 #pragma endregion  // "通信配置组"
@@ -439,7 +433,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadDriveMode() {
     uint8_t drive_mode;
-    ReadRegField(ControlTable::kDriveMode, drive_mode);
+    ReadField<ControlTable::kDriveMode>(drive_mode);
     return drive_mode;
   }
 
@@ -448,7 +442,7 @@ class RegMap : public RegMapBase {
    * @param[in] drive_mode 驱动模式位域
    */
   void WriteDriveMode(const uint8_t drive_mode) {
-    WriteRegField(ControlTable::kDriveMode, drive_mode);
+    WriteField<ControlTable::kDriveMode>(drive_mode);
   }
 
   /**
@@ -529,7 +523,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadOperatingMode() {
     uint8_t operating_mode = 0;
-    ReadRegField(ControlTable::kOperatingMode, operating_mode);
+    ReadField<ControlTable::kOperatingMode>(operating_mode);
     return operating_mode;
   }
 
@@ -538,7 +532,7 @@ class RegMap : public RegMapBase {
    * @param[in] operating_mode 工作模式
    */
   void WriteOperatingMode(const uint8_t operating_mode) {
-    WriteRegField(ControlTable::kOperatingMode, operating_mode);
+    WriteField<ControlTable::kOperatingMode>(operating_mode);
   }
 
   /**
@@ -570,7 +564,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadShutdown() {
     uint8_t shutdown = 0;
-    ReadRegField(ControlTable::kShutdown, shutdown);
+    ReadField<ControlTable::kShutdown>(shutdown);
     return shutdown;
   }
 
@@ -579,7 +573,7 @@ class RegMap : public RegMapBase {
    * @param[in] shutdown 关断条件位域
    */
   void WriteShutdown(const uint8_t shutdown) {
-    WriteRegField(ControlTable::kShutdown, shutdown);
+    WriteField<ControlTable::kShutdown>(shutdown);
   }
 
 #pragma endregion  // "运行模式组"
@@ -619,7 +613,7 @@ class RegMap : public RegMapBase {
    */
   int32_t ReadHomingOffset() {
     uint32_t raw;
-    ReadRegField(ControlTable::kHomingOffset, raw);
+    ReadField<ControlTable::kHomingOffset>(raw);
     return static_cast<int32_t>(raw);
   }
 
@@ -628,8 +622,8 @@ class RegMap : public RegMapBase {
    * @param[in] homing_offset 归零偏移（pulse）
    */
   void WriteHomingOffset(const int32_t homing_offset) {
-    WriteRegField(ControlTable::kHomingOffset,
-                  static_cast<uint32_t>(homing_offset));
+    WriteField<ControlTable::kHomingOffset>(
+        static_cast<uint32_t>(homing_offset));
   }
 
   /**
@@ -657,7 +651,7 @@ class RegMap : public RegMapBase {
    */
   float ReadMovingThreshold() {
     uint32_t raw;
-    ReadRegField(ControlTable::kMovingThreshold, raw);
+    ReadField<ControlTable::kMovingThreshold>(raw);
     return VelocityFromRaw(raw);
   }
 
@@ -666,7 +660,7 @@ class RegMap : public RegMapBase {
    * @param[in] rpm 运动阈值（RPM）
    */
   void WriteMovingThreshold(const float rpm) {
-    WriteRegField(ControlTable::kMovingThreshold, VelocityToRaw(rpm));
+    WriteField<ControlTable::kMovingThreshold>(VelocityToRaw(rpm));
   }
 
 #pragma endregion  // "位置配置组"
@@ -700,7 +694,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadTemperatureLimit() {
     uint8_t temperature_limit;
-    ReadRegField(ControlTable::kTemperatureLimit, temperature_limit);
+    ReadField<ControlTable::kTemperatureLimit>(temperature_limit);
     return temperature_limit;
   }
 
@@ -709,7 +703,7 @@ class RegMap : public RegMapBase {
    * @param[in] temperature_limit 温度上限（°C）
    */
   void WriteTemperatureLimit(const uint8_t temperature_limit) {
-    WriteRegField(ControlTable::kTemperatureLimit, temperature_limit);
+    WriteField<ControlTable::kTemperatureLimit>(temperature_limit);
   }
 
   /**
@@ -737,7 +731,7 @@ class RegMap : public RegMapBase {
    */
   float ReadMaxVoltageLimit() {
     uint16_t raw;
-    ReadRegField(ControlTable::kMaxVoltageLimit, raw);
+    ReadField<ControlTable::kMaxVoltageLimit>(raw);
     return VoltageFromRaw(raw);
   }
 
@@ -746,7 +740,7 @@ class RegMap : public RegMapBase {
    * @param[in] voltage 最高电压限制（V）
    */
   void WriteMaxVoltageLimit(const float voltage) {
-    WriteRegField(ControlTable::kMaxVoltageLimit, VoltageToRaw(voltage));
+    WriteField<ControlTable::kMaxVoltageLimit>(VoltageToRaw(voltage));
   }
 
   /**
@@ -774,7 +768,7 @@ class RegMap : public RegMapBase {
    */
   float ReadMinVoltageLimit() {
     uint16_t raw;
-    ReadRegField(ControlTable::kMinVoltageLimit, raw);
+    ReadField<ControlTable::kMinVoltageLimit>(raw);
     return VoltageFromRaw(raw);
   }
 
@@ -783,7 +777,7 @@ class RegMap : public RegMapBase {
    * @param[in] voltage 最低电压限制（V）
    */
   void WriteMinVoltageLimit(const float voltage) {
-    WriteRegField(ControlTable::kMinVoltageLimit, VoltageToRaw(voltage));
+    WriteField<ControlTable::kMinVoltageLimit>(VoltageToRaw(voltage));
   }
 
   /**
@@ -812,7 +806,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPwmLimit() {
     uint16_t raw;
-    ReadRegField(ControlTable::kPwmLimit, raw);
+    ReadField<ControlTable::kPwmLimit>(raw);
     return PwmFromRaw(static_cast<int16_t>(raw));
   }
 
@@ -821,7 +815,7 @@ class RegMap : public RegMapBase {
    * @param[in] percent PWM 上限（%）
    */
   void WritePwmLimit(const float percent) {
-    WriteRegField(ControlTable::kPwmLimit, PwmToRaw(percent));
+    WriteField<ControlTable::kPwmLimit>(PwmToRaw(percent));
   }
 
   /**
@@ -844,7 +838,7 @@ class RegMap : public RegMapBase {
    */
   float ReadCurrentLimit() {
     uint16_t current_limit;
-    ReadRegField(ControlTable::kCurrentLimit, current_limit);
+    ReadField<ControlTable::kCurrentLimit>(current_limit);
     return CurrentFromRaw(current_limit);
   }
 
@@ -853,7 +847,7 @@ class RegMap : public RegMapBase {
    * @param[in] current_limit 电流上限（A）
    */
   void WriteCurrentLimit(const uint16_t current_limit) {
-    WriteRegField(ControlTable::kCurrentLimit, current_limit);
+    WriteField<ControlTable::kCurrentLimit>(current_limit);
   }
 
   /**
@@ -884,7 +878,7 @@ class RegMap : public RegMapBase {
    */
   float ReadVelocityLimit() {
     uint32_t raw;
-    ReadRegField(ControlTable::kVelocityLimit, raw);
+    ReadField<ControlTable::kVelocityLimit>(raw);
     return VelocityFromRaw(raw);
   }
 
@@ -893,7 +887,7 @@ class RegMap : public RegMapBase {
    * @param[in] rpm 速度上限（RPM）
    */
   void WriteVelocityLimit(const float rpm) {
-    WriteRegField(ControlTable::kVelocityLimit, VelocityToRaw(rpm));
+    WriteField<ControlTable::kVelocityLimit>(VelocityToRaw(rpm));
   }
 
   /**
@@ -922,7 +916,7 @@ class RegMap : public RegMapBase {
    */
   uint32_t ReadMaxPositionLimit() {
     uint32_t max_position_limit;
-    ReadRegField(ControlTable::kMaxPositionLimit, max_position_limit);
+    ReadField<ControlTable::kMaxPositionLimit>(max_position_limit);
     return max_position_limit;
   }
 
@@ -934,7 +928,7 @@ class RegMap : public RegMapBase {
    * @note 修改后需调用 StoreEeprom() 并重启生效
    */
   void WriteMaxPositionLimit(const uint32_t max_position_limit) {
-    WriteRegField(ControlTable::kMaxPositionLimit, max_position_limit);
+    WriteField<ControlTable::kMaxPositionLimit>(max_position_limit);
   }
 
   /**
@@ -963,7 +957,7 @@ class RegMap : public RegMapBase {
    */
   uint32_t ReadMinPositionLimit() {
     uint32_t min_position_limit = 0;
-    ReadRegField(ControlTable::kMinPositionLimit, min_position_limit);
+    ReadField<ControlTable::kMinPositionLimit>(min_position_limit);
     return min_position_limit;
   }
 
@@ -972,7 +966,7 @@ class RegMap : public RegMapBase {
    * @param[in] min_position_limit 位置下限（pulse）
    */
   void WriteMinPositionLimit(const uint32_t min_position_limit) {
-    WriteRegField(ControlTable::kMinPositionLimit, min_position_limit);
+    WriteField<ControlTable::kMinPositionLimit>(min_position_limit);
   }
 
   /**
@@ -981,7 +975,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadProtectionTime() {
     uint8_t protection_time;
-    ReadRegField(ControlTable::kProtectionTime, protection_time);
+    ReadField<ControlTable::kProtectionTime>(protection_time);
     return MsFromRaw(protection_time);
   }
 
@@ -990,7 +984,7 @@ class RegMap : public RegMapBase {
    * @param[in] protection_time 保护时间（ms）
    */
   void WriteProtectionTime(const uint8_t protection_time) {
-    WriteRegField(ControlTable::kProtectionTime, MsToRaw(protection_time));
+    WriteField<ControlTable::kProtectionTime>(MsToRaw(protection_time));
   }
 
 #pragma endregion  // "保护限制组"
@@ -1036,7 +1030,7 @@ class RegMap : public RegMapBase {
    */
   float ReadVelocityIgain() {
     uint16_t raw;
-    ReadRegField(ControlTable::kVelocityIgain, raw);
+    ReadField<ControlTable::kVelocityIgain>(raw);
     return PidIGainFromRaw(raw);
   }
 
@@ -1045,7 +1039,7 @@ class RegMap : public RegMapBase {
    * @param[in] velocity_igain I 增益
    */
   void WriteVelocityIgain(const float velocity_igain) {
-    WriteRegField(ControlTable::kVelocityIgain, PidIGainToRaw(velocity_igain));
+    WriteField<ControlTable::kVelocityIgain>(PidIGainToRaw(velocity_igain));
   }
 
   /**
@@ -1075,7 +1069,7 @@ class RegMap : public RegMapBase {
    */
   float ReadVelocityPgain() {
     uint16_t raw;
-    ReadRegField(ControlTable::kVelocityPgain, raw);
+    ReadField<ControlTable::kVelocityPgain>(raw);
     return PidPGainFromRaw(raw);
   }
 
@@ -1084,7 +1078,7 @@ class RegMap : public RegMapBase {
    * @param[in] velocity_pgain P 增益
    */
   void WriteVelocityPgain(const float velocity_pgain) {
-    WriteRegField(ControlTable::kVelocityPgain, PidPGainToRaw(velocity_pgain));
+    WriteField<ControlTable::kVelocityPgain>(PidPGainToRaw(velocity_pgain));
   }
 
   /**
@@ -1120,7 +1114,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPositionDgain() {
     uint16_t raw;
-    ReadRegField(ControlTable::kPositionDgain, raw);
+    ReadField<ControlTable::kPositionDgain>(raw);
     return PidDGainFromRaw(raw);
   }
 
@@ -1129,7 +1123,7 @@ class RegMap : public RegMapBase {
    * @param[in] position_dgain D 增益
    */
   void WritePositionDgain(const float position_dgain) {
-    WriteRegField(ControlTable::kPositionDgain, PidDGainToRaw(position_dgain));
+    WriteField<ControlTable::kPositionDgain>(PidDGainToRaw(position_dgain));
   }
 
   /**
@@ -1165,7 +1159,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPositionIgain() {
     uint16_t raw;
-    ReadRegField(ControlTable::kPositionIgain, raw);
+    ReadField<ControlTable::kPositionIgain>(raw);
     return PidIGainFromRaw(raw);
   }
 
@@ -1174,7 +1168,7 @@ class RegMap : public RegMapBase {
    * @param[in] position_igain I 增益
    */
   void WritePositionIgain(const float position_igain) {
-    WriteRegField(ControlTable::kPositionIgain, PidIGainToRaw(position_igain));
+    WriteField<ControlTable::kPositionIgain>(PidIGainToRaw(position_igain));
   }
 
   /**
@@ -1209,7 +1203,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPositionPgain() {
     uint16_t raw;
-    ReadRegField(ControlTable::kPositionPgain, raw);
+    ReadField<ControlTable::kPositionPgain>(raw);
     return PidPGainFromRaw(raw);
   }
 
@@ -1218,7 +1212,7 @@ class RegMap : public RegMapBase {
    * @param[in] position_pgain P 增益
    */
   void WritePositionPgain(const float position_pgain) {
-    WriteRegField(ControlTable::kPositionPgain, PidPGainToRaw(position_pgain));
+    WriteField<ControlTable::kPositionPgain>(PidPGainToRaw(position_pgain));
   }
 
   /**
@@ -1253,7 +1247,7 @@ class RegMap : public RegMapBase {
    */
   float ReadFeedforward2ndGain() {
     uint16_t raw;
-    ReadRegField(ControlTable::kFeedforward2ndGain, raw);
+    ReadField<ControlTable::kFeedforward2ndGain>(raw);
     return FeedforwardGainFromRaw(raw);
   }
 
@@ -1262,8 +1256,8 @@ class RegMap : public RegMapBase {
    * @param[in] feedforward_2nd_gain 前馈二阶增益
    */
   void WriteFeedforward2ndGain(const float feedforward_2nd_gain) {
-    WriteRegField(ControlTable::kFeedforward2ndGain,
-                  FeedforwardGainToRaw(feedforward_2nd_gain));
+    WriteField<ControlTable::kFeedforward2ndGain>(
+        FeedforwardGainToRaw(feedforward_2nd_gain));
   }
 
   /**
@@ -1298,7 +1292,7 @@ class RegMap : public RegMapBase {
    */
   float ReadFeedforward1stGain() {
     uint16_t raw;
-    ReadRegField(ControlTable::kFeedforward1stGain, raw);
+    ReadField<ControlTable::kFeedforward1stGain>(raw);
     return FeedforwardGainFromRaw(raw);
   }
 
@@ -1307,8 +1301,8 @@ class RegMap : public RegMapBase {
    * @param[in] feedforward_1st_gain 前馈一阶增益
    */
   void WriteFeedforward1stGain(const float feedforward_1st_gain) {
-    WriteRegField(ControlTable::kFeedforward1stGain,
-                  FeedforwardGainToRaw(feedforward_1st_gain));
+    WriteField<ControlTable::kFeedforward1stGain>(
+        FeedforwardGainToRaw(feedforward_1st_gain));
   }
 
 #pragma endregion  // "PID 参数组"
@@ -1368,7 +1362,7 @@ class RegMap : public RegMapBase {
    */
   float ReadProfileAcceleration() {
     uint32_t raw;
-    ReadRegField(ControlTable::kProfileAcceleration, raw);
+    ReadField<ControlTable::kProfileAcceleration>(raw);
     return AccelerationFromRaw(raw);
   }
 
@@ -1377,8 +1371,8 @@ class RegMap : public RegMapBase {
    * @param[in] acceleration 轨迹加速度（rev/min²，Velocity-based模式）
    */
   void WriteProfileAcceleration(const float acceleration) {
-    WriteRegField(ControlTable::kProfileAcceleration,
-                  AccelerationToRaw(acceleration));
+    WriteField<ControlTable::kProfileAcceleration>(
+        AccelerationToRaw(acceleration));
   }
 
   /**
@@ -1472,7 +1466,7 @@ class RegMap : public RegMapBase {
    */
   float ReadProfileVelocity() {
     uint32_t raw;
-    ReadRegField(ControlTable::kProfileVelocity, raw);
+    ReadField<ControlTable::kProfileVelocity>(raw);
     return VelocityFromRaw(raw);
   }
 
@@ -1481,7 +1475,7 @@ class RegMap : public RegMapBase {
    * @param[in] rpm 轨迹速度（RPM，Velocity-based模式）
    */
   void WriteProfileVelocity(const float rpm) {
-    WriteRegField(ControlTable::kProfileVelocity, VelocityToRaw(rpm));
+    WriteField<ControlTable::kProfileVelocity>(VelocityToRaw(rpm));
   }
 
 #pragma endregion  // "轨迹配置组"
@@ -1519,7 +1513,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadTorqueEnable() {
     uint8_t torque_enable = 0;
-    ReadRegField(ControlTable::kTorqueEnable, torque_enable);
+    ReadField<ControlTable::kTorqueEnable>(torque_enable);
     return torque_enable;
   }
 
@@ -1528,7 +1522,7 @@ class RegMap : public RegMapBase {
    * @param[in] torque_enable 力矩使能 (0: 禁用, 1: 使能)
    */
   void WriteTorqueEnable(const uint8_t torque_enable) {
-    WriteRegField(ControlTable::kTorqueEnable, torque_enable);
+    WriteField<ControlTable::kTorqueEnable>(torque_enable);
   }
 
   /**
@@ -1545,7 +1539,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadDxlLed() {
     uint8_t dxl_led = 0;
-    ReadRegField(ControlTable::kDxlLed, dxl_led);
+    ReadField<ControlTable::kDxlLed>(dxl_led);
     return dxl_led;
   }
 
@@ -1554,7 +1548,7 @@ class RegMap : public RegMapBase {
    * @param[in] dxl_led LED 状态 (0: 关, 1: 开)
    */
   void WriteDxlLed(const uint8_t dxl_led) {
-    WriteRegField(ControlTable::kDxlLed, dxl_led);
+    WriteField<ControlTable::kDxlLed>(dxl_led);
   }
 
   /**
@@ -1563,7 +1557,7 @@ class RegMap : public RegMapBase {
    */
   uint16_t ReadAlignToPosition() {
     uint16_t align_to_position = 0;
-    ReadRegField(ControlTable::kAlignToPosition, align_to_position);
+    ReadField<ControlTable::kAlignToPosition>(align_to_position);
     return align_to_position != 0;
   }
 
@@ -1575,7 +1569,7 @@ class RegMap : public RegMapBase {
    * - 调整Homing Offset使Present Position为目标位置
    */
   void WriteAlignToPosition(const uint16_t align_to_position) {
-    WriteRegField(ControlTable::kAlignToPosition, align_to_position);
+    WriteField<ControlTable::kAlignToPosition>(align_to_position);
   }
 
   /**
@@ -1611,7 +1605,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadHardwareErrorStatus() {
     uint8_t hardware_error_status = 0;
-    ReadRegField(ControlTable::kHardwareErrorStatus, hardware_error_status);
+    ReadField<ControlTable::kHardwareErrorStatus>(hardware_error_status);
     return hardware_error_status;
   }
 
@@ -1620,7 +1614,7 @@ class RegMap : public RegMapBase {
    * @param[in] hardware_error_status 硬件错误状态位域
    */
   void WriteHardwareErrorStatus(const uint8_t hardware_error_status) {
-    WriteRegField(ControlTable::kHardwareErrorStatus, hardware_error_status);
+    WriteField<ControlTable::kHardwareErrorStatus>(hardware_error_status);
   }
 
   /**
@@ -1649,7 +1643,7 @@ class RegMap : public RegMapBase {
    */
   uint16_t ReadBusWatchdog() {
     uint8_t raw;
-    ReadRegField(ControlTable::kBusWatchdog, raw);
+    ReadField<ControlTable::kBusWatchdog>(raw);
     return MsFromRaw(raw);
   }
 
@@ -1658,7 +1652,7 @@ class RegMap : public RegMapBase {
    * @param[in] milliseconds 看门狗时间（ms）
    */
   void WriteBusWatchdog(const uint16_t milliseconds) {
-    WriteRegField(ControlTable::kBusWatchdog, MsToRaw(milliseconds));
+    WriteField<ControlTable::kBusWatchdog>(MsToRaw(milliseconds));
   }
 
 #pragma endregion  // "控制命令组"
@@ -1695,7 +1689,7 @@ class RegMap : public RegMapBase {
    */
   float ReadGoalPwm() {
     uint16_t raw;
-    ReadRegField(ControlTable::kGoalPwm, raw);
+    ReadField<ControlTable::kGoalPwm>(raw);
     return PwmFromRaw(raw);
   }
 
@@ -1704,7 +1698,7 @@ class RegMap : public RegMapBase {
    * @param[in] percent 目标 PWM（%）
    */
   void WriteGoalPwm(const float percent) {
-    WriteRegField(ControlTable::kGoalPwm, PwmToRaw(percent));
+    WriteField<ControlTable::kGoalPwm>(PwmToRaw(percent));
   }
 
   /**
@@ -1730,7 +1724,7 @@ class RegMap : public RegMapBase {
    */
   uint16_t ReadGoalCurrent() {
     uint16_t goal_current;
-    ReadRegField(ControlTable::kGoalCurrent, goal_current);
+    ReadField<ControlTable::kGoalCurrent>(goal_current);
     return CurrentFromRaw(goal_current);
   }
 
@@ -1739,7 +1733,7 @@ class RegMap : public RegMapBase {
    * @param[in] goal_current 目标电流（0.001A）
    */
   void WriteGoalCurrent(const float goal_current) {
-    WriteRegField(ControlTable::kGoalCurrent, CurrentToRaw(goal_current));
+    WriteField<ControlTable::kGoalCurrent>(CurrentToRaw(goal_current));
   }
 
   /**
@@ -1771,7 +1765,7 @@ class RegMap : public RegMapBase {
    */
   float ReadGoalVelocity() {
     uint32_t raw;
-    ReadRegField(ControlTable::kGoalVelocity, raw);
+    ReadField<ControlTable::kGoalVelocity>(raw);
     return VelocityFromRaw(raw);
   }
 
@@ -1780,7 +1774,7 @@ class RegMap : public RegMapBase {
    * @param[in] rpm 目标速度（RPM）
    */
   void WriteGoalVelocity(const float rpm) {
-    WriteRegField(ControlTable::kGoalVelocity, VelocityToRaw(rpm));
+    WriteField<ControlTable::kGoalVelocity>(VelocityToRaw(rpm));
   }
 
   /**
@@ -1810,7 +1804,7 @@ class RegMap : public RegMapBase {
    */
   int32_t ReadGoalPosition() {
     uint32_t raw;
-    ReadRegField(ControlTable::kGoalPosition, raw);
+    ReadField<ControlTable::kGoalPosition>(raw);
     return static_cast<int32_t>(raw);
   }
 
@@ -1819,8 +1813,8 @@ class RegMap : public RegMapBase {
    * @param[in] goal_position 目标位置（pulse）
    */
   void WriteGoalPosition(const int32_t goal_position) {
-    WriteRegField(ControlTable::kGoalPosition,
-                  static_cast<uint32_t>(goal_position));
+    WriteField<ControlTable::kGoalPosition>(
+        static_cast<uint32_t>(goal_position));
   }
 
 #pragma endregion  // "目标值组"
@@ -1846,7 +1840,7 @@ class RegMap : public RegMapBase {
    */
   uint16_t ReadRealtimeTick() {
     uint16_t realtime_tick;
-    ReadRegField(ControlTable::kRealtimeTick, realtime_tick);
+    ReadField<ControlTable::kRealtimeTick>(realtime_tick);
     return realtime_tick;
   }
 
@@ -1855,7 +1849,7 @@ class RegMap : public RegMapBase {
    * @param[in] realtime_tick 实时时钟
    */
   void WriteRealtimeTick(const uint16_t realtime_tick) {
-    WriteRegField(ControlTable::kRealtimeTick, realtime_tick);
+    WriteField<ControlTable::kRealtimeTick>(realtime_tick);
   }
 
   /**
@@ -1884,7 +1878,7 @@ class RegMap : public RegMapBase {
    */
   bool ReadMoving() {
     uint8_t moving;
-    ReadRegField(ControlTable::kMoving, moving);
+    ReadField<ControlTable::kMoving>(moving);
     return moving != 0;
   }
 
@@ -1893,7 +1887,7 @@ class RegMap : public RegMapBase {
    * @param[in] moving 运动状态
    */
   void WriteMoving(const bool moving) {
-    WriteRegField(ControlTable::kMoving, moving);
+    WriteField<ControlTable::kMoving>(moving);
   }
 
   /**
@@ -1962,7 +1956,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadMovingStatus() {
     uint8_t moving_status;
-    ReadRegField(ControlTable::kMovingStatus, moving_status);
+    ReadField<ControlTable::kMovingStatus>(moving_status);
     return moving_status;
   }
 
@@ -1971,7 +1965,7 @@ class RegMap : public RegMapBase {
    * @param[in] moving_status 详细运动状态位域
    */
   void WriteMovingStatus(const uint8_t moving_status) {
-    WriteRegField(ControlTable::kMovingStatus, moving_status);
+    WriteField<ControlTable::kMovingStatus>(moving_status);
   }
 
   /**
@@ -1993,7 +1987,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPresentPwm() {
     int16_t raw;
-    ReadRegField(ControlTable::kPresentPwm, raw);
+    ReadField<ControlTable::kPresentPwm>(raw);
     return PwmFromRaw(raw);
   }
 
@@ -2002,7 +1996,7 @@ class RegMap : public RegMapBase {
    * @param[in] present_pwm 当前 PWM
    */
   void WritePresentPwm(const uint16_t present_pwm) {
-    WriteRegField(ControlTable::kPresentPwm, present_pwm);
+    WriteField<ControlTable::kPresentPwm>(present_pwm);
   }
 
   /**
@@ -2024,7 +2018,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPresentCurrent() {
     uint16_t present_current;
-    ReadRegField(ControlTable::kPresentCurrent, present_current);
+    ReadField<ControlTable::kPresentCurrent>(present_current);
     return CurrentFromRaw(present_current);
   }
 
@@ -2033,7 +2027,7 @@ class RegMap : public RegMapBase {
    * @param[in] present_current 当前电流
    */
   void WritePresentCurrent(const float present_current) {
-    WriteRegField(ControlTable::kPresentCurrent, CurrentToRaw(present_current));
+    WriteField<ControlTable::kPresentCurrent>(CurrentToRaw(present_current));
   }
 
   /**
@@ -2059,7 +2053,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPresentVelocity() {
     uint32_t raw;
-    ReadRegField(ControlTable::kPresentVelocity, raw);
+    ReadField<ControlTable::kPresentVelocity>(raw);
     return VelocityFromRaw(raw);
   }
 
@@ -2068,7 +2062,7 @@ class RegMap : public RegMapBase {
    * @param[in] present_velocity 当前速度
    */
   void WritePresentVelocity(const uint32_t present_velocity) {
-    WriteRegField(ControlTable::kPresentVelocity, present_velocity);
+    WriteField<ControlTable::kPresentVelocity>(present_velocity);
   }
 
   /**
@@ -2097,7 +2091,7 @@ class RegMap : public RegMapBase {
    */
   int32_t ReadPresentPosition() {
     uint32_t raw;
-    ReadRegField(ControlTable::kPresentPosition, raw);
+    ReadField<ControlTable::kPresentPosition>(raw);
     return static_cast<int32_t>(raw);
   }
 
@@ -2106,8 +2100,8 @@ class RegMap : public RegMapBase {
    * @param[in] present_position 当前位置
    */
   void WritePresentPosition(const int32_t present_position) {
-    WriteRegField(ControlTable::kPresentPosition,
-                  static_cast<uint32_t>(present_position));
+    WriteField<ControlTable::kPresentPosition>(
+        static_cast<uint32_t>(present_position));
   }
 
   /**
@@ -2141,7 +2135,7 @@ class RegMap : public RegMapBase {
    */
   float ReadVelocityTrajectory() {
     uint32_t raw;
-    ReadRegField(ControlTable::kVelocityTrajectory, raw);
+    ReadField<ControlTable::kVelocityTrajectory>(raw);
     return VelocityFromRaw(raw);
   }
 
@@ -2150,7 +2144,7 @@ class RegMap : public RegMapBase {
    * @param[in] velocity_trajectory 速度轨迹
    */
   void WriteVelocityTrajectory(const uint32_t velocity_trajectory) {
-    WriteRegField(ControlTable::kVelocityTrajectory, velocity_trajectory);
+    WriteField<ControlTable::kVelocityTrajectory>(velocity_trajectory);
   }
 
   /**
@@ -2176,7 +2170,7 @@ class RegMap : public RegMapBase {
    */
   int32_t ReadPositionTrajectory() {
     uint32_t raw;
-    ReadRegField(ControlTable::kPositionTrajectory, raw);
+    ReadField<ControlTable::kPositionTrajectory>(raw);
     return static_cast<int32_t>(raw);
   }
 
@@ -2185,8 +2179,8 @@ class RegMap : public RegMapBase {
    * @param[in] position_trajectory 位置轨迹
    */
   void WritePositionTrajectory(const int32_t position_trajectory) {
-    WriteRegField(ControlTable::kPositionTrajectory,
-                  static_cast<uint32_t>(position_trajectory));
+    WriteField<ControlTable::kPositionTrajectory>(
+        static_cast<uint32_t>(position_trajectory));
   }
 
   /**
@@ -2211,7 +2205,7 @@ class RegMap : public RegMapBase {
    */
   float ReadPresentInputVoltage() {
     uint16_t raw;
-    ReadRegField(ControlTable::kPresentInputVoltage, raw);
+    ReadField<ControlTable::kPresentInputVoltage>(raw);
     return VoltageFromRaw(raw);
   }
 
@@ -2220,7 +2214,7 @@ class RegMap : public RegMapBase {
    * @param present_input_voltage 当前输入电压
    */
   void WritePresentInputVoltage(const uint16_t present_input_voltage) {
-    WriteRegField(ControlTable::kPresentInputVoltage, present_input_voltage);
+    WriteField<ControlTable::kPresentInputVoltage>(present_input_voltage);
   }
 
   /**
@@ -2237,7 +2231,7 @@ class RegMap : public RegMapBase {
    */
   uint8_t ReadPresentTemperature() {
     uint8_t present_temperature;
-    ReadRegField(ControlTable::kPresentTemperature, present_temperature);
+    ReadField<ControlTable::kPresentTemperature>(present_temperature);
     return present_temperature;
   }
 
@@ -2246,7 +2240,7 @@ class RegMap : public RegMapBase {
    * @param present_temperature 当前温度
    */
   void WritePresentTemperature(const uint8_t present_temperature) {
-    WriteRegField(ControlTable::kPresentTemperature, present_temperature);
+    WriteField<ControlTable::kPresentTemperature>(present_temperature);
   }
 
 #pragma endregion  // "状态反馈组"
@@ -2256,36 +2250,36 @@ class RegMap : public RegMapBase {
    * @return 错误码
    */
   Error RecoveryEeprom() {
-    RestoreEeprom(ControlTable::kModelNumber);
-    RestoreEeprom(ControlTable::kModelInformation);
-    RestoreEeprom(ControlTable::kFirmwareVersion);
-    RestoreEeprom(ControlTable::kId);
-    RestoreEeprom(ControlTable::kBaudRate);
-    RestoreEeprom(ControlTable::kReturnDelayTime);
-    RestoreEeprom(ControlTable::kStatusReturnLevel);
-    RestoreEeprom(ControlTable::kDriveMode);
-    RestoreEeprom(ControlTable::kOperatingMode);
-    RestoreEeprom(ControlTable::kShutdown);
-    RestoreEeprom(ControlTable::kHomingOffset);
-    RestoreEeprom(ControlTable::kMovingThreshold);
-    RestoreEeprom(ControlTable::kTemperatureLimit);
-    RestoreEeprom(ControlTable::kMaxVoltageLimit);
-    RestoreEeprom(ControlTable::kMinVoltageLimit);
-    RestoreEeprom(ControlTable::kPwmLimit);
-    RestoreEeprom(ControlTable::kCurrentLimit);
-    RestoreEeprom(ControlTable::kVelocityLimit);
-    RestoreEeprom(ControlTable::kMaxPositionLimit);
-    RestoreEeprom(ControlTable::kMinPositionLimit);
-    RestoreEeprom(ControlTable::kProtectionTime);
-    RestoreEeprom(ControlTable::kVelocityIgain);
-    RestoreEeprom(ControlTable::kVelocityPgain);
-    RestoreEeprom(ControlTable::kPositionDgain);
-    RestoreEeprom(ControlTable::kPositionIgain);
-    RestoreEeprom(ControlTable::kPositionPgain);
-    RestoreEeprom(ControlTable::kFeedforward2ndGain);
-    RestoreEeprom(ControlTable::kFeedforward1stGain);
-    RestoreEeprom(ControlTable::kProfileAcceleration);
-    RestoreEeprom(ControlTable::kProfileVelocity);
+    RestoreEeprom<ControlTable::kModelNumber>();
+    RestoreEeprom<ControlTable::kModelInformation>();
+    RestoreEeprom<ControlTable::kFirmwareVersion>();
+    RestoreEeprom<ControlTable::kId>();
+    RestoreEeprom<ControlTable::kBaudRate>();
+    RestoreEeprom<ControlTable::kReturnDelayTime>();
+    RestoreEeprom<ControlTable::kStatusReturnLevel>();
+    RestoreEeprom<ControlTable::kDriveMode>();
+    RestoreEeprom<ControlTable::kOperatingMode>();
+    RestoreEeprom<ControlTable::kShutdown>();
+    RestoreEeprom<ControlTable::kHomingOffset>();
+    RestoreEeprom<ControlTable::kMovingThreshold>();
+    RestoreEeprom<ControlTable::kTemperatureLimit>();
+    RestoreEeprom<ControlTable::kMaxVoltageLimit>();
+    RestoreEeprom<ControlTable::kMinVoltageLimit>();
+    RestoreEeprom<ControlTable::kPwmLimit>();
+    RestoreEeprom<ControlTable::kCurrentLimit>();
+    RestoreEeprom<ControlTable::kVelocityLimit>();
+    RestoreEeprom<ControlTable::kMaxPositionLimit>();
+    RestoreEeprom<ControlTable::kMinPositionLimit>();
+    RestoreEeprom<ControlTable::kProtectionTime>();
+    RestoreEeprom<ControlTable::kVelocityIgain>();
+    RestoreEeprom<ControlTable::kVelocityPgain>();
+    RestoreEeprom<ControlTable::kPositionDgain>();
+    RestoreEeprom<ControlTable::kPositionIgain>();
+    RestoreEeprom<ControlTable::kPositionPgain>();
+    RestoreEeprom<ControlTable::kFeedforward2ndGain>();
+    RestoreEeprom<ControlTable::kFeedforward1stGain>();
+    RestoreEeprom<ControlTable::kProfileAcceleration>();
+    RestoreEeprom<ControlTable::kProfileVelocity>();
     CHECK(StoreEeprom());
     return Error::kOk;
   }

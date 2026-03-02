@@ -27,6 +27,9 @@ namespace hortor::drivers::MT6701 {
 // todo：除了ReadRaw,其它函数都没测试过
 template <typename BusImpl>
 class RegMap : public BusImpl {
+  using BusImpl::ReadField;
+  using BusImpl::WriteField;
+
  public:
   /**
    * @brief 读取原始位置和状态值
@@ -110,7 +113,7 @@ class RegMap : public BusImpl {
    * 注意：此功能仅在QFN封装的MT6701芯片上可用。
    */
   Error WriteNaNbNzEnable(bool enable) {  // 仅适用于QFN版本
-    CHECK(this->WriteRegField(MT6701Regs::kUVM_MUX, enable));
+    CHECK(this->template WriteField<MT6701Regs::kUVM_MUX>(enable));
     return Error::kOk;
   }
 
@@ -155,8 +158,8 @@ class RegMap : public BusImpl {
    * 可以选择顺时针或逆时针方向作为角度增加的方向。
    */
   Error WriteDirection(const Direction direction) {
-    CHECK(
-        this->WriteRegField(MT6701Regs::kDIR, static_cast<uint8_t>(direction)));
+    CHECK(this->template WriteField<MT6701Regs::kDIR>(
+        static_cast<uint8_t>(direction)));
     return Error::kOk;
   }
   /**
@@ -168,7 +171,7 @@ class RegMap : public BusImpl {
    */
   Error GetDirection(Direction& direction) {
     uint8_t value;
-    CHECK(this->ReadRegField(MT6701Regs::kDIR, value));
+    CHECK(this->template ReadField<MT6701Regs::kDIR>(value));
     direction = static_cast<Direction>(value);
     return Error::kOk;
   }
@@ -200,8 +203,10 @@ class RegMap : public BusImpl {
     if (pulses >= 1024) {
       return Error::kOutOfRange;
     }
-    CHECK(this->WriteRegField(
-        MT6701Regs::kABZ_RES_8, MT6701Regs::kABZ_RES_0, pulses));
+    using kABZ_RES_8 = MT6701Regs::kABZ_RES_8;
+    using kABZ_RES_0 = MT6701Regs::kABZ_RES_0;
+    CHECK(
+        this->template WriteField<uint16_t, kABZ_RES_8, kABZ_RES_0>(pulses));
     return Error::kOk;
   }
 
@@ -218,7 +223,8 @@ class RegMap : public BusImpl {
     if (pairs >= 16) {
       return Error::kOutOfRange;
     }
-    CHECK(this->WriteRegField(MT6701Regs::kUVM_RES_0, pairs));
+    using kUVM_RES_0 = MT6701Regs::kUVM_RES_0;
+    CHECK(this->template WriteField<kUVM_RES_0>(pairs));
     return Error::kOk;
   }
 
@@ -231,8 +237,8 @@ class RegMap : public BusImpl {
    * 可以选择UVW模式（适用于无刷电机）或ABZ模式（增量式编码器）。
    */
   Error WriteMode(Mode mode) {
-    CHECK(
-        this->WriteRegField(MT6701Regs::kABZ_MUX, static_cast<uint8_t>(mode)));
+    using kABZ_MUX = MT6701Regs::kABZ_MUX;
+    CHECK(this->template WriteField<kABZ_MUX>(static_cast<uint8_t>(mode)));
     return Error::kOk;
   }
 
@@ -245,7 +251,9 @@ class RegMap : public BusImpl {
    * 此方法使用12位分辨率的原始值（0-4096范围）。
    */
   Error WriteZeroRaw(uint16_t zero) {
-    CHECK(this->WriteRegField(MT6701Regs::kZERO_8, MT6701Regs::kZERO_0, zero));
+    using kZERO_8 = MT6701Regs::kZERO_8;
+    using kZERO_0 = MT6701Regs::kZERO_0;
+    CHECK(this->template WriteField<uint16_t, kZERO_8, kZERO_0>(zero));
     return Error::kOk;
   }
 
@@ -270,9 +278,10 @@ class RegMap : public BusImpl {
    * 较大的迟滞值可以减少噪声，但会降低灵敏度。
    */
   Error WriteHyst(Hyst hysteresis) {
-    CHECK(this->WriteRegField(MT6701Regs::kHYST_2,
-                              MT6701Regs::kHYST_0,
-                              static_cast<uint16_t>(hysteresis)));
+    using kHYST_2 = MT6701Regs::kHYST_2;
+    using kHYST_0 = MT6701Regs::kHYST_0;
+    CHECK(this->template WriteField<uint8_t, kHYST_2, kHYST_0>(
+        static_cast<uint8_t>(hysteresis)));
     return Error::kOk;
   }
 
@@ -297,10 +306,13 @@ class RegMap : public BusImpl {
       return Error::kInvalidParameter;
     }
 
-    CHECK(this->WriteRegField(
-        MT6701Regs::kA_START_8, MT6701Regs::kA_START_0, start));
-    CHECK(this->WriteRegField(
-        MT6701Regs::kA_STOP_8, MT6701Regs::kA_STOP_0, stop));
+    using kA_START_8 = MT6701Regs::kA_START_8;
+    using kA_START_0 = MT6701Regs::kA_START_0;
+    using kA_STOP_8 = MT6701Regs::kA_STOP_8;
+    using kA_STOP_0 = MT6701Regs::kA_STOP_0;
+    CHECK(
+        this->template WriteField<uint16_t, kA_START_8, kA_START_0>(start));
+    CHECK(this->template WriteField<uint16_t, kA_STOP_8, kA_STOP_0>(stop));
     return Error::kOk;
   }
 
@@ -330,8 +342,9 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器在ABZ模式下Z信号的脉冲宽度。
    */
   Error WritePulseWidth(PulseWidth width) {
-    CHECK(this->WriteRegField(MT6701Regs::kPULSE_WIDTH,
-                              static_cast<uint8_t>(width)));
+    using kPULSE_WIDTH = MT6701Regs::kPULSE_WIDTH;
+    CHECK(this->template WriteField<uint8_t, kPULSE_WIDTH>(
+        static_cast<uint8_t>(width)));
     return Error::kOk;
   }
   /**
@@ -343,7 +356,8 @@ class RegMap : public BusImpl {
    */
   Error ReadPulseWidth(PulseWidth& width) {
     uint8_t value;
-    CHECK(this->ReadRegField(MT6701Regs::kPULSE_WIDTH, value));
+    using kPULSE_WIDTH = MT6701Regs::kPULSE_WIDTH;
+    CHECK(this->template ReadField<kPULSE_WIDTH>(value));
     width = static_cast<PulseWidth>(value);
     return Error::kOk;
   }
@@ -355,8 +369,8 @@ class RegMap : public BusImpl {
    * 设置MT6701传感器PWM输出模式的频率。
    */
   Error WritePwmFreq(PwmFreq freq) {
-    CHECK(
-        this->WriteRegField(MT6701Regs::kPWM_FREQ, static_cast<uint8_t>(freq)));
+    using kPWM_FREQ = MT6701Regs::kPWM_FREQ;
+    CHECK(this->template WriteField<kPWM_FREQ>(static_cast<uint8_t>(freq)));
     return Error::kOk;
   }
   /**
@@ -368,7 +382,8 @@ class RegMap : public BusImpl {
    */
   Error ReadPwmFreq(PwmFreq& freq) {
     uint8_t value;
-    CHECK(this->ReadRegField(MT6701Regs::kPWM_FREQ, value));
+    using kPWM_FREQ = MT6701Regs::kPWM_FREQ;
+    CHECK(this->template ReadField<kPWM_FREQ>(value));
     freq = static_cast<PwmFreq>(value);
     return Error::kOk;
   }
@@ -382,8 +397,9 @@ class RegMap : public BusImpl {
    * 低电平有效时，占空比随角度增加而减少。
    */
   Error WritePwmPolarity(PwmPol polarity) {
-    CHECK(this->WriteRegField(MT6701Regs::kPWM_POL,
-                              static_cast<uint8_t>(polarity)));
+    using kPWM_POL = MT6701Regs::kPWM_POL;
+    CHECK(
+        this->template WriteField<kPWM_POL>(static_cast<uint8_t>(polarity)));
     return Error::kOk;
   }
   /**
@@ -395,7 +411,8 @@ class RegMap : public BusImpl {
    */
   Error ReadPwmPolarity(PwmPol& polarity) {
     uint8_t value;
-    CHECK(this->ReadRegField(MT6701Regs::kPWM_POL, value));
+    using kPWM_POL = MT6701Regs::kPWM_POL;
+    CHECK(this->template ReadField<kPWM_POL>(value));
     polarity = static_cast<PwmPol>(value);
     return Error::kOk;
   }
@@ -408,8 +425,8 @@ class RegMap : public BusImpl {
    * 可以选择模拟输出（电压随角度变化）或PWM输出（占空比随角度变化）。
    */
   Error WriteOutMode(const OutMode mode) {
-    CHECK(
-        this->WriteRegField(MT6701Regs::kOUT_MODE, static_cast<uint8_t>(mode)));
+    using kOUT_MODE = MT6701Regs::kOUT_MODE;
+    CHECK(this->template WriteField<kOUT_MODE>(static_cast<uint8_t>(mode)));
     return Error::kOk;
   }
   /**
@@ -421,7 +438,8 @@ class RegMap : public BusImpl {
    */
   Error ReadOutMode(OutMode& mode) {
     uint8_t value;
-    CHECK(this->ReadRegField(MT6701Regs::kOUT_MODE, value));
+    using kOUT_MODE = MT6701Regs::kOUT_MODE;
+    CHECK(this->template ReadField<kOUT_MODE>(value));
     mode = static_cast<OutMode>(value);
     return Error::kOk;
   }

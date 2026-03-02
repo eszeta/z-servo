@@ -6,6 +6,7 @@
 #include <Arduino.h>
 
 #include "base/types.h"
+#include "hortor.h"
 #include "regmap/regmap_i2c_bus.h"
 #include "types.h"
 
@@ -36,8 +37,9 @@ class RegMapI2CBus : public regmap::RegMapI2CBus {
                 Status& field_status,
                 bool& button_pushed,
                 bool& track_loss) {
-    CHECK(ReadRegField(MT6701Regs::kANGLE_6, MT6701Regs::kANGLE_0, angle_raw));
-
+    using kANGLE_6 = MT6701Regs::kANGLE_6;
+    using kANGLE_0 = MT6701Regs::kANGLE_0;
+    CHECK(ReadField<uint16_t, kANGLE_6, kANGLE_0>(angle_raw));
     // I2C模式下不支持这些状态读取
     (void)field_status;
     (void)button_pushed;

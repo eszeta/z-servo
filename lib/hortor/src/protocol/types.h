@@ -38,16 +38,13 @@ enum : uint8_t {
 
 constexpr uint8_t kBroadcastId = 0xfe;
 
-template <typename T = uint8_t>
-struct ControlTableItem {
-  const regmap::RegField<T> reg;
-  const T default_value;
-
-  constexpr ControlTableItem(const uint8_t address,
-                             const uint8_t shift,
-                             const uint8_t bits,
-                             const T default_value)
-      : reg(address, shift, bits), default_value(default_value) {}
+template <typename T,
+          uint8_t Address,
+          uint8_t Shift,
+          uint8_t Bits,
+          T default_value>
+struct ControlTableItem : regmap::Field<T, Address, Shift, Bits> {
+  static constexpr T kDefault = default_value;
 };
 
 struct ControlTableBlock {

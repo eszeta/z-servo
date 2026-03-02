@@ -219,200 +219,201 @@ enum class LOW_PASS_ON_6D {
  * @brief 陀螺仪控制寄存器，用于控制陀螺仪的工作模式
  */
 namespace LSM6DSOWRegs {
-using RegFieldU08 = regmap::RegFieldU08;
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
 /**
    * @brief WHO_AM_I寄存器
    * @note 这是一个只读寄存器。其值固定为6Ch。
    */
-constexpr RegFieldU08 kWHO_AM_I{0X0F, 0, 8};
+struct kWHO_AM_I : FieldU08<0X0F, 0, 8> {};
 
 /**
    * @brief CTRL1_XL (10h)
    */
-constexpr RegFieldU08 kCTRL1_XL{0X10, 0, 8};
+struct kCTRL1_XL : FieldU08<0X10, 0, 8> {};
 /**
    * @brief 加速度计ODR选择
    */
-constexpr RegFieldU08 kODR_XL{0X10, 4, 4};
+struct kODR_XL : FieldU08<0X10, 4, 4> {};
 /**
    * @brief 加速度计满量程选择
    */
-constexpr RegFieldU08 kFS_XL{0X10, 2, 2};
+struct kFS_XL : FieldU08<0X10, 2, 2> {};
 /**
    * @brief 加速度计高分辨率选择
    */
-constexpr RegFieldU08 kLPF2_XL_EN{0X10, 1, 1};
+struct kLPF2_XL_EN : FieldU08<0X10, 1, 1> {};
 
 /**
    * @brief CTRL2_G (11h)
    */
-constexpr RegFieldU08 kCTRL2_G{0X11, 0, 8};
+struct kCTRL2_G : FieldU08<0X11, 0, 8> {};
 /**
    * @brief 陀螺仪ODR选择
    */
-constexpr RegFieldU08 kODR_G{0X11, 4, 4};
+struct kODR_G : FieldU08<0X11, 4, 4> {};
 /**
    * @brief 陀螺仪满量程选择
    */
-constexpr RegFieldU08 kFS_G{0X11, 2, 2};
+struct kFS_G : FieldU08<0X11, 2, 2> {};
 /**
    * @brief 陀螺仪125 dps满量程选择
    */
-constexpr RegFieldU08 kFS_125{0X11, 1, 1};
+struct kFS_125 : FieldU08<0X11, 1, 1> {};
 
 /**
    * @brief CTRL7_G (16h)
    */
-constexpr RegFieldU08 kCTRL7_G{0X16, 0, 8};
+struct kCTRL7_G : FieldU08<0X16, 0, 8> {};
 /**
    * @brief 陀螺仪高性能工作模式选择
    */
-constexpr RegFieldU08 kG_HM_MODE{0X16, 7, 1};
+struct kG_HM_MODE : FieldU08<0X16, 7, 1> {};
 /**
    * @brief 陀螺仪高通滤波器使能
    */
-constexpr RegFieldU08 kHP_EN_G{0X16, 6, 1};
+struct kHP_EN_G : FieldU08<0X16, 6, 1> {};
 /**
    * @brief 陀螺仪高通滤波器截止频率选择
    */
-constexpr RegFieldU08 kHPM_G{0X16, 4, 2};
+struct kHPM_G : FieldU08<0X16, 4, 2> {};
 /**
    * @brief 加速度计用户偏移校正模块使能
    */
-constexpr RegFieldU08 kUSR_OFF_ON_OUT{0X16, 1, 1};
+struct kUSR_OFF_ON_OUT : FieldU08<0X16, 1, 1> {};
 
 /**
    * @brief CTRL8_XL (17h)
    */
-constexpr RegFieldU08 kCTRL8_XL{0X17, 0, 8};
+struct kCTRL8_XL : FieldU08<0X17, 0, 8> {};
 /**
    * @brief 加速度计LPF2和高通滤波器配置及截止频率设置
    */
-constexpr RegFieldU08 kHPCF_XL{0X17, 5, 3};
+struct kHPCF_XL : FieldU08<0X17, 5, 3> {};
 /**
    * @brief 加速度计高通滤波器参考模式使能
    */
-constexpr RegFieldU08 kHP_REF_MODE_XL{0X17, 4, 1};
+struct kHP_REF_MODE_XL : FieldU08<0X17, 4, 1> {};
 /**
    * @brief 加速度计LPF2和HPF快速稳定模式使能
    */
-constexpr RegFieldU08 kFASTSETTL_MODE_XL{0X17, 3, 1};
+struct kFASTSETTL_MODE_XL : FieldU08<0X17, 3, 1> {};
 /**
    * @brief 加速度计斜率滤波器/高通滤波器选择
    */
-constexpr RegFieldU08 kHP_SLOPE_XL_EN{0X17, 2, 1};
+struct kHP_SLOPE_XL_EN : FieldU08<0X17, 2, 1> {};
 /**
    * @brief 6D功能的LPF2选择
    */
-constexpr RegFieldU08 kLOW_PASS_ON_6D{0X17, 0, 1};
+struct kLOW_PASS_ON_6D : FieldU08<0X17, 0, 1> {};
 
 /**
    * @brief STATUS_REG (1Eh)
    */
-constexpr RegFieldU08 kSTATUS_REG{0X1E, 0, 8};
+struct kSTATUS_REG : FieldU08<0X1E, 0, 8> {};
 /**
    * @brief 温度数据可用标志
    */
-constexpr RegFieldU08 kTDA{0x1E, 2, 1};
+struct kTDA : FieldU08<0x1E, 2, 1> {};
 /**
    * @brief 陀螺仪数据可用标志
    */
-constexpr RegFieldU08 kGDA{0x1E, 1, 1};
+struct kGDA : FieldU08<0x1E, 1, 1> {};
 /**
    * @brief 加速度计数据可用标志
    */
-constexpr RegFieldU08 kXLDA{0x1E, 0, 1};
+struct kXLDA : FieldU08<0x1E, 0, 1> {};
 
 /**
    * @brief 温度数据输出寄存器
    */
-constexpr RegFieldU08 kOUT_TEMP{0x20, 0, 8};
+struct kOUT_TEMP : FieldU08<0x20, 0, 8> {};
 /**
    * @brief 温度数据输出寄存器低字节
    */
-constexpr RegFieldU08 kOUT_TEMP_L{0x20, 0, 8};
+struct kOUT_TEMP_L : FieldU08<0x20, 0, 8> {};
 /**
    * @brief 温度数据输出寄存器高字节
    */
-constexpr RegFieldU08 kOUT_TEMP_H{0x21, 0, 8};
+struct kOUT_TEMP_H : FieldU08<0x21, 0, 8> {};
 
 /**
    * @brief 陀螺仪X轴角速度数据输出寄存器
    */
-constexpr RegFieldU08 kOUTX_G{0x22, 0, 8};
+struct kOUTX_G : FieldU08<0x22, 0, 8> {};
 /**
    * @brief 陀螺仪X轴角速度数据输出寄存器低字节
    */
-constexpr RegFieldU08 kOUTX_L_G{0x22, 0, 8};
+struct kOUTX_L_G : FieldU08<0x22, 0, 8> {};
 /**
    * @brief 陀螺仪X轴角速度数据输出寄存器高字节
    */
-constexpr RegFieldU08 kOUTX_H_G{0x23, 0, 8};
+struct kOUTX_H_G : FieldU08<0x23, 0, 8> {};
 
 /**
    * @brief 陀螺仪Y轴角速度数据输出寄存器
    */
-constexpr RegFieldU08 kOUTY_G{0x24, 0, 8};
+struct kOUTY_G : FieldU08<0x24, 0, 8> {};
 /**
    * @brief 陀螺仪Y轴角速度数据输出寄存器低字节
    */
-constexpr RegFieldU08 kOUTY_L_G{0x24, 0, 8};
+struct kOUTY_L_G : FieldU08<0x24, 0, 8> {};
 /**
    * @brief 陀螺仪Y轴角速度数据输出寄存器高字节
    */
-constexpr RegFieldU08 kOUTY_H_G{0x25, 0, 8};
+struct kOUTY_H_G : FieldU08<0x25, 0, 8> {};
 
 /**
    * @brief 陀螺仪Z轴角速度数据输出寄存器
    */
-constexpr RegFieldU08 kOUTZ_G{0x26, 0, 8};
+struct kOUTZ_G : FieldU08<0x26, 0, 8> {};
 /**
    * @brief 陀螺仪Z轴角速度数据输出寄存器低字节
    */
-constexpr RegFieldU08 kOUTZ_L_G{0x26, 0, 8};
+struct kOUTZ_L_G : FieldU08<0x26, 0, 8> {};
 /**
    * @brief 陀螺仪Z轴角速度数据输出寄存器高字节
    */
-constexpr RegFieldU08 kOUTZ_H_G{0x27, 0, 8};
+struct kOUTZ_H_G : FieldU08<0x27, 0, 8> {};
 
 /**
    * @brief 加速度计X轴加速度数据输出寄存器
    */
-constexpr RegFieldU08 kOUTX_A{0x28, 0, 8};
+struct kOUTX_A : FieldU08<0x28, 0, 8> {};
 /**
    * @brief 加速度计X轴加速度数据输出寄存器低字节
    */
-constexpr RegFieldU08 kOUTX_L_A{0x28, 0, 8};
+struct kOUTX_L_A : FieldU08<0x28, 0, 8> {};
 /**
    * @brief 加速度计X轴加速度数据输出寄存器高字节
    */
-constexpr RegFieldU08 kOUTX_H_A{0x29, 0, 8};
+struct kOUTX_H_A : FieldU08<0x29, 0, 8> {};
 
 /**
    * @brief 加速度计Y轴加速度数据输出寄存器
    */
-constexpr RegFieldU08 kOUTY_A{0x2A, 0, 8};
+struct kOUTY_A : FieldU08<0x2A, 0, 8> {};
 /**
    * @brief 加速度计Y轴加速度数据输出寄存器低字节
    */
-constexpr RegFieldU08 kOUTY_L_A{0x2A, 0, 8};
+struct kOUTY_L_A : FieldU08<0x2A, 0, 8> {};
 /**
    * @brief 加速度计Y轴加速度数据输出寄存器高字节
    */
-constexpr RegFieldU08 kOUTY_H_A{0x2B, 0, 8};
+struct kOUTY_H_A : FieldU08<0x2B, 0, 8> {};
 
 /**
    * @brief 加速度计Z轴加速度数据输出寄存器
    */
-constexpr RegFieldU08 kOUTZ_A{0x2C, 0, 8};
+struct kOUTZ_A : FieldU08<0x2C, 0, 8> {};
 /**
    * @brief 加速度计Z轴加速度数据输出寄存器低字节
    */
-constexpr RegFieldU08 kOUTZ_L_A{0x2C, 0, 8};
+struct kOUTZ_L_A : FieldU08<0x2C, 0, 8> {};
 /**
    * @brief 加速度计Z轴加速度数据输出寄存器高字节
    */
-constexpr RegFieldU08 kOUTZ_H_A{0x2D, 0, 8};
+struct kOUTZ_H_A : FieldU08<0x2D, 0, 8> {};
 };  // namespace LSM6DSOWRegs
 
 }  // namespace hortor::drivers::LSM6DSOW
