@@ -8,7 +8,6 @@
 
 #include "base/imu.h"
 #include "regmap.h"
-#include "regmap/regmap_i2c_bus.h"
 #include "types.h"
 
 namespace hortor::drivers::LSM6DSOW {
@@ -21,12 +20,22 @@ using LSM6DSOWBase = servo::IMU<LSM6DSOW>;
 class LSM6DSOW final : public LSM6DSOWBase {
  public:
   /**
+ * @brief LSM6DSOW传感器I2C地址
+ * @note 默认地址为0x6A
+ */
+  static constexpr uint8_t kI2CAddress = 0x6A;
+
+  struct Config {
+    TwoWire* wire;
+  };
+
+  /**
    * @brief 初始化I2C通信
    * @param wire I2C通信接口指针
    * @return 初始化结果
    */
-  Error Init(TwoWire* wire) {
-    CHECK(regmap_.Init(wire, kI2CAddress));
+  Error Init(const Config& config) {
+    CHECK(regmap_.Init(config.wire, kI2CAddress));
     return Error::kOk;
   }
 

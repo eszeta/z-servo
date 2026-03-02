@@ -11,17 +11,13 @@
 namespace hortor::regmap {
 
 /**
- * @brief 寄存器映射基类（CRTP模式）
- *
- * 提供寄存器读写功能。基于 Linux Kernel regmap 子系统设计。
- * 使用 CRTP (Curiously Recurring Template Pattern) 实现编译期静态多态，
- * 消除虚函数和 std::function 的运行时开销。
- *
- * @tparam Derived 派生类类型，必须实现 WriteImpl 和 ReadImpl 方法
+ * @brief 寄存器映射基类
  */
-template <typename Derived>
+template <typename PLAIN>
 class RegMap : public hortor::Noncopyable {
  public:
+  PLAIN& get_plain() { return plain_; }
+
   /**
    * @brief 写寄存器
    * @param address 寄存器地址
@@ -41,7 +37,7 @@ class RegMap : public hortor::Noncopyable {
    * @return 错误码，成功返回OK
    */
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
-    return static_cast<Derived*>(this)->WriteImpl(address, data, size);
+    return plain_.Write(address, data, size);
   }
 
   /**
@@ -63,7 +59,7 @@ class RegMap : public hortor::Noncopyable {
    * @return 错误码，成功返回OK
    */
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
-    return static_cast<Derived*>(this)->ReadImpl(address, size, data);
+    return plain_.Read(address, size, data);
   }
 
   /**
@@ -80,15 +76,15 @@ class RegMap : public hortor::Noncopyable {
     return Error::kOk;
   }
 
-  template <typename T, typename High, typename Low>
+  template <typename T, typename HIGHT_FIELD, typename LOW_FIELD>
   Error WriteField(T value) {
-    typename High::Storage high_data;
-    typename Low::Storage low_data;
-    CHECK(Read(High::kAddress, high_data));
-    CHECK(Read(Low::kAddress, low_data));
-    Merged2<T, High, Low>::SetValue(value, high_data, low_data);
-    CHECK(Write(High::kAddress, high_data));
-    CHECK(Write(Low::kAddress, low_data));
+    typename HIGHT_FIELD::Storage high_data;
+    typename LOW_FIELD::Storage low_data;
+    CHECK(Read(HIGHT_FIELD::kAddress, high_data));
+    CHECK(Read(LOW_FIELD::kAddress, low_data));
+    Merged2<T, HIGHT_FIELD, LOW_FIELD>::SetValue(value, high_data, low_data);
+    CHECK(Write(HIGHT_FIELD::kAddress, high_data));
+    CHECK(Write(LOW_FIELD::kAddress, low_data));
     return Error::kOk;
   }
 
@@ -112,15 +108,18 @@ class RegMap : public hortor::Noncopyable {
    * @param value 要写入的值
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  template <typename T, typename High, typename Low>
+  template <typename T, typename HIGHT_FIELD, typename LOW_FIELD>
   Error ReadField(T& value) {
-    typename High::Storage high_data;
-    typename Low::Storage low_data;
-    CHECK(Read(High::kAddress, high_data));
-    CHECK(Read(Low::kAddress, low_data));
-    value = Merged2<T, High, Low>::GetValue(high_data, low_data);
+    typename HIGHT_FIELD::Storage high_data;
+    typename LOW_FIELD::Storage low_data;
+    CHECK(Read(HIGHT_FIELD::kAddress, high_data));
+    CHECK(Read(LOW_FIELD::kAddress, low_data));
+    value = Merged2<T, HIGHT_FIELD, LOW_FIELD>::GetValue(high_data, low_data);
     return Error::kOk;
   }
+
+ protected:
+  PLAIN plain_;
 };
 
 }  // namespace hortor::regmap

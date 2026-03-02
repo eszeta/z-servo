@@ -14,8 +14,8 @@
 #include "math/pid.h"
 #include "motor.h"
 #include "types.h"
-#include "utils/timeout_limiter.h"
 #include "utils/debug_print.h"
+#include "utils/timeout_limiter.h"
 
 namespace hortor::servo {
 

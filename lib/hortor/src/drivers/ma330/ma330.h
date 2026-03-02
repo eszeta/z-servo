@@ -8,7 +8,6 @@
 #include "base/encoder.h"
 #include "base/types.h"
 #include "regmap.h"
-#include "regmap_spi_bus.h"
 
 namespace hortor::drivers::MA330 {
 constexpr uint8_t kResolutionBits = 14;
@@ -23,6 +22,8 @@ class MA330;
 using MA330Base = servo::Encoder<MA330, kResolutionBits>;
 class MA330 : public MA330Base {
  public:
+  constexpr static uint8_t kResolutionBits =
+      hortor::drivers::MA330::kResolutionBits;
   struct Config : public MA330Base::Config {
     SPIClass* spi;
     uint8_t cs_pin;

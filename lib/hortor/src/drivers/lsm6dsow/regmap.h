@@ -4,17 +4,16 @@
 #pragma once
 
 #include "base/types.h"
-#include "regmap/regmap_i2c_bus.h"
+#include "regmap/i2c_plain.h"
+#include "regmap/regmap.h"
 #include "types.h"
 
 namespace hortor::drivers::LSM6DSOW {
 
 /**
- * @brief LSM6DSOW控制器类（CRTP模式），负责与LSM6DSOW传感器的通信和数据读取
- *
- * 继承自 regmap::RegMapI2CBus，通过 CRTP 实现编译期静态多态。
+ * @brief LSM6DSOW控制器类
  */
-class RegMap : public regmap::RegMapI2CBus {
+class RegMap : public regmap::RegMap<regmap::I2CPlain> {
  public:
   /**
    * @brief 初始化控制器
@@ -23,27 +22,33 @@ class RegMap : public regmap::RegMapI2CBus {
    * @return 初始化结果
    */
   Error Init(TwoWire* wire, const int address) {
-    CHECK(RegMapI2CBus::Init(wire, address));
+    CHECK(plain_.Init(wire, address));
+
     uint8_t value;
-    CHECK(Read(LSM6DSOWRegs::kWHO_AM_I::kAddress, value));
+    using kWHO_AM_I = LSM6DSOWRegs::kWHO_AM_I;
+    CHECK(ReadField<kWHO_AM_I>(value));
     if (value != 0x6C) {
       return Error::kGeneralErr;
     }
 
     // set the gyroscope control register to work at 104 Hz, 2000 dps and in
     // bypass mode
-    CHECK(Write(LSM6DSOWRegs::kCTRL2_G::kAddress, 0x4C));
+    using kCTRL2_G = LSM6DSOWRegs::kCTRL2_G;
+    CHECK(WriteField<kCTRL2_G>(0x4C));
 
     // Set the Accelerometer control register to work at 104 Hz, 4 g,and in bypass
     // mode and enable ODR/4 low pass filter (check figure9 of LSM6DSOW's
     // datasheet)
-    CHECK(Write(LSM6DSOWRegs::kCTRL1_XL::kAddress, 0x4A));
+    using kCTRL1_XL = LSM6DSOWRegs::kCTRL1_XL;
+    CHECK(WriteField<kCTRL1_XL>(0x4A));
 
     // set gyroscope power mode to high performance and bandwidth to 16 MHz
-    CHECK(Write(LSM6DSOWRegs::kCTRL7_G::kAddress, 0x00));
+    using kCTRL7_G = LSM6DSOWRegs::kCTRL7_G;
+    CHECK(WriteField<kCTRL7_G>(0x00));
 
     // Set the ODR config register to ODR/4
-    CHECK(Write(LSM6DSOWRegs::kCTRL8_XL::kAddress, 0x09));
+    using kCTRL8_XL = LSM6DSOWRegs::kCTRL8_XL;
+    CHECK(WriteField<kCTRL8_XL>(0x09));
 
     return Error::kOk;
   }

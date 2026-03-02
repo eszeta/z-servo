@@ -13,7 +13,7 @@
 
 #include <Arduino.h>
 
-#include "regmap/regmap_mmio.h"
+#include "regmap/mmio_plain.h"
 #include "types.h"
 
 #ifndef EEPROM_DISABLE
@@ -174,10 +174,10 @@ constexpr uint16_t CurrentToRaw(float current) {
 /**
  * @brief 伺服从机寄存器映射实现
  */
-class RegMap : public regmap::RegMapMmio {
+class RegMap : public regmap::RegMap<regmap::MmioPlain> {
  public:
   Error Init() {
-    CHECK(regmap::RegMapMmio::Init(table_, sizeof(table_)));
+    CHECK(plain_.Init(table_, sizeof(table_)));
     CHECK(LoadEeprom());
     if (IsEepromEmpty()) {
       CHECK(RecoveryEeprom());
@@ -2294,7 +2294,7 @@ class RegMap : public regmap::RegMapMmio {
     for (uint8_t address = TableBlocks::kEeprom.begin;
          address < TableBlocks::kEeprom.end;
          address++) {
-      regs_[address] = EEPROM.read(pos++);
+      table_[address] = EEPROM.read(pos++);
     }
 #endif
     return Error::kOk;
@@ -2310,7 +2310,7 @@ class RegMap : public regmap::RegMapMmio {
     for (uint8_t address = TableBlocks::kEeprom.begin;
          address < TableBlocks::kEeprom.end;
          address++) {
-      EEPROM.update(pos++, regs_[address]);
+      EEPROM.update(pos++, table_[address]);
     }
 #endif
     return Error::kOk;
@@ -2323,11 +2323,11 @@ class RegMap : public regmap::RegMapMmio {
    * 擦除后的 Flash/EEPROM 通常为 0xFF；EEPROM_DISABLE 时 table_ 初始化为 0。
    */
   bool IsEepromEmpty() const {
-    const auto first = regs_[TableBlocks::kEeprom.begin];
+    const auto first = table_[TableBlocks::kEeprom.begin];
     const auto begin = TableBlocks::kEeprom.begin;
     const auto end = TableBlocks::kEeprom.end;
     for (uint8_t address = begin; address < end; address++) {
-      if (regs_[address] != first) {
+      if (table_[address] != first) {
         return false;
       }
     }

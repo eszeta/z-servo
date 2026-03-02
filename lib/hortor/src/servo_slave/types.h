@@ -178,8 +178,8 @@ constexpr size_t kTotalSize =
 };  // namespace ControlTable
 
 namespace TableBlocks {
-using ControlTable::kProfileVelocity;
 using ControlTable::kModelNumber;
+using ControlTable::kProfileVelocity;
 constexpr ControlTableBlock kEeprom = {
     kModelNumber::kAddress,
     kProfileVelocity::kAddress + kProfileVelocity::kSize};

@@ -105,7 +105,7 @@ enum class Status : uint8_t {
  *
  * 定义MT6701传感器支持的不同通信总线类型。
  */
-enum class BusType {
+enum class PlainType : uint8_t {
   kI2C,  // I2C总线通信
   kSPI,  // SPI总线通信
 };
@@ -127,7 +127,7 @@ struct MT6701Regs {
 
   template <uint8_t Address, uint8_t Shift, uint8_t Bits>
   using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
-  
+
   // 角度相关寄存器，用于读取当前角度值
   struct kANGLE_6 : FieldU08<0x03, 0, 8> {};
   struct kANGLE_0 : FieldU08<0x04, 2, 6> {};
