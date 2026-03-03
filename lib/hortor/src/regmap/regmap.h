@@ -84,8 +84,7 @@ class RegMap : public hortor::Noncopyable {
     typename LOW_FIELD::access_t low_access;
     CHECK(Read(HIGH_FIELD::kAddress, high_access));
     CHECK(Read(LOW_FIELD::kAddress, low_access));
-    Merged2<T, HIGH_FIELD, LOW_FIELD>::SetValue(
-        value, high_access, low_access);
+    Merged2<T, HIGH_FIELD, LOW_FIELD>::SetValue(value, high_access, low_access);
     CHECK(Write(HIGH_FIELD::kAddress, high_access));
     CHECK(Write(LOW_FIELD::kAddress, low_access));
     return Error::kOk;

@@ -23,9 +23,9 @@ namespace Converters {
 using VoltageCvt = regmap::RatioConverter<float, 1, 10>;       // 0.1V / LSB
 using PwmPctCvt = regmap::RatioConverter<float, 113, 1000>;    // 0.113% / LSB
 using VelocityCvt = regmap::RatioConverter<float, 229, 1000>;  // 0.229RPM / LSB
-using MsCvt = regmap::RatioConverter<uint16_t, 20>;  // 20ms / LSB
-using UsCvt = regmap::RatioConverter<uint16_t, 2>;   // 2us / LSB
-using CurrentCvt = regmap::RatioConverter<float, 1, 1000>;       // 0.001A / LSB
+using MsCvt = regmap::RatioConverter<uint16_t, 20>;            // 20ms / LSB
+using UsCvt = regmap::RatioConverter<uint16_t, 2>;             // 2us / LSB
+using CurrentCvt = regmap::RatioConverter<float, 1, 1000>;     // 0.001A / LSB
 using FeedforwardGainCvt = regmap::RatioConverter<float, 1, 4>;  // raw / 4
 using PidPCvt = regmap::RatioConverter<float, 1, 128>;           // raw / 128
 using PidICvt = regmap::RatioConverter<float, 1, 65536>;         // raw / 65536
@@ -243,15 +243,11 @@ struct ControlTable {
   struct kPresentTemperature : RegU8<0xBA, 0> {};
   /* 0xBB-0xBF: 保留，用于状态反馈组扩展 */
 
-  static constexpr size_t kTotalSize =
-      kPresentTemperature::kAddress + kPresentTemperature::kSize;
+  static constexpr size_t kTotalSize = 0xC0;
 };  // struct ControlTable
 
 namespace TableBlocks {
-constexpr ControlTableBlock kEeprom = {
-    ControlTable::kModelNumber::kAddress,
-    ControlTable::kFeedforward1stGain::kAddress +
-        ControlTable::kFeedforward1stGain::kSize};
+constexpr ControlTableBlock kEeprom = {0, ControlTable::kTotalSize};
 
 constexpr ControlTableBlock kRam = {
     ControlTable::kTorqueEnable::kAddress,

@@ -94,8 +94,8 @@ enum class Reverse : int8_t {
 union DriveModeBits {
   uint8_t value = 0;
   struct {
-    bool moto_reverse_mode : 1;      // 位0 0: 正转, 1: 反转
-    bool encoder_reverse_mode : 1;   // 位1 0: 正转, 1: 反转
+    bool moto_reverse_mode : 1;     // 位0 0: 正转, 1: 反转
+    bool encoder_reverse_mode : 1;  // 位1 0: 正转, 1: 反转
     bool reserved_bit2 : 1;         // 位2 保留
     bool reserved_bit3 : 1;         // 位3 保留
     bool reserved_bit4 : 1;         // 位4 保留

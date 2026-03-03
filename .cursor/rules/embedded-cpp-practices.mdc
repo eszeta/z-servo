@@ -125,7 +125,7 @@ alwaysApply: true
 ## 10. 编译环境 
 
 **platformio**：
-- 需要用户手动编译
+- 编译指令 "$HOME/.platformio/penv/bin/pio" run
 
 **C++版本**：
 - C++17

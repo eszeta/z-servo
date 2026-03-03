@@ -80,7 +80,7 @@ void setup() {
   serial_debug.begin(115200);
   DebugEnable(&serial_debug);
   hortor::utils::DebugPrintln(F("setup"));
-  
+
   wire_sensor.begin();
   wire_slave.begin();
 
