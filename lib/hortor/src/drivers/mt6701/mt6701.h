@@ -39,7 +39,7 @@ template <PlainType PLAIN_TYPE>
 class MT6701Base
     : public servo::Encoder<MT6701Base<PLAIN_TYPE>, kResolutionBits> {
  public:
-  constexpr static uint8_t kResolutionBits =
+  static constexpr uint8_t kResolutionBits =
       hortor::drivers::MT6701::kResolutionBits;
   /**
    * @brief 获取控制器实例

@@ -213,202 +213,202 @@ enum class LOW_PASS_ON_6D {
 /**
  * @brief 陀螺仪控制寄存器，用于控制陀螺仪的工作模式
  */
-struct LSM6DSOWRegs {
-  template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
-  using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
-  /**
-   * @brief WHO_AM_I寄存器
-   * @note 这是一个只读寄存器。其值固定为6Ch。
-   */
-  struct kWHO_AM_I : FieldU08<0X0F, 0, 8> {};
+namespace LSM6DSOWRegs {
+template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
+using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
+/**
+ * @brief WHO_AM_I寄存器
+ * @note 这是一个只读寄存器。其值固定为6Ch。
+ */
+struct kWHO_AM_I : FieldU08<0X0F, 0, 8> {};
 
-  /**
-   * @brief CTRL1_XL (10h)
-   */
-  struct kCTRL1_XL : FieldU08<0X10, 0, 8> {};
-  /**
-   * @brief 加速度计ODR选择
-   */
-  struct kODR_XL : FieldU08<0X10, 4, 4> {};
-  /**
-   * @brief 加速度计满量程选择
-   */
-  struct kFS_XL : FieldU08<0X10, 2, 2> {};
-  /**
-   * @brief 加速度计高分辨率选择
-   */
-  struct kLPF2_XL_EN : FieldU08<0X10, 1, 1> {};
+/**
+ * @brief CTRL1_XL (10h)
+ */
+struct kCTRL1_XL : FieldU08<0X10, 0, 8> {};
+/**
+ * @brief 加速度计ODR选择
+ */
+struct kODR_XL : FieldU08<0X10, 4, 4> {};
+/**
+ * @brief 加速度计满量程选择
+ */
+struct kFS_XL : FieldU08<0X10, 2, 2> {};
+/**
+ * @brief 加速度计高分辨率选择
+ */
+struct kLPF2_XL_EN : FieldU08<0X10, 1, 1> {};
 
-  /**
-   * @brief CTRL2_G (11h)
-   */
-  struct kCTRL2_G : FieldU08<0X11, 0, 8> {};
-  /**
-   * @brief 陀螺仪ODR选择
-   */
-  struct kODR_G : FieldU08<0X11, 4, 4> {};
-  /**
-   * @brief 陀螺仪满量程选择
-   */
-  struct kFS_G : FieldU08<0X11, 2, 2> {};
-  /**
-   * @brief 陀螺仪125 dps满量程选择
-   */
-  struct kFS_125 : FieldU08<0X11, 1, 1> {};
+/**
+ * @brief CTRL2_G (11h)
+ */
+struct kCTRL2_G : FieldU08<0X11, 0, 8> {};
+/**
+ * @brief 陀螺仪ODR选择
+ */
+struct kODR_G : FieldU08<0X11, 4, 4> {};
+/**
+ * @brief 陀螺仪满量程选择 (11h)
+ */
+struct kFS_G : FieldU08<0X11, 2, 2> {};
+/**
+ * @brief 陀螺仪125 dps满量程选择 (11h)
+ */
+struct kFS_125 : FieldU08<0X11, 1, 1> {};
 
-  /**
-   * @brief CTRL7_G (16h)
-   */
-  struct kCTRL7_G : FieldU08<0X16, 0, 8> {};
-  /**
-   * @brief 陀螺仪高性能工作模式选择
-   */
-  struct kG_HM_MODE : FieldU08<0X16, 7, 1> {};
-  /**
-   * @brief 陀螺仪高通滤波器使能
-   */
-  struct kHP_EN_G : FieldU08<0X16, 6, 1> {};
-  /**
-   * @brief 陀螺仪高通滤波器截止频率选择
-   */
-  struct kHPM_G : FieldU08<0X16, 4, 2> {};
-  /**
-   * @brief 加速度计用户偏移校正模块使能
-   */
-  struct kUSR_OFF_ON_OUT : FieldU08<0X16, 1, 1> {};
+/**
+ * @brief CTRL7_G (16h)
+ */
+struct kCTRL7_G : FieldU08<0X16, 0, 8> {};
+/**
+ * @brief 陀螺仪高性能工作模式选择
+ */
+struct kG_HM_MODE : FieldU08<0X16, 7, 1> {};
+/**
+ * @brief 陀螺仪高通滤波器使能
+ */
+struct kHP_EN_G : FieldU08<0X16, 6, 1> {};
+/**
+ * @brief 陀螺仪高通滤波器截止频率选择
+ */
+struct kHPM_G : FieldU08<0X16, 4, 2> {};
+/**
+ * @brief 加速度计用户偏移校正模块使能
+ */
+struct kUSR_OFF_ON_OUT : FieldU08<0X16, 1, 1> {};
 
-  /**
-   * @brief CTRL8_XL (17h)
-   */
-  struct kCTRL8_XL : FieldU08<0X17, 0, 8> {};
-  /**
-   * @brief 加速度计LPF2和高通滤波器配置及截止频率设置
-   */
-  struct kHPCF_XL : FieldU08<0X17, 5, 3> {};
-  /**
-   * @brief 加速度计高通滤波器参考模式使能
-   */
-  struct kHP_REF_MODE_XL : FieldU08<0X17, 4, 1> {};
-  /**
-   * @brief 加速度计LPF2和HPF快速稳定模式使能
-   */
-  struct kFASTSETTL_MODE_XL : FieldU08<0X17, 3, 1> {};
-  /**
-   * @brief 加速度计斜率滤波器/高通滤波器选择
-   */
-  struct kHP_SLOPE_XL_EN : FieldU08<0X17, 2, 1> {};
-  /**
-   * @brief 6D功能的LPF2选择
-   */
-  struct kLOW_PASS_ON_6D : FieldU08<0X17, 0, 1> {};
+/**
+ * @brief CTRL8_XL (17h)
+ */
+struct kCTRL8_XL : FieldU08<0X17, 0, 8> {};
+/**
+ * @brief 加速度计LPF2和高通滤波器配置及截止频率设置
+ */
+struct kHPCF_XL : FieldU08<0X17, 5, 3> {};
+/**
+ * @brief 加速度计高通滤波器参考模式使能
+ */
+struct kHP_REF_MODE_XL : FieldU08<0X17, 4, 1> {};
+/**
+ * @brief 加速度计LPF2和HPF快速稳定模式使能
+ */
+struct kFASTSETTL_MODE_XL : FieldU08<0X17, 3, 1> {};
+/**
+ * @brief 加速度计斜率滤波器/高通滤波器选择
+ */
+struct kHP_SLOPE_XL_EN : FieldU08<0X17, 2, 1> {};
+/**
+ * @brief 6D功能的LPF2选择
+ */
+struct kLOW_PASS_ON_6D : FieldU08<0X17, 0, 1> {};
 
-  /**
-   * @brief STATUS_REG (1Eh)
-   */
-  struct kSTATUS_REG : FieldU08<0X1E, 0, 8> {};
-  /**
-   * @brief 温度数据可用标志
-   */
-  struct kTDA : FieldU08<0x1E, 2, 1> {};
-  /**
-   * @brief 陀螺仪数据可用标志
-   */
-  struct kGDA : FieldU08<0x1E, 1, 1> {};
-  /**
-   * @brief 加速度计数据可用标志
-   */
-  struct kXLDA : FieldU08<0x1E, 0, 1> {};
+/**
+ * @brief STATUS_REG (1Eh)
+ */
+struct kSTATUS_REG : FieldU08<0X1E, 0, 8> {};
+/**
+ * @brief 温度数据可用标志
+ */
+struct kTDA : FieldU08<0x1E, 2, 1> {};
+/**
+ * @brief 陀螺仪数据可用标志
+ */
+struct kGDA : FieldU08<0x1E, 1, 1> {};
+/**
+ * @brief 加速度计数据可用标志
+ */
+struct kXLDA : FieldU08<0x1E, 0, 1> {};
 
-  /**
-   * @brief 温度数据输出寄存器
-   */
-  struct kOUT_TEMP : FieldU08<0x20, 0, 8> {};
-  /**
-   * @brief 温度数据输出寄存器低字节
-   */
-  struct kOUT_TEMP_L : FieldU08<0x20, 0, 8> {};
-  /**
-   * @brief 温度数据输出寄存器高字节
-   */
-  struct kOUT_TEMP_H : FieldU08<0x21, 0, 8> {};
+/**
+ * @brief 温度数据输出寄存器
+ */
+struct kOUT_TEMP : FieldU08<0x20, 0, 8> {};
+/**
+ * @brief 温度数据输出寄存器低字节
+ */
+struct kOUT_TEMP_L : FieldU08<0x20, 0, 8> {};
+/**
+ * @brief 温度数据输出寄存器高字节
+ */
+struct kOUT_TEMP_H : FieldU08<0x21, 0, 8> {};
 
-  /**
-   * @brief 陀螺仪X轴角速度数据输出寄存器
-   */
-  struct kOUTX_G : FieldU08<0x22, 0, 8> {};
-  /**
-   * @brief 陀螺仪X轴角速度数据输出寄存器低字节
-   */
-  struct kOUTX_L_G : FieldU08<0x22, 0, 8> {};
-  /**
-   * @brief 陀螺仪X轴角速度数据输出寄存器高字节
-   */
-  struct kOUTX_H_G : FieldU08<0x23, 0, 8> {};
+/**
+ * @brief 陀螺仪X轴角速度数据输出寄存器
+ */
+struct kOUTX_G : FieldU08<0x22, 0, 8> {};
+/**
+ * @brief 陀螺仪X轴角速度数据输出寄存器低字节
+ */
+struct kOUTX_L_G : FieldU08<0x22, 0, 8> {};
+/**
+ * @brief 陀螺仪X轴角速度数据输出寄存器高字节
+ */
+struct kOUTX_H_G : FieldU08<0x23, 0, 8> {};
 
-  /**
-   * @brief 陀螺仪Y轴角速度数据输出寄存器
-   */
-  struct kOUTY_G : FieldU08<0x24, 0, 8> {};
-  /**
-   * @brief 陀螺仪Y轴角速度数据输出寄存器低字节
-   */
-  struct kOUTY_L_G : FieldU08<0x24, 0, 8> {};
-  /**
-   * @brief 陀螺仪Y轴角速度数据输出寄存器高字节
-   */
-  struct kOUTY_H_G : FieldU08<0x25, 0, 8> {};
+/**
+ * @brief 陀螺仪Y轴角速度数据输出寄存器
+ */
+struct kOUTY_G : FieldU08<0x24, 0, 8> {};
+/**
+ * @brief 陀螺仪Y轴角速度数据输出寄存器低字节
+ */
+struct kOUTY_L_G : FieldU08<0x24, 0, 8> {};
+/**
+ * @brief 陀螺仪Y轴角速度数据输出寄存器高字节
+ */
+struct kOUTY_H_G : FieldU08<0x25, 0, 8> {};
 
-  /**
-   * @brief 陀螺仪Z轴角速度数据输出寄存器
-   */
-  struct kOUTZ_G : FieldU08<0x26, 0, 8> {};
-  /**
-   * @brief 陀螺仪Z轴角速度数据输出寄存器低字节
-   */
-  struct kOUTZ_L_G : FieldU08<0x26, 0, 8> {};
-  /**
-   * @brief 陀螺仪Z轴角速度数据输出寄存器高字节
-   */
-  struct kOUTZ_H_G : FieldU08<0x27, 0, 8> {};
+/**
+ * @brief 陀螺仪Z轴角速度数据输出寄存器
+ */
+struct kOUTZ_G : FieldU08<0x26, 0, 8> {};
+/**
+ * @brief 陀螺仪Z轴角速度数据输出寄存器低字节
+ */
+struct kOUTZ_L_G : FieldU08<0x26, 0, 8> {};
+/**
+ * @brief 陀螺仪Z轴角速度数据输出寄存器高字节
+ */
+struct kOUTZ_H_G : FieldU08<0x27, 0, 8> {};
 
-  /**
-   * @brief 加速度计X轴加速度数据输出寄存器
-   */
-  struct kOUTX_A : FieldU08<0x28, 0, 8> {};
-  /**
-   * @brief 加速度计X轴加速度数据输出寄存器低字节
-   */
-  struct kOUTX_L_A : FieldU08<0x28, 0, 8> {};
-  /**
-   * @brief 加速度计X轴加速度数据输出寄存器高字节
-   */
-  struct kOUTX_H_A : FieldU08<0x29, 0, 8> {};
+/**
+ * @brief 加速度计X轴加速度数据输出寄存器
+ */
+struct kOUTX_A : FieldU08<0x28, 0, 8> {};
+/**
+ * @brief 加速度计X轴加速度数据输出寄存器低字节
+ */
+struct kOUTX_L_A : FieldU08<0x28, 0, 8> {};
+/**
+ * @brief 加速度计X轴加速度数据输出寄存器高字节
+ */
+struct kOUTX_H_A : FieldU08<0x29, 0, 8> {};
 
-  /**
-   * @brief 加速度计Y轴加速度数据输出寄存器
-   */
-  struct kOUTY_A : FieldU08<0x2A, 0, 8> {};
-  /**
-   * @brief 加速度计Y轴加速度数据输出寄存器低字节
-   */
-  struct kOUTY_L_A : FieldU08<0x2A, 0, 8> {};
-  /**
-   * @brief 加速度计Y轴加速度数据输出寄存器高字节
-   */
-  struct kOUTY_H_A : FieldU08<0x2B, 0, 8> {};
+/**
+ * @brief 加速度计Y轴加速度数据输出寄存器
+ */
+struct kOUTY_A : FieldU08<0x2A, 0, 8> {};
+/**
+ * @brief 加速度计Y轴加速度数据输出寄存器低字节
+ */
+struct kOUTY_L_A : FieldU08<0x2A, 0, 8> {};
+/**
+ * @brief 加速度计Y轴加速度数据输出寄存器高字节
+ */
+struct kOUTY_H_A : FieldU08<0x2B, 0, 8> {};
 
-  /**
-   * @brief 加速度计Z轴加速度数据输出寄存器
-   */
-  struct kOUTZ_A : FieldU08<0x2C, 0, 8> {};
-  /**
-   * @brief 加速度计Z轴加速度数据输出寄存器低字节
-   */
-  struct kOUTZ_L_A : FieldU08<0x2C, 0, 8> {};
-  /**
-   * @brief 加速度计Z轴加速度数据输出寄存器高字节
-   */
-  struct kOUTZ_H_A : FieldU08<0x2D, 0, 8> {};
+/**
+ * @brief 加速度计Z轴加速度数据输出寄存器
+ */
+struct kOUTZ_A : FieldU08<0x2C, 0, 8> {};
+/**
+ * @brief 加速度计Z轴加速度数据输出寄存器低字节
+ */
+struct kOUTZ_L_A : FieldU08<0x2C, 0, 8> {};
+/**
+ * @brief 加速度计Z轴加速度数据输出寄存器高字节
+ */
+struct kOUTZ_H_A : FieldU08<0x2D, 0, 8> {};
 };  // namespace LSM6DSOWRegs
 
 }  // namespace hortor::drivers::LSM6DSOW

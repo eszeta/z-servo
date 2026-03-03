@@ -14,28 +14,28 @@ enum class FieldStrength : uint8_t {
   kErr = 0x03  // impossible state
 };
 
-struct MA330Regs {
-  template <uint8_t ADDRESS, uint8_t Shift, uint8_t Bits>
-  using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
+namespace MA330Regs {
+template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
+using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
 
-  template <uint8_t ADDRESS, uint8_t Shift, uint8_t Bits>
-  using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
+template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
+using FieldB08 = regmap::Field<bool, ADDRESS, SHIFT, BITS>;
 
-  struct kZ_L : FieldU08<0x00, 0, 8> {};
-  struct kZ_H : FieldU08<0x01, 0, 8> {};
-  struct kBCT : FieldU08<0x02, 0, 8> {};
-  struct kETX : FieldB08<0x03, 0, 1> {};
-  struct kETY : FieldB08<0x03, 1, 1> {};
-  struct kILIP : FieldU08<0x04, 2, 4> {};
-  struct kPPT_L : FieldU08<0x04, 6, 2> {};
-  struct kPPT_H : FieldU08<0x05, 0, 8> {};
-  struct kMGHT : FieldU08<0x06, 2, 3> {};
-  struct kMGLT : FieldU08<0x06, 5, 3> {};
-  struct kNPP : FieldU08<0x07, 5, 3> {};
-  struct kRD : FieldU08<0x09, 7, 1> {};
-  struct kFW : FieldU08<0x0E, 0, 8> {};
-  struct kHYS : FieldU08<0x10, 0, 8> {};
-  struct kMGL_MGH : FieldU08<0x1B, 6, 2> {};
+struct kZ_L : FieldU08<0x00, 0, 8> {};
+struct kZ_H : FieldU08<0x01, 0, 8> {};
+struct kBCT : FieldU08<0x02, 0, 8> {};
+struct kETX : FieldB08<0x03, 0, 1> {};
+struct kETY : FieldB08<0x03, 1, 1> {};
+struct kILIP : FieldU08<0x04, 2, 4> {};
+struct kPPT_L : FieldU08<0x04, 6, 2> {};
+struct kPPT_H : FieldU08<0x05, 0, 8> {};
+struct kMGHT : FieldU08<0x06, 2, 3> {};
+struct kMGLT : FieldU08<0x06, 5, 3> {};
+struct kNPP : FieldU08<0x07, 5, 3> {};
+struct kRD : FieldU08<0x09, 7, 1> {};
+struct kFW : FieldU08<0x0E, 0, 8> {};
+struct kHYS : FieldU08<0x10, 0, 8> {};
+struct kMGL_MGH : FieldU08<0x1B, 6, 2> {};
 };  // namespace MA330Regs
 
 }  // namespace hortor::drivers::MA330
