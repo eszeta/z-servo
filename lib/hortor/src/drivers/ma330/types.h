@@ -15,10 +15,10 @@ enum class FieldStrength : uint8_t {
 };
 
 struct MA330Regs {
-  template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+  template <uint8_t ADDRESS, uint8_t Shift, uint8_t Bits>
   using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
 
-  template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+  template <uint8_t ADDRESS, uint8_t Shift, uint8_t Bits>
   using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
 
   struct kZ_L : FieldU08<0x00, 0, 8> {};

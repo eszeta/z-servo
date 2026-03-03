@@ -16,7 +16,7 @@ namespace hortor::regmap {
 template <typename PLAIN>
 class RegMap : public hortor::Noncopyable {
  public:
-  PLAIN& get_plain() { return plain_; }
+  PLAIN& plain() { return plain_; }
 
   /**
    * @brief 写寄存器
@@ -68,23 +68,26 @@ class RegMap : public hortor::Noncopyable {
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
   template <typename T>
-  Error WriteField(typename T::Type value) {
-    typename T::Storage data;
-    CHECK(Read(T::kAddress, data));
-    T::SetValue(value, data);
-    CHECK(Write(T::kAddress, data));
+  Error WriteField(typename Trait::WriteValueTypeOf<T>::Type value) {
+    using FieldBase = typename Trait::FieldOf<T>::Type;
+    typename FieldBase::access_t access;
+    CHECK(Read(FieldBase::kAddress, access));
+    const auto raw = Trait::EncodePipeline<T>::Run(value);
+    FieldBase::SetValue(raw, access);
+    CHECK(Write(FieldBase::kAddress, access));
     return Error::kOk;
   }
 
-  template <typename T, typename HIGHT_FIELD, typename LOW_FIELD>
+  template <typename T, typename HIGH_FIELD, typename LOW_FIELD>
   Error WriteField(T value) {
-    typename HIGHT_FIELD::Storage high_data;
-    typename LOW_FIELD::Storage low_data;
-    CHECK(Read(HIGHT_FIELD::kAddress, high_data));
-    CHECK(Read(LOW_FIELD::kAddress, low_data));
-    Merged2<T, HIGHT_FIELD, LOW_FIELD>::SetValue(value, high_data, low_data);
-    CHECK(Write(HIGHT_FIELD::kAddress, high_data));
-    CHECK(Write(LOW_FIELD::kAddress, low_data));
+    typename HIGH_FIELD::access_t high_access;
+    typename LOW_FIELD::access_t low_access;
+    CHECK(Read(HIGH_FIELD::kAddress, high_access));
+    CHECK(Read(LOW_FIELD::kAddress, low_access));
+    Merged2<T, HIGH_FIELD, LOW_FIELD>::SetValue(
+        value, high_access, low_access);
+    CHECK(Write(HIGH_FIELD::kAddress, high_access));
+    CHECK(Write(LOW_FIELD::kAddress, low_access));
     return Error::kOk;
   }
 
@@ -94,10 +97,12 @@ class RegMap : public hortor::Noncopyable {
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
   template <typename T>
-  Error ReadField(typename T::Type& value) {
-    typename T::Storage data;
-    CHECK(Read(T::kAddress, data));
-    value = T::GetValue(data);
+  Error ReadField(typename Trait::ReadValueTypeOf<T>::Type& value) {
+    using FieldBase = typename Trait::FieldOf<T>::Type;
+    typename FieldBase::access_t access;
+    CHECK(Read(FieldBase::kAddress, access));
+    const auto raw = FieldBase::GetValue(access);
+    value = Trait::DecodePipeline<T>::Run(raw);
     return Error::kOk;
   }
 
@@ -108,13 +113,14 @@ class RegMap : public hortor::Noncopyable {
    * @param value 要写入的值
    * @return 错误码，成功返回OK，否则参见Error错误码
    */
-  template <typename T, typename HIGHT_FIELD, typename LOW_FIELD>
+  template <typename T, typename HIGH_FIELD, typename LOW_FIELD>
   Error ReadField(T& value) {
-    typename HIGHT_FIELD::Storage high_data;
-    typename LOW_FIELD::Storage low_data;
-    CHECK(Read(HIGHT_FIELD::kAddress, high_data));
-    CHECK(Read(LOW_FIELD::kAddress, low_data));
-    value = Merged2<T, HIGHT_FIELD, LOW_FIELD>::GetValue(high_data, low_data);
+    typename HIGH_FIELD::access_t high_access;
+    typename LOW_FIELD::access_t low_access;
+    CHECK(Read(HIGH_FIELD::kAddress, high_access));
+    CHECK(Read(LOW_FIELD::kAddress, low_access));
+    value =
+        Merged2<T, HIGH_FIELD, LOW_FIELD>::GetValue(high_access, low_access);
     return Error::kOk;
   }
 

@@ -122,11 +122,11 @@ constexpr uint8_t kI2CAddress = 0x06;
  * 使用RegisterUtils工具类简化寄存器操作。
  */
 namespace MT6701Regs {
-template <uint8_t Address, uint8_t Shift, uint8_t Bits>
-using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
+template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
+using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
 
-template <uint8_t Address, uint8_t Shift, uint8_t Bits>
-using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
+template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
+using FieldB08 = regmap::Field<bool, ADDRESS, SHIFT, BITS>;
 
 // 角度相关寄存器，用于读取当前角度值
 struct kANGLE_6 : FieldU08<0x03, 0, 8> {};

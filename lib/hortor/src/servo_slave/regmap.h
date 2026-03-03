@@ -22,155 +22,6 @@
 
 namespace hortor::servo_slave {
 
-//==============================================================================
-// 单位转换辅助函数
-//==============================================================================
-namespace {
-
-/**
- * @brief 将原始电压值转换为实际电压值
- * @param raw 原始值
- * @return 实际电压值
- * 原始单位：0.1V，转换单位：V
- * 转换公式: voltage = raw × 0.1V
- */
-constexpr float VoltageFromRaw(uint16_t raw) { return raw * 0.1f; }
-
-/** @brief 将实际电压值转换为原始值 */
-constexpr uint16_t VoltageToRaw(float voltage) {
-  return static_cast<uint16_t>(voltage * 10.0f);
-}
-
-/**
- * @brief 将原始 PWM 值转换为实际 PWM 百分比
- * @param raw 原始值
- * @return 实际 PWM 百分比 (-100.0% 到 100.0%)
- * 原始单位：0.113%，转换单位：%
- * 转换公式: percent = raw × 0.113%
- */
-constexpr float PwmFromRaw(int16_t raw) { return raw * 0.113f; }
-
-/** @brief 将实际 PWM 百分比转换为原始值 */
-constexpr int16_t PwmToRaw(float percent) {
-  return static_cast<int16_t>(percent / 0.113f);
-}
-
-/**
- * @brief 将原始速度值转换为实际速度值
- * @param raw 原始值 
- * @return 实际速度值
- *
- * 转换公式: rpm = raw × 0.229 RPM
- * 原始单位：0.229 RPM，转换单位：RPM
- * @note 负值表示反向旋转
- */
-constexpr float VelocityFromRaw(uint32_t raw) { return raw * 0.229f; }
-
-/** @brief 将实际速度值转换为原始值 */
-constexpr uint32_t VelocityToRaw(float rpm) {
-  return static_cast<uint32_t>(rpm / 0.229f);
-}
-
-/**
- * @brief 将原始加速度值转换为实际加速度值
- * @param raw 原始值
- * @return 实际加速度值
- * 原始单位：214.577 rev/min²，转换单位：rev/min²
- * 转换公式: acc = raw × 214.577 rev/min²
- */
-constexpr float AccelerationFromRaw(uint32_t raw) { return raw * 214.577f; }
-
-/** @brief 将实际加速度值转换为原始值 */
-constexpr uint32_t AccelerationToRaw(float acc) {
-  return static_cast<uint32_t>(acc / 214.577f);
-}
-
-/**
- * @brief 将原始ms转换为实际毫秒
- * @param raw 原始值
- * @return 实际毫秒
- * 原始单位：20ms，转换单位：ms
- * 转换公式: milliseconds = raw × 20ms  
- */
-constexpr float MsFromRaw(uint8_t raw) { return raw * 20.0f; }
-
-/** @brief 将实际毫秒转换为原始值 */
-constexpr uint8_t MsToRaw(float milliseconds) {
-  return static_cast<uint8_t>(milliseconds / 20.0f);
-}
-
-/**
- * @brief 将原始 P 增益值转换为实际增益值
- * @param raw 原始值
- * @return 实际 P 增益值
- * 原始单位：128.0，转换单位：-
- * 转换公式: gain = raw / 128.0
- */
-constexpr float PidPGainFromRaw(uint16_t raw) { return raw / 128.0f; }
-
-/** @brief 将实际 P 增益值转换为原始值 */
-constexpr uint16_t PidPGainToRaw(float gain) {
-  return static_cast<uint16_t>(gain * 128.0f);
-}
-
-/**
- * @brief 将原始 I 增益值转换为实际增益值
- * @param raw 原始值
- * @return 实际 I 增益值
- * 原始单位：65536.0，转换单位：-
- * 转换公式: gain = raw / 65536.0
- */
-constexpr float PidIGainFromRaw(uint16_t raw) { return raw / 65536.0f; }
-
-/** @brief 将实际 I 增益值转换为原始值  */
-constexpr uint16_t PidIGainToRaw(float gain) {
-  return static_cast<uint16_t>(gain * 65536.0f);
-}
-
-/**
- * @brief 将原始 D 增益值转换为实际增益值
- * @param raw 原始值
- * @return 实际 D 增益值
- * 原始单位：16.0，转换单位：-
- * 转换公式: gain = raw / 16.0
- */
-constexpr float PidDGainFromRaw(uint16_t raw) { return raw / 16.0f; }
-
-/** @brief 将实际 D 增益值转换为原始值 */
-constexpr uint16_t PidDGainToRaw(float gain) {
-  return static_cast<uint16_t>(gain * 16.0f);
-}
-
-/**
- * @brief 将原始前馈增益值转换为实际增益值
- * @param raw 原始值
- * @return 实际前馈增益值
- * 原始单位：4.0，转换单位：-
- * 转换公式: gain = raw / 4.0
- */
-constexpr float FeedforwardGainFromRaw(uint16_t raw) { return raw / 4.0f; }
-
-/** @brief 将实际前馈增益值转换为原始值 */
-constexpr uint16_t FeedforwardGainToRaw(float gain) {
-  return static_cast<uint16_t>(gain * 4.0f);
-}
-
-/**
- * @brief 将原始电流值转换为实际电流值
- * @param raw 原始值 
- * @return 实际电流值 
- * 原始单位：0.001A，转换单位：A
- * 转换公式: current = raw × 0.001A
- */
-constexpr float CurrentFromRaw(uint16_t raw) { return raw / 1000.0f; }
-
-/** @brief 将实际电流值转换为原始值 */
-constexpr uint16_t CurrentToRaw(float current) {
-  return static_cast<uint16_t>(current * 1000.0f);
-}
-
-}  // namespace
-
 /**
  * @brief 伺服从机寄存器映射实现
  */
@@ -185,12 +36,6 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
     return Error::kOk;
   }
 
-  template <typename T>
-  constexpr Error RestoreEeprom() {
-    CHECK(this->template WriteField<T>(T::kDefault));
-    return Error::kOk;
-  }
-
   //==============================================================================
   // 设备信息组 (0x00-0x0F, EEPROM，只读)
   //==============================================================================
@@ -202,17 +47,17 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * @return model_number 型号编号
    */
   uint16_t ReadModelNumber() {
-    uint16_t model_number;
-    ReadField<ControlTable::kModelNumber>(model_number);
-    return model_number;
+    uint16_t value;
+    ReadField<ControlTable::kModelNumber>(value);
+    return value;
   }
 
   /**
-   * @brief 设置型号编号 (R)
-   * @param model_number 型号编号
+   * @brief 写入型号编号 (R，仅内部同步)
+   * @param[in] value 型号编号
    */
-  void WriteModelNumber(const uint16_t model_number) {
-    WriteField<ControlTable::kModelNumber>(model_number);
+  void WriteModelNumber(const uint16_t value) {
+    WriteField<ControlTable::kModelNumber>(value);
   }
 
   /**
@@ -220,17 +65,17 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * @return model_information 型号信息
    */
   uint32_t ReadModelInformation() {
-    uint32_t model_information;
-    ReadField<ControlTable::kModelInformation>(model_information);
-    return model_information;
+    uint32_t value;
+    ReadField<ControlTable::kModelInformation>(value);
+    return value;
   }
 
   /**
-   * @brief 设置型号信息 (R)
-   * @param model_information 型号信息
+   * @brief 写入型号信息 (R，仅内部同步)
+   * @param[in] value 型号信息
    */
-  void WriteModelInformation(const uint32_t model_information) {
-    WriteField<ControlTable::kModelInformation>(model_information);
+  void WriteModelInformation(const uint32_t value) {
+    WriteField<ControlTable::kModelInformation>(value);
   }
 
   /**
@@ -238,17 +83,17 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * @return firmware_version 固件版本
    */
   uint8_t ReadFirmwareVersion() {
-    uint8_t firmware_version;
-    ReadField<ControlTable::kFirmwareVersion>(firmware_version);
-    return firmware_version;
+    uint8_t value;
+    ReadField<ControlTable::kFirmwareVersion>(value);
+    return value;
   }
 
   /**
-   * @brief 设置固件版本 (R)
-   * @param firmware_version 固件版本
+   * @brief 写入固件版本 (R，仅内部同步)
+   * @param[in] value 固件版本
    */
-  void WriteFirmwareVersion(const uint8_t firmware_version) {
-    WriteField<ControlTable::kFirmwareVersion>(firmware_version);
+  void WriteFirmwareVersion(const uint8_t value) {
+    WriteField<ControlTable::kFirmwareVersion>(value);
   }
 
   /**
@@ -263,16 +108,16 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 同一总线上不能有重复的 ID
    */
   uint8_t ReadId() {
-    uint8_t id;
-    ReadField<ControlTable::kId>(id);
-    return id;
+    uint8_t value;
+    ReadField<ControlTable::kId>(value);
+    return value;
   }
 
   /**
    * @brief 设置舵机 ID (R/W)
-   * @param[in] id 舵机 ID (0-252)
+   * @param[in] value 舵机 ID (0-252)
    */
-  void WriteId(const uint8_t id) { WriteField<ControlTable::kId>(id); }
+  void WriteId(const uint8_t value) { WriteField<ControlTable::kId>(value); }
 
 #pragma endregion  // "设备信息组"
 
@@ -304,21 +149,19 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * | 6    | 4000000      |
    * | 7    | 4500000      |
    *
-   * 【相关寄存器】
-   * - Return Delay Time: 返回延迟设置
    */
   uint8_t ReadBaudRate() {
-    uint8_t baud_rate;
-    ReadField<ControlTable::kBaudRate>(baud_rate);
-    return baud_rate;
+    uint8_t value;
+    ReadField<ControlTable::kBaudRate>(value);
+    return value;
   }
 
   /**
    * @brief 设置波特率索引 (R/W)
-   * @param[in] baud_rate 波特率索引 (0-7)
+   * @param[in] value 波特率索引 (0-7)
    */
-  void WriteBaudRate(const uint8_t baud_rate) {
-    WriteField<ControlTable::kBaudRate>(baud_rate);
+  void WriteBaudRate(const uint8_t value) {
+    WriteField<ControlTable::kBaudRate>(value);
   }
 
   /**
@@ -342,19 +185,19 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * @note 修改后需调用 StoreEeprom() 并重启生效
    */
   uint16_t ReadReturnDelayTime() {
-    uint8_t raw;
-    ReadField<ControlTable::kReturnDelayTime>(raw);
-    return raw * 2;
+    uint16_t value;
+    ReadField<ControlTable::kReturnDelayTime>(value);
+    return value;
   }
 
   /**
    * @brief 设置返回延迟时间 (R/W)
-   * @param[in] microseconds 返回延迟时间（μs）
+   * @param[in] value 返回延迟时间（μs）
    *
    * @note 在多舵机串联时，适当的延迟可避免总线冲突
    */
-  void WriteReturnDelayTime(const uint16_t microseconds) {
-    WriteField<ControlTable::kReturnDelayTime>(microseconds / 2);
+  void WriteReturnDelayTime(const uint16_t value) {
+    WriteField<ControlTable::kReturnDelayTime>(value);
   }
 
   /**
@@ -375,17 +218,17 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    *
    */
   uint8_t ReadStatusReturnLevel() {
-    uint8_t status_return_level = 0;
-    ReadField<ControlTable::kStatusReturnLevel>(status_return_level);
-    return status_return_level;
+    uint8_t value;
+    ReadField<ControlTable::kStatusReturnLevel>(value);
+    return value;
   }
 
   /**
    * @brief 设置状态返回级别 (R/W)
-   * @param[in] status_return_level 状态返回级别 (0-2)
+   * @param[in] value 状态返回级别 (0-2)
    */
-  void WriteStatusReturnLevel(const uint8_t status_return_level) {
-    WriteField<ControlTable::kStatusReturnLevel>(status_return_level);
+  void WriteStatusReturnLevel(const uint8_t value) {
+    WriteField<ControlTable::kStatusReturnLevel>(value);
   }
 
 #pragma endregion  // "通信配置组"
@@ -426,23 +269,19 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * 【编码器反转模式 (Bit 5)】
    * - 编码器正反转模式，修正最终输出轴方向不一致问题
    *
-   * 【相关寄存器】
-   * - Profile Velocity: Velocity-based 模式使用
-   * - Profile Acceleration: 两种模式都使用（Time-based 模式为加速时间）
-   * - Operating Mode: 工作模式设置
    */
   uint8_t ReadDriveMode() {
-    uint8_t drive_mode;
-    ReadField<ControlTable::kDriveMode>(drive_mode);
-    return drive_mode;
+    uint8_t value;
+    ReadField<ControlTable::kDriveMode>(value);
+    return value;
   }
 
   /**
    * @brief 设置驱动模式 (R/W)
-   * @param[in] drive_mode 驱动模式位域
+   * @param[in] value 驱动模式位域
    */
-  void WriteDriveMode(const uint8_t drive_mode) {
-    WriteField<ControlTable::kDriveMode>(drive_mode);
+  void WriteDriveMode(const uint8_t value) {
+    WriteField<ControlTable::kDriveMode>(value);
   }
 
   /**
@@ -511,28 +350,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * 3. 设置该模式的目标值（Goal Position/Velocity/Current/PWM）
    * 4. WriteTorqueEnable(1) - 重新使能力矩
    *
-   * 【相关寄存器】
-   * - Goal Position: 模式 3,4,5 使用
-   * - Goal Velocity: 模式 1 使用
-   * - Goal Current: 模式 0,5 使用
-   * - Goal PWM: 模式 16 使用
-   * - Torque Enable: 切换模式前必须禁用
-   *
    * @warning 更改工作模式时，必须先将 Torque Enable 设置为 0
    * @note 不同模式下使用的控制寄存器不同，详见各 Goal 寄存器说明
    */
   uint8_t ReadOperatingMode() {
-    uint8_t operating_mode = 0;
-    ReadField<ControlTable::kOperatingMode>(operating_mode);
-    return operating_mode;
+    uint8_t value;
+    ReadField<ControlTable::kOperatingMode>(value);
+    return value;
   }
 
   /**
    * @brief 设置工作模式 (R/W)
-   * @param[in] operating_mode 工作模式
+   * @param[in] value 工作模式
    */
-  void WriteOperatingMode(const uint8_t operating_mode) {
-    WriteField<ControlTable::kOperatingMode>(operating_mode);
+  void WriteOperatingMode(const uint8_t value) {
+    WriteField<ControlTable::kOperatingMode>(value);
   }
 
   /**
@@ -556,24 +388,19 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * | 3   | Electrical Shock Error | 电气冲击                      |
    * | 4   | Overload Error         | 过载                          |
    *
-   * 【相关寄存器】
-   * - Hardware Error Status: 错误状态记录
-   * - Torque Enable: 关断后需要重新使能
-   * - Temperature Limit: 温度保护阈值
-   * - Voltage Limits: 电压保护阈值
    */
   uint8_t ReadShutdown() {
-    uint8_t shutdown = 0;
-    ReadField<ControlTable::kShutdown>(shutdown);
-    return shutdown;
+    uint8_t value;
+    ReadField<ControlTable::kShutdown>(value);
+    return value;
   }
 
   /**
    * @brief 设置关断条件 (R/W)
-   * @param[in] shutdown 关断条件位域
+   * @param[in] value 关断条件位域
    */
-  void WriteShutdown(const uint8_t shutdown) {
-    WriteField<ControlTable::kShutdown>(shutdown);
+  void WriteShutdown(const uint8_t value) {
+    WriteField<ControlTable::kShutdown>(value);
   }
 
 #pragma endregion  // "运行模式组"
@@ -585,7 +412,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
 
   /**
    * @brief 获取归零偏移 (R/W)
-   * @param[out] homing_offset 归零偏移（pulse）
+   * @return homing_offset 归零偏移（pulse）
    *
    * 范围: -1,048,575 ~ 1,048,575 pulse
    *
@@ -605,30 +432,24 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 小调整：±100 ~ ±1000 pulse（±2.2° ~ ±22°）
    * - 大调整：±10000 ~ ±50000 pulse（±220° ~ ±1100°）
    *
-   * 【相关寄存器】
-   * - Goal Position: 目标位置会加上此偏移
-   * - Present Position: 当前位置会加上此偏移
-   * - Min/Max Position Limit: 限位范围不受影响
-   * - Operating Mode: 不同模式下的行为差异
    */
   int32_t ReadHomingOffset() {
-    uint32_t raw;
-    ReadField<ControlTable::kHomingOffset>(raw);
-    return static_cast<int32_t>(raw);
+    int32_t value;
+    ReadField<ControlTable::kHomingOffset>(value);
+    return value;
   }
 
   /**
    * @brief 设置归零偏移 (R/W)
-   * @param[in] homing_offset 归零偏移（pulse）
+   * @param[in] value 归零偏移（pulse）
    */
-  void WriteHomingOffset(const int32_t homing_offset) {
-    WriteField<ControlTable::kHomingOffset>(
-        static_cast<uint32_t>(homing_offset));
+  void WriteHomingOffset(const int32_t value) {
+    WriteField<ControlTable::kHomingOffset>(value);
   }
 
   /**
    * @brief 获取运动阈值 (R/W)
-   * @param[out] rpm 运动阈值（RPM）
+   * @return rpm 运动阈值（RPM）
    *
    * 【功能说明】
    * - 运动阈值用于判断舵机是否在运动
@@ -642,25 +463,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 一般应用: 2-5 RPM（平衡精度和稳定性）
    * - 高速应用: 10-20 RPM（避免高速时的误判）
    *
-   * 【相关寄存器】
-   * - Moving Status: 基于此阈值更新
-   * - Present Velocity: 用于比较的实际速度
-   * - Moving: 简化的运动状态指示
-   *
    * @note 用于检测运动状态，避免微小振动导致的误判
    */
   float ReadMovingThreshold() {
-    uint32_t raw;
-    ReadField<ControlTable::kMovingThreshold>(raw);
-    return VelocityFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kMovingThreshold>(value);
+    return value;
   }
 
   /**
    * @brief 设置运动阈值 (R/W)
-   * @param[in] rpm 运动阈值（RPM）
+   * @param[in] value 运动阈值（RPM）
    */
-  void WriteMovingThreshold(const float rpm) {
-    WriteField<ControlTable::kMovingThreshold>(VelocityToRaw(rpm));
+  void WriteMovingThreshold(const float value) {
+    WriteField<ControlTable::kMovingThreshold>(value);
   }
 
 #pragma endregion  // "位置配置组"
@@ -671,7 +487,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
 #pragma region "保护限制组"
   /**
    * @brief 获取温度上限 (R/W)
-   * @param[out] temperature_limit 温度上限（°C）
+   * @return temperature_limit 温度上限（°C）
    *
    * 范围: 0-100°C
    *
@@ -687,23 +503,19 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 70-80°C（平衡性能和安全性）
    * - 极限设置: 80-90°C（最大性能，需谨慎）
    *
-   * 【相关寄存器】
-   * - Present Temperature: 当前温度监控
-   * - Shutdown: 关断条件设置
-   * - Hardware Error Status: 错误状态
    */
   uint8_t ReadTemperatureLimit() {
-    uint8_t temperature_limit;
-    ReadField<ControlTable::kTemperatureLimit>(temperature_limit);
-    return temperature_limit;
+    uint8_t value;
+    ReadField<ControlTable::kTemperatureLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置温度上限 (R/W)
-   * @param[in] temperature_limit 温度上限（°C）
+   * @param[in] value 温度上限（°C）
    */
-  void WriteTemperatureLimit(const uint8_t temperature_limit) {
-    WriteField<ControlTable::kTemperatureLimit>(temperature_limit);
+  void WriteTemperatureLimit(const uint8_t value) {
+    WriteField<ControlTable::kTemperatureLimit>(value);
   }
 
   /**
@@ -724,23 +536,19 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 24V 系统: 26-28V（标准24V电源）
    * - 通用设置: 15-16V（兼容多种电源）
    *
-   * 【相关寄存器】
-   * - Present Input Voltage: 当前电压监控
-   * - Min Voltage Limit: 最低电压限制
-   * - Shutdown: 关断条件设置
    */
   float ReadMaxVoltageLimit() {
-    uint16_t raw;
-    ReadField<ControlTable::kMaxVoltageLimit>(raw);
-    return VoltageFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kMaxVoltageLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置最高电压限制 (R/W)
-   * @param[in] voltage 最高电压限制（V）
+   * @param[in] value 最高电压限制（V）
    */
-  void WriteMaxVoltageLimit(const float voltage) {
-    WriteField<ControlTable::kMaxVoltageLimit>(VoltageToRaw(voltage));
+  void WriteMaxVoltageLimit(const float value) {
+    WriteField<ControlTable::kMaxVoltageLimit>(value);
   }
 
   /**
@@ -761,28 +569,24 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 24V 系统: 20-22V（标准24V电源）
    * - 通用设置: 6-8V（兼容多种电源）
    *
-   * 【相关寄存器】
-   * - Present Input Voltage: 当前电压监控
-   * - Max Voltage Limit: 最高电压限制
-   * - Shutdown: 关断条件设置
    */
   float ReadMinVoltageLimit() {
-    uint16_t raw;
-    ReadField<ControlTable::kMinVoltageLimit>(raw);
-    return VoltageFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kMinVoltageLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置最低电压限制 (R/W)
-   * @param[in] voltage 最低电压限制（V）
+   * @param[in] value 最低电压限制（V）
    */
-  void WriteMinVoltageLimit(const float voltage) {
-    WriteField<ControlTable::kMinVoltageLimit>(VoltageToRaw(voltage));
+  void WriteMinVoltageLimit(const float value) {
+    WriteField<ControlTable::kMinVoltageLimit>(value);
   }
 
   /**
    * @brief 获取 PWM 上限 (R/W)
-   * @param[out] percent PWM 上限（%）
+   * @return percent PWM 上限（%）
    *
    * 范围: 0-100%
    *
@@ -797,30 +601,25 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 80-90%（平衡性能）
    * - 极限设置: 95-100%（最大性能）
    *
-   * 【相关寄存器】
-   * - Goal PWM: PWM控制模式的目标值
-   * - Present PWM: 实际PWM输出
-   * - Current Limit: 电流限制
-   *
    * @note Goal PWM 和 Present PWM 不会超过此值
    */
   float ReadPwmLimit() {
-    uint16_t raw;
-    ReadField<ControlTable::kPwmLimit>(raw);
-    return PwmFromRaw(static_cast<int16_t>(raw));
+    float value;
+    ReadField<ControlTable::kPwmLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置 PWM 上限 (R/W)
-   * @param[in] percent PWM 上限（%）
+   * @param[in] value PWM 上限（%）
    */
-  void WritePwmLimit(const float percent) {
-    WriteField<ControlTable::kPwmLimit>(PwmToRaw(percent));
+  void WritePwmLimit(const float value) {
+    WriteField<ControlTable::kPwmLimit>(value);
   }
 
   /**
    * @brief 获取电流上限 (R/W)
-   * @param[out] current_limit 电流上限（A）
+   * @return current_limit 电流上限（A）
    *
    * 【功能说明】
    * - 限制电机输出电流
@@ -828,26 +627,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - Current-based Position Control Mode 的最大电流
    * - 修改后需要重启生效
    *
-   * 【相关寄存器】
-   * - Goal Current: 电流控制模式的目标值
-   * - Present Current: 实际电流输出
-   * - PWM Limit: PWM限制
-   *
    * @warning 长时间大电流运行会导致过热
    * @note Present Current 不会超过此值
    */
   float ReadCurrentLimit() {
-    uint16_t current_limit;
-    ReadField<ControlTable::kCurrentLimit>(current_limit);
-    return CurrentFromRaw(current_limit);
+    float value;
+    ReadField<ControlTable::kCurrentLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置电流上限 (R/W)
-   * @param[in] current_limit 电流上限（A）
+   * @param[in] value 电流上限（A）
    */
-  void WriteCurrentLimit(const uint16_t current_limit) {
-    WriteField<ControlTable::kCurrentLimit>(current_limit);
+  void WriteCurrentLimit(const float value) {
+    WriteField<ControlTable::kCurrentLimit>(value);
   }
 
   /**
@@ -868,26 +662,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 精密应用：50-100 RPM（低速高精度）
    * - 重载应用：100-200 RPM（保护机械结构）
    *
-   * 【相关寄存器】
-   * - Profile Velocity: 受此限制约束
-   * - Goal Velocity: Velocity Mode 下受此限制
-   * - Present Velocity: 实际速度不会超过此值
-   * - PWM Limit: 间接影响速度上限
-   *
    * @note 实际速度还受 PWM Limit 和 Current Limit 限制
    */
   float ReadVelocityLimit() {
-    uint32_t raw;
-    ReadField<ControlTable::kVelocityLimit>(raw);
-    return VelocityFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kVelocityLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置速度上限 (R/W)
-   * @param[in] rpm 速度上限（RPM）
+   * @param[in] value 速度上限（RPM）
    */
-  void WriteVelocityLimit(const float rpm) {
-    WriteField<ControlTable::kVelocityLimit>(VelocityToRaw(rpm));
+  void WriteVelocityLimit(const float value) {
+    WriteField<ControlTable::kVelocityLimit>(value);
   }
 
   /**
@@ -907,28 +695,23 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 安全范围：3500-4000（留出安全裕度）
    * - 限制范围：2000-3000（特定应用）
    *
-   * 【相关寄存器】
-   * - Min Position Limit: 位置下限
-   * - Goal Position: 目标位置受此限制
-   * - Operating Mode: 仅在 Position Control Mode 有效
-   *
    * @note 确保 Max Position Limit >= Min Position Limit
    */
   uint32_t ReadMaxPositionLimit() {
-    uint32_t max_position_limit;
-    ReadField<ControlTable::kMaxPositionLimit>(max_position_limit);
-    return max_position_limit;
+    uint32_t value;
+    ReadField<ControlTable::kMaxPositionLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置位置上限 (R/W)
-   * @param[in] max_position_limit 位置上限（pulse）
+   * @param[in] value 位置上限（pulse）
    *
    * @warning 如果设置不当，可能导致舵机无法移动
    * @note 修改后需调用 StoreEeprom() 并重启生效
    */
-  void WriteMaxPositionLimit(const uint32_t max_position_limit) {
-    WriteField<ControlTable::kMaxPositionLimit>(max_position_limit);
+  void WriteMaxPositionLimit(const uint32_t value) {
+    WriteField<ControlTable::kMaxPositionLimit>(value);
   }
 
   /**
@@ -948,43 +731,38 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 安全范围：50-100（留出安全裕度）
    * - 限制范围：500-1000（特定应用）
    *
-   * 【相关寄存器】
-   * - Max Position Limit: 位置上限
-   * - Goal Position: 目标位置受此限制
-   * - Operating Mode: 仅在 Position Control Mode 有效
-   *
    * @note 确保 Max Position Limit >= Min Position Limit
    */
   uint32_t ReadMinPositionLimit() {
-    uint32_t min_position_limit = 0;
-    ReadField<ControlTable::kMinPositionLimit>(min_position_limit);
-    return min_position_limit;
+    uint32_t value;
+    ReadField<ControlTable::kMinPositionLimit>(value);
+    return value;
   }
 
   /**
    * @brief 设置位置下限 (R/W)
-   * @param[in] min_position_limit 位置下限（pulse）
+   * @param[in] value 位置下限（pulse）
    */
-  void WriteMinPositionLimit(const uint32_t min_position_limit) {
-    WriteField<ControlTable::kMinPositionLimit>(min_position_limit);
+  void WriteMinPositionLimit(const uint32_t value) {
+    WriteField<ControlTable::kMinPositionLimit>(value);
   }
 
   /**
    * @brief 获取保护时间 (R/W)
    * @return protection_time 保护时间（ms）
    */
-  uint8_t ReadProtectionTime() {
-    uint8_t protection_time;
-    ReadField<ControlTable::kProtectionTime>(protection_time);
-    return MsFromRaw(protection_time);
+  uint16_t ReadProtectionTime() {
+    uint16_t value;
+    ReadField<ControlTable::kProtectionTime>(value);
+    return value;
   }
 
   /**
    * @brief 设置保护时间 (R/W)
-   * @param[in] protection_time 保护时间（ms）
+   * @param[in] value 保护时间（ms）
    */
-  void WriteProtectionTime(const uint8_t protection_time) {
-    WriteField<ControlTable::kProtectionTime>(MsToRaw(protection_time));
+  void WriteProtectionTime(const uint16_t value) {
+    WriteField<ControlTable::kProtectionTime>(value);
   }
 
 #pragma endregion  // "保护限制组"
@@ -1021,25 +799,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 0.05-0.15（平衡性能）
    * - 高精度设置: 0.15-0.25（精度优先）
    *
-   * 【相关寄存器】
-   * - Velocity P Gain: 速度环比例增益
-   * - Position PID: 外环位置控制器
-   * - Operating Mode: 控制模式设置
-   *
    * @note 仅在 Velocity Control Mode 和 Position Control Mode 有效
    */
-  float ReadVelocityIgain() {
-    uint16_t raw;
-    ReadField<ControlTable::kVelocityIgain>(raw);
-    return PidIGainFromRaw(raw);
+  float ReadVelocityIGain() {
+    float value;
+    ReadField<ControlTable::kVelocityIGain>(value);
+    return value;
   }
 
   /**
    * @brief 设置速度环 I 增益 (R/W)
-   * @param[in] velocity_igain I 增益
+   * @param[in] value I 增益
    */
-  void WriteVelocityIgain(const float velocity_igain) {
-    WriteField<ControlTable::kVelocityIgain>(PidIGainToRaw(velocity_igain));
+  void WriteVelocityIGain(const float value) {
+    WriteField<ControlTable::kVelocityIGain>(value);
   }
 
   /**
@@ -1060,25 +833,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * 3. 回退到稳定值
    * 4. P 增益是系统稳定性的基础
    *
-   * 【相关寄存器】
-   * - Velocity I Gain: 速度环积分增益
-   * - Position PID: 外环位置控制器
-   * - Operating Mode: 控制模式设置
-   *
    * @note 仅在 Velocity Control Mode 和 Position Control Mode 有效
    */
-  float ReadVelocityPgain() {
-    uint16_t raw;
-    ReadField<ControlTable::kVelocityPgain>(raw);
-    return PidPGainFromRaw(raw);
+  float ReadVelocityPGain() {
+    float value;
+    ReadField<ControlTable::kVelocityPGain>(value);
+    return value;
   }
 
   /**
    * @brief 设置速度环 P 增益 (R/W)
-   * @param[in] velocity_pgain P 增益
+   * @param[in] value P 增益
    */
-  void WriteVelocityPgain(const float velocity_pgain) {
-    WriteField<ControlTable::kVelocityPgain>(PidPGainToRaw(velocity_pgain));
+  void WriteVelocityPGain(const float value) {
+    WriteField<ControlTable::kVelocityPGain>(value);
   }
 
   /**
@@ -1104,26 +872,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 100-300（平衡性能）
    * - 高精度设置: 300-500（精度优先）
    *
-   * 【相关寄存器】
-   * - Position P Gain: 位置环比例增益
-   * - Position I Gain: 位置环积分增益
-   * - Operating Mode: 控制模式设置
-   *
    * @warning D 增益过大会放大高频噪声
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float ReadPositionDgain() {
-    uint16_t raw;
-    ReadField<ControlTable::kPositionDgain>(raw);
-    return PidDGainFromRaw(raw);
+  float ReadPositionDGain() {
+    float value;
+    ReadField<ControlTable::kPositionDGain>(value);
+    return value;
   }
 
   /**
    * @brief 设置位置环 D 增益 (R/W)
-   * @param[in] position_dgain D 增益
+   * @param[in] value D 增益
    */
-  void WritePositionDgain(const float position_dgain) {
-    WriteField<ControlTable::kPositionDgain>(PidDGainToRaw(position_dgain));
+  void WritePositionDGain(const float value) {
+    WriteField<ControlTable::kPositionDGain>(value);
   }
 
   /**
@@ -1149,26 +912,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 0.05-0.15（平衡性能）
    * - 高精度设置: 0.15-0.25（精度优先）
    *
-   * 【相关寄存器】
-   * - Position P Gain: 位置环比例增益
-   * - Position D Gain: 位置环微分增益
-   * - Operating Mode: 控制模式设置
-   *
    * @warning I 增益过大会导致系统不稳定
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float ReadPositionIgain() {
-    uint16_t raw;
-    ReadField<ControlTable::kPositionIgain>(raw);
-    return PidIGainFromRaw(raw);
+  float ReadPositionIGain() {
+    float value;
+    ReadField<ControlTable::kPositionIGain>(value);
+    return value;
   }
 
   /**
    * @brief 设置位置环 I 增益 (R/W)
-   * @param[in] position_igain I 增益
+   * @param[in] value I 增益
    */
-  void WritePositionIgain(const float position_igain) {
-    WriteField<ControlTable::kPositionIgain>(PidIGainToRaw(position_igain));
+  void WritePositionIGain(const float value) {
+    WriteField<ControlTable::kPositionIGain>(value);
   }
 
   /**
@@ -1194,25 +952,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 10-50（平衡性能）
    * - 高响应设置: 50-127（响应优先）
    *
-   * 【相关寄存器】
-   * - Position I Gain: 位置环积分增益
-   * - Position D Gain: 位置环微分增益
-   * - Operating Mode: 控制模式设置
-   *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
-  float ReadPositionPgain() {
-    uint16_t raw;
-    ReadField<ControlTable::kPositionPgain>(raw);
-    return PidPGainFromRaw(raw);
+  float ReadPositionPGain() {
+    float value;
+    ReadField<ControlTable::kPositionPGain>(value);
+    return value;
   }
 
   /**
    * @brief 设置位置环 P 增益 (R/W)
-   * @param[in] position_pgain P 增益
+   * @param[in] value P 增益
    */
-  void WritePositionPgain(const float position_pgain) {
-    WriteField<ControlTable::kPositionPgain>(PidPGainToRaw(position_pgain));
+  void WritePositionPGain(const float value) {
+    WriteField<ControlTable::kPositionPGain>(value);
   }
 
   /**
@@ -1238,26 +991,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 0.5-2.0（平衡性能）
    * - 高精度设置: 2.0-5.0（精度优先）
    *
-   * 【相关寄存器】
-   * - Feedforward 1st Gain: 前馈一阶增益
-   * - Position PID: 位置控制器
-   * - Operating Mode: 控制模式设置
-   *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
   float ReadFeedforward2ndGain() {
-    uint16_t raw;
-    ReadField<ControlTable::kFeedforward2ndGain>(raw);
-    return FeedforwardGainFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kFeedforward2ndGain>(value);
+    return value;
   }
 
   /**
    * @brief 设置前馈二阶增益 (R/W)
-   * @param[in] feedforward_2nd_gain 前馈二阶增益
+   * @param[in] value 前馈二阶增益
    */
-  void WriteFeedforward2ndGain(const float feedforward_2nd_gain) {
-    WriteField<ControlTable::kFeedforward2ndGain>(
-        FeedforwardGainToRaw(feedforward_2nd_gain));
+  void WriteFeedforward2ndGain(const float value) {
+    WriteField<ControlTable::kFeedforward2ndGain>(value);
   }
 
   /**
@@ -1283,26 +1030,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准设置: 0.5-2.0（平衡性能）
    * - 高精度设置: 2.0-5.0（精度优先）
    *
-   * 【相关寄存器】
-   * - Feedforward 2nd Gain: 前馈二阶增益
-   * - Position PID: 位置控制器
-   * - Operating Mode: 控制模式设置
-   *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
   float ReadFeedforward1stGain() {
-    uint16_t raw;
-    ReadField<ControlTable::kFeedforward1stGain>(raw);
-    return FeedforwardGainFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kFeedforward1stGain>(value);
+    return value;
   }
 
   /**
    * @brief 设置前馈一阶增益 (R/W)
-   * @param[in] feedforward_1st_gain 前馈一阶增益
+   * @param[in] value 前馈一阶增益
    */
-  void WriteFeedforward1stGain(const float feedforward_1st_gain) {
-    WriteField<ControlTable::kFeedforward1stGain>(
-        FeedforwardGainToRaw(feedforward_1st_gain));
+  void WriteFeedforward1stGain(const float value) {
+    WriteField<ControlTable::kFeedforward1stGain>(value);
   }
 
 #pragma endregion  // "PID 参数组"
@@ -1351,33 +1092,26 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 精密定位: 200-800 rev/min²
    * - 重载应用: 100-500 rev/min²
    *
-   * 【相关寄存器】
-   * - Profile Velocity: 配合设置速度曲线
-   * - Drive Mode: 决定 Profile 类型
-   * - Velocity Limit: 限制最大速度
-   * - Goal Position: 运动的目标位置
-   *
    * @note 在 Velocity Control Mode 中也使用此参数控制加速度
    * @note Time-based模式下单位为ms，当前实现假设Velocity-based模式
    */
   float ReadProfileAcceleration() {
-    uint32_t raw;
-    ReadField<ControlTable::kProfileAcceleration>(raw);
-    return AccelerationFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kProfileAcceleration>(value);
+    return value;
   }
 
   /**
    * @brief 设置轨迹加速度
-   * @param[in] acceleration 轨迹加速度（rev/min²，Velocity-based模式）
+   * @param[in] value 轨迹加速度（rev/min²，Velocity-based模式）
    */
-  void WriteProfileAcceleration(const float acceleration) {
-    WriteField<ControlTable::kProfileAcceleration>(
-        AccelerationToRaw(acceleration));
+  void WriteProfileAcceleration(const float value) {
+    WriteField<ControlTable::kProfileAcceleration>(value);
   }
 
   /**
    * @brief 获取轨迹速度 (RW)
-   * @param[out] rpm 轨迹速度（RPM，Velocity-based模式）
+   * @return rpm 轨迹速度（RPM，Velocity-based模式）
    *
    * 范围: 0-7,503.643 RPM (Velocity-based模式) | 0-32767 ms (Time-based模式)
    *
@@ -1455,27 +1189,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 精密定位: 50-100 RPM
    * - 连续旋转: 设置较大值实现连续运动
    *
-   * 【相关寄存器】
-   * - Profile Acceleration: 配合设置加速度
-   * - Velocity Limit: 限制最大速度
-   * - Drive Mode: 决定 Profile 类型
-   * - Goal Position: 运动的目标位置
-   *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    * @note Time-based模式下单位为ms，当前实现假设Velocity-based模式
    */
   float ReadProfileVelocity() {
-    uint32_t raw;
-    ReadField<ControlTable::kProfileVelocity>(raw);
-    return VelocityFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kProfileVelocity>(value);
+    return value;
   }
 
   /**
    * @brief 设置轨迹速度
-   * @param[in] rpm 轨迹速度（RPM，Velocity-based模式）
+   * @param[in] value 轨迹速度（RPM，Velocity-based模式）
    */
-  void WriteProfileVelocity(const float rpm) {
-    WriteField<ControlTable::kProfileVelocity>(VelocityToRaw(rpm));
+  void WriteProfileVelocity(const float value) {
+    WriteField<ControlTable::kProfileVelocity>(value);
   }
 
 #pragma endregion  // "轨迹配置组"
@@ -1503,26 +1231,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * 2. 禁用力矩：WriteTorqueEnable(0) - 电机可以自由转动
    * 3. 模式切换：必须先禁用，再切换模式，最后重新使能
    *
-   * 【相关寄存器】
-   * - Operating Mode: 切换模式前必须禁用
-   * - Hardware Error Status: 错误时会自动禁用
-   * - Shutdown: 关断条件设置
-   *
    * @warning 使能力矩后电机会立即执行控制指令，注意安全
    * @note 禁用力矩时，Present Position 等反馈值仍然有效
    */
   uint8_t ReadTorqueEnable() {
-    uint8_t torque_enable = 0;
-    ReadField<ControlTable::kTorqueEnable>(torque_enable);
-    return torque_enable;
+    uint8_t value;
+    ReadField<ControlTable::kTorqueEnable>(value);
+    return value;
   }
 
   /**
    * @brief 设置力矩使能 (R/W)
-   * @param[in] torque_enable 力矩使能 (0: 禁用, 1: 使能)
+   * @param[in] value 力矩使能 (0: 禁用, 1: 使能)
    */
-  void WriteTorqueEnable(const uint8_t torque_enable) {
-    WriteField<ControlTable::kTorqueEnable>(torque_enable);
+  void WriteTorqueEnable(const uint8_t value) {
+    WriteField<ControlTable::kTorqueEnable>(value);
   }
 
   /**
@@ -1538,38 +1261,38 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 用于状态指示和调试
    */
   uint8_t ReadDxlLed() {
-    uint8_t dxl_led = 0;
-    ReadField<ControlTable::kDxlLed>(dxl_led);
-    return dxl_led;
+    uint8_t value;
+    ReadField<ControlTable::kDxlLed>(value);
+    return value;
   }
 
   /**
    * @brief 设置 LED 开关 (R/W)
-   * @param[in] dxl_led LED 状态 (0: 关, 1: 开)
+   * @param[in] value LED 状态 (0: 关, 1: 开)
    */
-  void WriteDxlLed(const uint8_t dxl_led) {
-    WriteField<ControlTable::kDxlLed>(dxl_led);
+  void WriteDxlLed(const uint8_t value) {
+    WriteField<ControlTable::kDxlLed>(value);
   }
 
   /**
-   * @brief 获取对齐到目标位置 (W)
+   * @brief 获取对齐命令值 (W)
    * @return align_to_position 对齐到目标位置
    */
   uint16_t ReadAlignToPosition() {
-    uint16_t align_to_position = 0;
-    ReadField<ControlTable::kAlignToPosition>(align_to_position);
-    return align_to_position != 0;
+    uint16_t value;
+    ReadField<ControlTable::kAlignToPosition>(value);
+    return value;
   }
 
   /**
-   * @brief 设置设置为居中位置 (W)
-   * @param[in] align_to_position 对齐到目标位置
+   * @brief 设置对齐到目标位置 (W)
+   * @param[in] value 对齐到目标位置
    * 范围: 0-1
    * 【功能说明】
-   * - 调整Homing Offset使Present Position为目标位置
+   * - 调整 Homing Offset，使 Present Position 对齐目标位置
    */
-  void WriteAlignToPosition(const uint16_t align_to_position) {
-    WriteField<ControlTable::kAlignToPosition>(align_to_position);
+  void WriteAlignToPosition(const uint16_t value) {
+    WriteField<ControlTable::kAlignToPosition>(value);
   }
 
   /**
@@ -1594,27 +1317,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * | 5   | Angle Limit Error      | 角度超出范围                  |
    * | 6   | Range Error            | 范围错误                      |
    *
-   * 【相关寄存器】
-   * - Shutdown: 决定哪些错误会自动关断力矩
-   * - Torque Enable: 错误清除后需要重新使能
-   * - Present Temperature: 监控温度状态
-   * - Present Input Voltage: 监控电压状态
-   * - Present Current: 监控电流状态
-   *
    * @note 如果 Shutdown 对应位启用，发生错误会自动关断力矩
    */
   uint8_t ReadHardwareErrorStatus() {
-    uint8_t hardware_error_status = 0;
-    ReadField<ControlTable::kHardwareErrorStatus>(hardware_error_status);
-    return hardware_error_status;
+    uint8_t value;
+    ReadField<ControlTable::kHardwareErrorStatus>(value);
+    return value;
   }
 
   /**
-   * @brief 设置硬件错误状态 (R)
-   * @param[in] hardware_error_status 硬件错误状态位域
+   * @brief 写入硬件错误状态 (R，仅内部同步)
+   * @param[in] value 硬件错误状态位域
    */
-  void WriteHardwareErrorStatus(const uint8_t hardware_error_status) {
-    WriteField<ControlTable::kHardwareErrorStatus>(hardware_error_status);
+  void WriteHardwareErrorStatus(const uint8_t value) {
+    WriteField<ControlTable::kHardwareErrorStatus>(value);
   }
 
   /**
@@ -1635,24 +1351,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 标准检测: 1000-2000 ms（一般应用）
    * - 慢速检测: 3000-5080 ms（低频率通信）
    *
-   * 【相关寄存器】
-   * - Torque Enable: 看门狗触发时会自动禁用
-   * - Hardware Error Status: 看门狗超时会记录错误
-   *
    * @note 看门狗超时会自动关断力矩，需要重新使能
    */
   uint16_t ReadBusWatchdog() {
-    uint8_t raw;
-    ReadField<ControlTable::kBusWatchdog>(raw);
-    return MsFromRaw(raw);
+    uint16_t value;
+    ReadField<ControlTable::kBusWatchdog>(value);
+    return value;
   }
 
   /**
    * @brief 设置总线看门狗 (R/W)
-   * @param[in] milliseconds 看门狗时间（ms）
+   * @param[in] value 看门狗时间（ms）
    */
-  void WriteBusWatchdog(const uint16_t milliseconds) {
-    WriteField<ControlTable::kBusWatchdog>(MsToRaw(milliseconds));
+  void WriteBusWatchdog(const uint16_t value) {
+    WriteField<ControlTable::kBusWatchdog>(value);
   }
 
 #pragma endregion  // "控制命令组"
@@ -1680,25 +1392,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 中速: ±30-70%（中速运行）
    * - 高速: ±70-100%（高速运行）
    *
-   * 【相关寄存器】
-   * - Operating Mode: 仅在 PWM Control Mode 有效
-   * - PWM Limit: 限制最大 PWM 输出
-   * - Present PWM: 实际 PWM 输出
-   *
    * @note 仅在 PWM Control Mode 有效
    */
   float ReadGoalPwm() {
-    uint16_t raw;
-    ReadField<ControlTable::kGoalPwm>(raw);
-    return PwmFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kGoalPwm>(value);
+    return value;
   }
 
   /**
    * @brief 设置目标 PWM (R/W)
-   * @param[in] percent 目标 PWM（%）
+   * @param[in] value 目标 PWM（%）
    */
-  void WriteGoalPwm(const float percent) {
-    WriteField<ControlTable::kGoalPwm>(PwmToRaw(percent));
+  void WriteGoalPwm(const float value) {
+    WriteField<ControlTable::kGoalPwm>(value);
   }
 
   /**
@@ -1715,25 +1422,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 负值表示反向电流
    * - 受 Current Limit 限制
    *
-   * 【相关寄存器】
-   * - Operating Mode: 决定电流控制模式
-   * - Current Limit: 限制最大电流
-   * - Present Current: 实际电流输出
-   *
    * @note 在 Current Control Mode 中作为控制目标，在 Current-based Position Control Mode 中作为限制
    */
-  uint16_t ReadGoalCurrent() {
-    uint16_t goal_current;
-    ReadField<ControlTable::kGoalCurrent>(goal_current);
-    return CurrentFromRaw(goal_current);
+  float ReadGoalCurrent() {
+    float value;
+    ReadField<ControlTable::kGoalCurrent>(value);
+    return value;
   }
 
   /**
    * @brief 设置目标电流 (R/W)
-   * @param[in] goal_current 目标电流（0.001A）
+   * @param[in] value 目标电流（0.001A）
    */
-  void WriteGoalCurrent(const float goal_current) {
-    WriteField<ControlTable::kGoalCurrent>(CurrentToRaw(goal_current));
+  void WriteGoalCurrent(const float value) {
+    WriteField<ControlTable::kGoalCurrent>(value);
   }
 
   /**
@@ -1756,25 +1458,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 中速: ±50-200 RPM（中速运行）
    * - 高速: ±200-468 RPM（高速运行）
    *
-   * 【相关寄存器】
-   * - Operating Mode: 决定速度控制模式
-   * - Velocity Limit: 限制最大速度
-   * - Present Velocity: 实际速度输出
-   *
    * @note 仅在 Velocity Control Mode 中作为控制目标
    */
   float ReadGoalVelocity() {
-    uint32_t raw;
-    ReadField<ControlTable::kGoalVelocity>(raw);
-    return VelocityFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kGoalVelocity>(value);
+    return value;
   }
 
   /**
    * @brief 设置目标速度 (R/W)
-   * @param[in] rpm 目标速度（RPM）
+   * @param[in] value 目标速度（RPM）
    */
-  void WriteGoalVelocity(const float rpm) {
-    WriteField<ControlTable::kGoalVelocity>(VelocityToRaw(rpm));
+  void WriteGoalVelocity(const float value) {
+    WriteField<ControlTable::kGoalVelocity>(value);
   }
 
   /**
@@ -1793,28 +1490,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - Extended Mode: ±1000000 (约±244圈)
    * - 连续旋转: 设置超出物理范围的值
    *
-   * 【相关寄存器】
-   * - Operating Mode: 决定位置范围和行为
-   * - Homing Offset: 会加到目标位置上
-   * - Min/Max Position Limit: 仅在 Position Mode 下有效
-   * - Profile Velocity/Acceleration: 控制运动轨迹
-   *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    * @note 运动中更新 Goal Position 会平滑过渡到新轨迹
    */
   int32_t ReadGoalPosition() {
-    uint32_t raw;
-    ReadField<ControlTable::kGoalPosition>(raw);
-    return static_cast<int32_t>(raw);
+    int32_t value;
+    ReadField<ControlTable::kGoalPosition>(value);
+    return value;
   }
 
   /**
    * @brief 设置目标位置 (RW)
-   * @param[in] goal_position 目标位置（pulse）
+   * @param[in] value 目标位置（pulse）
    */
-  void WriteGoalPosition(const int32_t goal_position) {
-    WriteField<ControlTable::kGoalPosition>(
-        static_cast<uint32_t>(goal_position));
+  void WriteGoalPosition(const int32_t value) {
+    WriteField<ControlTable::kGoalPosition>(value);
   }
 
 #pragma endregion  // "目标值组"
@@ -1825,7 +1515,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
 #pragma region "状态反馈组"
   /**
    * @brief 获取实时时钟 (R)
-   * @param[out] realtime_tick 实时时钟（ms）
+   * @return realtime_tick 实时时钟（ms）
    *
    * 范围: 0-32767 ms
    *
@@ -1839,22 +1529,22 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * @note 此寄存器为只读，由系统自动更新
    */
   uint16_t ReadRealtimeTick() {
-    uint16_t realtime_tick;
-    ReadField<ControlTable::kRealtimeTick>(realtime_tick);
-    return realtime_tick;
+    uint16_t value;
+    ReadField<ControlTable::kRealtimeTick>(value);
+    return value;
   }
 
   /**
-   * @brief 设置实时时钟 (R)
-   * @param[in] realtime_tick 实时时钟
+   * @brief 写入实时时钟 (R，仅内部同步)
+   * @param[in] value 实时时钟
    */
-  void WriteRealtimeTick(const uint16_t realtime_tick) {
-    WriteField<ControlTable::kRealtimeTick>(realtime_tick);
+  void WriteRealtimeTick(const uint16_t value) {
+    WriteField<ControlTable::kRealtimeTick>(value);
   }
 
   /**
    * @brief 获取运动状态 (R)
-   * @param[out] moving 运动状态
+   * @return moving 运动状态
    *
    * 范围: 0-1
    *
@@ -1869,30 +1559,25 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 当 Present Velocity ≥ Moving Threshold 时，Moving = 1
    * - 当 Present Velocity < Moving Threshold 时，Moving = 0
    *
-   * 【相关寄存器】
-   * - Moving Threshold: 运动判断阈值
-   * - Present Velocity: 实际速度值
-   * - Moving Status: 详细的运动状态
-   *
    * @note 此寄存器为只读，由系统自动更新
    */
   bool ReadMoving() {
-    uint8_t moving;
-    ReadField<ControlTable::kMoving>(moving);
-    return moving != 0;
+    bool value;
+    ReadField<ControlTable::kMoving>(value);
+    return value;
   }
 
   /**
-   * @brief 设置运动状态 (R)
-   * @param[in] moving 运动状态
+   * @brief 写入运动状态 (R，仅内部同步)
+   * @param[in] value 运动状态
    */
-  void WriteMoving(const bool moving) {
-    WriteField<ControlTable::kMoving>(moving);
+  void WriteMoving(const bool value) {
+    WriteField<ControlTable::kMoving>(value);
   }
 
   /**
    * @brief 获取详细运动状态 (R)
-   * @param[out] moving_status 详细运动状态位域
+   * @return moving_status 详细运动状态位域
    *
    * 范围: 0-255 (8位位域)
    *
@@ -1912,7 +1597,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * | 4-5 | Velocity Profile       | 00: Step,                     |
    * |     |                        | 01: Rectangular,              |
    * |     |                        | 10: Triangular,               |
-   * |     |                        | 11: Trapezoidal               | 
+   * |     |                        | 11: Trapezoidal               |
    * | 6-7 | Reserved               | 保留位                        |
    *
    * 【Profile 类型详解】
@@ -1934,10 +1619,8 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    *
    * 【Triangular vs Trapezoidal】
    * - 当配置为 Trapezoidal 时（Profile Velocity ≠ 0, Profile Acceleration ≠ 0）
-   * - 如果移动距离足够长：执行完整梯形曲线 → Moving Status 显示 11
-   * (Trapezoidal)
-   * - 如果移动距离太短：自动降级为三角形曲线 → Moving Status 显示 10
-   * (Triangular)
+   * - 如果移动距离足够长：执行完整梯形曲线 → Moving Status 显示 11 (Trapezoidal)
+   * - 如果移动距离太短：自动降级为三角形曲线 → Moving Status 显示 10 (Triangular)
    * - Triangular 是系统根据实际距离自动选择的，无法直接配置
    *
    * 【状态说明】
@@ -1946,31 +1629,25 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - Following Error: 是否出现跟随误差
    * - Velocity Profile: 当前使用的速度曲线类型
    *
-   * 【相关寄存器】
-   * - Goal Position: 目标位置
-   * - Present Position: 当前位置
-   * - Profile Velocity: 速度曲线参数
-   * - Profile Acceleration: 加速度参数
-   *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
   uint8_t ReadMovingStatus() {
-    uint8_t moving_status;
-    ReadField<ControlTable::kMovingStatus>(moving_status);
-    return moving_status;
+    uint8_t value;
+    ReadField<ControlTable::kMovingStatus>(value);
+    return value;
   }
 
   /**
-   * @brief 设置详细运动状态 (R)
-   * @param[in] moving_status 详细运动状态位域
+   * @brief 写入详细运动状态 (R，仅内部同步)
+   * @param[in] value 详细运动状态位域
    */
-  void WriteMovingStatus(const uint8_t moving_status) {
-    WriteField<ControlTable::kMovingStatus>(moving_status);
+  void WriteMovingStatus(const uint8_t value) {
+    WriteField<ControlTable::kMovingStatus>(value);
   }
 
   /**
    * @brief 获取当前 PWM (R)
-   * @param[out] percent 当前 PWM（%）
+   * @return percent 当前 PWM（%）
    *
    * 范围: -100.0% 到 100.0%
    *
@@ -1980,23 +1657,19 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 负值表示反向旋转
    * - 实时更新，反映当前输出状态
    *
-   * 【相关寄存器】
-   * - Goal PWM: 目标 PWM 值
-   * - PWM Limit: PWM 限制值
-   * - Torque Enable: 力矩使能状态
    */
   float ReadPresentPwm() {
-    int16_t raw;
-    ReadField<ControlTable::kPresentPwm>(raw);
-    return PwmFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kPresentPwm>(value);
+    return value;
   }
 
   /**
-   * @brief 设置当前 PWM (R)
-   * @param[in] present_pwm 当前 PWM
+   * @brief 写入当前 PWM (R，仅内部同步)
+   * @param[in] value 当前 PWM
    */
-  void WritePresentPwm(const uint16_t present_pwm) {
-    WriteField<ControlTable::kPresentPwm>(present_pwm);
+  void WritePresentPwm(const float value) {
+    WriteField<ControlTable::kPresentPwm>(value);
   }
 
   /**
@@ -2009,30 +1682,25 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 实时更新，反映当前电流状态
    * - 用于监控电机负载和功耗
    *
-   * 【相关寄存器】
-   * - Goal Current: 目标电流值
-   * - Current Limit: 电流限制值
-   * - Torque Enable: 力矩使能状态
-   *
    * @note 此寄存器为只读，由系统自动更新
    */
   float ReadPresentCurrent() {
-    uint16_t present_current;
-    ReadField<ControlTable::kPresentCurrent>(present_current);
-    return CurrentFromRaw(present_current);
+    float value;
+    ReadField<ControlTable::kPresentCurrent>(value);
+    return value;
   }
 
   /**
-   * @brief 设置当前电流 (R)
-   * @param[in] present_current 当前电流
+   * @brief 写入当前电流 (R，仅内部同步)
+   * @param[in] value 当前电流
    */
-  void WritePresentCurrent(const float present_current) {
-    WriteField<ControlTable::kPresentCurrent>(CurrentToRaw(present_current));
+  void WritePresentCurrent(const float value) {
+    WriteField<ControlTable::kPresentCurrent>(value);
   }
 
   /**
    * @brief 获取当前速度 (R)
-   * @param[out] rpm 当前速度（RPM）
+   * @return rpm 当前速度（RPM）
    *
    * 范围: -468.763 到 468.763 RPM
    *
@@ -2043,31 +1711,25 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 负值表示反向旋转
    * - 实时更新，反映当前速度状态
    *
-   * 【相关寄存器】
-   * - Goal Velocity: 目标速度值
-   * - Velocity Limit: 速度限制值
-   * - Moving Threshold: 运动判断阈值
-   * - Moving: 运动状态指示
-   *
    * @note 此寄存器为只读，由系统自动更新
    */
   float ReadPresentVelocity() {
-    uint32_t raw;
-    ReadField<ControlTable::kPresentVelocity>(raw);
-    return VelocityFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kPresentVelocity>(value);
+    return value;
   }
 
   /**
-   * @brief 设置当前速度 (R)
-   * @param[in] present_velocity 当前速度
+   * @brief 写入当前速度 (R，仅内部同步)
+   * @param[in] value 当前速度
    */
-  void WritePresentVelocity(const uint32_t present_velocity) {
-    WriteField<ControlTable::kPresentVelocity>(present_velocity);
+  void WritePresentVelocity(const float value) {
+    WriteField<ControlTable::kPresentVelocity>(value);
   }
 
   /**
    * @brief 获取当前位置 (R)
-   * @param[out] present_position 当前位置（pulse）
+   * @return present_position 当前位置（pulse）
    *
    * 范围: 0-4095 (Position Mode) | -1,048,575 到 1,048,575 (Extended Mode)
    *
@@ -2081,32 +1743,25 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - Position Control Mode: 0-4095 (单圈)
    * - Extended Position Control Mode: 多圈累计位置
    *
-   * 【相关寄存器】
-   * - Goal Position: 目标位置对比
-   * - Operating Mode: 决定位置范围
-   * - Moving Status: 运动状态指示
-   * - Homing Offset: 零点偏移
-   *
    * @note 此寄存器为只读，由系统自动更新
    */
   int32_t ReadPresentPosition() {
-    uint32_t raw;
-    ReadField<ControlTable::kPresentPosition>(raw);
-    return static_cast<int32_t>(raw);
+    int32_t value;
+    ReadField<ControlTable::kPresentPosition>(value);
+    return value;
   }
 
   /**
-   * @brief 设置当前位置 (R)
-   * @param[in] present_position 当前位置
+   * @brief 写入当前位置 (R，仅内部同步)
+   * @param[in] value 当前位置
    */
-  void WritePresentPosition(const int32_t present_position) {
-    WriteField<ControlTable::kPresentPosition>(
-        static_cast<uint32_t>(present_position));
+  void WritePresentPosition(const int32_t value) {
+    WriteField<ControlTable::kPresentPosition>(value);
   }
 
   /**
    * @brief 获取速度轨迹 (R)
-   * @param[out] rpm 速度轨迹（RPM）
+   * @return rpm 速度轨迹（RPM）
    *
    * 范围: -468.763 到 468.763 RPM
    *
@@ -2125,31 +1780,25 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - Velocity PID 控制器跟踪 Velocity Trajectory
    * - 输出 PWM 驱动电机
    *
-   * 【相关寄存器】
-   * - Profile Velocity: 速度曲线参数
-   * - Profile Acceleration: 加速度参数
-   * - Present Velocity: 实际速度值
-   * - Position Trajectory: 位置轨迹
-   *
    * @note 此寄存器为只读，由系统自动更新
    */
   float ReadVelocityTrajectory() {
-    uint32_t raw;
-    ReadField<ControlTable::kVelocityTrajectory>(raw);
-    return VelocityFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kVelocityTrajectory>(value);
+    return value;
   }
 
   /**
-   * @brief 设置速度轨迹 (R)
-   * @param[in] velocity_trajectory 速度轨迹
+   * @brief 写入速度轨迹 (R，仅内部同步)
+   * @param[in] value 速度轨迹
    */
-  void WriteVelocityTrajectory(const uint32_t velocity_trajectory) {
-    WriteField<ControlTable::kVelocityTrajectory>(velocity_trajectory);
+  void WriteVelocityTrajectory(const float value) {
+    WriteField<ControlTable::kVelocityTrajectory>(value);
   }
 
   /**
    * @brief 获取位置轨迹 (R)
-   * @param[out] position_trajectory 位置轨迹（pulse）
+   * @return position_trajectory 位置轨迹（pulse）
    *
    * 范围: 0-4095 (Position Mode) | -1,048,575 到 1,048,575 (Extended Mode)
    *
@@ -2159,28 +1808,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 与 Present Position 的区别：期望位置 vs 实际位置
    * - 实时更新，反映期望位置轨迹
    *
-   * 【相关寄存器】
-   * - Goal Position: 轨迹的最终目标
-   * - Present Position: 实际位置对比
-   * - Profile Velocity: 速度曲线参数
-   * - Profile Acceleration: 加速度参数
-   * - Moving Status: 轨迹状态指示
-   *
    * @note 此寄存器为只读，由系统自动更新
    */
   int32_t ReadPositionTrajectory() {
-    uint32_t raw;
-    ReadField<ControlTable::kPositionTrajectory>(raw);
-    return static_cast<int32_t>(raw);
+    int32_t value;
+    ReadField<ControlTable::kPositionTrajectory>(value);
+    return value;
   }
 
   /**
-   * @brief 设置位置轨迹 (R)
-   * @param[in] position_trajectory 位置轨迹
+   * @brief 写入位置轨迹 (R，仅内部同步)
+   * @param[in] value 位置轨迹
    */
-  void WritePositionTrajectory(const int32_t position_trajectory) {
-    WriteField<ControlTable::kPositionTrajectory>(
-        static_cast<uint32_t>(position_trajectory));
+  void WritePositionTrajectory(const int32_t value) {
+    WriteField<ControlTable::kPositionTrajectory>(value);
   }
 
   /**
@@ -2195,26 +1836,20 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 实时更新，反映当前电压
    * - 电压异常会触发保护
    *
-   * 【相关寄存器】
-   * - Min Voltage Limit: 最低电压限制
-   * - Max Voltage Limit: 最高电压限制
-   * - Hardware Error Status: 电压错误标志
-   * - Shutdown: 电压错误保护配置
-   *
    * @note 此寄存器为只读，由系统自动更新
    */
   float ReadPresentInputVoltage() {
-    uint16_t raw;
-    ReadField<ControlTable::kPresentInputVoltage>(raw);
-    return VoltageFromRaw(raw);
+    float value;
+    ReadField<ControlTable::kPresentInputVoltage>(value);
+    return value;
   }
 
   /**
-   * @brief 设置当前输入电压 (R)
-   * @param present_input_voltage 当前输入电压
+   * @brief 写入当前输入电压 (R，仅内部同步)
+   * @param[in] value 当前输入电压
    */
-  void WritePresentInputVoltage(const uint16_t present_input_voltage) {
-    WriteField<ControlTable::kPresentInputVoltage>(present_input_voltage);
+  void WritePresentInputVoltage(const float value) {
+    WriteField<ControlTable::kPresentInputVoltage>(value);
   }
 
   /**
@@ -2230,20 +1865,24 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 温度过高会触发保护
    */
   uint8_t ReadPresentTemperature() {
-    uint8_t present_temperature;
-    ReadField<ControlTable::kPresentTemperature>(present_temperature);
-    return present_temperature;
+    uint8_t value;
+    ReadField<ControlTable::kPresentTemperature>(value);
+    return value;
   }
 
   /**
-   * @brief 设置当前温度 (R)
-   * @param present_temperature 当前温度
+   * @brief 写入当前温度 (R，仅内部同步)
+   * @param[in] value 当前温度
    */
-  void WritePresentTemperature(const uint8_t present_temperature) {
-    WriteField<ControlTable::kPresentTemperature>(present_temperature);
+  void WritePresentTemperature(const uint8_t value) {
+    WriteField<ControlTable::kPresentTemperature>(value);
   }
 
 #pragma endregion  // "状态反馈组"
+
+  //==============================================================================
+  // EEPROM 持久化辅助
+  //==============================================================================
 
   /**
    * @brief 恢复 EEPROM 为默认值
@@ -2271,11 +1910,11 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
     RestoreEeprom<ControlTable::kMaxPositionLimit>();
     RestoreEeprom<ControlTable::kMinPositionLimit>();
     RestoreEeprom<ControlTable::kProtectionTime>();
-    RestoreEeprom<ControlTable::kVelocityIgain>();
-    RestoreEeprom<ControlTable::kVelocityPgain>();
-    RestoreEeprom<ControlTable::kPositionDgain>();
-    RestoreEeprom<ControlTable::kPositionIgain>();
-    RestoreEeprom<ControlTable::kPositionPgain>();
+    RestoreEeprom<ControlTable::kVelocityIGain>();
+    RestoreEeprom<ControlTable::kVelocityPGain>();
+    RestoreEeprom<ControlTable::kPositionDGain>();
+    RestoreEeprom<ControlTable::kPositionIGain>();
+    RestoreEeprom<ControlTable::kPositionPGain>();
     RestoreEeprom<ControlTable::kFeedforward2ndGain>();
     RestoreEeprom<ControlTable::kFeedforward1stGain>();
     RestoreEeprom<ControlTable::kProfileAcceleration>();
@@ -2293,7 +1932,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
     int pos = 0;
     for (uint8_t address = TableBlocks::kEeprom.begin;
          address < TableBlocks::kEeprom.end;
-         address++) {
+         ++address) {
       table_[address] = EEPROM.read(pos++);
     }
 #endif
@@ -2309,10 +1948,21 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
     int pos = 0;
     for (uint8_t address = TableBlocks::kEeprom.begin;
          address < TableBlocks::kEeprom.end;
-         address++) {
+         ++address) {
       EEPROM.update(pos++, table_[address]);
     }
 #endif
+    return Error::kOk;
+  }
+
+  /**
+   * @brief 将单个 EEPROM 寄存器恢复为默认值
+   * @tparam T 寄存器类型
+   * @return 错误码
+   */
+  template <typename T>
+  constexpr Error RestoreEeprom() {
+    CHECK(this->template WriteField<T>(T::kDefault));
     return Error::kOk;
   }
 
@@ -2326,7 +1976,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
     const auto first = table_[TableBlocks::kEeprom.begin];
     const auto begin = TableBlocks::kEeprom.begin;
     const auto end = TableBlocks::kEeprom.end;
-    for (uint8_t address = begin; address < end; address++) {
+    for (uint8_t address = begin; address < end; ++address) {
       if (table_[address] != first) {
         return false;
       }
@@ -2334,6 +1984,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
     return first == 0x00 || first == 0xFF;
   }
 
+  // 控制表缓存，按 ControlTable 地址空间顺序线性存储。
   uint8_t table_[ControlTable::kTotalSize] = {};
 };
 

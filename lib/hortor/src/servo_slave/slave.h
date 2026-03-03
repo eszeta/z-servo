@@ -162,13 +162,13 @@ class Slave : public SlaveBase<ServoType> {
     //==============================================================================
     // PID 参数组
     //==============================================================================
-    const auto vi = this->regmap_->ReadVelocityIgain();
-    const auto vp = this->regmap_->ReadVelocityPgain();
+    const auto vi = this->regmap_->ReadVelocityIGain();
+    const auto vp = this->regmap_->ReadVelocityPGain();
     this->servo_->set_velocity_pid(vp, vi, 0);
 
-    const auto pi = this->regmap_->ReadPositionIgain();
-    const auto pp = this->regmap_->ReadPositionPgain();
-    const auto pd = this->regmap_->ReadPositionDgain();
+    const auto pi = this->regmap_->ReadPositionIGain();
+    const auto pp = this->regmap_->ReadPositionPGain();
+    const auto pd = this->regmap_->ReadPositionDGain();
     this->servo_->set_position_pid(pp, pi, pd);
 
     const auto feedforward_2nd_gain = this->regmap_->ReadFeedforward2ndGain();

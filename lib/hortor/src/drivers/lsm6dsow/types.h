@@ -214,8 +214,8 @@ enum class LOW_PASS_ON_6D {
  * @brief 陀螺仪控制寄存器，用于控制陀螺仪的工作模式
  */
 struct LSM6DSOWRegs {
-  template <uint8_t Address, uint8_t Shift, uint8_t Bits>
-  using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
+  template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
+  using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
   /**
    * @brief WHO_AM_I寄存器
    * @note 这是一个只读寄存器。其值固定为6Ch。

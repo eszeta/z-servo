@@ -39,31 +39,34 @@ enum : uint8_t {
 constexpr uint8_t kBroadcastId = 0xfe;
 
 template <typename T,
-          uint8_t Address,
-          uint8_t Shift,
-          uint8_t Bits,
-          T default_value>
-struct ControlTableItem : regmap::Field<T, Address, Shift, Bits> {
-  static constexpr T kDefault = default_value;
+          uint8_t ADDRESS,
+          uint8_t SHIFT,
+          uint8_t BITS,
+          T DEFAULT_VALUE>
+struct ControlTableItem : regmap::Field<T, ADDRESS, SHIFT, BITS> {
+  static constexpr T kDefault = DEFAULT_VALUE;
 };
 
-template <uint8_t Address, uint8_t default_value>
-using RegU8 = ControlTableItem<uint8_t, Address, 0, 16, default_value>;
+template <uint8_t ADDRESS, uint8_t DEFAULT_VALUE>
+using RegU8 = ControlTableItem<uint8_t, ADDRESS, 0, 8, DEFAULT_VALUE>;
 
-template <uint8_t Address, uint16_t default_value>
-using RegU16 = ControlTableItem<uint16_t, Address, 0, 16, default_value>;
+template <uint8_t ADDRESS, uint16_t DEFAULT_VALUE>
+using RegU16 = ControlTableItem<uint16_t, ADDRESS, 0, 16, DEFAULT_VALUE>;
 
-template <uint8_t Address, uint32_t default_value>
-using RegU32 = ControlTableItem<uint32_t, Address, 0, 32, default_value>;
+template <uint8_t ADDRESS, uint32_t DEFAULT_VALUE>
+using RegU32 = ControlTableItem<uint32_t, ADDRESS, 0, 32, DEFAULT_VALUE>;
 
-template <uint8_t Address, int8_t default_value>
-using RegS8 = ControlTableItem<int8_t, Address, 0, 8, default_value>;
+template <uint8_t ADDRESS, int8_t DEFAULT_VALUE>
+using RegS8 = ControlTableItem<int8_t, ADDRESS, 0, 8, DEFAULT_VALUE>;
 
-template <uint8_t Address, int16_t default_value>
-using RegS16 = ControlTableItem<int16_t, Address, 0, 16, default_value>;
+template <uint8_t ADDRESS, int16_t DEFAULT_VALUE>
+using RegS16 = ControlTableItem<int16_t, ADDRESS, 0, 16, DEFAULT_VALUE>;
 
-template <uint8_t Address, int32_t default_value>
-using RegS32 = ControlTableItem<int32_t, Address, 0, 32, default_value>;
+template <uint8_t ADDRESS, int32_t DEFAULT_VALUE>
+using RegS32 = ControlTableItem<int32_t, ADDRESS, 0, 32, DEFAULT_VALUE>;
+
+template <uint8_t ADDRESS, bool DEFAULT_VALUE>
+using RegB8 = ControlTableItem<bool, ADDRESS, 0, 1, DEFAULT_VALUE>;
 
 struct ControlTableBlock {
   const uint8_t begin;

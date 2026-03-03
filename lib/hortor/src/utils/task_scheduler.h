@@ -77,7 +77,6 @@ class TaskScheduler {
 
   /**
    * @brief 非阻塞 Tick：到时的任务将被执行，未到时立即返回
-   * @param get_time_us 系统时间函数（微秒）
    * @return 执行的任务数量
    */
   Error TickNonBlocking() {
@@ -96,8 +95,6 @@ class TaskScheduler {
 
   /**
    * @brief 阻塞 Tick：执行到时任务后，按最快任务周期剩余时间进行延迟
-   * @param get_time_us 系统时间函数（微秒）
-   * @param delay_us 延迟函数（微秒）
    */
   Error Tick() {
     const uint32_t start = micros();

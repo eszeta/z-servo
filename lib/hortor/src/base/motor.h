@@ -13,7 +13,7 @@ namespace hortor::servo {
  * @details
  * 所有具体的电机驱动器实现都必须继承自此类。该类提供了电机驱动器的基本接口定义。
  */
-template <typename Derived>
+template <typename DERIVED>
 class Motor {
  public:
   /**
@@ -36,17 +36,17 @@ class Motor {
    * @brief 设置电机PWM
    * @param pwm (-1..1)
    */
-  void SetPWM(float pwm) { static_cast<Derived*>(this)->SetPWMImpl(pwm); }
+  void SetPWM(float pwm) { static_cast<DERIVED*>(this)->SetPWMImpl(pwm); }
 
   /**
    * @brief 制动（快速停止）
    */
-  void Brake() { static_cast<Derived*>(this)->BrakeImpl(); }
+  void Brake() { static_cast<DERIVED*>(this)->BrakeImpl(); }
 
   /**
    * @brief 滑行（自由停止）
    */
-  void Coast() { static_cast<Derived*>(this)->CoastImpl(); }
+  void Coast() { static_cast<DERIVED*>(this)->CoastImpl(); }
 
  protected:
   /** @brief 电机反转 */

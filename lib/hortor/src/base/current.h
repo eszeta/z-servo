@@ -13,7 +13,7 @@ namespace hortor::servo {
  * @details
  * 所有具体的电流传感器实现都必须继承自此类。该类提供了电流检测的基本接口定义。
  */
-template <typename Derived>
+template <typename DERIVED>
 class Current {
  public:
   /**
@@ -22,7 +22,7 @@ class Current {
    * @return Error 错误码
    */
   Error ReadCurrent(float& current) {
-    return static_cast<Derived*>(this)->ReadCurrentImpl(current);
+    return static_cast<DERIVED*>(this)->ReadCurrentImpl(current);
   }
 
   /**

@@ -16,7 +16,7 @@ namespace hortor::servo {
 /**
  * @brief 传感器基类，提供编码器传感器的通用接口和功能实现
  */
-template <typename Derived, uint8_t Bits>
+template <typename DERIVED, uint8_t Bits>
 class Encoder {
  public:
   struct Config {
@@ -126,7 +126,7 @@ class Encoder {
    * 子类必须实现此方法以提供特定传感器的原始计数值读取功能。
    */
   Error ReadRaw(uint32_t& out_raw) {
-    return static_cast<Derived*>(this)->ReadRawImpl(out_raw);
+    return static_cast<DERIVED*>(this)->ReadRawImpl(out_raw);
   }
 
   Error recalibrate() {

@@ -20,7 +20,7 @@ namespace hortor::protocol {
  *
  * @tparam Derived 派生类类型
  */
-template <typename Derived>
+template <typename DERIVED>
 class PortHandler {
  public:
   /**
@@ -35,7 +35,7 @@ class PortHandler {
                 const float dt,
                 InstPacket& inst_packet,
                 bool& is_complete) {
-    return static_cast<Derived*>(this)->ProcessImpl(
+    return static_cast<DERIVED*>(this)->ProcessImpl(
         protocol, dt, inst_packet, is_complete);
   }
 
@@ -46,7 +46,7 @@ class PortHandler {
    * @return 错误码
    */
   Error Response(const StatusPacket& packet, const uint8_t reply_idx) {
-    return static_cast<Derived*>(this)->ResponseImpl(packet, reply_idx);
+    return static_cast<DERIVED*>(this)->ResponseImpl(packet, reply_idx);
   }
 
   /**

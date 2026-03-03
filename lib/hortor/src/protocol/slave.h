@@ -16,11 +16,11 @@ namespace hortor::protocol {
 /**
  * @brief 协议从机类（CRTP 基类）
  *
- * @tparam Derived 派生类类型（CRTP）
+ * @tparam DERIVED 派生类类型（CRTP）
  * @tparam RegMapType 寄存器映射类型
  * @tparam PortHandlerType 端口处理器类型
  */
-template <typename Derived, typename RegMapType, typename PortHandlerType>
+template <typename DERIVED, typename RegMapType, typename PortHandlerType>
 class Slave {
  public:
   /**
@@ -55,7 +55,7 @@ class Slave {
    * @return 错误码
    */
   Error AfterProcess(float dt) {
-    return static_cast<Derived*>(this)->AfterProcessImpl(dt);
+    return static_cast<DERIVED*>(this)->AfterProcessImpl(dt);
   }
 
   /**
@@ -200,7 +200,7 @@ class Slave {
   Error AfterWriteRegs(const uint8_t address,
                        const uint8_t* data,
                        const size_t size) {
-    return static_cast<Derived*>(this)->AfterWriteRegsImpl(address, data, size);
+    return static_cast<DERIVED*>(this)->AfterWriteRegsImpl(address, data, size);
   }
 
   /**
@@ -377,7 +377,7 @@ class Slave {
    * @return 错误码
    */
   Error AfterResetHandler(const InstPacket& packet, const bool response) {
-    return static_cast<Derived*>(this)->AfterResetHandlerImpl(packet, response);
+    return static_cast<DERIVED*>(this)->AfterResetHandlerImpl(packet, response);
   }
 
   /**

@@ -14,7 +14,7 @@ namespace hortor::servo {
  * @brief IMU类
  * @details 定义了IMU的基本接口
  */
-template <typename Derived>
+template <typename DERIVED>
 class IMU {
  public:
   /**
@@ -25,7 +25,7 @@ class IMU {
    * @return IMUError 读取结果
    */
   Error ReadAcceleration(float& x, float& y, float& z) {
-    return static_cast<Derived*>(this)->ReadAccelerationImpl(x, y, z);
+    return static_cast<DERIVED*>(this)->ReadAccelerationImpl(x, y, z);
   }
 
   /**
@@ -33,7 +33,7 @@ class IMU {
    * @return bool 加速度是否可用
    */
   bool AccelerationAvailable() {
-    return static_cast<Derived*>(this)->AccelerationAvailableImpl();
+    return static_cast<DERIVED*>(this)->AccelerationAvailableImpl();
   }
 
   /**
@@ -44,7 +44,7 @@ class IMU {
    * @return IMUError 读取结果
    */
   Error ReadGyroscope(float& x, float& y, float& z) {
-    return static_cast<Derived*>(this)->ReadGyroscopeImpl(x, y, z);
+    return static_cast<DERIVED*>(this)->ReadGyroscopeImpl(x, y, z);
   }
 
   /**
@@ -52,7 +52,7 @@ class IMU {
    * @return bool 陀螺仪是否可用
    */
   bool GyroscopeAvailable() {
-    return static_cast<Derived*>(this)->GyroscopeAvailableImpl();
+    return static_cast<DERIVED*>(this)->GyroscopeAvailableImpl();
   }
 
   /**
@@ -61,7 +61,7 @@ class IMU {
    * @return IMUError 读取结果
    */
   Error ReadTemperature(float& temperature_deg) {
-    return static_cast<Derived*>(this)->ReadTemperatureImpl(temperature_deg);
+    return static_cast<DERIVED*>(this)->ReadTemperatureImpl(temperature_deg);
   }
 
   /**
@@ -69,7 +69,7 @@ class IMU {
    * @return bool 温度是否可用
    */
   bool TemperatureAvailable() {
-    return static_cast<Derived*>(this)->TemperatureAvailableImpl();
+    return static_cast<DERIVED*>(this)->TemperatureAvailableImpl();
   }
 };
 
