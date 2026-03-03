@@ -23,8 +23,6 @@ namespace Converters {
 using VoltageCvt = regmap::RatioConverter<float, 1, 10>;       // 0.1V / LSB
 using PwmPctCvt = regmap::RatioConverter<float, 113, 1000>;    // 0.113% / LSB
 using VelocityCvt = regmap::RatioConverter<float, 229, 1000>;  // 0.229RPM / LSB
-using AccelerationCvt =
-    regmap::RatioConverter<float, 214577, 1000>;     // 214.577RPM^2 / LSB
 using MsCvt = regmap::RatioConverter<uint16_t, 20>;  // 20ms / LSB
 using UsCvt = regmap::RatioConverter<uint16_t, 2>;   // 2us / LSB
 using CurrentCvt = regmap::RatioConverter<float, 1, 1000>;       // 0.001A / LSB
@@ -57,7 +55,6 @@ struct ControlTable {
   using VoltageCvt = Converters::VoltageCvt;
   using PwmPctCvt = Converters::PwmPctCvt;
   using VelocityCvt = Converters::VelocityCvt;
-  using AccelerationCvt = Converters::AccelerationCvt;
   using MsCvt = Converters::MsCvt;
   using UsCvt = Converters::UsCvt;
   using CurrentCvt = Converters::CurrentCvt;
@@ -174,16 +171,7 @@ struct ControlTable {
   };
   /* 0x6E-0x6F: 保留，用于PID参数组扩展 */
 
-  /* 轨迹配置组 (0x70-0x7F, 16字节) */
-  /** @brief 轨迹加速度 | 单位: 214.577 rev/min² (速度模式) / 1ms (时间模式) | 访问: RW */
-  struct kProfileAcceleration : RegU32<0x70, 0> {
-    using converter_t = AccelerationCvt;
-  };
-  /** @brief 轨迹速度 | 单位: 0.229 rev/min (速度模式) / 1ms (时间模式) | 访问: RW */
-  struct kProfileVelocity : RegU32<0x74, 0> {
-    using converter_t = VelocityCvt;
-  };
-  /* 0x78-0x7F: 保留，用于轨迹配置组扩展 */
+  /* 0x70-0x7F: 保留 */
 
   //--------------------------------------------------------------------------
   // RAM 区（掉电不保存）
@@ -262,8 +250,8 @@ struct ControlTable {
 namespace TableBlocks {
 constexpr ControlTableBlock kEeprom = {
     ControlTable::kModelNumber::kAddress,
-    ControlTable::kProfileVelocity::kAddress +
-        ControlTable::kProfileVelocity::kSize};
+    ControlTable::kFeedforward1stGain::kAddress +
+        ControlTable::kFeedforward1stGain::kSize};
 
 constexpr ControlTableBlock kRam = {
     ControlTable::kTorqueEnable::kAddress,

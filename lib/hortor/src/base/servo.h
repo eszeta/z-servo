@@ -208,24 +208,6 @@ class Servo {
 #pragma endregion  // "PID 参数组"
 
   //==============================================================================
-  // 轨迹配置组
-  //==============================================================================
-#pragma region "轨迹配置组"
-  /** @brief 轨迹速度（RPM，Velocity-based 模式） */
-  float profile_velocity() const { return profile_velocity_; }
-  void set_profile_velocity(const float profile_velocity) {
-    profile_velocity_ = profile_velocity;
-  }
-
-  /** @brief 轨迹加速度（rev/min²，Velocity-based 模式） */
-  float profile_acceleration() const { return profile_acceleration_; }
-  void set_profile_acceleration(const float profile_acceleration) {
-    profile_acceleration_ = profile_acceleration;
-  }
-
-#pragma endregion  // "轨迹配置组"
-
-  //==============================================================================
   // 控制命令组
   //==============================================================================
 #pragma region "控制命令组"
@@ -318,13 +300,13 @@ class Servo {
   float present_pwm() const { return present_pwm_; }
   void set_present_pwm(const float present_pwm) { present_pwm_ = present_pwm; }
 
-  /** @brief 位置轨迹（Profile 生成的期望位置） */
+  /** @brief 位置轨迹（系统生成的期望位置） */
   int32_t position_trajectory() const { return position_trajectory_; }
   void set_position_trajectory(const int32_t position_trajectory) {
     position_trajectory_ = position_trajectory;
   }
 
-  /** @brief 速度轨迹（Position PID 输出或 Profile 生成的期望速度） */
+  /** @brief 速度轨迹（Position PID 输出或系统生成的期望速度） */
   float velocity_trajectory() const { return velocity_trajectory_; }
   void set_velocity_trajectory(const float velocity_trajectory) {
     velocity_trajectory_ = velocity_trajectory;
@@ -450,18 +432,6 @@ class Servo {
   float feedforward_1st_gain_ = 0.0f;
 
 #pragma endregion  // "PID 参数组"
-
-  //==============================================================================
-  // 轨迹配置组
-  //==============================================================================
-#pragma region "轨迹配置组"
-  /** @brief 轨迹加速度 */
-  float profile_acceleration_ = 0.0f;
-
-  /** @brief 轨迹速度 */
-  float profile_velocity_ = 0.0f;
-
-#pragma endregion  // "轨迹配置组"
 
   //==============================================================================
   // 控制命令组
@@ -627,7 +597,7 @@ class Servo {
    * @param dt 时间间隔(秒)
    * @note
    * 1. 指令经总线传输并写入 Goal Position。
-   * 2. 由 Profile Velocity 与 Profile Acceleration 将 Goal Position
+   * 2. 由轨迹生成器将 Goal Position
    * 转换为期望位置轨迹与期望速度轨迹。
    * 3. 期望位置轨迹与期望速度轨迹分别存入 Position Trajectory 与
    * Velocity Trajectory。

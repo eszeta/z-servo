@@ -30,7 +30,7 @@ enum class OperatingMode : uint8_t {
    * @brief 速度控制模式
    *
    * 控制电机转速，实现速度伺服。
-   * - 控制参数：Goal Velocity（目标速度）、Profile Acceleration（加速度）
+   * - 控制参数：Goal Velocity（目标速度）
    * - 输出特性：恒定转速输出
    * - 应用场景：轮式机器人、传送带、风扇控制
    */
@@ -40,8 +40,7 @@ enum class OperatingMode : uint8_t {
    * @brief 位置控制模式（单圈）
    *
    * 控制电机位置，实现位置伺服，限制在单圈范围内。
-   * - 控制参数：Goal Position（目标位置）、Profile Velocity（速度）、Profile
-   * Acceleration（加速度）
+   * - 控制参数：Goal Position（目标位置）
    * - 位置范围：0-4095（对应0-360°）
    * - 限制条件：受 Min/Max Position Limit 限制
    * - 应用场景：关节控制、单圈定位、舵机应用
@@ -52,8 +51,7 @@ enum class OperatingMode : uint8_t {
    * @brief 扩展位置控制模式（多圈）
    *
    * 支持多圈位置控制，允许电机连续旋转。
-   * - 控制参数：Goal Position（目标位置）、Profile Velocity（速度）、Profile
-   * Acceleration（加速度）
+   * - 控制参数：Goal Position（目标位置）
    * - 位置范围：-1,048,575 ~ 1,048,575（对应-256 ~ 256圈）
    * - 限制条件：不受 Min/Max Position Limit 限制
    * - 应用场景：多圈定位、旋转计数、连续旋转应用
@@ -98,12 +96,12 @@ union DriveModeBits {
   struct {
     bool moto_reverse_mode : 1;      // 位0 0: 正转, 1: 反转
     bool encoder_reverse_mode : 1;   // 位1 0: 正转, 1: 反转
-    bool profile_configuration : 1;  // 位2 0: Velocity-based, 1:Time-based
-    bool reserved_bit3 : 1;          // 位3 保留
-    bool reserved_bit4 : 1;          // 位4 保留
-    bool reserved_bit5 : 1;          // 位5 保留
-    bool reserved_bit6 : 1;          // 位6 保留
-    bool reserved_bit7 : 1;          // 位7 保留
+    bool reserved_bit2 : 1;         // 位2 保留
+    bool reserved_bit3 : 1;         // 位3 保留
+    bool reserved_bit4 : 1;         // 位4 保留
+    bool reserved_bit5 : 1;         // 位5 保留
+    bool reserved_bit6 : 1;         // 位6 保留
+    bool reserved_bit7 : 1;         // 位7 保留
   };
 };
 
@@ -114,14 +112,10 @@ union MovingStatusBits {
   uint8_t value = 0;
   struct {
     bool in_position : 1;          // 位0: 已到达目标位置
-    bool profile_ongoing : 1;      // 位1: 轨迹进行中
+    bool reserved_bit1 : 1;        // 位1: 保留
     bool reserved_bit2 : 1;        // 位2: 保留
     bool following_error : 1;      // 位3: 跟随误差
-    uint8_t velocity_profile : 2;  // 位4-5: 速度轨迹类型 (
-                                   //   00=Step,
-                                   //   01=Rect,
-                                   //   10=Tri,
-                                   //   11=Trap)
+    uint8_t reserved_bits4_5 : 2;  // 位4-5: 保留
     uint8_t reserved_bits6_7 : 2;  // 位6-7: 保留
   };
 };

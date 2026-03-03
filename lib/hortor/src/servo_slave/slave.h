@@ -179,15 +179,6 @@ class Slave : public SlaveBase<ServoType> {
         this->regmap_->ReadFeedforward1stGain());
 
     //==============================================================================
-    // 轨迹配置组
-    //==============================================================================
-    const auto profile_acceleration = this->regmap_->ReadProfileAcceleration();
-    this->servo_->set_profile_acceleration(profile_acceleration);
-
-    const auto profile_velocity = this->regmap_->ReadProfileVelocity();
-    this->servo_->set_profile_velocity(profile_velocity);
-
-    //==============================================================================
     // 控制命令组
     //==============================================================================
     const auto torque_enable = this->regmap_->ReadTorqueEnable();

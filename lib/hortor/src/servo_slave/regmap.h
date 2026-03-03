@@ -252,17 +252,13 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * |-----|----------------------------|-----------------------------------|
    * | 0   | Motor Reverse Mode         | 0: Normal, 1: Reverse             |
    * | 1   | Encoder Reverse Mode       | 0: Normal, 1: Reverse             |
-   * | 2   | Profile Configuration      | 0: Velocity-based, 1: Time-based  |
+   * | 2   | Reserved                   | 保留（未使用）                    |
    * | 3   | Reserved                   | 保留（未使用）                    |
    * | 4   | Reserved                   | 保留（未使用）                    |
    * | 5   | Reserved                   | 保留（未使用）                    |
    * | 6   | Reserved                   | 保留（未使用）                    |
    * | 7   | Reserved                   | 保留（未使用）                    |
    *
-   * 【Profile 配置 (Bit 2)】
-   * - 0: Velocity-based Profile - 使用速度和加速度参数
-   * - 1: Time-based Profile - 使用时间参数（毫秒）
-   * 
    * 【电机反转模式 (Bit 4)】
    * - 电机正反转模式，修正最终输出轴方向不一致问题
    *
@@ -295,14 +291,14 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 修改后需要重启生效
    *
    * 【模式对比表】
-   * | 模式             | 控制目标      | Profile     | 位置限位  | 多圈支持| 典型应用       |
-   * |------------------|---------------|-------------|-----------|---------|----------------|
-   * | 0: Current       | 电流/力矩     | ✗           | ✗         | ✗       | 力控、柔顺     |
-   * | 1: Velocity      | 速度          | ~ (仅加速度)| ✗         | ✓       | 轮子、传送带   |
-   * | 3: Position      | 位置(单圈)    | ✓           | ✓         | ✗       | 关节、单圈定位 |
-   * | 4: Extended      | 位置(多圈)    | ✓           | ✗         | ✓       | 多圈、旋转计数 |
-   * | 5: Current-based | 位置+电流限制 | ✓           | ✓         | ✗       | 抓取、防撞     |
-   * | 16: PWM          | PWM占空比     | ✗           | ✗         | ✗       | 开环、调试     |
+   * | 模式             | 控制目标      | 位置限位  | 多圈支持| 典型应用       |
+   * |------------------|---------------|-----------|---------|----------------|
+   * | 0: Current       | 电流/力矩     | ✗         | ✗       | 力控、柔顺     |
+   * | 1: Velocity      | 速度          | ✗         | ✓       | 轮子、传送带   |
+   * | 3: Position      | 位置(单圈)    | ✓         | ✗       | 关节、单圈定位 |
+   * | 4: Extended      | 位置(多圈)    | ✗         | ✓       | 多圈、旋转计数 |
+   * | 5: Current-based | 位置+电流限制 | ✓         | ✗       | 抓取、防撞     |
+   * | 16: PWM          | PWM占空比     | ✗         | ✗       | 开环、调试     |
    *
    * 【详细模式说明】
    *
@@ -314,7 +310,6 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    *
    * 【1: Velocity Control Mode（速度控制模式）】
    * - 使用 Goal Velocity 控制转速
-   * - Profile Acceleration 用于加速度控制
    * - 不控制位置
    * - 适用场景：轮式机器人、传送带
    *
@@ -322,7 +317,6 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 使用 Goal Position 控制位置
    * - 位置范围: 0-4095 (0-360°)
    * - 受 Min/Max Position Limit 限制
-   * - Profile Velocity 和 Profile Acceleration 控制运动轨迹
    * - 适用场景：关节控制、单圈定位
    *
    * 【4: Extended Position Control Mode（扩展位置控制模式）】
@@ -1049,164 +1043,10 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
 #pragma endregion  // "PID 参数组"
 
   //==============================================================================
-  // 轨迹配置组 (0x70-0x7F, EEPROM)
+  // 保留区域 (0x70-0x7F, EEPROM)
   //==============================================================================
-#pragma region "轨迹配置组"
-
-  /**
-   * @brief 获取轨迹加速度 (RW)
-   * @return acceleration 轨迹加速度（rev/min²，Velocity-based模式）
-   *
-   * 范围: 0-7,032,024.959 rev/min² (Velocity-based模式) | 0-32767 ms
-   * (Time-based模式)
-   *
-   * 【功能说明】
-   * Profile Acceleration 在不同 Profile 类型下的作用：
-   *
-   * 【Velocity-based Profile (Drive Mode Bit 2 = 0)】
-   * 单位: rev/min²
-   * 作用: 设置加速度
-   * - 0: 矩形 Profile（无加速过程）
-   * - 非 0: 梯形 Profile（有加速和减速阶段）
-   *
-   * 【Time-based Profile (Drive Mode Bit 2 = 1)】
-   * 单位: ms
-   * 作用: 设置加速时间 (t1)
-   * - 加速阶段 (0 → t1): 加速
-   * - 匀速阶段 (t1 → t3-t1): 匀速
-   * - 减速阶段 (t3-t1 → t3): 减速
-   * - 系统自动限制: Profile Acceleration 不会超过 Profile Velocity 的 50%
-   *   (确保 t1 ≤ t3/2，即加速+减速时间不超过总时间)
-   *
-   * 【Velocity Control Mode 中的使用】
-   * - Velocity Control Mode 只使用 Profile Acceleration(108)
-   * - 不使用 Profile Velocity(112)
-   * - 支持的 Profile 类型:
-   *   * Step: Profile Acceleration = 0（立即达到目标速度）
-   *   * Trapezoidal: Profile Acceleration ≠ 0（平滑加速到目标速度）
-   * - 加速时间计算同上述 Velocity-based 公式
-   *
-   * 【典型参数】
-   * - 快速运动: 1000-3000 rev/min²
-   * - 一般运动: 500-1500 rev/min²
-   * - 精密定位: 200-800 rev/min²
-   * - 重载应用: 100-500 rev/min²
-   *
-   * @note 在 Velocity Control Mode 中也使用此参数控制加速度
-   * @note Time-based模式下单位为ms，当前实现假设Velocity-based模式
-   */
-  float ReadProfileAcceleration() {
-    float value;
-    ReadField<ControlTable::kProfileAcceleration>(value);
-    return value;
-  }
-
-  /**
-   * @brief 设置轨迹加速度
-   * @param[in] value 轨迹加速度（rev/min²，Velocity-based模式）
-   */
-  void WriteProfileAcceleration(const float value) {
-    WriteField<ControlTable::kProfileAcceleration>(value);
-  }
-
-  /**
-   * @brief 获取轨迹速度 (RW)
-   * @return rpm 轨迹速度（RPM，Velocity-based模式）
-   *
-   * 范围: 0-7,503.643 RPM (Velocity-based模式) | 0-32767 ms (Time-based模式)
-   *
-   * 【Profile 处理流程】
-   * 根据官方文档，当接收到新的 Goal Position 时：
-   *
-   * 1. 指令通过 DYNAMIXEL 总线传输，注册到 Goal Position
-   * 2. 基于 Profile Velocity 和 Profile Acceleration 计算加速时间 t1
-   * 3. 根据以下条件决定 Profile 类型：
-   *    - Profile Velocity = 0 → Step (不使用 Profile)
-   *    - Profile Velocity ≠ 0, Profile Acceleration = 0 → Rectangular
-   *    - Profile Velocity ≠ 0, Profile Acceleration ≠ 0 → Trapezoidal
-   *    - 移动距离不足时，Trapezoidal 自动降级为 Triangular
-   * 4. 选择的 Profile 类型存储在 Moving Status(123) 的 Bit 4-5
-   * 5. Profile Generator 计算期望轨迹:
-   *    - Position Trajectory(140): 期望位置轨迹
-   *    - Velocity Trajectory: 期望速度轨迹
-   * 6. 控制器跟踪期望轨迹驱动电机
-   *
-   * 【运动中更新 Goal Position】
-   * - 如果在运动过程中更新 Goal Position:
-   *   * 基于当前运动速度重新生成轨迹
-   *   * 速度平滑过渡到新的期望轨迹
-   *   * 避免速度突变，保护机械结构
-   *
-   * 【功能说明】
-   * Profile Velocity 在不同 Profile 类型下的作用：
-   *
-   * 【Velocity-based Profile (Drive Mode Bit 2 = 0)】
-   * 单位: RPM
-   * 作用: 设置运动的最大速度
-   * - 0: 不使用 Profile（Step Instruction）
-   *   * 立即以最大速度移动（受 Velocity Limit 限制）
-   *   * 无加减速过程，可能对机械产生冲击
-   *   * 适用于调试或对响应速度要求极高的场景
-   * - 非 0: 使用梯形或矩形速度曲线
-   * - 受 Velocity Limit(44) 限制
-   *
-   * 【Time-based Profile (Drive Mode Bit 2 = 1)】
-   * 单位: ms
-   * 作用: 设置运动的总时间 (t3)
-   * - Profile Acceleration(108) 设置加速时间 (t1)
-   * - 运动时间 = Profile Velocity
-   * - Profile Acceleration ≤ 50% of Profile Velocity
-   *
-   * 【Profile 类型选择】
-   * | Profile Velocity | Profile Acceleration | Profile 类型      |
-   * |------------------|----------------------|-------------------|
-   * | 0                | -                    | Step (无 Profile) |
-   * | 非 0             | 0                    | Rectangular       |
-   * | 非 0             | 非 0                 | Trapezoidal       |
-   *
-   * 【加速时间计算】
-   *
-   * Velocity-based Profile:
-   *   t1 = 64 × (Profile Velocity / Profile Acceleration)
-   *
-   *   其中:
-   *   - t1: 加速时间（毫秒 ms）
-   *   - Profile Velocity: 单位 0.229 RPM/tick
-   *   - Profile Acceleration: 单位 214.577 rev/min²/tick
-   *   - 系数 64: 单位转换常数
-   *
-   * Time-based Profile:
-   *   t1 = Profile Acceleration(108)
-   *
-   *   其中:
-   *   - t1: 加速时间（毫秒 ms）
-   *   - Profile Acceleration 直接设置加速时间
-   *   - 自动限制: t1 ≤ 50% × Profile Velocity (即 t1 ≤ t3/2)
-   *
-   * 【典型参数】
-   * - 快速定位: 200-400 RPM
-   * - 一般运动: 100-200 RPM
-   * - 精密定位: 50-100 RPM
-   * - 连续旋转: 设置较大值实现连续运动
-   *
-   * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
-   * @note Time-based模式下单位为ms，当前实现假设Velocity-based模式
-   */
-  float ReadProfileVelocity() {
-    float value;
-    ReadField<ControlTable::kProfileVelocity>(value);
-    return value;
-  }
-
-  /**
-   * @brief 设置轨迹速度
-   * @param[in] value 轨迹速度（RPM，Velocity-based模式）
-   */
-  void WriteProfileVelocity(const float value) {
-    WriteField<ControlTable::kProfileVelocity>(value);
-  }
-
-#pragma endregion  // "轨迹配置组"
+#pragma region "保留区域"
+#pragma endregion  // "保留区域"
 
   //==============================================================================
   // 控制命令组 (0x80-0x8F, RAM)
@@ -1591,43 +1431,15 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * | Bit | 名称                   | 说明                          |
    * |-----|------------------------|-------------------------------|
    * | 0   | In-Position            | 0: 未到达目标位置, 1: 已到达  |
-   * | 1   | Profile Ongoing        | 0: 轨迹已完成, 1: 轨迹进行中  |
+   * | 1   | Reserved               | 保留位                        |
    * | 2   | Reserved               | 保留位                        |
    * | 3   | Following Error        | 0: 正在跟随, 1: 未跟随轨迹    |
-   * | 4-5 | Velocity Profile       | 00: Step,                     |
-   * |     |                        | 01: Rectangular,              |
-   * |     |                        | 10: Triangular,               |
-   * |     |                        | 11: Trapezoidal               |
+   * | 4-5 | Reserved               | 保留位                        |
    * | 6-7 | Reserved               | 保留位                        |
-   *
-   * 【Profile 类型详解】
-   *
-   * 参数配置（3 种基本类型）：
-   * | Profile Velocity | Profile Acceleration | 配置的类型   |
-   * |------------------|----------------------|--------------|
-   * | 0                | -                    | Step         |
-   * | 非 0             | 0                    | Rectangular  |
-   * | 非 0             | 非 0                 | Trapezoidal  |
-   *
-   * 运行时状态（4 种可能状态，存储在 Bit 4-5）：
-   * | 编码 | 类型        | 说明                                  |
-   * |------|------------|----------------------------------------|
-   * | 00   | Step       | 不使用 Profile，立即以最大速度移动     |
-   * | 01   | Rectangular| 矩形曲线：匀速运动，无加减速过程       |
-   * | 10   | Triangular | 三角形曲线：只有加速和减速，无匀速段   |
-   * | 11   | Trapezoidal| 梯形曲线：完整的加速-匀速-减速过程     |
-   *
-   * 【Triangular vs Trapezoidal】
-   * - 当配置为 Trapezoidal 时（Profile Velocity ≠ 0, Profile Acceleration ≠ 0）
-   * - 如果移动距离足够长：执行完整梯形曲线 → Moving Status 显示 11 (Trapezoidal)
-   * - 如果移动距离太短：自动降级为三角形曲线 → Moving Status 显示 10 (Triangular)
-   * - Triangular 是系统根据实际距离自动选择的，无法直接配置
    *
    * 【状态说明】
    * - In-Position: 当前位置是否在目标位置容差范围内
-   * - Profile Ongoing: 是否正在执行运动轨迹
    * - Following Error: 是否出现跟随误差
-   * - Velocity Profile: 当前使用的速度曲线类型
    *
    * @note 仅在 Position Control Mode 和 Extended Position Control Mode 有效
    */
@@ -1766,16 +1578,16 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * 范围: -468.763 到 468.763 RPM
    *
    * 【功能说明】
-   * - Profile 生成的期望速度轨迹值
+   * - 系统生成的期望速度轨迹值
    * - 存储在 Velocity Trajectory 寄存器中
    * - 作为速度控制器的参考输入
-   * - 实时更新，反映 Profile 计算的期望速度
+   * - 实时更新，反映控制器计算的期望速度
    * - 与 Present Velocity 对比可得速度跟踪误差
    *
    * 【控制流程】
-   * Goal Position → [Profile Generator] → Velocity Trajectory → [Velocity
+   * Goal Position → [Trajectory Generator] → Velocity Trajectory → [Velocity
    * PID] → PWM
-   * - Profile Generator 根据 Goal Position 生成期望速度轨迹
+   * - Trajectory Generator 根据 Goal Position 生成期望速度轨迹
    * - 期望速度轨迹存储在 Velocity Trajectory 中
    * - Velocity PID 控制器跟踪 Velocity Trajectory
    * - 输出 PWM 驱动电机
@@ -1803,7 +1615,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * 范围: 0-4095 (Position Mode) | -1,048,575 到 1,048,575 (Extended Mode)
    *
    * 【功能说明】
-   * - 读取 Profile 生成的期望位置轨迹
+   * - 读取系统生成的期望位置轨迹
    * - 位置 PID 控制器的参考输入
    * - 与 Present Position 的区别：期望位置 vs 实际位置
    * - 实时更新，反映期望位置轨迹
@@ -1917,8 +1729,6 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
     RestoreEeprom<ControlTable::kPositionPGain>();
     RestoreEeprom<ControlTable::kFeedforward2ndGain>();
     RestoreEeprom<ControlTable::kFeedforward1stGain>();
-    RestoreEeprom<ControlTable::kProfileAcceleration>();
-    RestoreEeprom<ControlTable::kProfileVelocity>();
     CHECK(StoreEeprom());
     return Error::kOk;
   }
