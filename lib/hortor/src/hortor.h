@@ -23,60 +23,30 @@ namespace hortor {
 /**
  * @brief 错误码枚举
  *
- * 定义MT6701传感器操作可能返回的错误码，用于诊断问题。
+ * 项目通用错误码，用于诊断问题。
  */
 enum class Error : uint8_t {
-  /**
-   * @brief 成功，操作正常完成
-   */
+  /** @brief 成功，操作正常完成 */
   kOk = 0,
-  /**
-   * @brief 一般错误，未指定具体原因
-   */
+  /** @brief 一般错误，未指定具体原因 */
   kGeneralErr = 1,
-  /**
-   * @brief IO错误，通信过程中发生错误
-   */
-  kIOErr = 3,
-  /**
-   * @brief 超出范围，参数值超出有效范围
-   */
-  kOutOfRange = 4,
-  /**
-   * @brief 无效参数，参数组合无效
-   */
-  kInvalidParameter = 5,
-  /**
-   * @brief 未初始化，设备未完成初始化
-   */
-  kUninitialized = 6,
-  /**
-   * @brief 无效包，包格式错误
-   */
-  kInvalidPacket = 7,
-  /**
-   * @brief 无效指令，指令码无效
-   */
-  kInvalidInstruction = 8,
-  /**
-   * @brief 数组越界
-   */
-  kArrayOutOfRange = 9,
-  /**
-   * @brief 无效状态
-   */
-  kInvalidState = 10,
-  /**
-   * @brief 校验和错误
-   */
-  kChecksumError = 11,
-  /**
-   * @brief 未实现
-   */
-  kNotImplemented = 11,
-  /**
-   * @brief 模式不支持
-   */
-  kModeNotSupport = 12,
+  /** @brief IO错误，通信过程中发生错误 */
+  kIOErr = 2,
+  /** @brief 超出范围，参数值超出有效范围 */
+  kOutOfRange = 3,
+  /** @brief 无效参数，参数组合无效 */
+  kInvalidParameter = 4,
+  /** @brief 无效包，包格式错误 */
+  kInvalidPacket = 5,
+  /** @brief 无效指令，指令码无效 */
+  kInvalidInstruction = 6,
+  /** @brief 数组越界 */
+  kArrayOutOfRange = 7,
+  /** @brief 无效状态 */
+  kInvalidState = 8,
+  /** @brief 校验和错误 */
+  kChecksumError = 9,
+  /** @brief 模式不支持 */
+  kModeNotSupport = 10,
 };
 }  // namespace hortor

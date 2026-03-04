@@ -128,7 +128,7 @@ alwaysApply: true
 - 编译指令 "$HOME/.platformio/penv/bin/pio" run
 
 **C++版本**：
-- C++17
+- gnu++17
 
 ---
 
