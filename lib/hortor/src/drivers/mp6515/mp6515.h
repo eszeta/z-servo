@@ -45,7 +45,7 @@ class MP6515 final : public MP6515Base {
   Error Init(const Config& config) {
     if (config.pin_phase == 0 || config.pin_enbl == 0 ||
         config.pin_brake == 0 || config.pin_sleep == 0) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
 
     CHECK(MP6515Base::Init());

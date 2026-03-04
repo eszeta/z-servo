@@ -29,7 +29,7 @@ class SpiPlain : public hortor::Noncopyable {
    */
   Error Init(SPIClass* spi, int cs_pin, const SPISettings& spi_settings) {
     if (!spi_) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     spi_ = spi;
     cs_pin_ = cs_pin;
@@ -47,7 +47,7 @@ class SpiPlain : public hortor::Noncopyable {
    */
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
     if (!spi_ || !data) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     spi_->beginTransaction(spi_settings_);
     if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
@@ -67,7 +67,7 @@ class SpiPlain : public hortor::Noncopyable {
    */
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
     if (!spi_) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     spi_->beginTransaction(spi_settings_);
     if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);

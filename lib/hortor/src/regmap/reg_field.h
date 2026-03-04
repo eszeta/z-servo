@@ -8,7 +8,6 @@
 #include <tuple>
 #include <type_traits>
 
-#include "base/noncopyable.h"
 #include "hortor.h"
 #include "utils/bit_utils.h"
 

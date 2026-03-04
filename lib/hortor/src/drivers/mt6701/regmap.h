@@ -68,7 +68,7 @@ class RegMapBase<PlainType::kSPI> : public regmap::RegMap<regmap::SpiPlain> {
     const int cs_pin = plain_.cs_pin();
     const SPISettings spi_settings = plain_.spi_settings();
     if (!spi) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
 
     uint8_t data[3];
@@ -98,19 +98,19 @@ class RegMapBase<PlainType::kSPI> : public regmap::RegMap<regmap::SpiPlain> {
   }
 
   Error Write(const uint8_t address, const uint8_t data) {
-    return Error::kGeneralErr;
+    return Error::kErr;
   }
 
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
-    return Error::kGeneralErr;
+    return Error::kErr;
   }
 
   Error Read(const uint8_t address, uint8_t* data) {
-    return Error::kGeneralErr;
+    return Error::kErr;
   }
 
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
-    return Error::kGeneralErr;
+    return Error::kErr;
   }
 };
 
@@ -246,7 +246,7 @@ class RegMap : public RegMapBase<PLAIN_TYPE> {
       return Error::kOutOfRange;
     }
     if (stop <= start) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     using kA_START_8 = MT6701Regs::kA_START_8;
     using kA_START_0 = MT6701Regs::kA_START_0;

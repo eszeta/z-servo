@@ -28,7 +28,7 @@ class RegMap : public regmap::RegMap<regmap::I2CPlain> {
     using kWHO_AM_I = LSM6DSOWRegs::kWHO_AM_I;
     CHECK(ReadField<kWHO_AM_I>(value));
     if (value != 0x6C) {
-      return Error::kGeneralErr;
+      return Error::kErr;
     }
 
     // set the gyroscope control register to work at 104 Hz, 2000 dps and in

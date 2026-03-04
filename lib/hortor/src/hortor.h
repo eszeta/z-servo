@@ -5,48 +5,5 @@
 
 #include <Arduino.h>
 
-namespace hortor {
-/**
- * @def CHECK
- * @brief 错误处理辅助宏
- * @param x 要检查的表达式
- *
- * 执行表达式并检查返回的错误码。如果发生错误，立即返回该错误码。
- * 用于简化连续操作的错误处理。
- */
-#define CHECK(...)                             \
-  do {                                         \
-    hortor::Error err = (__VA_ARGS__);         \
-    if (err != hortor::Error::kOk) return err; \
-  } while (0)
-
-/**
- * @brief 错误码枚举
- *
- * 项目通用错误码，用于诊断问题。
- */
-enum class Error : uint8_t {
-  /** @brief 成功，操作正常完成 */
-  kOk = 0,
-  /** @brief 一般错误，未指定具体原因 */
-  kGeneralErr = 1,
-  /** @brief IO错误，通信过程中发生错误 */
-  kIOErr = 2,
-  /** @brief 超出范围，参数值超出有效范围 */
-  kOutOfRange = 3,
-  /** @brief 无效参数，参数组合无效 */
-  kInvalidParameter = 4,
-  /** @brief 无效包，包格式错误 */
-  kInvalidPacket = 5,
-  /** @brief 无效指令，指令码无效 */
-  kInvalidInstruction = 6,
-  /** @brief 数组越界 */
-  kArrayOutOfRange = 7,
-  /** @brief 无效状态 */
-  kInvalidState = 8,
-  /** @brief 校验和错误 */
-  kChecksumError = 9,
-  /** @brief 模式不支持 */
-  kModeNotSupport = 10,
-};
-}  // namespace hortor
+#include "error.h"
+#include "noncopyable.h"

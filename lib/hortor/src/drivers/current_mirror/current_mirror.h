@@ -32,7 +32,7 @@ class CurrentMirror : public servo::Current<CurrentMirror> {
    */
   Error Init(const Config& config) {
     if (config.pin_adc == 0) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     pin_adc_ = config.pin_adc;
     calibration_samples_ = config.calibration_samples;

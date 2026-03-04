@@ -5,7 +5,6 @@
 
 #include <Wire.h>
 
-#include "base/noncopyable.h"
 #include "base/types.h"
 #include "hortor.h"
 #include "regmap.h"
@@ -27,7 +26,7 @@ class MmioPlain : public hortor::Noncopyable {
     */
   Error Init(uint8_t* regs, const size_t size) {
     if (!regs || size == 0) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     regs_ = regs;
     size_ = size;
@@ -43,7 +42,7 @@ class MmioPlain : public hortor::Noncopyable {
     */
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
     if (address + size > size_) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     for (size_t i = 0; i < size; ++i) {
       regs_[address + i] = data[i];
@@ -60,7 +59,7 @@ class MmioPlain : public hortor::Noncopyable {
     */
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
     if (address + size > size_) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     for (size_t i = 0; i < size; ++i) {
       data[i] = regs_[address + i];

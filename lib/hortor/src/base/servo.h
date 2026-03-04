@@ -586,7 +586,7 @@ class Servo {
         break;
       }
       default:
-        return Error::kModeNotSupport;
+        return Error::kUnsupported;
         break;
     }
     return Error::kOk;

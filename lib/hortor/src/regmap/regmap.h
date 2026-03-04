@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "base/noncopyable.h"
 #include "base/types.h"
 #include "hortor.h"
 #include "regmap/reg_field.h"

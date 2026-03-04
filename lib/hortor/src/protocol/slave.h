@@ -183,7 +183,7 @@ class Slave {
                   const uint8_t* data,
                   const size_t size) {
     if (data == nullptr || size == 0) {
-      return Error::kInvalidParameter;
+      return Error::kInvalidArg;
     }
     CHECK(regmap_->Write(address, data, size));
     CHECK(AfterWriteRegs(address, data, size));
@@ -255,7 +255,7 @@ class Slave {
   Error RegWriteHandler(const InstPacket& packet, const bool response) {
     const size_t size = packet.GetBufferSize();
     if (async_write_buffer_size_ + size > sizeof(async_write_buffer_)) {
-      return Error::kArrayOutOfRange;
+      return Error::kOutOfRange;
     }
     memcpy(async_write_buffer_ + async_write_buffer_size_, packet.buffer, size);
     async_write_buffer_size_ += size;
