@@ -30,8 +30,17 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
   Error Init() {
     CHECK(plain_.Init(table_, sizeof(table_)));
     CHECK(LoadEeprom());
+    // 检查EEPROM是否为空
     if (IsEepromEmpty()) {
       CHECK(RecoveryEeprom());
+      RestoreEeprom<ControlTable::kId>();
+      return Error::kOk;
+    }
+    // 检查固件版本
+    const auto firmware_version = ReadFirmwareVersion();
+    if (firmware_version != ControlTable::kFirmwareVersion::kDefault) {
+      CHECK(RecoveryEeprom());
+      return Error::kOk;
     }
     return Error::kOk;
   }
@@ -41,43 +50,6 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
   //==============================================================================
 #pragma region "设备信息组"
   // 此区域包含设备识别和版本信息，所有寄存器均为只读，出厂预设。
-
-  /**
-   * @brief 获取型号编号 (R)
-   * @return model_number 型号编号
-   */
-  uint16_t ReadModelNumber() {
-    uint16_t value;
-    ReadField<ControlTable::kModelNumber>(value);
-    return value;
-  }
-
-  /**
-   * @brief 写入型号编号 (R，仅内部同步)
-   * @param[in] value 型号编号
-   */
-  void WriteModelNumber(const uint16_t value) {
-    WriteField<ControlTable::kModelNumber>(value);
-  }
-
-  /**
-   * @brief 获取型号信息 (R)
-   * @return model_information 型号信息
-   */
-  uint32_t ReadModelInformation() {
-    uint32_t value;
-    ReadField<ControlTable::kModelInformation>(value);
-    return value;
-  }
-
-  /**
-   * @brief 写入型号信息 (R，仅内部同步)
-   * @param[in] value 型号信息
-   */
-  void WriteModelInformation(const uint32_t value) {
-    WriteField<ControlTable::kModelInformation>(value);
-  }
-
   /**
    * @brief 获取固件版本 (R)
    * @return firmware_version 固件版本
@@ -1699,12 +1671,10 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
   /**
    * @brief 恢复 EEPROM 为默认值
    * @return 错误码
+   * @note 恢复EEPROM为默认值，但不恢复ID
    */
   Error RecoveryEeprom() {
-    RestoreEeprom<ControlTable::kModelNumber>();
-    RestoreEeprom<ControlTable::kModelInformation>();
     RestoreEeprom<ControlTable::kFirmwareVersion>();
-    RestoreEeprom<ControlTable::kId>();
     RestoreEeprom<ControlTable::kBaudRate>();
     RestoreEeprom<ControlTable::kReturnDelayTime>();
     RestoreEeprom<ControlTable::kStatusReturnLevel>();
