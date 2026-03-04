@@ -36,15 +36,33 @@ enum class Error : uint8_t {
 };
 
 /**
+ * @brief 判断错误码是否为成功
+ */
+inline bool IsOk(Error e) { return e == Error::kOk; }
+
+}  // namespace hortor
+
+/**
  * @def CHECK
  * @brief 错误传播宏
  *
  * 执行表达式并检查返回的错误码。如果发生错误，立即从当前函数返回该错误码。
+ * 使用 __VA_ARGS__ 以兼容模板多参数调用，如 CHECK(ReadField<T, A, B>(v))。
  */
-#define CHECK(...)                             \
-  do {                                         \
-    hortor::Error err = (__VA_ARGS__);         \
-    if (err != hortor::Error::kOk) return err; \
+#define CHECK(...)                                   \
+  do {                                               \
+    ::hortor::Error _err_ = (__VA_ARGS__);           \
+    if (_err_ != ::hortor::Error::kOk) return _err_; \
   } while (0)
 
-}  // namespace hortor
+/**
+ * @def VERIFY
+ * @brief 前置条件守卫宏
+ *
+ * 检查条件，若条件为 false，立即从当前函数返回指定错误码。
+ * 用于替代 if (!cond) return err; 模式，使前置条件检查更简洁。
+ */
+#define VERIFY(cond, err)      \
+  do {                         \
+    if (!(cond)) return (err); \
+  } while (0)

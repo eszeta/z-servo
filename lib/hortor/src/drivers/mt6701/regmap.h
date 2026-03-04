@@ -67,9 +67,7 @@ class RegMapBase<PlainType::kSPI> : public regmap::RegMap<regmap::SpiPlain> {
     SPIClass* spi = plain_.spi();
     const int cs_pin = plain_.cs_pin();
     const SPISettings spi_settings = plain_.spi_settings();
-    if (!spi) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(spi, Error::kInvalidArg);
 
     uint8_t data[3];
     digitalWrite(cs_pin, LOW);
@@ -97,17 +95,13 @@ class RegMapBase<PlainType::kSPI> : public regmap::RegMap<regmap::SpiPlain> {
     return Error::kOk;
   }
 
-  Error Write(const uint8_t address, const uint8_t data) {
-    return Error::kErr;
-  }
+  Error Write(const uint8_t address, const uint8_t data) { return Error::kErr; }
 
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
     return Error::kErr;
   }
 
-  Error Read(const uint8_t address, uint8_t* data) {
-    return Error::kErr;
-  }
+  Error Read(const uint8_t address, uint8_t* data) { return Error::kErr; }
 
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
     return Error::kErr;
@@ -197,9 +191,7 @@ class RegMap : public RegMapBase<PLAIN_TYPE> {
 
   Error WriteABZPulsePerRound(uint16_t pulses) {
     pulses--;
-    if (pulses >= 1024) {
-      return Error::kOutOfRange;
-    }
+    VERIFY(pulses < 1024, Error::kOutOfRange);
     using kABZ_RES_8 = MT6701Regs::kABZ_RES_8;
     using kABZ_RES_0 = MT6701Regs::kABZ_RES_0;
     CHECK(this->template WriteField<uint16_t, kABZ_RES_8, kABZ_RES_0>(pulses));
@@ -208,9 +200,7 @@ class RegMap : public RegMapBase<PLAIN_TYPE> {
 
   Error WriteUVWPolePair(uint8_t pairs) {
     pairs--;
-    if (pairs >= 16) {
-      return Error::kOutOfRange;
-    }
+    VERIFY(pairs < 16, Error::kOutOfRange);
     using kUVM_RES_0 = MT6701Regs::kUVM_RES_0;
     CHECK(this->template WriteField<kUVM_RES_0>(pairs));
     return Error::kOk;
@@ -242,12 +232,8 @@ class RegMap : public RegMapBase<PLAIN_TYPE> {
   }
 
   Error WriteStartStopRaw(uint16_t start, uint16_t stop) {
-    if (start >= 4096 || stop >= 4096) {
-      return Error::kOutOfRange;
-    }
-    if (stop <= start) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(start < 4096 && stop < 4096, Error::kOutOfRange);
+    VERIFY(stop > start, Error::kInvalidArg);
     using kA_START_8 = MT6701Regs::kA_START_8;
     using kA_START_0 = MT6701Regs::kA_START_0;
     using kA_STOP_8 = MT6701Regs::kA_STOP_8;

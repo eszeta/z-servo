@@ -28,9 +28,7 @@ class SpiPlain : public hortor::Noncopyable {
    * @return 错误码，成功返回OK
    */
   Error Init(SPIClass* spi, int cs_pin, const SPISettings& spi_settings) {
-    if (!spi_) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(spi, Error::kInvalidArg);
     spi_ = spi;
     cs_pin_ = cs_pin;
     spi_settings_ = spi_settings;
@@ -46,9 +44,7 @@ class SpiPlain : public hortor::Noncopyable {
    * @return 错误码，成功返回OK
    */
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
-    if (!spi_ || !data) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(spi_ && data, Error::kInvalidArg);
     spi_->beginTransaction(spi_settings_);
     if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
     spi_->transfer(address);
@@ -66,9 +62,7 @@ class SpiPlain : public hortor::Noncopyable {
    * @return 错误码，成功返回OK
    */
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
-    if (!spi_) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(spi_, Error::kInvalidArg);
     spi_->beginTransaction(spi_settings_);
     if (cs_pin_ >= 0) digitalWrite(cs_pin_, LOW);
     spi_->transfer(0x80 | address);

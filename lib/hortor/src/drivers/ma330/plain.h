@@ -25,9 +25,7 @@ class SpiPlain : public regmap::SpiPlain {
     * @return 错误码
     */
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
-    if (!data) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(data, Error::kInvalidArg);
     for (size_t i = 0; i < size; ++i) {
       uint16_t cmd = 0x8000 | (((address + i) & 0x1F) << 8) | data[i];
       transfer16(cmd);
@@ -45,9 +43,7 @@ class SpiPlain : public regmap::SpiPlain {
    * @return 错误码，成功返回OK
    */
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
-    if (!data) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(data, Error::kInvalidArg);
     for (size_t i = 0; i < size; ++i) {
       uint16_t cmd = 0x4000 | (((address + i) & 0x001F) << 8);
       uint16_t value = transfer16(cmd);

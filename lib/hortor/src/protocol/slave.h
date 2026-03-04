@@ -182,9 +182,7 @@ class Slave {
   Error WriteRegs(const uint8_t address,
                   const uint8_t* data,
                   const size_t size) {
-    if (data == nullptr || size == 0) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(data != nullptr && size != 0, Error::kInvalidArg);
     CHECK(regmap_->Write(address, data, size));
     CHECK(AfterWriteRegs(address, data, size));
     return Error::kOk;

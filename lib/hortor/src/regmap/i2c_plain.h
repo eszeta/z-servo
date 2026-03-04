@@ -25,9 +25,7 @@ class I2CPlain : public hortor::Noncopyable {
     * @return 错误码，成功返回OK
     */
   Error Init(TwoWire* wire, const int address) {
-    if (!wire) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(wire, Error::kInvalidArg);
     wire_ = wire;
     address_ = address;
     return Error::kOk;
@@ -41,9 +39,7 @@ class I2CPlain : public hortor::Noncopyable {
     * @return 错误码，成功返回OK
     */
   Error Write(const uint8_t address, const uint8_t* data, const size_t size) {
-    if (!wire_ || !data) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(wire_ && data, Error::kInvalidArg);
     wire_->beginTransmission(address_);
     wire_->write(address);
     wire_->write(data, size);
@@ -61,9 +57,7 @@ class I2CPlain : public hortor::Noncopyable {
     * @return 错误码，成功返回OK
     */
   Error Read(const uint8_t address, const size_t size, uint8_t* data) {
-    if (!wire_ || !data) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(wire_ && data, Error::kInvalidArg);
     wire_->beginTransmission(address_);
     wire_->write(address);
     wire_->endTransmission(false);

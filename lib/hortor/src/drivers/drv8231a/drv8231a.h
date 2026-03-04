@@ -51,9 +51,7 @@ class DRV8231A final : public DRV8231ABase {
    * @return Error 错误码
    */
   Error Init(const Config& config) {
-    if (config.pin_in1 == 0 || config.pin_in2 == 0) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(config.pin_in1 != 0 && config.pin_in2 != 0, Error::kInvalidArg);
 
     CHECK(DRV8231ABase::Init());
 

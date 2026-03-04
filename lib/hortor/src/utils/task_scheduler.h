@@ -54,16 +54,10 @@ class TaskScheduler {
    * @return Error::kOk 成功；kInvalidArg 参数/容量/周期无效
    */
   Error Register(Callback callback, uint32_t rate_hz) {
-    if (callback == nullptr || rate_hz == 0) {
-      return Error::kInvalidArg;
-    }
-    if (size_ >= capacity_) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(callback != nullptr && rate_hz != 0, Error::kInvalidArg);
+    VERIFY(size_ < capacity_, Error::kInvalidArg);
     const auto period_us = 1000000u / rate_hz;
-    if (period_us == 0u) {
-      return Error::kInvalidArg;
-    }
+    VERIFY(period_us != 0u, Error::kInvalidArg);
     const uint32_t idx = size_;
     tasks_[idx].callback = callback;
     tasks_[idx].period_us = period_us;
