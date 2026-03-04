@@ -4,96 +4,91 @@
 #pragma once
 
 #include <Arduino.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "error.h"
 #include "led.h"
-
-// 数组大小计算宏
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 namespace hortor::info_led {
 
 /**
- * @brief LED闪烁模式的基本单元
+ * @brief LED闪烁模式的基本单元（1字节紧凑编码）
+ * bit7: state, bit0-6: duration in 20ms units
  */
 struct BlinkUnit {
-  float duration;  // 持续时间(秒)
-  bool state;      // true表示亮，false表示灭
+  uint8_t raw;
+
+  uint16_t duration_ms() const {
+    return static_cast<uint16_t>(raw & 0x7Fu) * 20u;
+  }
+  bool state() const { return (raw & 0x80u) != 0; }
+
+  static constexpr uint8_t kDurationUnitMs = 20;
+  static constexpr uint8_t Make(uint16_t duration_ms, bool state) {
+    return static_cast<uint8_t>((duration_ms / kDurationUnitMs) |
+                                (state ? 0x80u : 0u));
+  }
+  constexpr BlinkUnit() : raw(0) {}
+  constexpr BlinkUnit(uint8_t r) : raw(r) {}
 };
 
 /**
  * @brief 信息LED
+ * @tparam M LED 输出模式（编译期确定，默认开漏）
  */
+template <LedMode M = LedMode::kOpenDrain>
 class InfoLED {
  public:
-  /**
-   * @brief 信息类型
-   */
-  enum class InfoType {
-    kOk,          // 正常状态
-    kWarning,     // 警告
-    kError,       // 错误
-    kFatalError,  // 致命错误
-    kMax
-  };
-  /**
-   * @brief 构造函数
-   */
-  InfoLED() = default;
-  /**
-   * @brief 初始化
-   */
-  void Init(const uint32_t pin, const Mode mode = Mode::kPushPull);
-  /**
-   * @brief 初始化
-   * @param pinName 引脚名
-   * @param mode 模式
-   */
-  void Init(const PinName pinName, const Mode mode = Mode::kPushPull);
+  enum class InfoType { kOk, kWarning, kError, kFatalError, kMax };
 
-  /**
-   * @brief 设置预定义的信息类型
-   * @param type 信息类型
-   */
+  void Init(uint32_t pin);
+  void Init(PinName pinName);
   void SetInfo(InfoType type);
-
-  /**
-   * @brief 停止显示信息
-   */
   void Stop();
-
-  /**
-   * @brief 需要在主循环中调用以更新LED状态
-   * @param dt 时间间隔(秒)
-   */
+  void ShowErrorCode(uint8_t code);
   void Process(float dt);
 
  private:
-  /**
-   * @brief LED
-   */
-  LED led_;
-  /**
-   * @brief 当前模式
-   */
-  const BlinkUnit* current_pattern_ = nullptr;
-  /**
-   * @brief 当前模式大小
-   */
-  size_t current_pattern_size_ = 0;
-  /**
-   * @brief 当前步骤
-   */
-  size_t current_step_ = 0;
-  /**
-   * @brief 当前步骤已运行时间(秒)
-   */
-  float elapsed_time_ = 0.0f;
+  size_t FillErrorCodePattern(uint8_t code);
 
-  // 预定义的信息类型模式
-  static const BlinkUnit kOkPattern[2];
-  static const BlinkUnit kWarningPattern[2];
-  static const BlinkUnit kErrorPattern[6];
-  static const BlinkUnit kFatalErrorPattern[8];
+  LED<M> led_;
+  const BlinkUnit* pattern_ = nullptr;
+  size_t pattern_size_ = 0;
+  size_t step_ = 0;
+
+  uint32_t elapsed_ms_ = 0;
+  // ShowErrorCode 动态模式缓冲区（2*N+1 单元，N=闪烁次数，与 Error 枚举同步）
+  static constexpr uint8_t kMaxCode = static_cast<uint8_t>(Error::kMax);
+  static constexpr size_t kMaxCodePatternSize = 2 * kMaxCode + 1;
+  BlinkUnit error_code_buffer_[kMaxCodePatternSize]{};
+
+  static constexpr BlinkUnit kOkPattern[2] = {
+      {BlinkUnit::Make(500, true)},
+      {BlinkUnit::Make(500, false)},
+  };
+  static constexpr BlinkUnit kWarningPattern[2] = {
+      {BlinkUnit::Make(200, true)},
+      {BlinkUnit::Make(200, false)},
+  };
+  static constexpr BlinkUnit kErrorPattern[6] = {
+      {BlinkUnit::Make(1000, true)},
+      {BlinkUnit::Make(500, false)},
+      {BlinkUnit::Make(200, true)},
+      {BlinkUnit::Make(200, false)},
+      {BlinkUnit::Make(200, true)},
+      {BlinkUnit::Make(200, false)},
+  };
+  static constexpr BlinkUnit kFatalErrorPattern[8] = {
+      {BlinkUnit::Make(200, true)},
+      {BlinkUnit::Make(200, false)},
+      {BlinkUnit::Make(200, true)},
+      {BlinkUnit::Make(200, false)},
+      {BlinkUnit::Make(200, true)},
+      {BlinkUnit::Make(200, false)},
+      {BlinkUnit::Make(1000, true)},
+      {BlinkUnit::Make(1000, false)},
+  };
 };
 
 }  // namespace hortor::info_led

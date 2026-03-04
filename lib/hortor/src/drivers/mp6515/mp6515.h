@@ -33,11 +33,6 @@ class MP6515 final : public MP6515Base {
   };
 
   /**
-   * @brief 构造函数
-   */
-  MP6515() = default;
-
-  /**
    * @brief 初始化电机驱动器
    * @param config 配置参数
    * @return Error 错误码

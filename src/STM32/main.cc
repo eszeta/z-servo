@@ -18,13 +18,14 @@
 #include <utils/task_scheduler.h>
 
 using hortor::Error;
+using hortor::IsFail;
 using hortor::utils::Commander;
 using hortor::utils::DebugEnable;
 using hortor::utils::Monitor;
 using hortor::utils::TaskScheduler;
-using InfoLEDType = hortor::info_led::InfoLED;
-using InfoLEDMode = hortor::info_led::Mode;
-using InfoLEDInfoType = hortor::info_led::InfoLED::InfoType;
+using hortor::info_led::LedMode;
+using InfoLEDType = hortor::info_led::InfoLED<LedMode::kOpenDrain>;
+using InfoLEDInfoType = InfoLEDType::InfoType;
 using PortHandlerType = hortor::protocol::I2cPortHandler;
 using ReverseType = hortor::servo::Reverse;
 using SlaveRegMapType = hortor::servo_slave::RegMap;
@@ -40,7 +41,7 @@ constexpr auto kInfoLedPin = PA12;
 constexpr auto kMainLoopRateHz = 1000;
 // 调试输出频率 10Hz
 constexpr auto kDebugOutputRateHz = 10;
-
+// Servo逻辑分辨率位数
 constexpr auto kResolutionBits = 12;
 
 // 伺服电机类型别名，简化复杂的模板类型
@@ -68,12 +69,34 @@ Commander commander{};
 // 集中式任务调度器（固定容量，避免动态分配）
 TaskScheduler scheduler{};
 
-// 前向声明
+// 系统初始化
+Error SystemSetup();
+// 主控制循环回调函数
 Error MainLoopCallback(float dt);
+// 调试输出回调函数
 Error DebugOutputCallback(float dt);
 
 // cppcheck-suppress unusedFunction
 void setup() {
+  const auto error = SystemSetup();
+  if (IsFail(error)) {
+    info_led.ShowErrorCode(static_cast<uint8_t>(error));
+    scheduler.ClearTasks();
+    scheduler.AddTask(DebugOutputCallback,
+                      kDebugOutputRateHz);  // 10Hz 调试输出
+  }
+}
+
+// cppcheck-suppress unusedFunction
+void loop() {
+  // 统一调度与睡眠（按最小周期）
+  // 运行时错误不 Panic，而是点亮故障灯并继续运行（允许通信恢复）
+  if (IsFail(scheduler.Tick())) {
+    info_led.SetInfo(InfoLEDInfoType::kError);
+  }
+}
+
+Error SystemSetup() {
   // 设置PWM频率为10kHz
   analogWriteFrequency(10 * 1000);
 
@@ -81,50 +104,51 @@ void setup() {
   DebugEnable(&serial_debug);
   hortor::utils::DebugPrintln(F("setup"));
 
+  info_led.Init(kInfoLedPin);
+  info_led.SetInfo(InfoLEDInfoType::kOk);
+
   wire_sensor.begin();
   wire_slave.begin();
 
-  motor_driver.Init({
+  CHECK(motor_driver.Init({
       .pin_in1 = PA0,
       .pin_in2 = PA2,
       .pin_nfault = 0,               // 如果硬件连接了 nFAULT，填入引脚号
       .slow_decay_threshold = 0.3f,  // 低于 30% 使用慢速衰减
-  });
+  }));
 
   EncoderConfig encoder_config{};
   encoder_config.homing_offset = 0;
   encoder_config.reverse = ReverseType::kNormal;
   encoder_config.wire = &wire_sensor;
 
-  encoder.Init(encoder_config);
-  current_sensor.Init({.pin_adc = PA3,
-                       .ripropi_ohms = 1000.0f,
-                       .scaling_factor = 1500.0f,
-                       .adc_resolution_bits = 12,
-                       .adc_vref_volts = 3.3f,
-                       .calibration_samples = 50});
+  CHECK(encoder.Init(encoder_config));
+  CHECK(current_sensor.Init({.pin_adc = PA3,
+                             .ripropi_ohms = 1000.0f,
+                             .scaling_factor = 1500.0f,
+                             .adc_resolution_bits = 12,
+                             .adc_vref_volts = 3.3f,
+                             .calibration_samples = 50}));
 
   servo.set_motor(&motor_driver);
   servo.set_encoder(&encoder);
   servo.set_current_sensor(&current_sensor);
-  servo.Init();
+  CHECK(servo.Init());
 
-  regmap.Init();
-  port_handler.Init(&wire_slave);
+  CHECK(regmap.Init());
+  CHECK(port_handler.Init(&wire_slave));
   slave.set_regmap(&regmap);
   slave.set_port_handler(&port_handler);
   slave.set_servo(&servo);
-  slave.Init();
+  CHECK(slave.Init());
 
   monitor.set_port(&serial_debug);
   monitor.set_servo(&servo);
 
-  info_led.Init(kInfoLedPin, InfoLEDMode::kOpenDrain);
-  info_led.SetInfo(InfoLEDInfoType::kOk);
-
   // 注册任务：集中式调度
-  scheduler.Register(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制
-  scheduler.Register(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
+  scheduler.AddTask(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制
+  scheduler.AddTask(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
+  return Error::kOk;
 }
 
 /**
@@ -132,7 +156,6 @@ void setup() {
  * @param dt 距离上次调用的时间间隔（秒）
  */
 Error MainLoopCallback(float dt) {
-  info_led.Process(dt);
   CHECK(slave.Process(dt));
   CHECK(servo.Process(dt));
   return Error::kOk;
@@ -143,12 +166,7 @@ Error MainLoopCallback(float dt) {
  * @param dt 距离上次调用的时间间隔（秒）
  */
 Error DebugOutputCallback(float dt) {
+  info_led.Process(dt);
   CHECK(monitor.Process(dt));
   return Error::kOk;
-}
-
-// cppcheck-suppress unusedFunction
-void loop() {
-  // 统一调度与睡眠（按最小周期）
-  scheduler.Tick();
 }

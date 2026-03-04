@@ -41,11 +41,6 @@ class DRV8231A final : public DRV8231ABase {
   };
 
   /**
-   * @brief 构造函数
-   */
-  DRV8231A() = default;
-
-  /**
    * @brief 初始化电机驱动器
    * @param config 配置参数
    * @return Error 错误码

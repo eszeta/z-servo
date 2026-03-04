@@ -120,9 +120,6 @@ typedef InstPacket StatusPacket;
 
 class InstProtocol {
  public:
-  InstProtocol();
-  ~InstProtocol();
-
   Error Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete);
   Error CreateResponse(const uint8_t id,
                        const StatusErrorBits& status,

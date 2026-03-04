@@ -8,14 +8,9 @@
 namespace hortor::info_led {
 
 /**
- * @brief 状态枚举
- */
-enum class State { kOff = 0, kOn = 1 };
-
-/**
  * @brief 模式枚举
  */
-enum class Mode {
+enum class LedMode {
   /**
    * @brief 开漏输出
    */
@@ -28,19 +23,20 @@ enum class Mode {
 
 /**
  * @brief LED类
+ * @tparam M 输出模式（编译期确定，零运行时分支）
  */
+template <LedMode M>
 class LED final {
  public:
   /**
    * @brief 初始化
    */
-  void Init(uint32_t pin, Mode mode = Mode::kOpenDrain);
+  void Init(uint32_t pin);
   /**
    * @brief 初始化
    * @param pinName 引脚名
-   * @param mode 模式
    */
-  void Init(PinName pinName, Mode mode = Mode::kOpenDrain);
+  void Init(PinName pinName);
   /**
    * @brief 设置状态
    * @param value 状态
@@ -55,15 +51,45 @@ class LED final {
   /**
    * @brief 状态
    */
-  State state_ = State::kOff;
+  bool state_ = false;
   /**
    * @brief 引脚
    */
   PinName pin_name_ = NC;
-  /**
-   * @brief 模式
-   */
-  Mode mode_ = Mode::kOpenDrain;
 };
+
+template <LedMode M>
+void LED<M>::Init(uint32_t pin) {
+  Init(digitalPinToPinName(pin));
+}
+
+template <LedMode M>
+void LED<M>::Init(PinName pinName) {
+  pin_name_ = pinName;
+  if constexpr (M == LedMode::kOpenDrain) {
+    pinMode(pinName, OUTPUT_OPEN_DRAIN);
+  } else {
+    pinMode(pinName, OUTPUT);
+  }
+  Turn(false);
+}
+
+template <LedMode M>
+void LED<M>::Turn(bool value) {
+  if (value == state_) {
+    return;
+  }
+  state_ = value;
+  if constexpr (M == LedMode::kOpenDrain) {
+    digitalWrite(pin_name_, value ? LOW : HIGH);
+  } else {
+    digitalWrite(pin_name_, value ? HIGH : LOW);
+  }
+}
+
+template <LedMode M>
+void LED<M>::Toggle() {
+  Turn(!state_);
+}
 
 }  // namespace hortor::info_led

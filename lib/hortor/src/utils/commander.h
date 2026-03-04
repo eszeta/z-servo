@@ -18,10 +18,6 @@ typedef void (*CommandCallback)(int argc, char** argv);
  */
 class Commander {
  public:
-  /**
-   * 构造函数
-   */
-  Commander() = default;
 
   /**
    * 注册命令

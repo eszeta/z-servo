@@ -26,7 +26,7 @@ Error SerialPortHandler::ProcessImpl(InstProtocol& protocol,
     const size_t buffer_size = status_packet_.GetBufferSize();
     const size_t size = serial_->write(status_packet_.buffer, buffer_size);
     if (size != buffer_size) {
-      return Error::kIOErr;
+      return Error::kIO;
     }
   }
 

@@ -21,11 +21,6 @@ class CurrentMirror : public servo::Current<CurrentMirror> {
   };
 
   /**
-   * @brief 构造函数
-   */
-  CurrentMirror() = default;
-
-  /**
    * @brief 初始化电流镜传感器
    * @param config 配置参数
    * @return Error 错误码

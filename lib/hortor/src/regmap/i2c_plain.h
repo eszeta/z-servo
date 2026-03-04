@@ -44,7 +44,7 @@ class I2CPlain : public hortor::Noncopyable {
     wire_->write(address);
     wire_->write(data, size);
     if (wire_->endTransmission() != 0) {
-      return Error::kIOErr;
+      return Error::kIO;
     }
     return Error::kOk;
   }
@@ -66,7 +66,7 @@ class I2CPlain : public hortor::Noncopyable {
       if (wire_->available()) {
         data[i] = wire_->read();
       } else {
-        return Error::kIOErr;
+        return Error::kIO;
       }
     }
     return Error::kOk;

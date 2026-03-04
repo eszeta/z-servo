@@ -7,10 +7,6 @@
 
 namespace hortor::protocol {
 
-InstProtocol::InstProtocol() = default;
-
-InstProtocol::~InstProtocol() = default;
-
 Error InstProtocol::Process(InstPacket& packet,
                             const uint8_t recv_data,
                             bool& is_complete) {
@@ -29,7 +25,7 @@ Error InstProtocol::Process(InstPacket& packet,
         packet.header2 = recv_data;
       } else {
         packet_state_ = PacketState::kHeader1;
-        return Error::kInvalidPacket;
+        return Error::kBadData;
       }
       break;
     }
@@ -42,7 +38,7 @@ Error InstProtocol::Process(InstPacket& packet,
       // Header(2Byte) + ID + Length = 4
       if (recv_data + 4 > InstPacket::kBufferCapacity || recv_data < 2) {
         packet_state_ = PacketState::kHeader1;
-        return Error::kInvalidPacket;
+        return Error::kBadData;
       } else {
         packet.length = recv_data;
         packet_state_ = PacketState::kInstructionOrError;
@@ -75,13 +71,13 @@ Error InstProtocol::Process(InstPacket& packet,
       is_complete = true;
       if (checksum != recv_data) {
         packet_state_ = PacketState::kHeader1;
-        return Error::kChecksumError;
+        return Error::kBadData;
       }
       break;
     }
     default: {
       packet_state_ = PacketState::kHeader1;
-      return Error::kInvalidState;
+      return Error::kBadState;
     }
   }
   return Error::kOk;

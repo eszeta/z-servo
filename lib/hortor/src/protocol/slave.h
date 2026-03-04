@@ -23,10 +23,6 @@ namespace hortor::protocol {
 template <typename DERIVED, typename RegMapType, typename PortHandlerType>
 class Slave {
  public:
-  /**
-   * @brief 构造函数
-   */
-  Slave() = default;
 
   /**
    * @brief 初始化
@@ -388,7 +384,7 @@ class Slave {
     if (response) {
       CHECK(Response(0, nullptr, 0));
     }
-    return Error::kInvalidInstruction;
+    return Error::kBadData;
   }
 
   bool CheckResponse(const uint8_t instruction) const {

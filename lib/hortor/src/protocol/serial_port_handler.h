@@ -18,10 +18,6 @@ namespace hortor::protocol {
 
 class SerialPortHandler : public PortHandler<SerialPortHandler> {
  public:
-  /**
-   * @brief 构造函数
-   */
-  SerialPortHandler() = default;
 
   /**
    * @brief 初始化
