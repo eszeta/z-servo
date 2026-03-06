@@ -18,7 +18,7 @@ namespace hortor::info_led {
  * @brief LED闪烁模式的基本单元（1字节紧凑编码）
  * bit7: state, bit0-6: duration in 20ms units
  */
-struct BlinkUnit {
+struct BlinkUnit : public hortor::Noncopyable {
   uint8_t raw;
 
   uint16_t duration_ms() const {
@@ -66,23 +66,30 @@ class InfoLED : public hortor::Noncopyable {
   BlinkUnit                error_code_buffer_[kMaxCodePatternSize]{};
 
   static constexpr BlinkUnit kOkPattern[2] = {
-      {BlinkUnit::Make(500, true)},
-      {BlinkUnit::Make(500, false)},
+      BlinkUnit(BlinkUnit::Make(500, true)),
+      BlinkUnit(BlinkUnit::Make(500, false)),
   };
   static constexpr BlinkUnit kWarningPattern[2] = {
-      {BlinkUnit::Make(200, true)},
-      {BlinkUnit::Make(200, false)},
+      BlinkUnit(BlinkUnit::Make(200, true)),
+      BlinkUnit(BlinkUnit::Make(200, false)),
   };
   static constexpr BlinkUnit kErrorPattern[6] = {
-      {BlinkUnit::Make(1000, true)}, {BlinkUnit::Make(500, false)},
-      {BlinkUnit::Make(200, true)},  {BlinkUnit::Make(200, false)},
-      {BlinkUnit::Make(200, true)},  {BlinkUnit::Make(200, false)},
+      BlinkUnit(BlinkUnit::Make(1000, true)),
+      BlinkUnit(BlinkUnit::Make(500, false)),
+      BlinkUnit(BlinkUnit::Make(200, true)),
+      BlinkUnit(BlinkUnit::Make(200, false)),
+      BlinkUnit(BlinkUnit::Make(200, true)),
+      BlinkUnit(BlinkUnit::Make(200, false)),
   };
   static constexpr BlinkUnit kFatalErrorPattern[8] = {
-      {BlinkUnit::Make(200, true)},  {BlinkUnit::Make(200, false)},
-      {BlinkUnit::Make(200, true)},  {BlinkUnit::Make(200, false)},
-      {BlinkUnit::Make(200, true)},  {BlinkUnit::Make(200, false)},
-      {BlinkUnit::Make(1000, true)}, {BlinkUnit::Make(1000, false)},
+      BlinkUnit(BlinkUnit::Make(200, true)),
+      BlinkUnit(BlinkUnit::Make(200, false)),
+      BlinkUnit(BlinkUnit::Make(200, true)),
+      BlinkUnit(BlinkUnit::Make(200, false)),
+      BlinkUnit(BlinkUnit::Make(200, true)),
+      BlinkUnit(BlinkUnit::Make(200, false)),
+      BlinkUnit(BlinkUnit::Make(1000, true)),
+      BlinkUnit(BlinkUnit::Make(1000, false)),
   };
 };
 
@@ -158,10 +165,10 @@ size_t InfoLED<Mode>::FillErrorCodePattern(uint8_t code) {
   size_t        i = 0;
   const uint8_t n = (code > kMaxCode) ? kMaxCode : code;
   for (uint8_t k = 0; k < n; ++k) {
-    error_code_buffer_[i++] = BlinkUnit(kBlinkOn);
-    error_code_buffer_[i++] = BlinkUnit(kBlinkOff);
+    error_code_buffer_[i++].raw = kBlinkOn;
+    error_code_buffer_[i++].raw = kBlinkOff;
   }
-  error_code_buffer_[i++] = BlinkUnit(kCycleGap);
+  error_code_buffer_[i++].raw = kCycleGap;
   return i;
 }
 
@@ -182,18 +189,14 @@ void InfoLED<Mode>::ShowErrorCode(uint8_t code) {
 
 template <LedMode Mode>
 void InfoLED<Mode>::Process(float dt) {
-  if (pattern_ == nullptr || pattern_size_ == 0) {
+  if (pattern_ == nullptr || pattern_size_ == 0 || step_ >= pattern_size_) {
     return;
   }
-
-  led_.Turn(pattern_[step_].state());
   elapsed_ms_ += static_cast<uint32_t>(dt * 1000.0f);
-  if (elapsed_ms_ < pattern_[step_].duration_ms()) {
-    return;
+  if (elapsed_ms_ >= pattern_[step_].duration_ms()) {
+    elapsed_ms_ = 0;
+    step_       = (step_ + 1) % pattern_size_;
   }
-
-  elapsed_ms_ = 0;
-  step_       = (step_ + 1) % pattern_size_;
   led_.Turn(pattern_[step_].state());
 }
 }  // namespace hortor::info_led

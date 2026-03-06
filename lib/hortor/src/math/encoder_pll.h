@@ -106,9 +106,10 @@ float EncoderPll<EncoderType, Bits>::rpm() const {
 template <typename EncoderType, uint8_t Bits>
 Error EncoderPll<EncoderType, Bits>::Process(float dt) {
   CHECK(encoder_->Process(dt));
-  const auto pos          = encoder_->pos();
+  const auto encoder_pos  = encoder_->pos();
   const auto encoder_bits = encoder_->kResolution.kBits;
-  const auto mapped = math::mapResolution(pos, encoder_bits, kResolution.kBits);
+  const auto mapped =
+      math::mapResolution(encoder_pos, encoder_bits, kResolution.kBits);
   pos_ += dt * velocity_;
 
   float error = static_cast<float>(mapped) - pos_;

@@ -365,7 +365,6 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::BulkReadHandler(
     const InstPacket& packet, const bool response) {
   const uint8_t  parameter_size = packet.GetParameterSize();
   const uint8_t  block_count    = (parameter_size - 1) / 3;
-  uint8_t        response_idx   = 0;
   uint8_t        buffer[128];
   const uint8_t* parameter = packet.parameter + 1;
   for (uint8_t i = 0; i < block_count; i++) {
@@ -373,10 +372,9 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::BulkReadHandler(
     if (id_ == target_id) {
       const uint8_t data_size = parameter[0];
       const uint8_t address   = parameter[2];
-      response_idx            = i;
       CHECK(regmap_->Read(address, data_size, buffer));
       if (response) {
-        CHECK(Response(response_idx, buffer, data_size));
+        CHECK(Response(i, buffer, data_size));
       }
       return Error::kOk;
     }

@@ -432,16 +432,6 @@ class Servo : public hortor::Noncopyable {
    * @param pwm PWM值
    */
   void SetMotorPower(const float pwm);
-
-  /**
-   * @brief 电机刹车
-   */
-  void MotorBreak();
-
-  /**
-   * @brief 电机滑行
-   */
-  void MotorCoast();
 };
 
 }  // namespace hortor::servo
@@ -1112,18 +1102,6 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::SetMotorPower(
     const float pwm) {
   set_present_pwm(pwm);
   motor_->SetPWM(pwm);
-}
-
-template <typename MotorType, typename EncoderType, typename CurrentType,
-          uint8_t Bits>
-void Servo<MotorType, EncoderType, CurrentType, Bits>::MotorBreak() {
-  motor_->Brake();
-}
-
-template <typename MotorType, typename EncoderType, typename CurrentType,
-          uint8_t Bits>
-void Servo<MotorType, EncoderType, CurrentType, Bits>::MotorCoast() {
-  motor_->Coast();
 }
 
 }  // namespace hortor::servo

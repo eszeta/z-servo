@@ -37,7 +37,7 @@ class TaskScheduler : public hortor::Noncopyable {
   uint32_t size() const;
   uint32_t capacity() const;
   Error    AddTask(Callback callback, uint32_t rate_hz);
-  Error    RemoveTask(Callback callback);
+  Error    RemoveTask(const Callback callback);
   Error    ClearTasks();
   Error    TickNonBlocking();
   Error    Tick();
@@ -85,7 +85,7 @@ Error TaskScheduler<MaxTasks>::AddTask(Callback callback, uint32_t rate_hz) {
 }
 
 template <uint32_t MaxTasks>
-Error TaskScheduler<MaxTasks>::RemoveTask(Callback callback) {
+Error TaskScheduler<MaxTasks>::RemoveTask(const Callback callback) {
   VERIFY(callback != nullptr, Error::kInvalidArg);
   uint32_t found = size_;
   for (uint32_t i = 0; i < size_; ++i) {
