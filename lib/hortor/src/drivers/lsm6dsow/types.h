@@ -12,17 +12,17 @@ namespace hortor::drivers::LSM6DSOW {
  * @brief 加速度计ODR寄存器设置
  */
 enum class ODR_XL {
-  kPowerDown = 0b0000,
-  k12_5Hz = 0b0001,
-  k26Hz = 0b0010,
-  k52Hz = 0b0011,
-  k104Hz = 0b0100,
-  k208Hz = 0b0101,
-  k416Hz = 0b0110,
-  k833Hz = 0b0111,
-  k1660Hz = 0b1000,
-  k3330Hz = 0b1001,
-  k6660Hz = 0b1010,
+  kPowerDown    = 0b0000,
+  k12_5Hz       = 0b0001,
+  k26Hz         = 0b0010,
+  k52Hz         = 0b0011,
+  k104Hz        = 0b0100,
+  k208Hz        = 0b0101,
+  k416Hz        = 0b0110,
+  k833Hz        = 0b0111,
+  k1660Hz       = 0b1000,
+  k3330Hz       = 0b1001,
+  k6660Hz       = 0b1010,
   k1_6Hz_12_5Hz = 0b1011,
 };
 
@@ -32,10 +32,10 @@ enum class ODR_XL {
  * @note (默认) 2g
  */
 enum class FS_XL {
-  k2g = 0b00,
+  k2g     = 0b00,
   k16g_2g = 0b01,
-  k4g = 0b10,
-  k8g = 0b11,
+  k4g     = 0b10,
+  k8g     = 0b11,
 };
 
 /**
@@ -59,16 +59,16 @@ enum class LPF2_XL_EN {
  */
 enum class ODR_G {
   kPowerDown = 0b0000,
-  k12_5Hz = 0b0001,
-  k26Hz = 0b0010,
-  k52Hz = 0b0011,
-  k104Hz = 0b0100,
-  k208Hz = 0b0101,
-  k416Hz = 0b0110,
-  k833Hz = 0b0111,
-  k1660Hz = 0b1000,
-  k3330Hz = 0b1001,
-  k6660Hz = 0b1010,
+  k12_5Hz    = 0b0001,
+  k26Hz      = 0b0010,
+  k52Hz      = 0b0011,
+  k104Hz     = 0b0100,
+  k208Hz     = 0b0101,
+  k416Hz     = 0b0110,
+  k833Hz     = 0b0111,
+  k1660Hz    = 0b1000,
+  k3330Hz    = 0b1001,
+  k6660Hz    = 0b1010,
 };
 
 /**
@@ -76,8 +76,8 @@ enum class ODR_G {
  * @brief 陀螺仪链满量程选择
  */
 enum class FS_G {
-  k250dps = 0b00,
-  k500dps = 0b01,
+  k250dps  = 0b00,
+  k500dps  = 0b01,
   k1000dps = 0b10,
   k2000dps = 0b11,
 };
@@ -131,8 +131,8 @@ enum class HP_EN_G {
  * @note 默认值：00
  */
 enum class HPM_G {
-  k16mHz = 0b00,
-  k65mHz = 0b01,
+  k16mHz  = 0b00,
+  k65mHz  = 0b01,
   k260mHz = 0b10,
   k1_04Hz = 0b11,
 };
@@ -173,7 +173,7 @@ enum class HPCF_XL {
  */
 enum class HP_REF_MODE_XL {
   kDisabled = 0b0,
-  kEnabled = 0b1,
+  kEnabled  = 0b1,
 };
 
 /**
@@ -184,7 +184,7 @@ enum class HP_REF_MODE_XL {
  */
 enum class FASTSETTL_MODE_XL {
   kDisabled = 0b0,
-  kEnabled = 0b1,
+  kEnabled  = 0b1,
 };
 
 /**
@@ -192,7 +192,7 @@ enum class FASTSETTL_MODE_XL {
  */
 enum class HP_SLOPE_XL_EN {
   kDisabled = 0b0,
-  kEnabled = 0b1,
+  kEnabled  = 0b1,
 };
 
 /**
@@ -214,8 +214,8 @@ enum class LOW_PASS_ON_6D {
  * @brief 陀螺仪控制寄存器，用于控制陀螺仪的工作模式
  */
 namespace LSM6DSOWRegs {
-template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
-using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
 /**
  * @brief WHO_AM_I寄存器
  * @note 这是一个只读寄存器。其值固定为6Ch。

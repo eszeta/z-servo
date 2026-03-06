@@ -4,15 +4,13 @@
 #pragma once
 
 namespace hortor {
-class Noncopyable;
-}
-
-class hortor::Noncopyable {
+class Noncopyable {
  private:
-  Noncopyable(Noncopyable const&) = delete;
+  explicit Noncopyable(Noncopyable const&)   = delete;
   Noncopyable& operator=(Noncopyable const&) = delete;
 
- protected:
-  Noncopyable() {}
-  ~Noncopyable() {}
+ public:
+  Noncopyable()  = default;
+  ~Noncopyable() = default;
 };
+}  // namespace hortor

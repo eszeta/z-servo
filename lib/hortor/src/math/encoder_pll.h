@@ -7,71 +7,43 @@
 
 #include "base/types.h"
 #include "hortor.h"
+#include "math.h"
 #include "resolution.h"
 
 namespace hortor::math {
 
 template <typename EncoderType, uint8_t Bits>
-class EncoderPll {
+class EncoderPll : public hortor::Noncopyable {
  public:
-  Error Init(uint16_t pos) {
-    pos_ = static_cast<float>(pos);
-    velocity_ = 0.0f;
-    return Error::kOk;
-  }
+  Error Init(uint16_t pos);
 
-  EncoderType* encoder() const { return encoder_; }
-
-  void set_encoder(EncoderType* encoder) { encoder_ = encoder; }
+  EncoderType* encoder() const;
+  void         set_encoder(EncoderType* encoder);
 
   /**
    * @brief 获取估计位置
    * @return 估计位置（单位：pulse）
    */
-  float pos() const { return pos_; }
+  float pos() const;
 
   /**
    * @brief 获取估计速度
    * @return 估计速度（单位：pulse/秒）
    */
-  float velocity() const { return velocity_; }
+  float velocity() const;
 
   /**
    * @brief 获取估计速度
    * @return 估计速度（单位：RPM）
    */
-  float rpm() const { return rpm_; }
+  float rpm() const;
+
   /**
    * @brief 处理编码器数据
    * @param dt 时间间隔(秒)
-   * @param pos_counts 编码器计数值
-   * @param encoder_bits 编码器分辨率
    * @return 错误码
    */
-  Error Process(float dt) {
-    CHECK(encoder_->Process(dt));
-    const auto pos = encoder_->pos();
-    const auto encoder_bits = encoder_->kResolution.kBits;
-    const auto mapped =
-        math::mapResolution(pos, encoder_bits, kResolution.kBits);
-    // PLL 预测步骤：使用当前速度估计预测下一个位置
-    pos_ += dt * velocity_;
-
-    // PLL 误差计算
-    float error = static_cast<float>(mapped) - pos_;
-
-    // PLL 校正步骤：用比例-积分反馈校正估计值
-    pos_ += dt * kPllKp * error;
-    velocity_ += dt * kPllKi * error;
-
-    // 零速度对齐：防止静止时的速度抖动
-    const float threshold = 0.5f * dt * kPllKi;
-    if (fabs(velocity_) < threshold) {
-      velocity_ = 0.0f;
-    }
-    rpm_ = (velocity_ / kResolution.kEncoderCpr) * 60.0f;
-    return Error::kOk;
-  }
+  Error Process(float dt);
 
  private:
   static constexpr Resolution<Bits> kResolution{};
@@ -94,5 +66,62 @@ class EncoderPll {
   /** @brief 角度传感器 */
   EncoderType* encoder_ = nullptr;
 };
+
+}  // namespace hortor::math
+
+namespace hortor::math {
+
+template <typename EncoderType, uint8_t Bits>
+Error EncoderPll<EncoderType, Bits>::Init(uint16_t pos) {
+  pos_      = static_cast<float>(pos);
+  velocity_ = 0.0f;
+  return Error::kOk;
+}
+
+template <typename EncoderType, uint8_t Bits>
+EncoderType* EncoderPll<EncoderType, Bits>::encoder() const {
+  return encoder_;
+}
+
+template <typename EncoderType, uint8_t Bits>
+void EncoderPll<EncoderType, Bits>::set_encoder(EncoderType* encoder) {
+  encoder_ = encoder;
+}
+
+template <typename EncoderType, uint8_t Bits>
+float EncoderPll<EncoderType, Bits>::pos() const {
+  return pos_;
+}
+
+template <typename EncoderType, uint8_t Bits>
+float EncoderPll<EncoderType, Bits>::velocity() const {
+  return velocity_;
+}
+
+template <typename EncoderType, uint8_t Bits>
+float EncoderPll<EncoderType, Bits>::rpm() const {
+  return rpm_;
+}
+
+template <typename EncoderType, uint8_t Bits>
+Error EncoderPll<EncoderType, Bits>::Process(float dt) {
+  CHECK(encoder_->Process(dt));
+  const auto pos          = encoder_->pos();
+  const auto encoder_bits = encoder_->kResolution.kBits;
+  const auto mapped = math::mapResolution(pos, encoder_bits, kResolution.kBits);
+  pos_ += dt * velocity_;
+
+  float error = static_cast<float>(mapped) - pos_;
+
+  pos_ += dt * kPllKp * error;
+  velocity_ += dt * kPllKi * error;
+
+  const float threshold = 0.5f * dt * kPllKi;
+  if (fabs(velocity_) < threshold) {
+    velocity_ = 0.0f;
+  }
+  rpm_ = (velocity_ / kResolution.kEncoderCpr) * 60.0f;
+  return Error::kOk;
+}
 
 }  // namespace hortor::math

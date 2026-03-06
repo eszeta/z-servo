@@ -21,226 +21,226 @@ using SlaveBase =
 template <typename ServoType>
 class Slave : public SlaveBase<ServoType> {
  public:
-  ServoType* servo() { return servo_; }
-  /**
-   * @brief 链接伺服电机
-   * @param servo 伺服电机
-   * @return 错误码
-   */
-  Error set_servo(ServoType* servo) {
-    servo_ = servo;
-    return Error::kOk;
-  }
+  ServoType* servo();
+  Error      set_servo(ServoType* servo);
 
-  Error Init() {
-    CHECK(SlaveBase<ServoType>::Init());
-    CHECK(ApplyProtocolConfig());
-    CHECK(ApplyMotorConfig());
-    CHECK(UpdateMotorStatus());
-    return Error::kOk;
-  }
+  Error Init();
 
   Error AfterResetHandlerImpl(const protocol::InstPacket& packet,
-                              const bool response) {
-    CHECK(this->regmap_->RecoveryEeprom());
-    return Error::kOk;
-  }
+                              const bool                  response);
 
-  Error AfterWriteRegsImpl(const uint8_t address,
-                           const uint8_t* data,
-                           const size_t size) {
-    if (TableBlocks::kEeprom.InBlock(address, size)) {
-      CHECK(this->regmap_->StoreEeprom());
-    }
-    if (TableBlocks::kAlign.InBlock(address, size)) {
-      CHECK(ApplyAlignToPosition());
-    }
-    CHECK(ApplyProtocolConfig());
-    CHECK(ApplyMotorConfig());
-    CHECK(UpdateMotorStatus());
-    return Error::kOk;
-  }
+  Error AfterWriteRegsImpl(const uint8_t address, const uint8_t* data,
+                           const size_t size);
 
-  Error AfterProcessImpl(float dt) {
-    realtime_tick_ += dt * 1000;
-    this->regmap_->WriteRealtimeTick(realtime_tick_);
-    CHECK(UpdateMotorStatus());
-    return UpdateStatus();
-  }
+  Error AfterProcessImpl(float dt);
 
-  Error UpdateStatus() {
-    const auto hardware_error = servo_->hardware_error_status();
-    this->status_.input_voltage_error = hardware_error.input_voltage_error;
-    this->status_.angle_limit_error = hardware_error.angle_limit_error;
-    this->status_.overheating_error = hardware_error.overheating_error;
-    this->status_.range_error = hardware_error.range_error;
-    this->status_.overload_error = hardware_error.overload_error;
-    return Error::kOk;
-  }
+  Error UpdateStatus();
 
  private:
-  /**
-   * @brief 伺服电机
-   */
-  ServoType* servo_ = nullptr;
+  ServoType* servo_         = nullptr;
+  uint16_t   realtime_tick_ = 0;
 
-  uint16_t realtime_tick_ = 0;
-  /**
-   * @brief 同步从机参数
-   */
-  Error ApplyProtocolConfig() {
-    this->set_id(this->regmap_->ReadId());
-    this->set_return_level(this->regmap_->ReadStatusReturnLevel());
-    return Error::kOk;
-  }
-
-  Error ApplyAlignToPosition() {
-    if (this->regmap_->ReadAlignToPosition()) {
-      const auto align_to_position = this->regmap_->ReadAlignToPosition();
-      servo_->AlignToPosition(align_to_position);
-      this->regmap_->WriteAlignToPosition(0);
-    }
-    return Error::kOk;
-  }
-
-  /**
-   * @brief 同步电机参数
-   * @return 错误码
-   */
-  Error ApplyMotorConfig() {
-    //==============================================================================
-    // 运行模式组
-    //==============================================================================
-    const auto drive_mode = this->regmap_->ReadDriveMode();
-    servo_->set_drive_mode(drive_mode);
-
-    const auto operating_mode = this->regmap_->ReadOperatingMode();
-    servo_->set_operating_mode(operating_mode);
-
-    const auto shutdown = this->regmap_->ReadShutdown();
-    servo_->set_shutdown(shutdown);
-
-    //==============================================================================
-    // 位置配置组
-    //==============================================================================
-    const auto homing_offset = this->regmap_->ReadHomingOffset();
-    servo_->set_homing_offset(homing_offset);
-
-    const auto moving_threshold = this->regmap_->ReadMovingThreshold();
-    servo_->set_moving_threshold(moving_threshold);
-
-    //==============================================================================
-    // 保护限制组
-    //==============================================================================
-    const auto temperature_limit = this->regmap_->ReadTemperatureLimit();
-    servo_->set_temperature_limit(temperature_limit);
-
-    const auto max_voltage_limit = this->regmap_->ReadMaxVoltageLimit();
-    servo_->set_max_voltage_limit(max_voltage_limit);
-
-    const auto min_voltage_limit = this->regmap_->ReadMinVoltageLimit();
-    servo_->set_min_voltage_limit(min_voltage_limit);
-
-    const auto pwm_limit = this->regmap_->ReadPwmLimit();
-    servo_->set_pwm_limit(pwm_limit);
-
-    const auto current_limit = this->regmap_->ReadCurrentLimit();
-    servo_->set_current_limit(current_limit);
-
-    const auto velocity_limit = this->regmap_->ReadVelocityLimit();
-    servo_->set_velocity_limit(velocity_limit);
-
-    const auto max_position_limit = this->regmap_->ReadMaxPositionLimit();
-    servo_->set_max_position_limit(max_position_limit);
-
-    const auto min_position_limit = this->regmap_->ReadMinPositionLimit();
-    servo_->set_min_position_limit(min_position_limit);
-
-    const auto protection_time = this->regmap_->ReadProtectionTime();
-    servo_->set_protection_time(protection_time);
-
-    //==============================================================================
-    // PID 参数组
-    //==============================================================================
-    const auto vi = this->regmap_->ReadVelocityIGain();
-    const auto vp = this->regmap_->ReadVelocityPGain();
-    servo_->set_velocity_pid(vp, vi, 0);
-
-    const auto pi = this->regmap_->ReadPositionIGain();
-    const auto pp = this->regmap_->ReadPositionPGain();
-    const auto pd = this->regmap_->ReadPositionDGain();
-    servo_->set_position_pid(pp, pi, pd);
-
-    const auto feedforward_2nd_gain = this->regmap_->ReadFeedforward2ndGain();
-    servo_->set_feedforward_2nd_gain(feedforward_2nd_gain);
-
-    const auto feedforward_1st_gain = this->regmap_->ReadFeedforward1stGain();
-    servo_->set_feedforward_1st_gain(this->regmap_->ReadFeedforward1stGain());
-
-    //==============================================================================
-    // 控制命令组
-    //==============================================================================
-    const auto torque_enable = this->regmap_->ReadTorqueEnable();
-    servo_->set_torque_enable(torque_enable);
-
-    const auto hardware_error_status = this->regmap_->ReadHardwareErrorStatus();
-    servo_->set_hardware_error_status(hardware_error_status);
-
-    //==============================================================================
-    // 目标值组
-    //==============================================================================
-    const auto goal_pwm = this->regmap_->ReadGoalPwm();
-    servo_->set_goal_pwm(goal_pwm);
-
-    const auto goal_current = this->regmap_->ReadGoalCurrent();
-    servo_->set_goal_current(goal_current);
-
-    const auto goal_velocity = this->regmap_->ReadGoalVelocity();
-    servo_->set_goal_velocity(goal_velocity);
-
-    const auto goal_position = this->regmap_->ReadGoalPosition();
-    servo_->set_goal_position(goal_position);
-    return Error::kOk;
-  }
-
-  Error UpdateMotorStatus() {
-    const auto torque_enable = servo_->torque_enable();
-    this->regmap_->WriteTorqueEnable(torque_enable);
-
-    const auto hardware_error_status = servo_->hardware_error_status_value();
-    this->regmap_->WriteHardwareErrorStatus(hardware_error_status);
-
-    const auto moving = servo_->moving();
-    this->regmap_->WriteMoving(moving);
-
-    const auto moving_status = servo_->moving_status_value();
-    this->regmap_->WriteMovingStatus(moving_status);
-
-    const auto present_position = servo_->present_position();
-    this->regmap_->WritePresentPosition(present_position);
-
-    const auto present_velocity = servo_->present_velocity();
-    this->regmap_->WritePresentVelocity(present_velocity);
-
-    const auto present_current = servo_->present_current();
-    this->regmap_->WritePresentCurrent(present_current);
-
-    const auto present_input_voltage = servo_->present_input_voltage();
-    this->regmap_->WritePresentInputVoltage(present_input_voltage);
-
-    const auto present_temperature = servo_->present_temperature();
-    this->regmap_->WritePresentTemperature(present_temperature);
-
-    const auto present_pwm = servo_->present_pwm();
-    this->regmap_->WritePresentPwm(present_pwm);
-
-    const auto position_trajectory = servo_->position_trajectory();
-    this->regmap_->WritePositionTrajectory(position_trajectory);
-
-    const auto velocity_trajectory = servo_->velocity_trajectory();
-    this->regmap_->WriteVelocityTrajectory(velocity_trajectory);
-    return Error::kOk;
-  }
+  Error ApplyProtocolConfig();
+  Error ApplyAlignToPosition();
+  Error ApplyMotorConfig();
+  Error UpdateMotorStatus();
 };
+
+}  // namespace hortor::servo_slave
+
+namespace hortor::servo_slave {
+
+template <typename ServoType>
+ServoType* Slave<ServoType>::servo() {
+  return servo_;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::set_servo(ServoType* servo) {
+  servo_ = servo;
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::Init() {
+  CHECK(SlaveBase<ServoType>::Init());
+  CHECK(ApplyProtocolConfig());
+  CHECK(ApplyMotorConfig());
+  CHECK(UpdateMotorStatus());
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::AfterResetHandlerImpl(
+    const protocol::InstPacket& packet, const bool response) {
+  CHECK(this->regmap_->RecoveryEeprom());
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::AfterWriteRegsImpl(const uint8_t  address,
+                                           const uint8_t* data,
+                                           const size_t   size) {
+  if (TableBlocks::kEeprom::InBlock(address, size)) {
+    CHECK(this->regmap_->StoreEeprom());
+  }
+  if (TableBlocks::kAlign::InBlock(address, size)) {
+    CHECK(ApplyAlignToPosition());
+  }
+  CHECK(ApplyProtocolConfig());
+  CHECK(ApplyMotorConfig());
+  CHECK(UpdateMotorStatus());
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::AfterProcessImpl(float dt) {
+  realtime_tick_ += dt * 1000;
+  this->regmap_->WriteRealtimeTick(realtime_tick_);
+  CHECK(UpdateMotorStatus());
+  return UpdateStatus();
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::UpdateStatus() {
+  const auto hardware_error         = servo_->hardware_error_status();
+  this->status_.input_voltage_error = hardware_error.input_voltage_error;
+  this->status_.angle_limit_error   = hardware_error.angle_limit_error;
+  this->status_.overheating_error   = hardware_error.overheating_error;
+  this->status_.range_error         = hardware_error.range_error;
+  this->status_.overload_error      = hardware_error.overload_error;
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::ApplyProtocolConfig() {
+  this->set_id(this->regmap_->ReadId());
+  this->set_return_level(this->regmap_->ReadStatusReturnLevel());
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::ApplyAlignToPosition() {
+  if (this->regmap_->ReadAlignToPosition()) {
+    const auto align_to_position = this->regmap_->ReadAlignToPosition();
+    servo_->AlignToPosition(align_to_position);
+    this->regmap_->WriteAlignToPosition(0);
+  }
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::ApplyMotorConfig() {
+  const auto drive_mode = this->regmap_->ReadDriveMode();
+  servo_->set_drive_mode(drive_mode);
+
+  const auto operating_mode = this->regmap_->ReadOperatingMode();
+  servo_->set_operating_mode(operating_mode);
+
+  const auto shutdown = this->regmap_->ReadShutdown();
+  servo_->set_shutdown(shutdown);
+
+  const auto homing_offset = this->regmap_->ReadHomingOffset();
+  servo_->set_homing_offset(homing_offset);
+
+  const auto moving_threshold = this->regmap_->ReadMovingThreshold();
+  servo_->set_moving_threshold(moving_threshold);
+
+  const auto temperature_limit = this->regmap_->ReadTemperatureLimit();
+  servo_->set_temperature_limit(temperature_limit);
+
+  const auto max_voltage_limit = this->regmap_->ReadMaxVoltageLimit();
+  servo_->set_max_voltage_limit(max_voltage_limit);
+
+  const auto min_voltage_limit = this->regmap_->ReadMinVoltageLimit();
+  servo_->set_min_voltage_limit(min_voltage_limit);
+
+  const auto pwm_limit = this->regmap_->ReadPwmLimit();
+  servo_->set_pwm_limit(pwm_limit);
+
+  const auto current_limit = this->regmap_->ReadCurrentLimit();
+  servo_->set_current_limit(current_limit);
+
+  const auto velocity_limit = this->regmap_->ReadVelocityLimit();
+  servo_->set_velocity_limit(velocity_limit);
+
+  const auto max_position_limit = this->regmap_->ReadMaxPositionLimit();
+  servo_->set_max_position_limit(max_position_limit);
+
+  const auto min_position_limit = this->regmap_->ReadMinPositionLimit();
+  servo_->set_min_position_limit(min_position_limit);
+
+  const auto protection_time = this->regmap_->ReadProtectionTime();
+  servo_->set_protection_time(protection_time);
+
+  const auto vi = this->regmap_->ReadVelocityIGain();
+  const auto vp = this->regmap_->ReadVelocityPGain();
+  servo_->set_velocity_pid(vp, vi, 0);
+
+  const auto pi = this->regmap_->ReadPositionIGain();
+  const auto pp = this->regmap_->ReadPositionPGain();
+  const auto pd = this->regmap_->ReadPositionDGain();
+  servo_->set_position_pid(pp, pi, pd);
+
+  const auto feedforward_2nd_gain = this->regmap_->ReadFeedforward2ndGain();
+  servo_->set_feedforward_2nd_gain(feedforward_2nd_gain);
+
+  const auto feedforward_1st_gain = this->regmap_->ReadFeedforward1stGain();
+  servo_->set_feedforward_1st_gain(feedforward_1st_gain);
+
+  const auto torque_enable = this->regmap_->ReadTorqueEnable();
+  servo_->set_torque_enable(torque_enable);
+
+  const auto hardware_error_status = this->regmap_->ReadHardwareErrorStatus();
+  servo_->set_hardware_error_status(hardware_error_status);
+
+  const auto goal_pwm = this->regmap_->ReadGoalPwm();
+  servo_->set_goal_pwm(goal_pwm);
+
+  const auto goal_current = this->regmap_->ReadGoalCurrent();
+  servo_->set_goal_current(goal_current);
+
+  const auto goal_velocity = this->regmap_->ReadGoalVelocity();
+  servo_->set_goal_velocity(goal_velocity);
+
+  const auto goal_position = this->regmap_->ReadGoalPosition();
+  servo_->set_goal_position(goal_position);
+  return Error::kOk;
+}
+
+template <typename ServoType>
+Error Slave<ServoType>::UpdateMotorStatus() {
+  const auto torque_enable = servo_->torque_enable();
+  this->regmap_->WriteTorqueEnable(torque_enable);
+
+  const auto hardware_error_status = servo_->hardware_error_status_value();
+  this->regmap_->WriteHardwareErrorStatus(hardware_error_status);
+
+  const auto moving = servo_->moving();
+  this->regmap_->WriteMoving(moving);
+
+  const auto moving_status = servo_->moving_status_value();
+  this->regmap_->WriteMovingStatus(moving_status);
+
+  const auto present_position = servo_->present_position();
+  this->regmap_->WritePresentPosition(present_position);
+
+  const auto present_velocity = servo_->present_velocity();
+  this->regmap_->WritePresentVelocity(present_velocity);
+
+  const auto present_current = servo_->present_current();
+  this->regmap_->WritePresentCurrent(present_current);
+
+  const auto present_input_voltage = servo_->present_input_voltage();
+  this->regmap_->WritePresentInputVoltage(present_input_voltage);
+
+  const auto present_temperature = servo_->present_temperature();
+  this->regmap_->WritePresentTemperature(present_temperature);
+
+  const auto present_pwm = servo_->present_pwm();
+  this->regmap_->WritePresentPwm(present_pwm);
+
+  return Error::kOk;
+}
 
 }  // namespace hortor::servo_slave

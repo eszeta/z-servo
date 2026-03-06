@@ -9,10 +9,8 @@
 
 namespace hortor::servo_slave {
 
-using protocol::ControlTableBlock;
-
-constexpr uint32_t kBaudRateTable[] = {
-    9600, 57600, 115200, 1000000, 2000000, 3000000, 4000000, 4500000};
+constexpr uint32_t kBaudRateTable[] = {9600,    57600,   115200,  1000000,
+                                       2000000, 3000000, 4000000, 4500000};
 
 //==============================================================================
 // 单位转换辅助函数
@@ -20,48 +18,48 @@ constexpr uint32_t kBaudRateTable[] = {
 namespace Converters {
 
 // 统一使用语义化 *Converter 命名。
-using VoltageCvt = regmap::RatioConverter<float, 1, 10>;       // 0.1V / LSB
-using PwmPctCvt = regmap::RatioConverter<float, 113, 1000>;    // 0.113% / LSB
+using VoltageCvt  = regmap::RatioConverter<float, 1, 10>;      // 0.1V / LSB
+using PwmPctCvt   = regmap::RatioConverter<float, 113, 1000>;  // 0.113% / LSB
 using VelocityCvt = regmap::RatioConverter<float, 229, 1000>;  // 0.229RPM / LSB
-using MsCvt = regmap::RatioConverter<uint16_t, 20>;            // 20ms / LSB
-using UsCvt = regmap::RatioConverter<uint16_t, 2>;             // 2us / LSB
-using CurrentCvt = regmap::RatioConverter<float, 1, 1000>;     // 0.001A / LSB
-using FeedforwardGainCvt = regmap::RatioConverter<float, 1, 4>;  // raw / 4
-using PidPCvt = regmap::RatioConverter<float, 1, 128>;           // raw / 128
-using PidICvt = regmap::RatioConverter<float, 1, 65536>;         // raw / 65536
-using PidDCvt = regmap::RatioConverter<float, 1, 16>;            // raw / 16
+using MsCvt       = regmap::RatioConverter<uint16_t, 20>;      // 20ms / LSB
+using UsCvt       = regmap::RatioConverter<uint16_t, 2>;       // 2us / LSB
+using CurrentCvt  = regmap::RatioConverter<float, 1, 1000>;    // 0.001A / LSB
+using FeedforwardGainCvt = regmap::RatioConverter<float, 1, 4>;    // raw / 4
+using PidPCvt            = regmap::RatioConverter<float, 1, 128>;  // raw / 128
+using PidICvt = regmap::RatioConverter<float, 1, 65536>;  // raw / 65536
+using PidDCvt = regmap::RatioConverter<float, 1, 16>;     // raw / 16
 }  // namespace Converters
 /**
  * @brief 控制表
  * 仿照XL330的控制表
  */
 namespace ControlTable {
-template <uint8_t ADDRESS>
-using CTIU8 = protocol::ControlTableItemU8<ADDRESS>;
-template <uint8_t ADDRESS>
-using CTIU16 = protocol::ControlTableItemU16<ADDRESS>;
-template <uint8_t ADDRESS>
-using CTIU32 = protocol::ControlTableItemU32<ADDRESS>;
-template <uint8_t ADDRESS>
-using CTIS8 = protocol::ControlTableItemS8<ADDRESS>;
-template <uint8_t ADDRESS>
-using CTIS16 = protocol::ControlTableItemS16<ADDRESS>;
-template <uint8_t ADDRESS>
-using CTIS32 = protocol::ControlTableItemS32<ADDRESS>;
-template <uint8_t ADDRESS>
-using CTIB8 = protocol::ControlTableItemB8<ADDRESS>;
+template <uint8_t Address>
+using CTIU8 = protocol::ControlTableItemU8<Address>;
+template <uint8_t Address>
+using CTIU16 = protocol::ControlTableItemU16<Address>;
+template <uint8_t Address>
+using CTIU32 = protocol::ControlTableItemU32<Address>;
+template <uint8_t Address>
+using CTIS8 = protocol::ControlTableItemS8<Address>;
+template <uint8_t Address>
+using CTIS16 = protocol::ControlTableItemS16<Address>;
+template <uint8_t Address>
+using CTIS32 = protocol::ControlTableItemS32<Address>;
+template <uint8_t Address>
+using CTIB8 = protocol::ControlTableItemB8<Address>;
 
 // 统一使用语义化 *Converter 命名。
-using VoltageCvt = Converters::VoltageCvt;
-using PwmPctCvt = Converters::PwmPctCvt;
-using VelocityCvt = Converters::VelocityCvt;
-using MsCvt = Converters::MsCvt;
-using UsCvt = Converters::UsCvt;
-using CurrentCvt = Converters::CurrentCvt;
+using VoltageCvt         = Converters::VoltageCvt;
+using PwmPctCvt          = Converters::PwmPctCvt;
+using VelocityCvt        = Converters::VelocityCvt;
+using MsCvt              = Converters::MsCvt;
+using UsCvt              = Converters::UsCvt;
+using CurrentCvt         = Converters::CurrentCvt;
 using FeedforwardGainCvt = Converters::FeedforwardGainCvt;
-using PidPCvt = Converters::PidPCvt;
-using PidICvt = Converters::PidICvt;
-using PidDCvt = Converters::PidDCvt;
+using PidPCvt            = Converters::PidPCvt;
+using PidICvt            = Converters::PidICvt;
+using PidDCvt            = Converters::PidDCvt;
 
 //--------------------------------------------------------------------------
 // EEPROM 区（掉电保存）
@@ -86,7 +84,7 @@ struct kBaudRate : CTIU8<0x10> {
 /** @brief 返回延迟 | 单位: 2μs | 访问: RW */
 struct kReturnDelayTime : CTIU8<0x11> {
   static constexpr uint16_t kDefault = 500;
-  using converter_t = UsCvt;
+  using converter_t                  = UsCvt;
 };
 /** @brief 状态返回级别 (0-2) | 单位: - | 访问: RW */
 struct kStatusReturnLevel : CTIU8<0x12> {
@@ -117,7 +115,7 @@ struct kHomingOffset : CTIS32<0x30> {
 /** @brief 运动阈值 | 单位: 0.229 rev/min | 访问: RW */
 struct kMovingThreshold : CTIU32<0x34> {
   static constexpr float kDefault = 2.29f;
-  using converter_t = VelocityCvt;
+  using converter_t               = VelocityCvt;
 };
 /* 0x38-0x3F: 保留，用于位置配置组扩展 */
 
@@ -129,27 +127,27 @@ struct kTemperatureLimit : CTIU8<0x40> {
 /** @brief 最高电压限制 | 单位: 0.1V | 访问: RW */
 struct kMaxVoltageLimit : CTIU16<0x41> {
   static constexpr float kDefault = 16.0f;
-  using converter_t = VoltageCvt;
+  using converter_t               = VoltageCvt;
 };
 /** @brief 最低电压限制 | 单位: 0.1V | 访问: RW */
 struct kMinVoltageLimit : CTIU16<0x43> {
   static constexpr float kDefault = 5.0f;
-  using converter_t = VoltageCvt;
+  using converter_t               = VoltageCvt;
 };
 /** @brief PWM上限 | 单位: 0.113% | 访问: RW */
 struct kPwmLimit : CTIU16<0x45> {
   static constexpr float kDefault = 100.0f;
-  using converter_t = PwmPctCvt;
+  using converter_t               = PwmPctCvt;
 };
 /** @brief 电流上限 | 单位: 0.001A | 访问: RW */
 struct kCurrentLimit : CTIU16<0x47> {
   static constexpr float kDefault = 3.0f;
-  using converter_t = CurrentCvt;
+  using converter_t               = CurrentCvt;
 };
 /** @brief 速度上限 | 单位: 0.229 rev/min | 访问: RW */
 struct kVelocityLimit : CTIU32<0x49> {
   static constexpr float kDefault = 468.763f;
-  using converter_t = VelocityCvt;
+  using converter_t               = VelocityCvt;
 };
 /** @brief 位置上限 | 单位: pulse | 访问: RW */
 struct kMaxPositionLimit : CTIU32<0x4D> {
@@ -162,7 +160,7 @@ struct kMinPositionLimit : CTIU32<0x51> {
 /** @brief 过载保护时间 | 单位: 20ms | 访问: RW */
 struct kProtectionTime : CTIU8<0x55> {
   static constexpr uint16_t kDefault = 0;
-  using converter_t = MsCvt;
+  using converter_t                  = MsCvt;
 };
 /* 0x56-0x5F: 保留，用于保护限制组扩展 */
 
@@ -170,37 +168,37 @@ struct kProtectionTime : CTIU8<0x55> {
 /** @brief 速度积分增益 | 单位: - | 访问: RW */
 struct kVelocityIGain : CTIU16<0x60> {
   static constexpr float kDefault = 0.029296875f;
-  using converter_t = PidICvt;
+  using converter_t               = PidICvt;
 };
 /** @brief 速度比例增益 | 单位: - | 访问: RW */
 struct kVelocityPGain : CTIU16<0x62> {
   static constexpr float kDefault = 0.78125f;
-  using converter_t = PidPCvt;
+  using converter_t               = PidPCvt;
 };
 /** @brief 位置微分增益 | 单位: - | 访问: RW */
 struct kPositionDGain : CTIU16<0x64> {
   static constexpr float kDefault = 250.0f;
-  using converter_t = PidDCvt;
+  using converter_t               = PidDCvt;
 };
 /** @brief 位置积分增益 | 单位: - | 访问: RW */
 struct kPositionIGain : CTIU16<0x66> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = PidICvt;
+  using converter_t               = PidICvt;
 };
 /** @brief 位置比例增益 | 单位: - | 访问: RW */
 struct kPositionPGain : CTIU16<0x68> {
   static constexpr float kDefault = 6.25f;
-  using converter_t = PidPCvt;
+  using converter_t               = PidPCvt;
 };
 /** @brief 前馈二阶增益 | 单位: - | 访问: RW */
 struct kFeedforward2ndGain : CTIU16<0x6A> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = FeedforwardGainCvt;
+  using converter_t               = FeedforwardGainCvt;
 };
 /** @brief 前馈一阶增益 | 单位: - | 访问: RW */
 struct kFeedforward1stGain : CTIU16<0x6C> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = FeedforwardGainCvt;
+  using converter_t               = FeedforwardGainCvt;
 };
 /* 0x6E-0x6F: 保留，用于PID参数组扩展 */
 
@@ -229,7 +227,7 @@ struct kHardwareErrorStatus : CTIU8<0x84> {
 /** @brief 总线看门狗 | 单位: 20ms | 访问: RW */
 struct kBusWatchdog : CTIU8<0x85> {
   static constexpr uint16_t kDefault = 0;
-  using converter_t = MsCvt;
+  using converter_t                  = MsCvt;
 };
 /* 0x86-0x8F: 保留，用于控制命令组扩展 */
 
@@ -237,17 +235,17 @@ struct kBusWatchdog : CTIU8<0x85> {
 /** @brief 目标PWM | 单位: 0.113% | 访问: RW */
 struct kGoalPwm : CTIS16<0x90> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = PwmPctCvt;
+  using converter_t               = PwmPctCvt;
 };
 /** @brief 目标电流 | 单位: 0.001A | 访问: RW */
 struct kGoalCurrent : CTIU16<0x92> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = CurrentCvt;
+  using converter_t               = CurrentCvt;
 };
 /** @brief 目标速度 | 单位: 0.229 rev/min | 访问: RW */
 struct kGoalVelocity : CTIU32<0x94> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = VelocityCvt;
+  using converter_t               = VelocityCvt;
 };
 /** @brief 目标位置 | 单位: pulse (0-4095=0-360°) | 访问: RW */
 struct kGoalPosition : CTIS32<0x98> {
@@ -271,62 +269,44 @@ struct kMovingStatus : CTIU8<0xA3> {
 /** @brief 当前PWM | 单位: 0.113% | 访问: R */
 struct kPresentPwm : CTIS16<0xA4> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = PwmPctCvt;
+  using converter_t               = PwmPctCvt;
 };
 /** @brief 当前电流 | 单位: 0.001A | 访问: R */
 struct kPresentCurrent : CTIU16<0xA6> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = CurrentCvt;
+  using converter_t               = CurrentCvt;
 };
 /** @brief 当前速度 | 单位: 0.229 rev/min | 访问: R */
 struct kPresentVelocity : CTIU32<0xA8> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = VelocityCvt;
+  using converter_t               = VelocityCvt;
 };
 /** @brief 当前位置 | 单位: pulse (0-4095=0-360°) | 访问: R */
 struct kPresentPosition : CTIS32<0xAC> {
   static constexpr int32_t kDefault = 0;
 };
-/** @brief 速度轨迹 | 单位: 0.229 rev/min | 访问: R */
-struct kVelocityTrajectory : CTIU32<0xB0> {
-  static constexpr float kDefault = 0.0f;
-  using converter_t = VelocityCvt;
-};
-/** @brief 位置轨迹 | 单位: pulse | 访问: R */
-struct kPositionTrajectory : CTIS32<0xB4> {
-  static constexpr int32_t kDefault = 0;
-};
 /** @brief 当前输入电压 | 单位: 0.1V | 访问: R */
-struct kPresentInputVoltage : CTIU16<0xB8> {
+struct kPresentInputVoltage : CTIU16<0xB0> {
   static constexpr float kDefault = 0.0f;
-  using converter_t = VoltageCvt;
+  using converter_t               = VoltageCvt;
 };
 /** @brief 当前温度 | 单位: °C | 访问: R */
-struct kPresentTemperature : CTIU8<0xBA> {
+struct kPresentTemperature : CTIU8<0xB2> {
   static constexpr uint8_t kDefault = 0;
 };
-/* 0xBB-0xBF: 保留，用于状态反馈组扩展 */
+/* 0xB4-0xBF: 保留，用于状态反馈组扩展 */
 
 constexpr size_t kTotalSize = 0xC0;
 };  // namespace ControlTable
 
 namespace TableBlocks {
-template <typename BEGIN, typename END>
-constexpr ControlTableBlock MakeBlock() {
-  return {
-      BEGIN::kAddress,
-      END::kAddress + END::kSize,
-  };
-}
+using protocol::ControlTableBlock;
 
-constexpr ControlTableBlock kEeprom =
-    MakeBlock<ControlTable::kFirmwareVersion,
-              ControlTable::kFeedforward1stGain>();
-
-constexpr ControlTableBlock kRam =
-    MakeBlock<ControlTable::kTorqueEnable, ControlTable::kPresentTemperature>();
-
-constexpr ControlTableBlock kAlign =
-    MakeBlock<ControlTable::kAlignToPosition, ControlTable::kAlignToPosition>();
-};  // namespace TableBlocks
+struct kEeprom : ControlTableBlock<ControlTable::kFirmwareVersion,
+                                   ControlTable::kFeedforward1stGain> {};
+struct kRam : ControlTableBlock<ControlTable::kTorqueEnable,
+                                ControlTable::kPresentTemperature> {};
+struct kAlign : ControlTableBlock<ControlTable::kAlignToPosition,
+                                  ControlTable::kAlignToPosition> {};
+}  // namespace TableBlocks
 }  // namespace hortor::servo_slave

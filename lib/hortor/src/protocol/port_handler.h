@@ -20,8 +20,8 @@ namespace hortor::protocol {
  *
  * @tparam Derived 派生类类型
  */
-template <typename DERIVED>
-class PortHandler {
+template <typename DerivedType>
+class PortHandler : public hortor::Noncopyable {
  public:
   /**
    * @brief 处理数据
@@ -31,13 +31,8 @@ class PortHandler {
    * @param is_complete 是否完成
    * @return 错误码
    */
-  Error Process(InstProtocol& protocol,
-                const float dt,
-                InstPacket& inst_packet,
-                bool& is_complete) {
-    return static_cast<DERIVED*>(this)->ProcessImpl(
-        protocol, dt, inst_packet, is_complete);
-  }
+  Error Process(InstProtocol& protocol, const float dt, InstPacket& inst_packet,
+                bool& is_complete);
 
   /**
    * @brief 发送响应数据
@@ -45,21 +40,40 @@ class PortHandler {
    * @param reply_idx 回复索引
    * @return 错误码
    */
-  Error Response(const StatusPacket& packet, const uint8_t reply_idx) {
-    return static_cast<DERIVED*>(this)->ResponseImpl(packet, reply_idx);
-  }
+  Error Response(const StatusPacket& packet, const uint8_t reply_idx);
 
   /**
    * @brief 设置响应延迟
    * @param response_delay 响应延迟时间（秒）
    */
-  void SetResponseDelay(const float response_delay) {
-    response_delay_ = response_delay;
-  }
+  void SetResponseDelay(const float response_delay);
 
  protected:
-  StatusPacket status_packet_{};  // 状态包缓冲区
-  float response_delay_ = 0.0f;   // 响应延迟（秒）
+  StatusPacket status_packet_{};        // 状态包缓冲区
+  float        response_delay_ = 0.0f;  // 响应延迟（秒）
 };
+
+}  // namespace hortor::protocol
+
+namespace hortor::protocol {
+
+template <typename DerivedType>
+Error PortHandler<DerivedType>::Process(InstProtocol& protocol, const float dt,
+                                        InstPacket& inst_packet,
+                                        bool&       is_complete) {
+  return static_cast<DerivedType*>(this)->ProcessImpl(protocol, dt, inst_packet,
+                                                      is_complete);
+}
+
+template <typename DerivedType>
+Error PortHandler<DerivedType>::Response(const StatusPacket& packet,
+                                         const uint8_t       reply_idx) {
+  return static_cast<DerivedType*>(this)->ResponseImpl(packet, reply_idx);
+}
+
+template <typename DerivedType>
+void PortHandler<DerivedType>::SetResponseDelay(const float response_delay) {
+  response_delay_ = response_delay;
+}
 
 }  // namespace hortor::protocol

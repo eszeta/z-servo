@@ -84,69 +84,69 @@ enum class OperatingMode : uint8_t {
  * @brief 方向
  */
 enum class Reverse : int8_t {
-  kNormal = 1,    // clockwise
+  kNormal  = 1,   // clockwise
   kReverse = -1,  // counterclockwise
 };
 
-/** 
- * @brief 驱动模式 
+/**
+ * @brief 驱动模式
  */
 union DriveModeBits {
   uint8_t value = 0;
   struct {
-    bool moto_reverse_mode : 1;     // 位0 0: 正转, 1: 反转
+    bool moto_reverse_mode    : 1;  // 位0 0: 正转, 1: 反转
     bool encoder_reverse_mode : 1;  // 位1 0: 正转, 1: 反转
-    bool reserved_bit2 : 1;         // 位2 保留
-    bool reserved_bit3 : 1;         // 位3 保留
-    bool reserved_bit4 : 1;         // 位4 保留
-    bool reserved_bit5 : 1;         // 位5 保留
-    bool reserved_bit6 : 1;         // 位6 保留
-    bool reserved_bit7 : 1;         // 位7 保留
+    bool reserved_bit2        : 1;  // 位2 保留
+    bool reserved_bit3        : 1;  // 位3 保留
+    bool reserved_bit4        : 1;  // 位4 保留
+    bool reserved_bit5        : 1;  // 位5 保留
+    bool reserved_bit6        : 1;  // 位6 保留
+    bool reserved_bit7        : 1;  // 位7 保留
   };
 };
 
-/** 
+/**
  * @brief 运动状态
  */
 union MovingStatusBits {
   uint8_t value = 0;
   struct {
-    bool in_position : 1;          // 位0: 已到达目标位置
-    bool reserved_bit1 : 1;        // 位1: 保留
-    bool reserved_bit2 : 1;        // 位2: 保留
-    bool following_error : 1;      // 位3: 跟随误差
+    bool    in_position      : 1;  // 位0: 已到达目标位置
+    bool    reserved_bit1    : 1;  // 位1: 保留
+    bool    reserved_bit2    : 1;  // 位2: 保留
+    bool    following_error  : 1;  // 位3: 跟随误差
     uint8_t reserved_bits4_5 : 2;  // 位4-5: 保留
     uint8_t reserved_bits6_7 : 2;  // 位6-7: 保留
   };
 };
 
-/** 
+/**
  * @brief 关断条件
  */
 union ShutdownBits {
   uint8_t value = 0;
   struct {
-    bool input_voltage_error : 1;     // 位0: 输入电压超出范围
-    bool overheating_error : 1;       // 位1: 温度超过上限
-    bool motor_encoder_error : 1;     // 位2: 编码器故障
+    bool input_voltage_error    : 1;  // 位0: 输入电压超出范围
+    bool overheating_error      : 1;  // 位1: 温度超过上限
+    bool motor_encoder_error    : 1;  // 位2: 编码器故障
     bool electrical_shock_error : 1;  // 位3: 电气冲击
-    bool overload_error : 1;          // 位4: 过载
+    bool overload_error         : 1;  // 位4: 过载
   };
 };
 
-/** 
+/**
  * @brief 硬件错误状态
  */
 union HardwareErrorStatusBits {
   uint8_t value = 0;
   struct {
-    bool input_voltage_error : 1;     // 位0: 输入电压超出范围
-    bool overheating_error : 1;       // 位1: 温度超过上限
-    bool motor_encoder_error : 1;     // 位2: 编码器故障
+    bool input_voltage_error    : 1;  // 位0: 输入电压超出范围
+    bool overheating_error      : 1;  // 位1: 温度超过上限
+    bool motor_encoder_error    : 1;  // 位2: 编码器故障
     bool electrical_shock_error : 1;  // 位3: 电气冲击
-    bool overload_error : 1;          // 位4: 过载
-    bool angle_limit_error : 1;       // 位5: 角度超出范围
-    bool range_error : 1;             // 位6: 范围错误
+    bool overload_error         : 1;  // 位4: 过载
+    bool angle_limit_error      : 1;  // 位5: 角度超出范围
+    bool range_error            : 1;  // 位6: 范围错误
   };
 };
 }  // namespace hortor::servo

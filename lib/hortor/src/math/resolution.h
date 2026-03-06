@@ -4,17 +4,22 @@
 #pragma once
 
 #include <Arduino.h>
+
+#include "hortor.h"
+
 namespace hortor::math {
 
 template <uint8_t Bits>
-struct Resolution {
+struct Resolution : public hortor::Noncopyable {
  public:
+  constexpr Resolution() = default;
+
   /** @brief 目标分辨率（位数），决定了传感器的精度和量程 */
   static constexpr uint8_t kBits = Bits;
   /** @brief 最大值 */
-  static constexpr uint32_t kMax = (1 << kBits) - 1;
+  static constexpr uint32_t kMax = (1 << Bits) - 1;
   /** @brief Counts Per Revolution */
-  static constexpr uint16_t kEncoderCpr = (1 << kBits);
+  static constexpr uint16_t kEncoderCpr = (1 << Bits);
   /** @brief 角度到计数值的转换系数，用于将角度转换为计数值 */
   static constexpr float kAngleToRaw = kEncoderCpr / 360.0f;
   /** @brief 弧度到计数值的转换系数，用于将弧度转换为计数值 */

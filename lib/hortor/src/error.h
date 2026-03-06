@@ -26,8 +26,19 @@ enum class Error : uint8_t {
   kMax,          ///< 最大错误码（用于数组索引）
 };
 
-inline bool IsOk(Error e) { return e == Error::kOk; }
-inline bool IsFail(Error e) { return e != Error::kOk; }
+bool IsOk(Error e);
+bool IsFail(Error e);
+
+}  // namespace hortor
+
+namespace hortor {
+
+inline bool IsOk(Error e) {
+  return e == Error::kOk;
+}
+inline bool IsFail(Error e) {
+  return e != Error::kOk;
+}
 
 }  // namespace hortor
 
@@ -38,16 +49,18 @@ inline bool IsFail(Error e) { return e != Error::kOk; }
 /// @brief 错误传播：执行表达式，非 kOk 则立即返回该错误码
 ///
 /// 使用 __VA_ARGS__ 兼容含逗号的模板调用，如 CHECK(Func<A, B>(v))。
-#define CHECK(...)                                   \
-  do {                                               \
-    ::hortor::Error _err_ = (__VA_ARGS__);           \
-    if (_err_ != ::hortor::Error::kOk) return _err_; \
+#define CHECK(...)                         \
+  do {                                     \
+    ::hortor::Error _err_ = (__VA_ARGS__); \
+    if (_err_ != ::hortor::Error::kOk)     \
+      return _err_;                        \
   } while (0)
 
 /// @brief 前置条件守卫：条件为 false 则返回指定错误码
 ///
 /// 替代 `if (!cond) return err;`，使参数校验更简洁。
-#define VERIFY(cond, err)      \
-  do {                         \
-    if (!(cond)) return (err); \
+#define VERIFY(cond, err) \
+  do {                    \
+    if (!(cond))          \
+      return (err);       \
   } while (0)

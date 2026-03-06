@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 
+#include "hortor.h"
 #include "math/math.h"
 
 namespace hortor::math {
@@ -12,7 +13,7 @@ namespace hortor::math {
 /**
  * @brief PID控制器类
  */
-class Pid {
+class Pid : public hortor::Noncopyable {
  public:
   struct Config {
     float kp;     // 比例增益 Kp
@@ -22,9 +23,7 @@ class Pid {
     float limit;  // 输出限幅值
   };
 
-  explicit Pid(const Config& config) : config_(config) {}
-  Pid(const Pid&) = delete;
-  Pid& operator=(const Pid&) = delete;
+  explicit Pid(const Config& config);
 
   /**
    * @brief 计算PID控制器输出（无前馈）
@@ -32,71 +31,104 @@ class Pid {
    * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(const float error,
-                const float dt,
-                const float feedforward = 0.0f) {
-    // 比例项：直接响应当前误差
-    const float proportional = config_.kp * error;
-
-    // 积分项：使用梯形积分法，并应用抗饱和反馈
-    const float integral = integral_accumulator_ +
-                           config_.ki * dt * 0.5f * (error + previous_error_) -
-                           config_.ka * antiwindup_feedback_;
-
-    // 微分项：使用误差变化率来抑制超调
-    const float derivative = config_.kd * (error - previous_error_) / dt;
-
-    // 综合所有控制项和前馈
-    const float output = proportional + integral + derivative + feedforward;
-
-    // 限幅处理
-    const float output_clamped =
-        constrain(output, -config_.limit, config_.limit);
-
-    // 计算饱和误差，用于下次抗饱和反馈
-    const float saturation_error = output - output_clamped;
-
-    // 状态更新
-    integral_accumulator_ = integral;
-    previous_error_ = error;
-    antiwindup_feedback_ = saturation_error;
-    return output_clamped;
-  }
+  float Compute(const float error, const float dt,
+                const float feedforward = 0.0f);
 
   /**
    * @brief 重置PID控制器状态
-   * 清除积分项和上一次的状态
    */
-  void Reset() {
-    integral_accumulator_ = 0.0f;
-    antiwindup_feedback_ = 0.0f;
-    previous_error_ = 0.0f;
-  }
+  void Reset();
 
   // 参数设置和获取接口
-  void set_kp(float kp) { config_.kp = kp; }
-  float kp() const { return config_.kp; }
+  void  set_kp(float kp);
+  float kp() const;
 
-  void set_ki(float ki) { config_.ki = ki; }
-  float ki() const { return config_.ki; }
+  void  set_ki(float ki);
+  float ki() const;
 
-  void set_kd(float kd) { config_.kd = kd; }
-  float kd() const { return config_.kd; }
+  void  set_kd(float kd);
+  float kd() const;
 
-  void set_ka(float ka) { config_.ka = ka; }
-  float ka() const { return config_.ka; }
+  void  set_ka(float ka);
+  float ka() const;
 
-  void set_limit(float limit) { config_.limit = limit; }
-  float limit() const { return config_.limit; }
+  void  set_limit(float limit);
+  float limit() const;
 
  private:
-  // 控制器参数
   Config config_;
-
-  // 控制器状态
-  float previous_error_ = 0.0f;        // 上一次的控制误差，用于计算微分项
-  float integral_accumulator_ = 0.0f;  // 积分累加值，用于消除静态误差
-  float antiwindup_feedback_ = 0.0f;   // 抗饱和反馈值，为输出饱和时被削减的部分
+  float  previous_error_       = 0.0f;
+  float  integral_accumulator_ = 0.0f;
+  float  antiwindup_feedback_  = 0.0f;
 };
+
+}  // namespace hortor::math
+
+namespace hortor::math {
+
+inline Pid::Pid(const Config& config) : config_(config) {}
+
+inline float Pid::Compute(const float error, const float dt,
+                          const float feedforward) {
+  const float proportional = config_.kp * error;
+
+  const float integral = integral_accumulator_ +
+                         config_.ki * dt * 0.5f * (error + previous_error_) -
+                         config_.ka * antiwindup_feedback_;
+
+  const float derivative = config_.kd * (error - previous_error_) / dt;
+
+  const float output = proportional + integral + derivative + feedforward;
+
+  const float output_clamped = constrain(output, -config_.limit, config_.limit);
+
+  const float saturation_error = output - output_clamped;
+
+  integral_accumulator_ = integral;
+  previous_error_       = error;
+  antiwindup_feedback_  = saturation_error;
+  return output_clamped;
+}
+
+inline void Pid::Reset() {
+  integral_accumulator_ = 0.0f;
+  antiwindup_feedback_  = 0.0f;
+  previous_error_       = 0.0f;
+}
+
+inline void Pid::set_kp(float kp) {
+  config_.kp = kp;
+}
+inline float Pid::kp() const {
+  return config_.kp;
+}
+
+inline void Pid::set_ki(float ki) {
+  config_.ki = ki;
+}
+inline float Pid::ki() const {
+  return config_.ki;
+}
+
+inline void Pid::set_kd(float kd) {
+  config_.kd = kd;
+}
+inline float Pid::kd() const {
+  return config_.kd;
+}
+
+inline void Pid::set_ka(float ka) {
+  config_.ka = ka;
+}
+inline float Pid::ka() const {
+  return config_.ka;
+}
+
+inline void Pid::set_limit(float limit) {
+  config_.limit = limit;
+}
+inline float Pid::limit() const {
+  return config_.limit;
+}
 
 }  // namespace hortor::math

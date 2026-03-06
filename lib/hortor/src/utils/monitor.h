@@ -13,12 +13,12 @@ namespace hortor::utils {
  * @brief 监控类，用于监控电机状态
  */
 template <typename ServoType>
-class Monitor {
+class Monitor : public hortor::Noncopyable {
  public:
   enum MonitorBitmap : uint8_t {
-    kTarget = 0b1000000,    // 监控目标值
-    kPwm = 0b0100000,       // 监控PWM
-    kCurrent = 0b0001000,   // 监控电流值
+    kTarget   = 0b1000000,  // 监控目标值
+    kPwm      = 0b0100000,  // 监控PWM
+    kCurrent  = 0b0001000,  // 监控电流值
     kVelocity = 0b0000010,  // 监控速度值
     kPosition = 0b0000001   // 监控位置值
   };
@@ -43,41 +43,7 @@ class Monitor {
    * @brief 处理监控
    * @param dt 时间间隔(秒)
    */
-  Error Process(float dt) {
-    if (!monitorPort_) return Error::kOk;
-
-    // if (variables_ & MonitorBitmap::kTarget) {
-    //   monitorPort_->print(F(">target:"));
-    //   monitorPort_->println(servo_->goal_position());
-    // }
-
-    if (variables_ & MonitorBitmap::kPosition) {
-      monitorPort_->print(F(">position:"));
-      monitorPort_->println(servo_->present_position());
-    }
-
-    if (variables_ & MonitorBitmap::kPosition) {
-      monitorPort_->print(F(">raw_position:"));
-      monitorPort_->println(servo_->encoder()->raw_pos());
-    }
-
-    // if (variables_ & MonitorBitmap::kPwm) {
-    //   monitorPort_->print(F(">pwm:"));
-    //   monitorPort_->println(servo_->present_pwm(), kDecimals);
-    // }
-
-    // if (variables_ & MonitorBitmap::kCurrent) {
-    //   monitorPort_->print(F(">current:"));
-    //   monitorPort_->println(servo_->present_current(), kDecimals);
-    // }
-
-    // if (variables_ & MonitorBitmap::kVelocity) {
-    //   monitorPort_->print(F(">velocity:"));
-    //   monitorPort_->println(servo_->present_velocity(), kDecimals);
-    // }
-
-    return Error::kOk;
-  }
+  Error Process(float dt);
 
  private:
   /**
@@ -93,4 +59,28 @@ class Monitor {
    */
   Print* monitorPort_ = nullptr;
 };
+
+}  // namespace hortor::utils
+
+namespace hortor::utils {
+
+template <typename ServoType>
+Error Monitor<ServoType>::Process(float dt) {
+  (void)dt;
+  if (!monitorPort_)
+    return Error::kOk;
+
+  if (variables_ & MonitorBitmap::kPosition) {
+    monitorPort_->print(F(">position:"));
+    monitorPort_->println(servo_->present_position());
+  }
+
+  if (variables_ & MonitorBitmap::kPosition) {
+    monitorPort_->print(F(">raw_position:"));
+    monitorPort_->println(servo_->encoder()->raw_pos());
+  }
+
+  return Error::kOk;
+}
+
 }  // namespace hortor::utils

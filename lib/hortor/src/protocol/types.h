@@ -13,56 +13,58 @@ namespace hortor::protocol {
  * @brief 指令包索引
  */
 namespace PacketIndex {
-constexpr uint8_t kHeader1 = 0;
-constexpr uint8_t kHeader2 = 1;
-constexpr uint8_t kId = 2;
-constexpr uint8_t kLength = 3;
+constexpr uint8_t kHeader1     = 0;
+constexpr uint8_t kHeader2     = 1;
+constexpr uint8_t kId          = 2;
+constexpr uint8_t kLength      = 3;
 constexpr uint8_t kInstruction = 4;
-constexpr uint8_t kError = 4;
-constexpr uint8_t kParameter = 5;
+constexpr uint8_t kError       = 4;
+constexpr uint8_t kParameter   = 5;
 };  // namespace PacketIndex
 
 namespace Instruction {
 enum : uint8_t {
-  kPing = 0x01,
-  kReadData = 0x02,
+  kPing      = 0x01,
+  kReadData  = 0x02,
   kWriteData = 0x03,
-  kRegWrite = 0x04,
-  kAction = 0x05,
-  kReset = 0x06,
-  kReboot = 0x08,
+  kRegWrite  = 0x04,
+  kAction    = 0x05,
+  kReset     = 0x06,
+  kReboot    = 0x08,
   kSyncWrite = 0x82,
-  kBulkRead = 0x92,
+  kBulkRead  = 0x92,
 };
 }  // namespace Instruction
 
 constexpr uint8_t kBroadcastId = 0xfe;
 
-template <typename T, uint8_t ADDRESS>
-using ControlTableItem = regmap::Field<T, ADDRESS, 0, sizeof(T) * 8>;
+template <typename T, uint8_t Address>
+using ControlTableItem = regmap::Field<T, Address, 0, sizeof(T) * 8>;
 
-template <uint8_t ADDRESS>
-using ControlTableItemU8 = ControlTableItem<uint8_t, ADDRESS>;
-template <uint8_t ADDRESS>
-using ControlTableItemU16 = ControlTableItem<uint16_t, ADDRESS>;
-template <uint8_t ADDRESS>
-using ControlTableItemU32 = ControlTableItem<uint32_t, ADDRESS>;
-template <uint8_t ADDRESS>
-using ControlTableItemS8 = ControlTableItem<int8_t, ADDRESS>;
-template <uint8_t ADDRESS>
-using ControlTableItemS16 = ControlTableItem<int16_t, ADDRESS>;
-template <uint8_t ADDRESS>
-using ControlTableItemS32 = ControlTableItem<int32_t, ADDRESS>;
-template <uint8_t ADDRESS>
-using ControlTableItemB8 = ControlTableItem<bool, ADDRESS>;
+template <uint8_t Address>
+using ControlTableItemU8 = ControlTableItem<uint8_t, Address>;
+template <uint8_t Address>
+using ControlTableItemU16 = ControlTableItem<uint16_t, Address>;
+template <uint8_t Address>
+using ControlTableItemU32 = ControlTableItem<uint32_t, Address>;
+template <uint8_t Address>
+using ControlTableItemS8 = ControlTableItem<int8_t, Address>;
+template <uint8_t Address>
+using ControlTableItemS16 = ControlTableItem<int16_t, Address>;
+template <uint8_t Address>
+using ControlTableItemS32 = ControlTableItem<int32_t, Address>;
+template <uint8_t Address>
+using ControlTableItemB8 = ControlTableItem<bool, Address>;
 
-struct ControlTableBlock {
-  const uint8_t begin;
-  const uint8_t end;
+template <typename BeginType, typename EndType>
+struct ControlTableBlock : public hortor::Noncopyable {
+  static constexpr uint8_t kBegin = BeginType::kAddress;
+  static constexpr uint8_t kEnd   = EndType::kAddress + EndType::kSize;
 
-  constexpr uint8_t size() const { return end - begin; }
-  constexpr bool InBlock(const uint8_t address, const uint8_t size) const {
-    return address < end && address + size > begin;
+  static constexpr uint8_t size() { return kEnd - kBegin; }
+  static constexpr bool    InBlock(const uint8_t address,
+                                   const uint8_t access_size) {
+    return address < kEnd && address + access_size > kBegin;
   }
 };
 
@@ -101,10 +103,11 @@ union StatusErrorBits {
     bool overload_error : 1;
     /**
      * @brief 指令错误 bit6
-     * @note 若发送未定义的指令或在未发送Reg Write指令的情况下发送action指令，则将其设为1 
+     * @note 若发送未定义的指令或在未发送Reg
+     * Write指令的情况下发送action指令，则将其设为1
      */
     bool instruction_error : 1;
-    bool reserved_bit7 : 1;  // 位7: 保留（保留位）
+    bool reserved_bit7     : 1;  // 位7: 保留（保留位）
   };
 };
 

@@ -25,12 +25,12 @@ enum class Mode {
  * 较大的迟滞值可以减少噪声，但会降低灵敏度。
  */
 enum class Hyst : uint8_t {
-  kHyst1 = 0x0,     // 1 LSB迟滞
-  kHyst2 = 0x1,     // 2 LSB迟滞
-  kHyst4 = 0x2,     // 4 LSB迟滞
-  kHyst8 = 0x3,     // 8 LSB迟滞
+  kHyst1    = 0x0,  // 1 LSB迟滞
+  kHyst2    = 0x1,  // 2 LSB迟滞
+  kHyst4    = 0x2,  // 4 LSB迟滞
+  kHyst8    = 0x3,  // 8 LSB迟滞
   kHyst0_25 = 0x5,  // 0.25 LSB迟滞，最小设置
-  kHyst0_5 = 0x6,   // 0.5 LSB迟滞
+  kHyst0_5  = 0x6,  // 0.5 LSB迟滞
 };
 
 /**
@@ -40,7 +40,7 @@ enum class Hyst : uint8_t {
  */
 enum class Direction : uint8_t {
   kCCW = 0x0,  // 逆时针方向，角度随逆时针旋转增加
-  kCW = 0x1,   // 顺时针方向，角度随顺时针旋转增加
+  kCW  = 0x1,  // 顺时针方向，角度随顺时针旋转增加
 };
 
 /**
@@ -60,7 +60,7 @@ enum class PwmFreq : uint8_t {
  */
 enum class PwmPol : uint8_t {
   kHigh = 0x0,  // 高电平有效，占空比随角度增加而增加
-  kLow = 0x1,   // 低电平有效，占空比随角度增加而减少
+  kLow  = 0x1,  // 低电平有效，占空比随角度增加而减少
 };
 
 /**
@@ -70,7 +70,7 @@ enum class PwmPol : uint8_t {
  */
 enum class OutMode : uint8_t {
   kAnalog = 0x0,  // 模拟输出模式，输出电压与角度成正比
-  kPWM = 0x1,     // PWM输出模式，占空比与角度成正比
+  kPWM    = 0x1,  // PWM输出模式，占空比与角度成正比
 };
 
 /**
@@ -79,13 +79,13 @@ enum class OutMode : uint8_t {
  * 定义MT6701传感器在ABZ模式下Z信号的脉冲宽度选项。
  */
 enum class PulseWidth : uint8_t {
-  k1LSB = 0x0,   // 1 LSB宽度，最窄脉冲
-  k2LSB = 0x1,   // 2 LSB宽度
-  k4LSB = 0x2,   // 4 LSB宽度
-  k8LSB = 0x3,   // 8 LSB宽度
+  k1LSB  = 0x0,  // 1 LSB宽度，最窄脉冲
+  k2LSB  = 0x1,  // 2 LSB宽度
+  k4LSB  = 0x2,  // 4 LSB宽度
+  k8LSB  = 0x3,  // 8 LSB宽度
   k12LSB = 0x4,  // 12 LSB宽度
   k16LSB = 0x5,  // 16 LSB宽度
-  k180 = 0x6,    // 180度宽度，半圈脉冲
+  k180   = 0x6,  // 180度宽度，半圈脉冲
 };
 
 /**
@@ -94,10 +94,10 @@ enum class PulseWidth : uint8_t {
  * 定义MT6701传感器检测到的磁场状态，用于诊断磁铁位置问题。
  */
 enum class Status : uint8_t {
-  kNormal = 0x0,       // 正常状态，磁场强度适中
+  kNormal      = 0x0,  // 正常状态，磁场强度适中
   kFieldStrong = 0x1,  // 磁场过强，磁铁可能过于靠近传感器
-  kFieldWeak = 0x2,    // 磁场过弱，磁铁可能距离传感器过远
-  kFieldError = 0x3,   // 磁场错误，无法检测到有效磁场
+  kFieldWeak   = 0x2,  // 磁场过弱，磁铁可能距离传感器过远
+  kFieldError  = 0x3,  // 磁场错误，无法检测到有效磁场
 };
 
 /**
@@ -122,11 +122,11 @@ constexpr uint8_t kI2CAddress = 0x06;
  * 使用RegisterUtils工具类简化寄存器操作。
  */
 namespace MT6701Regs {
-template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
-using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
 
-template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
-using FieldB08 = regmap::Field<bool, ADDRESS, SHIFT, BITS>;
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
 
 // 角度相关寄存器，用于读取当前角度值
 struct kANGLE_6 : FieldU08<0x03, 0, 8> {};

@@ -5,6 +5,8 @@
 
 #include <Arduino.h>
 
+#include <cstring>
+
 #include "base/types.h"
 #include "hortor.h"
 #include "types.h"
@@ -27,7 +29,7 @@ enum class PacketState : uint8_t {
 };
 
 struct __packed InstPacket {
-  static constexpr uint8_t kBufferCapacity = 128;
+  static constexpr uint8_t kBufferCapacity  = 128;
   static constexpr uint8_t kParameterOffset = 5;
   union {
     uint8_t buffer[kBufferCapacity];
@@ -40,96 +42,164 @@ struct __packed InstPacket {
       uint8_t parameter[kBufferCapacity - kParameterOffset];
     };
   };
-  /**
-   * @brief 获取ID
-   * @param buffer 指令包
-   * @return ID
-   */
-  uint8_t GetId() const { return buffer[PacketIndex::kId]; }
-
-  /**
-   * @brief 获取指令包长度
-   * @param buffer 指令包
-   * @return 指令包长度（包括ID、长度、指令/错误和参数的总长度）
-   */
-  uint8_t GetLength() const { return length; }
-
-  /**
-   * @brief 获取参数长度
-   * @param buffer 指令包
-   * @return 参数长度
-   */
-  uint8_t GetParameterSize() const {
-    // 去掉 instruction/error 和 checksum
-    return GetLength() - 2;
-  }
-
-  /**
-   * @brief 设置参数长度
-   * @param buffer 指令包
-   * @param size 参数长度（不包括指令/错误和校验和）
-   */
-  void SetParameterSize(const uint8_t size) { length = size + 2; }
-
-  /**
-   * @brief 获取校验和
-   * @param buffer 指令包
-   * @return 校验和
-   */
-  uint8_t GetChecksum() const {
-    const uint8_t parameter_size = GetParameterSize();
-    return buffer[PacketIndex::kParameter + parameter_size];
-  }
-
-  /**
-   * @brief 设置校验和
-   * @param buffer 指令包
-   */
-  void SetChecksum(uint8_t checksum) {
-    const uint8_t parameter_size = GetParameterSize();
-    buffer[PacketIndex::kParameter + parameter_size] = checksum;
-  }
-
-  /**
-   * @brief 获取指令包总大小
-   * @param buffer 指令包
-   * @return 指令包总大小（包括头部、ID、长度、指令/错误、参数和校验和）
-   */
-  size_t GetBufferSize() const {
-    // Header(2Byte) + ID + Length = 4
-    return length + 4;
-  }
-
-  /**
-   * @brief 计算校验和
-   * @param buffer 指令包
-   * @return 校验和
-   */
-  // Check Sum = ~ (ID + Length + Instruction + Parameter1 + ... Parameter N)
-  uint8_t CalculateChecksum() const {
-    uint8_t checksum = id + length + instructionOrError;
-    const uint8_t l = GetParameterSize();
-    for (uint8_t i = PacketIndex::kId; i < l; i++) {
-      checksum += buffer[i];
-    }
-    return ~(static_cast<uint8_t>(checksum));
-  }
+  uint8_t GetId() const;
+  uint8_t GetLength() const;
+  uint8_t GetParameterSize() const;
+  void    SetParameterSize(const uint8_t size);
+  uint8_t GetChecksum() const;
+  void    SetChecksum(uint8_t checksum);
+  size_t  GetBufferSize() const;
+  uint8_t CalculateChecksum() const;
 };
 
 typedef InstPacket StatusPacket;
 
-class InstProtocol {
+class InstProtocol : public hortor::Noncopyable {
  public:
   Error Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete);
-  Error CreateResponse(const uint8_t id,
-                       const StatusErrorBits& status,
-                       const uint8_t* parameter,
-                       const size_t parameter_size,
+  Error CreateResponse(const uint8_t id, const StatusErrorBits& status,
+                       const uint8_t* parameter, const size_t parameter_size,
                        StatusPacket& packet);
 
  private:
-  uint8_t param_pos_ = 0;
+  uint8_t     param_pos_    = 0;
   PacketState packet_state_ = PacketState::kHeader1;
 };
+
+}  // namespace hortor::protocol
+
+namespace hortor::protocol {
+
+inline uint8_t InstPacket::GetId() const {
+  return buffer[PacketIndex::kId];
+}
+
+inline uint8_t InstPacket::GetLength() const {
+  return length;
+}
+
+inline uint8_t InstPacket::GetParameterSize() const {
+  return GetLength() - 2;
+}
+
+inline void InstPacket::SetParameterSize(const uint8_t size) {
+  length = size + 2;
+}
+
+inline uint8_t InstPacket::GetChecksum() const {
+  const uint8_t parameter_size = GetParameterSize();
+  return buffer[PacketIndex::kParameter + parameter_size];
+}
+
+inline void InstPacket::SetChecksum(uint8_t checksum) {
+  const uint8_t parameter_size                     = GetParameterSize();
+  buffer[PacketIndex::kParameter + parameter_size] = checksum;
+}
+
+inline size_t InstPacket::GetBufferSize() const {
+  return length + 4;
+}
+
+inline uint8_t InstPacket::CalculateChecksum() const {
+  uint8_t       checksum = id + length + instructionOrError;
+  const uint8_t l        = GetParameterSize();
+  for (uint8_t i = PacketIndex::kId; i < l; i++) {
+    checksum += buffer[i];
+  }
+  return ~(static_cast<uint8_t>(checksum));
+}
+
+inline Error InstProtocol::Process(InstPacket& packet, const uint8_t recv_data,
+                                   bool& is_complete) {
+  is_complete = false;
+  switch (packet_state_) {
+    case PacketState::kHeader1: {
+      if (recv_data == 0xff) {
+        packet_state_  = PacketState::kHeader2;
+        packet.header1 = recv_data;
+      }
+      break;
+    }
+    case PacketState::kHeader2: {
+      if (recv_data == 0xff) {
+        packet_state_  = PacketState::kId;
+        packet.header2 = recv_data;
+      } else {
+        packet_state_ = PacketState::kHeader1;
+        return Error::kBadData;
+      }
+      break;
+    }
+    case PacketState::kId: {
+      packet.id     = recv_data;
+      packet_state_ = PacketState::kLength;
+      break;
+    }
+    case PacketState::kLength: {
+      if (recv_data + 4 > InstPacket::kBufferCapacity || recv_data < 2) {
+        packet_state_ = PacketState::kHeader1;
+        return Error::kBadData;
+      } else {
+        packet.length = recv_data;
+        packet_state_ = PacketState::kInstructionOrError;
+      }
+      break;
+    }
+    case PacketState::kInstructionOrError: {
+      packet.instructionOrError = recv_data;
+      const uint8_t param_size  = packet.GetParameterSize();
+      if (param_size > 0) {
+        param_pos_    = 0;
+        packet_state_ = PacketState::kParameter;
+      } else {
+        packet_state_ = PacketState::kChecksum;
+      }
+      break;
+    }
+    case PacketState::kParameter: {
+      const uint8_t param_size     = packet.GetParameterSize();
+      packet.parameter[param_pos_] = recv_data;
+      param_pos_ += 1;
+      if (param_pos_ == param_size) {
+        packet_state_ = PacketState::kChecksum;
+      }
+      break;
+    }
+    case PacketState::kChecksum: {
+      const uint8_t checksum = packet.CalculateChecksum();
+      packet.SetChecksum(recv_data);
+      is_complete = true;
+      if (checksum != recv_data) {
+        packet_state_ = PacketState::kHeader1;
+        return Error::kBadData;
+      }
+      break;
+    }
+    default: {
+      packet_state_ = PacketState::kHeader1;
+      return Error::kBadState;
+    }
+  }
+  return Error::kOk;
+}
+
+inline Error InstProtocol::CreateResponse(const uint8_t          id,
+                                          const StatusErrorBits& status,
+                                          const uint8_t*         parameter,
+                                          const size_t           parameter_size,
+                                          StatusPacket&          packet) {
+  packet.header1            = 0xff;
+  packet.header2            = 0xff;
+  packet.id                 = id;
+  packet.instructionOrError = status.value;
+  if (parameter == nullptr) {
+    packet.SetParameterSize(0);
+  } else {
+    packet.SetParameterSize(parameter_size);
+    memcpy(packet.parameter, parameter, parameter_size);
+  }
+  packet.SetChecksum(packet.CalculateChecksum());
+  return Error::kOk;
+}
 
 }  // namespace hortor::protocol

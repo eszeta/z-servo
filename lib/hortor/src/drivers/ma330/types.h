@@ -9,17 +9,17 @@ namespace hortor::drivers::MA330 {
 
 enum class FieldStrength : uint8_t {
   kNormal = 0x00,
-  kLow = 0x01,
-  kHigh = 0x02,
-  kErr = 0x03  // impossible state
+  kLow    = 0x01,
+  kHigh   = 0x02,
+  kErr    = 0x03  // impossible state
 };
 
 namespace MA330Regs {
-template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
-using FieldU08 = regmap::Field<uint8_t, ADDRESS, SHIFT, BITS>;
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldU08 = regmap::Field<uint8_t, Address, Shift, Bits>;
 
-template <uint8_t ADDRESS, uint8_t SHIFT, uint8_t BITS>
-using FieldB08 = regmap::Field<bool, ADDRESS, SHIFT, BITS>;
+template <uint8_t Address, uint8_t Shift, uint8_t Bits>
+using FieldB08 = regmap::Field<bool, Address, Shift, Bits>;
 
 struct kZ_L : FieldU08<0x00, 0, 8> {};
 struct kZ_H : FieldU08<0x01, 0, 8> {};

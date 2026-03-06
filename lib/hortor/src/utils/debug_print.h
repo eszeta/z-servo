@@ -7,26 +7,33 @@
 
 namespace hortor::utils {
 #ifndef DISABLE_DEBUG
-/**
- * @brief 调试打印
- */
-Print* debug_print = nullptr;
+extern Print* debug_print;
 #endif
 
-/**
- * @brief 启用调试打印
- * @param _debugPrint 调试打印对象
- */
-void DebugEnable(Print* _debugPrint) {
+void DebugEnable(Print* _debugPrint);
+
+template <typename T>
+void DebugPrint(const T& val);
+template <typename T>
+void DebugPrintln(const T& val);
+template <typename T, typename U>
+void DebugPrint(const T& msg, const U& val);
+template <typename T, typename U>
+void DebugPrintln(const T& msg, const U& val);
+}  // namespace hortor::utils
+
+namespace hortor::utils {
+
 #ifndef DISABLE_DEBUG
-  debug_print = _debugPrint;
-#endif
-}
+Print* debug_print = nullptr;
 
-/**
- * @brief 打印单个值
- * @param val 要打印的值
- */
+inline void DebugEnable(Print* _debugPrint) {
+  debug_print = _debugPrint;
+}
+#else
+inline void DebugEnable(Print* /*_debugPrint*/) {}
+#endif
+
 template <typename T>
 void DebugPrint(const T& val) {
 #ifndef DISABLE_DEBUG
@@ -34,10 +41,6 @@ void DebugPrint(const T& val) {
 #endif
 }
 
-/**
- * @brief 打印单个值并换行
- * @param val 要打印的值
- */
 template <typename T>
 void DebugPrintln(const T& val) {
 #ifndef DISABLE_DEBUG
@@ -45,11 +48,6 @@ void DebugPrintln(const T& val) {
 #endif
 }
 
-/**
- * @brief 打印消息和值
- * @param msg 消息
- * @param val 值
- */
 template <typename T, typename U>
 void DebugPrint(const T& msg, const U& val) {
 #ifndef DISABLE_DEBUG
@@ -58,11 +56,6 @@ void DebugPrint(const T& msg, const U& val) {
 #endif
 }
 
-/**
- * @brief 打印消息和值并换行
- * @param msg 消息
- * @param val 值
- */
 template <typename T, typename U>
 void DebugPrintln(const T& msg, const U& val) {
 #ifndef DISABLE_DEBUG
@@ -70,4 +63,5 @@ void DebugPrintln(const T& msg, const U& val) {
   debug_print->println(val);
 #endif
 }
+
 }  // namespace hortor::utils

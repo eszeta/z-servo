@@ -9,8 +9,6 @@
 #include "base/encoder.h"
 #include "base/types.h"
 #include "regmap.h"
-// #include "regmap_i2c_bus.h"
-// #include "regmap_spi_bus.h"
 #include "types.h"
 
 namespace hortor::drivers::MT6701 {
@@ -23,7 +21,7 @@ constexpr uint8_t kResolutionBits = 14;
  * 使用BusType枚举作为模板参数，通过模板偏特化为不同总线类型提供实现。
  * 支持I2C和SPI两种通信方式，每种方式有独立的Init方法签名。
  */
-template <PlainType bus_type>
+template <PlainType PlainType>
 class MT6701;
 
 /**
@@ -32,12 +30,12 @@ class MT6701;
  * 包含所有与总线无关的公共代码，避免在特化中重复实现。
  * 使用CRTP模式继承servo::Encoder，提供统一的传感器接口。
  */
-template <PlainType PLAIN_TYPE>
+template <PlainType PlainType>
 class MT6701Base;
 
-template <PlainType PLAIN_TYPE>
+template <PlainType PlainType>
 class MT6701Base
-    : public servo::Encoder<MT6701Base<PLAIN_TYPE>, kResolutionBits> {
+    : public servo::Encoder<MT6701Base<PlainType>, kResolutionBits> {
  public:
   static constexpr uint8_t kResolutionBits =
       hortor::drivers::MT6701::kResolutionBits;
@@ -47,7 +45,7 @@ class MT6701Base
    *
    * 返回控制器实例的引用，用于直接操作传感器的配置和状态。
    */
-  RegMap<PLAIN_TYPE>& regmap() { return regmap_; }
+  RegMap<PlainType>& regmap() { return regmap_; }
 
   /**
    * @brief 获取原始角度值
@@ -57,22 +55,11 @@ class MT6701Base
    * 通过总线接口读取MT6701传感器的当前角度值。
    * 该方法实现了基类的纯虚函数。
    */
-  Error ReadRawImpl(uint32_t& out_raw) {
-    uint16_t raw;
-    Status status = Status::kNormal;
-    bool button_pushed = false;
-    bool track_loss = false;
-    CHECK(regmap_.ReadRaw(raw, status, button_pushed, track_loss));
-    out_raw = static_cast<uint32_t>(raw);
-    (void)status;
-    (void)button_pushed;
-    (void)track_loss;
-    return Error::kOk;
-  }
+  Error ReadRawImpl(uint32_t& out_raw);
 
  protected:
   /** @brief 寄存器映射实例，负责与传感器的具体通信操作 */
-  RegMap<PLAIN_TYPE> regmap_;
+  RegMap<PlainType> regmap_;
 };
 
 /**
@@ -91,14 +78,6 @@ class MT6701<PlainType::kI2C> : public I2CBase {
     TwoWire* wire;
   };
 
-  /**
-   * @brief 初始化传感器（I2C模式）
-   * @param wire I2C通信接口指针
-   * @return 错误码，成功返回OK
-   *
-   * 配置并初始化MT6701传感器，建立I2C通信，并执行基类初始化。
-   * 必须在使用传感器前调用此方法。
-   */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.wire, kI2CAddress));
     CHECK(I2CBase::Init(config));
@@ -118,26 +97,34 @@ template <>
 class MT6701<PlainType::kSPI> : public SPIBase {
  public:
   struct Config : public SPIBase::Config {
-    SPIClass* spi;
-    int cs_pin;
+    SPIClass*   spi;
+    int         cs_pin;
     SPISettings spi_settings;
   };
 
-  /**
-   * @brief 初始化传感器（SPI模式）
-   * @param spi SPI通信接口指针
-   * @param cs_pin 片选引脚号
-   * @param spi_settings SPI通信设置
-   * @return 错误码，成功返回OK
-   *
-   * 配置并初始化MT6701传感器，建立SPI通信，并执行基类初始化。
-   * 必须在使用传感器前调用此方法。
-   */
   Error Init(const Config& config) {
     CHECK(regmap_.Init(config.spi, config.cs_pin, config.spi_settings));
     CHECK(SPIBase::Init(config));
     return Error::kOk;
   }
 };
+
+}  // namespace hortor::drivers::MT6701
+
+namespace hortor::drivers::MT6701 {
+
+template <PlainType PlainType>
+Error MT6701Base<PlainType>::ReadRawImpl(uint32_t& out_raw) {
+  uint16_t raw;
+  Status   status        = Status::kNormal;
+  bool     button_pushed = false;
+  bool     track_loss    = false;
+  CHECK(regmap_.ReadRaw(raw, status, button_pushed, track_loss));
+  out_raw = static_cast<uint32_t>(raw);
+  (void)status;
+  (void)button_pushed;
+  (void)track_loss;
+  return Error::kOk;
+}
 
 }  // namespace hortor::drivers::MT6701

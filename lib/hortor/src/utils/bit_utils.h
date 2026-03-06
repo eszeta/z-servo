@@ -169,7 +169,7 @@ constexpr uint16_t TwosToSign(const int16_t value) noexcept {
  * @return 补码值（uint16_t）
  */
 constexpr int16_t SignToTwos(const uint16_t value,
-                             const uint8_t sign) noexcept {
+                             const uint8_t  sign) noexcept {
   if (!IsBitSet(value, sign)) {
     return static_cast<int16_t>(value);
   }

@@ -14,7 +14,6 @@ namespace hortor::protocol {
 
 class I2cPortHandler : public PortHandler<I2cPortHandler> {
  public:
-
   /**
    * @brief 初始化
    * @param wire I2C对象
@@ -33,10 +32,8 @@ class I2cPortHandler : public PortHandler<I2cPortHandler> {
    * @param is_complete 是否完成
    * @return 错误码
    */
-  Error ProcessImpl(InstProtocol& protocol,
-                    const float dt,
-                    InstPacket& inst_packet,
-                    bool& is_complete);
+  Error ProcessImpl(InstProtocol& protocol, const float dt,
+                    InstPacket& inst_packet, bool& is_complete);
 
   /**
    * @brief 发送响应数据实现
@@ -62,5 +59,36 @@ class I2cPortHandler : public PortHandler<I2cPortHandler> {
  private:
   TwoWire* wire_ = nullptr;
 };
+
+}  // namespace hortor::protocol
+
+namespace hortor::protocol {
+
+inline Error I2cPortHandler::ProcessImpl(InstProtocol& protocol, const float dt,
+                                         InstPacket& inst_packet,
+                                         bool&       is_complete) {
+  while (wire_->available()) {
+    uint8_t data = wire_->read();
+    CHECK(protocol.Process(inst_packet, data, is_complete));
+  }
+  return Error::kOk;
+}
+
+inline Error I2cPortHandler::ResponseImpl(const StatusPacket& packet,
+                                          const uint8_t       reply_idx) {
+  const size_t size = packet.GetBufferSize();
+  memcpy(status_packet_.buffer, packet.buffer, size);
+  return Error::kOk;
+}
+
+inline Error I2cPortHandler::OnReceive(int howMany) {
+  return Error::kOk;
+}
+
+inline Error I2cPortHandler::OnRequest() {
+  const size_t size = status_packet_.GetBufferSize();
+  wire_->write(status_packet_.buffer, size);
+  return Error::kOk;
+}
 
 }  // namespace hortor::protocol

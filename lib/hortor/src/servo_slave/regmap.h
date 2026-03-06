@@ -561,7 +561,7 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 间接限制输出力矩和电流
    * - 所有控制模式都受此限制
    * - 修改后需要重启生效
-   * 
+   *
    * 【典型参数】
    * - 保守设置: 50-70%（安全运行）
    * - 标准设置: 80-90%（平衡性能）
@@ -1234,7 +1234,8 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * - 负值表示反向电流
    * - 受 Current Limit 限制
    *
-   * @note 在 Current Control Mode 中作为控制目标，在 Current-based Position Control Mode 中作为限制
+   * @note 在 Current Control Mode 中作为控制目标，在 Current-based Position
+   * Control Mode 中作为限制
    */
   float ReadGoalCurrent() {
     float value;
@@ -1544,71 +1545,6 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
   }
 
   /**
-   * @brief 获取速度轨迹 (R)
-   * @return rpm 速度轨迹（RPM）
-   *
-   * 范围: -468.763 到 468.763 RPM
-   *
-   * 【功能说明】
-   * - 系统生成的期望速度轨迹值
-   * - 存储在 Velocity Trajectory 寄存器中
-   * - 作为速度控制器的参考输入
-   * - 实时更新，反映控制器计算的期望速度
-   * - 与 Present Velocity 对比可得速度跟踪误差
-   *
-   * 【控制流程】
-   * Goal Position → [Trajectory Generator] → Velocity Trajectory → [Velocity
-   * PID] → PWM
-   * - Trajectory Generator 根据 Goal Position 生成期望速度轨迹
-   * - 期望速度轨迹存储在 Velocity Trajectory 中
-   * - Velocity PID 控制器跟踪 Velocity Trajectory
-   * - 输出 PWM 驱动电机
-   *
-   * @note 此寄存器为只读，由系统自动更新
-   */
-  float ReadVelocityTrajectory() {
-    float value;
-    ReadField<ControlTable::kVelocityTrajectory>(value);
-    return value;
-  }
-
-  /**
-   * @brief 写入速度轨迹 (R，仅内部同步)
-   * @param[in] value 速度轨迹
-   */
-  void WriteVelocityTrajectory(const float value) {
-    WriteField<ControlTable::kVelocityTrajectory>(value);
-  }
-
-  /**
-   * @brief 获取位置轨迹 (R)
-   * @return position_trajectory 位置轨迹（pulse）
-   *
-   * 范围: 0-4095 (Position Mode) | -1,048,575 到 1,048,575 (Extended Mode)
-   *
-   * 【功能说明】
-   * - 读取系统生成的期望位置轨迹
-   * - 位置 PID 控制器的参考输入
-   * - 与 Present Position 的区别：期望位置 vs 实际位置
-   * - 实时更新，反映期望位置轨迹
-   *
-   * @note 此寄存器为只读，由系统自动更新
-   */
-  int32_t ReadPositionTrajectory() {
-    int32_t value;
-    ReadField<ControlTable::kPositionTrajectory>(value);
-    return value;
-  }
-
-  /**
-   * @brief 写入位置轨迹 (R，仅内部同步)
-   * @param[in] value 位置轨迹
-   */
-  void WritePositionTrajectory(const int32_t value) {
-    WriteField<ControlTable::kPositionTrajectory>(value);
-  }
-
-  /**
    * @brief 获取当前输入电压 (R)
    * @return voltage 当前输入电压（V）
    *
@@ -1710,9 +1646,8 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
   Error LoadEeprom() {
 #ifndef EEPROM_DISABLE
     int pos = 0;
-    for (uint8_t address = TableBlocks::kEeprom.begin;
-         address < TableBlocks::kEeprom.end;
-         ++address) {
+    for (uint8_t address = TableBlocks::kEeprom::kBegin;
+         address < TableBlocks::kEeprom::kEnd; ++address) {
       table_[address] = EEPROM.read(pos++);
     }
 #endif
@@ -1726,9 +1661,8 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
   Error StoreEeprom() {
 #ifndef EEPROM_DISABLE
     int pos = 0;
-    for (uint8_t address = TableBlocks::kEeprom.begin;
-         address < TableBlocks::kEeprom.end;
-         ++address) {
+    for (uint8_t address = TableBlocks::kEeprom::kBegin;
+         address < TableBlocks::kEeprom::kEnd; ++address) {
       EEPROM.update(pos++, table_[address]);
     }
 #endif
@@ -1753,9 +1687,9 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
    * 擦除后的 Flash/EEPROM 通常为 0xFF；EEPROM_DISABLE 时 table_ 初始化为 0。
    */
   bool IsEepromEmpty() const {
-    const auto first = table_[TableBlocks::kEeprom.begin];
-    const auto begin = TableBlocks::kEeprom.begin;
-    const auto end = TableBlocks::kEeprom.end;
+    const auto first = table_[TableBlocks::kEeprom::kBegin];
+    const auto begin = TableBlocks::kEeprom::kBegin;
+    const auto end   = TableBlocks::kEeprom::kEnd;
     for (uint8_t address = begin; address < end; ++address) {
       if (table_[address] != first) {
         return false;
