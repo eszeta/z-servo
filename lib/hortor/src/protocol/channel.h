@@ -4,8 +4,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include <cstring>
-#include <utility>
 
 #include "hortor.h"
 #include "protocol.h"
@@ -63,14 +61,14 @@ class ProtocolChannel : public hortor::Noncopyable {
    */
   InstProtocol* parser() { return &parser_; }
 
-  TransportType* transport() { return &transport_; }
+  TransportType*       transport() { return &transport_; }
   const TransportType* transport() const { return &transport_; }
 
  private:
   TransportType transport_;
-  InstProtocol parser_;
-  InstPacket   inst_packet_{};
-  StatusPacket status_packet_{};
+  InstProtocol  parser_;
+  InstPacket    inst_packet_{};
+  StatusPacket  status_packet_{};
 
   float response_delay_   = 0.0f;
   float delay_remaining_  = 0.0f;
@@ -121,7 +119,7 @@ Error ProtocolChannel<TransportType>::Process(const float dt, bool& is_complete)
 
 template <typename TransportType>
 Error ProtocolChannel<TransportType>::Response(const StatusPacket& packet,
-                                               const uint8_t reply_idx) {
+                                               const uint8_t       reply_idx) {
   memcpy(status_packet_.buffer, packet.buffer, packet.GetBufferSize());
 
   const float delay = response_delay_ * static_cast<float>(reply_idx + 1);

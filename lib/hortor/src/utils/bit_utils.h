@@ -112,8 +112,7 @@ constexpr T ToggleBit(const T data, const uint8_t idx) noexcept {
  * @param numBits 位宽
  * @return 位掩码
  */
-constexpr size_t CreateMask(const uint8_t startBit,
-                            const uint8_t numBits) noexcept {
+constexpr size_t CreateMask(const uint8_t startBit, const uint8_t numBits) noexcept {
   return ((1ULL << numBits) - 1) << startBit;
 }
 
@@ -123,8 +122,7 @@ constexpr size_t CreateMask(const uint8_t startBit,
  * @param lowByte 低字节
  * @return 拼接后的uint16_t值
  */
-constexpr uint16_t CombineToUint16(const uint8_t highByte,
-                                   const uint8_t lowByte) noexcept {
+constexpr uint16_t CombineToUint16(const uint8_t highByte, const uint8_t lowByte) noexcept {
   return (static_cast<uint16_t>(highByte) << 8) | lowByte;
 }
 
@@ -134,8 +132,7 @@ constexpr uint16_t CombineToUint16(const uint8_t highByte,
  * @param lowByte 低字节
  * @return 拼接后的int16_t值
  */
-constexpr int16_t CombineToInt16(const uint8_t highByte,
-                                 const uint8_t lowByte) noexcept {
+constexpr int16_t CombineToInt16(const uint8_t highByte, const uint8_t lowByte) noexcept {
   return static_cast<int16_t>(CombineToUint16(highByte, lowByte));
 }
 
@@ -145,8 +142,7 @@ constexpr int16_t CombineToInt16(const uint8_t highByte,
  * @param sign 符号位索引（默认 15）
  * @return 原码值（uint16_t，最高位为符号位）
  */
-constexpr uint16_t TwosToSign(const int16_t value,
-                              const uint8_t sign = 15) noexcept {
+constexpr uint16_t TwosToSign(const int16_t value, const uint8_t sign = 15) noexcept {
   if (value >= 0) {
     return static_cast<uint16_t>(value);
   }
@@ -159,8 +155,7 @@ constexpr uint16_t TwosToSign(const int16_t value,
  * @param sign 符号位索引（默认 15）
  * @return 补码值（int16_t）
  */
-constexpr int16_t SignToTwos(const uint16_t value,
-                             const uint8_t sign = 15) noexcept {
+constexpr int16_t SignToTwos(const uint16_t value, const uint8_t sign = 15) noexcept {
   if (!IsBitSet(value, sign)) {
     return static_cast<int16_t>(value);
   }

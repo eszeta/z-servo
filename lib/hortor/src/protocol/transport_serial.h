@@ -27,11 +27,11 @@ class TransportSerial : public Transport<TransportSerial> {
     return Error::kOk;
   }
 
-  bool ReadByteImpl(uint8_t& byte);
+  bool   ReadByteImpl(uint8_t& byte);
   size_t AvailableImpl();
-  Error WriteImpl(const uint8_t* data, const size_t size);
-  bool ConsumePacketImpl() { return false; }
-  void SetReceiverImpl(InstProtocol*, InstPacket*) {}
+  Error  WriteImpl(const uint8_t* data, const size_t size);
+  bool   ConsumePacketImpl() { return false; }
+  void   SetReceiverImpl(InstProtocol*, InstPacket*) {}
 
  private:
   HardwareSerial* serial_ = nullptr;

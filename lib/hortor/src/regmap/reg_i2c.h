@@ -38,9 +38,7 @@ inline Error RegI2C::Init(TwoWire* wire, const int address) {
   return Error::kOk;
 }
 
-inline Error RegI2C::Write(const uint8_t  address,
-                           const uint8_t* data,
-                           const size_t   size) {
+inline Error RegI2C::Write(const uint8_t address, const uint8_t* data, const size_t size) {
   VERIFY(wire_ && data, Error::kInvalidArg);
   wire_->beginTransmission(address_);
   wire_->write(address);
@@ -51,9 +49,7 @@ inline Error RegI2C::Write(const uint8_t  address,
   return Error::kOk;
 }
 
-inline Error RegI2C::Read(const uint8_t address,
-                          const size_t  size,
-                          uint8_t*      data) {
+inline Error RegI2C::Read(const uint8_t address, const size_t size, uint8_t* data) {
   VERIFY(wire_ && data, Error::kInvalidArg);
   wire_->beginTransmission(address_);
   wire_->write(address);

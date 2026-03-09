@@ -39,8 +39,8 @@ class Motor final : public Base {
 namespace hortor::drivers::MP6515 {
 
 inline Error Motor::Init(const Config& config) {
-  VERIFY(config.pin_phase != 0 && config.pin_enbl != 0 &&
-             config.pin_brake != 0 && config.pin_sleep != 0,
+  VERIFY(config.pin_phase != 0 && config.pin_enbl != 0 && config.pin_brake != 0 &&
+             config.pin_sleep != 0,
          Error::kInvalidArg);
 
   CHECK(Base::Init());

@@ -36,30 +36,25 @@ struct Trait : public hortor::Noncopyable {
     static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
                   "Unsupported RegField element size");
 
-    static constexpr size_t kIndex =
-        sizeof(T) == 1 ? 0 : (sizeof(T) == 2 ? 1 : 2);
+    static constexpr size_t kIndex = sizeof(T) == 1 ? 0 : (sizeof(T) == 2 ? 1 : 2);
 
     /// 单寄存器存储类型（与 T 同宽，无符号，用于位域操作）
-    using Type =
-        std::tuple_element_t<kIndex, std::tuple<uint8_t, uint16_t, uint32_t>>;
+    using Type = std::tuple_element_t<kIndex, std::tuple<uint8_t, uint16_t, uint32_t>>;
   };
 
   template <typename OutType, uint8_t ValidBits, typename RawType>
   static constexpr OutType SignExtend(const RawType raw) noexcept {
-    static_assert(std::is_integral_v<OutType>,
-                  "SignExtend output type must be integral");
+    static_assert(std::is_integral_v<OutType>, "SignExtend output type must be integral");
     static_assert(ValidBits > 0, "SignExtend valid bits must be > 0");
 
     constexpr uint8_t kTargetBits = sizeof(OutType) * 8U;
-    static_assert(ValidBits <= kTargetBits,
-                  "SignExtend valid bits exceed output width");
+    static_assert(ValidBits <= kTargetBits, "SignExtend valid bits exceed output width");
 
     using unsigned_out_t     = std::make_unsigned_t<OutType>;
     constexpr uint8_t kShift = static_cast<uint8_t>(kTargetBits - ValidBits);
 
     // 先左移让符号位对齐到最高位，再算术右移恢复目标位宽。
-    const auto shifted =
-        static_cast<unsigned_out_t>(static_cast<unsigned_out_t>(raw) << kShift);
+    const auto shifted   = static_cast<unsigned_out_t>(static_cast<unsigned_out_t>(raw) << kShift);
     const auto as_signed = static_cast<OutType>(shifted);
     return static_cast<OutType>(as_signed >> kShift);
   }
@@ -133,22 +128,17 @@ struct Field : public hortor::Noncopyable {
   static constexpr uint8_t  kBits     = Bits;
   static constexpr size_t   kSize     = sizeof(access_t);
   static constexpr size_t   kSizeBits = kSize * 8U;
-  static constexpr access_t kMask     = static_cast<access_t>(
-      hortor::utils::bit_utils::CreateMask(kShift, kBits));
+  static constexpr access_t kMask =
+      static_cast<access_t>(hortor::utils::bit_utils::CreateMask(kShift, kBits));
   static constexpr access_t kClearMask = static_cast<access_t>(~kMask);
 
-  static_assert(std::is_integral_v<value_t>,
-                "Field value type must be integral");
-  static_assert(sizeof(value_t) == 1 || sizeof(value_t) == 2 ||
-                    sizeof(value_t) == 4,
+  static_assert(std::is_integral_v<value_t>, "Field value type must be integral");
+  static_assert(sizeof(value_t) == 1 || sizeof(value_t) == 2 || sizeof(value_t) == 4,
                 "Field value type must be 1/2/4 bytes");
   static_assert(Bits > 0, "Field Bits must be greater than 0");
-  static_assert(Bits <= kSizeBits,
-                "Field Bits exceeds underlying access width");
-  static_assert(Shift < kSizeBits,
-                "Field Shift exceeds underlying access width");
-  static_assert(Shift + Bits <= kSizeBits,
-                "Field range exceeds underlying access width");
+  static_assert(Bits <= kSizeBits, "Field Bits exceeds underlying access width");
+  static_assert(Shift < kSizeBits, "Field Shift exceeds underlying access width");
+  static_assert(Shift + Bits <= kSizeBits, "Field range exceeds underlying access width");
 
   // 从寄存器数据中提取当前位域值；有符号值按位宽执行符号扩展。
   static constexpr value_t GetValue(const access_t data) noexcept {
@@ -161,9 +151,8 @@ struct Field : public hortor::Noncopyable {
 
   // 将 value 写入目标位域，不影响其它位。
   static constexpr void SetValue(const value_t value, access_t& data) noexcept {
-    const access_t shifted =
-        static_cast<access_t>(static_cast<access_t>(value) << kShift);
-    data = static_cast<access_t>((data & kClearMask) | (shifted & kMask));
+    const access_t shifted = static_cast<access_t>(static_cast<access_t>(value) << kShift);
+    data                   = static_cast<access_t>((data & kClearMask) | (shifted & kMask));
   }
 
   static constexpr void Clear(access_t& data) noexcept { data &= kClearMask; }
@@ -184,16 +173,13 @@ struct Merged2 : public hortor::Noncopyable {
   static constexpr size_t  kValueBits  = sizeof(value_t) * 8U;
   static constexpr uint8_t kMergedBits = HighField::kBits + LowField::kBits;
 
-  static_assert(std::is_integral_v<value_t>,
-                "Merged2 value type must be integral");
-  static_assert(kMergedBits <= kValueBits,
-                "Merged2 field width exceeds target value width");
+  static_assert(std::is_integral_v<value_t>, "Merged2 value type must be integral");
+  static_assert(kMergedBits <= kValueBits, "Merged2 field width exceeds target value width");
 
   static constexpr void SetValue(const value_t  value,
                                  high_access_t& high_access,
                                  low_access_t&  low_access) noexcept {
-    HighField::SetValue(static_cast<high_value_t>(value >> LowField::kBits),
-                        high_access);
+    HighField::SetValue(static_cast<high_value_t>(value >> LowField::kBits), high_access);
     LowField::SetValue(static_cast<low_value_t>(value), low_access);
   }
 
@@ -202,18 +188,16 @@ struct Merged2 : public hortor::Noncopyable {
     constexpr uint8_t kHighBits = HighField::kBits;
     constexpr uint8_t kLowBits  = LowField::kBits;
 
-    const access_t high_part =
-        static_cast<access_t>(HighField::GetValue(high_access));
-    const access_t low_part =
-        static_cast<access_t>(LowField::GetValue(low_access));
+    const access_t high_part = static_cast<access_t>(HighField::GetValue(high_access));
+    const access_t low_part  = static_cast<access_t>(LowField::GetValue(low_access));
 
-    constexpr access_t high_mask = static_cast<access_t>(
-        hortor::utils::bit_utils::CreateMask(0, kHighBits));
-    constexpr access_t low_mask = static_cast<access_t>(
-        hortor::utils::bit_utils::CreateMask(0, kLowBits));
+    constexpr access_t high_mask =
+        static_cast<access_t>(hortor::utils::bit_utils::CreateMask(0, kHighBits));
+    constexpr access_t low_mask =
+        static_cast<access_t>(hortor::utils::bit_utils::CreateMask(0, kLowBits));
 
-    const access_t extracted = static_cast<access_t>(
-        ((high_part & high_mask) << kLowBits) | (low_part & low_mask));
+    const access_t extracted =
+        static_cast<access_t>(((high_part & high_mask) << kLowBits) | (low_part & low_mask));
 
     if constexpr (std::is_signed_v<value_t>) {
       return Trait::template SignExtend<value_t, kMergedBits>(extracted);

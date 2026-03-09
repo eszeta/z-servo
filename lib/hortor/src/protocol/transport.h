@@ -25,16 +25,12 @@ class Transport : public hortor::Noncopyable {
    * @param byte 输出字节
    * @return 成功返回 true，无数据返回 false
    */
-  bool ReadByte(uint8_t& byte) {
-    return static_cast<DerivedType*>(this)->ReadByteImpl(byte);
-  }
+  bool ReadByte(uint8_t& byte) { return static_cast<DerivedType*>(this)->ReadByteImpl(byte); }
 
   /**
    * @brief 可读字节数
    */
-  size_t Available() {
-    return static_cast<DerivedType*>(this)->AvailableImpl();
-  }
+  size_t Available() { return static_cast<DerivedType*>(this)->AvailableImpl(); }
 
   /**
    * @brief 写入字节
@@ -49,9 +45,7 @@ class Transport : public hortor::Noncopyable {
   /**
    * @brief 消费已就绪的包（I2C 推模式：返回 true 并清除 packet_ready）
    */
-  bool ConsumePacket() {
-    return static_cast<DerivedType*>(this)->ConsumePacketImpl();
-  }
+  bool ConsumePacket() { return static_cast<DerivedType*>(this)->ConsumePacketImpl(); }
 
   /**
    * @brief 设置接收目标（I2C 推模式：OnReceive 中直接解析）

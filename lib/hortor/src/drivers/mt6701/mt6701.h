@@ -36,8 +36,7 @@ class EncoderBase;
 template <BusType Bus>
 class EncoderBase : public servo::Encoder<EncoderBase<Bus>, kResolutionBits> {
  public:
-  static constexpr uint8_t kResolutionBits =
-      hortor::drivers::MT6701::kResolutionBits;
+  static constexpr uint8_t kResolutionBits = hortor::drivers::MT6701::kResolutionBits;
   /**
    * @brief 获取控制器实例
    * @return 控制器实例引用

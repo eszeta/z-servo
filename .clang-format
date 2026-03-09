@@ -1,4 +1,5 @@
 BasedOnStyle: Google
+ColumnLimit: 100                                  # 每行最大列宽（默认：80）
 AlignConsecutiveAssignments: Consecutive          # 连续赋值按 = 对齐（默认：不启用）
 AlignConsecutiveBitFields: Consecutive            # 连续位域按 : 对齐（默认：不启用）
 AlignConsecutiveDeclarations: Consecutive         # 连续声明按 = 对齐（默认：不启用）

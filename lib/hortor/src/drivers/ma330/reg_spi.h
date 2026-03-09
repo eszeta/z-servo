@@ -29,9 +29,7 @@ class RegSPI : public regmap::RegSPI {
 
 namespace hortor::drivers::MA330 {
 
-inline Error RegSPI::Write(const uint8_t  address,
-                           const uint8_t* data,
-                           const size_t   size) {
+inline Error RegSPI::Write(const uint8_t address, const uint8_t* data, const size_t size) {
   VERIFY(data, Error::kInvalidArg);
   for (size_t i = 0; i < size; ++i) {
     uint16_t cmd = 0x8000 | (((address + i) & 0x1F) << 8) | data[i];
@@ -42,9 +40,7 @@ inline Error RegSPI::Write(const uint8_t  address,
   return Error::kOk;
 }
 
-inline Error RegSPI::Read(const uint8_t address,
-                          const size_t  size,
-                          uint8_t*      data) {
+inline Error RegSPI::Read(const uint8_t address, const size_t size, uint8_t* data) {
   VERIFY(data, Error::kInvalidArg);
   for (size_t i = 0; i < size; ++i) {
     uint16_t cmd   = 0x4000 | (((address + i) & 0x001F) << 8);

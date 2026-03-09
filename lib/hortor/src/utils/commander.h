@@ -44,8 +44,7 @@ inline void Commander::run(char* user_input) {
   input_buffer[63] = '\0';
 
   int len = strlen(input_buffer);
-  while (len > 0 &&
-         (input_buffer[len - 1] == '\n' || input_buffer[len - 1] == '\r')) {
+  while (len > 0 && (input_buffer[len - 1] == '\n' || input_buffer[len - 1] == '\r')) {
     input_buffer[len - 1] = '\0';
     len--;
   }

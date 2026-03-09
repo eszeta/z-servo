@@ -132,9 +132,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置波特率索引 (R/W)
    * @param[in] value 波特率索引 (0-7)
    */
-  void WriteBaudRate(const uint8_t value) {
-    WriteField<ControlTable::kBaudRate>(value);
-  }
+  void WriteBaudRate(const uint8_t value) { WriteField<ControlTable::kBaudRate>(value); }
 
   /**
    * @brief 获取返回延迟时间 (R/W)
@@ -248,9 +246,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置驱动模式 (R/W)
    * @param[in] value 驱动模式位域
    */
-  void WriteDriveMode(const uint8_t value) {
-    WriteField<ControlTable::kDriveMode>(value);
-  }
+  void WriteDriveMode(const uint8_t value) { WriteField<ControlTable::kDriveMode>(value); }
 
   /**
    * @brief 获取工作模式 (R/W)
@@ -329,9 +325,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置工作模式 (R/W)
    * @param[in] value 工作模式
    */
-  void WriteOperatingMode(const uint8_t value) {
-    WriteField<ControlTable::kOperatingMode>(value);
-  }
+  void WriteOperatingMode(const uint8_t value) { WriteField<ControlTable::kOperatingMode>(value); }
 
   /**
    * @brief 获取关断条件 (R/W)
@@ -365,9 +359,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置关断条件 (R/W)
    * @param[in] value 关断条件位域
    */
-  void WriteShutdown(const uint8_t value) {
-    WriteField<ControlTable::kShutdown>(value);
-  }
+  void WriteShutdown(const uint8_t value) { WriteField<ControlTable::kShutdown>(value); }
 
 #pragma endregion  // "运行模式组"
 
@@ -409,9 +401,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置归零偏移 (R/W)
    * @param[in] value 归零偏移（pulse）
    */
-  void WriteHomingOffset(const int32_t value) {
-    WriteField<ControlTable::kHomingOffset>(value);
-  }
+  void WriteHomingOffset(const int32_t value) { WriteField<ControlTable::kHomingOffset>(value); }
 
   /**
    * @brief 获取运动阈值 (R/W)
@@ -579,9 +569,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置 PWM 上限 (R/W)
    * @param[in] value PWM 上限（%）
    */
-  void WritePwmLimit(const float value) {
-    WriteField<ControlTable::kPwmLimit>(value);
-  }
+  void WritePwmLimit(const float value) { WriteField<ControlTable::kPwmLimit>(value); }
 
   /**
    * @brief 获取电流上限 (R/W)
@@ -606,9 +594,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置电流上限 (R/W)
    * @param[in] value 电流上限（A）
    */
-  void WriteCurrentLimit(const float value) {
-    WriteField<ControlTable::kCurrentLimit>(value);
-  }
+  void WriteCurrentLimit(const float value) { WriteField<ControlTable::kCurrentLimit>(value); }
 
   /**
    * @brief 获取速度上限 (R/W)
@@ -640,9 +626,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置速度上限 (R/W)
    * @param[in] value 速度上限（RPM）
    */
-  void WriteVelocityLimit(const float value) {
-    WriteField<ControlTable::kVelocityLimit>(value);
-  }
+  void WriteVelocityLimit(const float value) { WriteField<ControlTable::kVelocityLimit>(value); }
 
   /**
    * @brief 获取位置上限 (R/W)
@@ -777,9 +761,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置速度环 I 增益 (R/W)
    * @param[in] value I 增益
    */
-  void WriteVelocityIGain(const float value) {
-    WriteField<ControlTable::kVelocityIGain>(value);
-  }
+  void WriteVelocityIGain(const float value) { WriteField<ControlTable::kVelocityIGain>(value); }
 
   /**
    * @brief 获取速度环 P 增益 (R/W)
@@ -811,9 +793,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置速度环 P 增益 (R/W)
    * @param[in] value P 增益
    */
-  void WriteVelocityPGain(const float value) {
-    WriteField<ControlTable::kVelocityPGain>(value);
-  }
+  void WriteVelocityPGain(const float value) { WriteField<ControlTable::kVelocityPGain>(value); }
 
   /**
    * @brief 获取位置环 D 增益 (R/W)
@@ -851,9 +831,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置位置环 D 增益 (R/W)
    * @param[in] value D 增益
    */
-  void WritePositionDGain(const float value) {
-    WriteField<ControlTable::kPositionDGain>(value);
-  }
+  void WritePositionDGain(const float value) { WriteField<ControlTable::kPositionDGain>(value); }
 
   /**
    * @brief 获取位置环 I 增益 (R/W)
@@ -891,9 +869,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置位置环 I 增益 (R/W)
    * @param[in] value I 增益
    */
-  void WritePositionIGain(const float value) {
-    WriteField<ControlTable::kPositionIGain>(value);
-  }
+  void WritePositionIGain(const float value) { WriteField<ControlTable::kPositionIGain>(value); }
 
   /**
    * @brief 获取位置环 P 增益 (R/W)
@@ -930,9 +906,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置位置环 P 增益 (R/W)
    * @param[in] value P 增益
    */
-  void WritePositionPGain(const float value) {
-    WriteField<ControlTable::kPositionPGain>(value);
-  }
+  void WritePositionPGain(const float value) { WriteField<ControlTable::kPositionPGain>(value); }
 
   /**
    * @brief 获取前馈二阶增益 (R/W)
@@ -1056,9 +1030,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置力矩使能 (R/W)
    * @param[in] value 力矩使能 (0: 禁用, 1: 使能)
    */
-  void WriteTorqueEnable(const uint8_t value) {
-    WriteField<ControlTable::kTorqueEnable>(value);
-  }
+  void WriteTorqueEnable(const uint8_t value) { WriteField<ControlTable::kTorqueEnable>(value); }
 
   /**
    * @brief 获取 LED 状态 (R/W)
@@ -1082,9 +1054,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置 LED 开关 (R/W)
    * @param[in] value LED 状态 (0: 关, 1: 开)
    */
-  void WriteDxlLed(const uint8_t value) {
-    WriteField<ControlTable::kDxlLed>(value);
-  }
+  void WriteDxlLed(const uint8_t value) { WriteField<ControlTable::kDxlLed>(value); }
 
   /**
    * @brief 获取对齐命令值 (W)
@@ -1175,9 +1145,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置总线看门狗 (R/W)
    * @param[in] value 看门狗时间（ms）
    */
-  void WriteBusWatchdog(const uint16_t value) {
-    WriteField<ControlTable::kBusWatchdog>(value);
-  }
+  void WriteBusWatchdog(const uint16_t value) { WriteField<ControlTable::kBusWatchdog>(value); }
 
 #pragma endregion  // "控制命令组"
 
@@ -1216,9 +1184,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置目标 PWM (R/W)
    * @param[in] value 目标 PWM（%）
    */
-  void WriteGoalPwm(const float value) {
-    WriteField<ControlTable::kGoalPwm>(value);
-  }
+  void WriteGoalPwm(const float value) { WriteField<ControlTable::kGoalPwm>(value); }
 
   /**
    * @brief 获取目标电流 (R/W)
@@ -1247,9 +1213,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置目标电流 (R/W)
    * @param[in] value 目标电流（0.001A）
    */
-  void WriteGoalCurrent(const float value) {
-    WriteField<ControlTable::kGoalCurrent>(value);
-  }
+  void WriteGoalCurrent(const float value) { WriteField<ControlTable::kGoalCurrent>(value); }
 
   /**
    * @brief 获取目标速度 (R/W)
@@ -1283,9 +1247,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置目标速度 (R/W)
    * @param[in] value 目标速度（RPM）
    */
-  void WriteGoalVelocity(const float value) {
-    WriteField<ControlTable::kGoalVelocity>(value);
-  }
+  void WriteGoalVelocity(const float value) { WriteField<ControlTable::kGoalVelocity>(value); }
 
   /**
    * @brief 获取目标位置 (RW)
@@ -1316,9 +1278,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 设置目标位置 (RW)
    * @param[in] value 目标位置（pulse）
    */
-  void WriteGoalPosition(const int32_t value) {
-    WriteField<ControlTable::kGoalPosition>(value);
-  }
+  void WriteGoalPosition(const int32_t value) { WriteField<ControlTable::kGoalPosition>(value); }
 
 #pragma endregion  // "目标值组"
 
@@ -1351,9 +1311,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 写入实时时钟 (R，仅内部同步)
    * @param[in] value 实时时钟
    */
-  void WriteRealtimeTick(const uint16_t value) {
-    WriteField<ControlTable::kRealtimeTick>(value);
-  }
+  void WriteRealtimeTick(const uint16_t value) { WriteField<ControlTable::kRealtimeTick>(value); }
 
   /**
    * @brief 获取运动状态 (R)
@@ -1384,9 +1342,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 写入运动状态 (R，仅内部同步)
    * @param[in] value 运动状态
    */
-  void WriteMoving(const bool value) {
-    WriteField<ControlTable::kMoving>(value);
-  }
+  void WriteMoving(const bool value) { WriteField<ControlTable::kMoving>(value); }
 
   /**
    * @brief 获取详细运动状态 (R)
@@ -1426,9 +1382,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 写入详细运动状态 (R，仅内部同步)
    * @param[in] value 详细运动状态位域
    */
-  void WriteMovingStatus(const uint8_t value) {
-    WriteField<ControlTable::kMovingStatus>(value);
-  }
+  void WriteMovingStatus(const uint8_t value) { WriteField<ControlTable::kMovingStatus>(value); }
 
   /**
    * @brief 获取当前 PWM (R)
@@ -1453,9 +1407,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 写入当前 PWM (R，仅内部同步)
    * @param[in] value 当前 PWM
    */
-  void WritePresentPwm(const float value) {
-    WriteField<ControlTable::kPresentPwm>(value);
-  }
+  void WritePresentPwm(const float value) { WriteField<ControlTable::kPresentPwm>(value); }
 
   /**
    * @brief 获取当前电流 (R)
@@ -1479,9 +1431,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 写入当前电流 (R，仅内部同步)
    * @param[in] value 当前电流
    */
-  void WritePresentCurrent(const float value) {
-    WriteField<ControlTable::kPresentCurrent>(value);
-  }
+  void WritePresentCurrent(const float value) { WriteField<ControlTable::kPresentCurrent>(value); }
 
   /**
    * @brief 获取当前速度 (R)
@@ -1646,8 +1596,8 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
   Error LoadEeprom() {
 #ifndef EEPROM_DISABLE
     int pos = 0;
-    for (uint8_t address = TableBlocks::kEeprom::kBegin;
-         address < TableBlocks::kEeprom::kEnd; ++address) {
+    for (uint8_t address = TableBlocks::kEeprom::kBegin; address < TableBlocks::kEeprom::kEnd;
+         ++address) {
       table_[address] = EEPROM.read(pos++);
     }
 #endif
@@ -1661,8 +1611,8 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
   Error StoreEeprom() {
 #ifndef EEPROM_DISABLE
     int pos = 0;
-    for (uint8_t address = TableBlocks::kEeprom::kBegin;
-         address < TableBlocks::kEeprom::kEnd; ++address) {
+    for (uint8_t address = TableBlocks::kEeprom::kBegin; address < TableBlocks::kEeprom::kEnd;
+         ++address) {
       EEPROM.update(pos++, table_[address]);
     }
 #endif

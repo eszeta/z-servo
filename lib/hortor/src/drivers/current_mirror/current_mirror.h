@@ -51,10 +51,10 @@ inline Error Current::Init(const Config& config) {
   pinMode(pin_adc_, INPUT);
 
   const uint32_t adc_max_value = (1 << config.adc_resolution_bits) - 1;
-  adc_to_voltage_ = config.adc_vref_volts / static_cast<float>(adc_max_value);
+  adc_to_voltage_              = config.adc_vref_volts / static_cast<float>(adc_max_value);
 
   const float current_sense_ratio = config.scaling_factor / 1e6f;
-  voltage_to_current_ = 1.0f / (config.ripropi_ohms * current_sense_ratio);
+  voltage_to_current_             = 1.0f / (config.ripropi_ohms * current_sense_ratio);
 
   CHECK(CalibrateOffsets());
 

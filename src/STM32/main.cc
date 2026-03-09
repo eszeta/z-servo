@@ -33,8 +33,7 @@ using Slave  = hortor::slave::Slave<Servo, Channel>;
 using Regmap = hortor::slave::Regmap;
 
 // 信息灯
-using InfoLED =
-    hortor::info_led::InfoLED<hortor::info_led::LedMode::kOpenDrain>;
+using InfoLED     = hortor::info_led::InfoLED<hortor::info_led::LedMode::kOpenDrain>;
 using InfoLEDInfo = InfoLED::InfoType;
 
 // 工具
@@ -78,25 +77,30 @@ Error DebugOutputCallback(float dt);
 // I2C 从机回调
 void OnI2cReceive(int n);
 void OnI2cRequest();
+// 进入错误模式
+void EnterErrorMode(Error error);
 
 // cppcheck-suppress unusedFunction
 void setup() {
   const auto error = SystemSetup();
   if (IsFail(error)) {
-    led.ShowErrorCode(static_cast<uint8_t>(error));
-    scheduler.ClearTasks();
-    scheduler.AddTask(DebugOutputCallback,
-                      kDebugOutputRateHz);  // 10Hz 调试输出
+    EnterErrorMode(error);
   }
 }
 
 // cppcheck-suppress unusedFunction
 void loop() {
-  // 统一调度与睡眠（按最小周期）
-  // 运行时错误不 Panic，而是点亮故障灯并继续运行（允许通信恢复）
-  if (IsFail(scheduler.Tick())) {
-    led.SetInfo(InfoLEDInfo::kError);
+  const auto error = scheduler.Tick();
+  if (IsFail(error)) {
+    EnterErrorMode(error);
   }
+}
+
+// 进入错误模式
+void EnterErrorMode(Error error) {
+  led.ShowErrorCode(static_cast<uint8_t>(error));
+  scheduler.ClearTasks();
+  scheduler.AddTask(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
 }
 
 Error SystemSetup() {

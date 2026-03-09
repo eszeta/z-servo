@@ -103,17 +103,15 @@ inline size_t InstPacket::GetBufferSize() const {
 }
 
 inline uint8_t InstPacket::CalculateChecksum() const {
-  uint8_t checksum = 0;
-  const uint8_t end = PacketIndex::kParameter + GetParameterSize();
+  uint8_t       checksum = 0;
+  const uint8_t end      = PacketIndex::kParameter + GetParameterSize();
   for (uint8_t i = PacketIndex::kId; i < end; i++) {
     checksum += buffer[i];
   }
   return ~checksum;
 }
 
-inline Error InstProtocol::Process(InstPacket&   packet,
-                                   const uint8_t recv_data,
-                                   bool&         is_complete) {
+inline Error InstProtocol::Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete) {
   is_complete = false;
   switch (packet_state_) {
     case PacketState::kHeader1: {

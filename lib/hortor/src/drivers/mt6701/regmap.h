@@ -19,24 +19,17 @@ template <BusType Bus>
 class RegmapBase;
 
 template <>
-class RegmapBase<BusType::kI2C>
-    : public hortor::regmap::Regmap<hortor::regmap::RegI2C> {
+class RegmapBase<BusType::kI2C> : public hortor::regmap::Regmap<hortor::regmap::RegI2C> {
  public:
   Error Init(TwoWire* wire, const int address);
-  Error ReadRaw(uint16_t& angle_raw,
-                Status&   field_status,
-                bool&     button_pushed,
-                bool&     track_loss);
+  Error ReadRaw(uint16_t& angle_raw, Status& field_status, bool& button_pushed, bool& track_loss);
 };
 
 template <>
 class RegmapBase<BusType::kSPI> : public regmap::Regmap<regmap::RegSPI> {
  public:
   Error Init(SPIClass* spi, int cs_pin, const SPISettings& spi_settings);
-  Error ReadRaw(uint16_t& angle_raw,
-                Status&   field_status,
-                bool&     button_pushed,
-                bool&     track_loss);
+  Error ReadRaw(uint16_t& angle_raw, Status& field_status, bool& button_pushed, bool& track_loss);
   Error Write(const uint8_t address, const uint8_t data);
   Error Write(const uint8_t address, const uint8_t* data, const size_t size);
   Error Read(const uint8_t address, uint8_t* data);
@@ -140,8 +133,7 @@ inline Error RegmapBase<BusType::kSPI>::ReadRaw(uint16_t& angle_raw,
   return Error::kOk;
 }
 
-inline Error RegmapBase<BusType::kSPI>::Write(const uint8_t address,
-                                              const uint8_t data) {
+inline Error RegmapBase<BusType::kSPI>::Write(const uint8_t address, const uint8_t data) {
   return Error::kErr;
 }
 
@@ -151,8 +143,7 @@ inline Error RegmapBase<BusType::kSPI>::Write(const uint8_t  address,
   return Error::kErr;
 }
 
-inline Error RegmapBase<BusType::kSPI>::Read(const uint8_t address,
-                                             uint8_t*      data) {
+inline Error RegmapBase<BusType::kSPI>::Read(const uint8_t address, uint8_t* data) {
   return Error::kErr;
 }
 
@@ -206,8 +197,7 @@ Error Regmap<Bus>::WriteAnalogMode(const float start, const float stop) {
 }
 
 template <BusType Bus>
-Error Regmap<Bus>::WritePwmMode(const PwmFreq frequency,
-                                const PwmPol  polarity) {
+Error Regmap<Bus>::WritePwmMode(const PwmFreq frequency, const PwmPol polarity) {
   CHECK(WriteOutMode(OutMode::kPWM));
   CHECK(WritePwmFreq(frequency));
   CHECK(WritePwmPolarity(polarity));
@@ -216,8 +206,7 @@ Error Regmap<Bus>::WritePwmMode(const PwmFreq frequency,
 
 template <BusType Bus>
 Error Regmap<Bus>::WriteDirection(const Direction direction) {
-  CHECK(this->template WriteField<MT6701Regs::kDIR>(
-      static_cast<uint8_t>(direction)));
+  CHECK(this->template WriteField<MT6701Regs::kDIR>(static_cast<uint8_t>(direction)));
   return Error::kOk;
 }
 
@@ -280,8 +269,7 @@ template <BusType Bus>
 Error Regmap<Bus>::WriteHyst(Hyst hysteresis) {
   using kHYST_2 = MT6701Regs::kHYST_2;
   using kHYST_0 = MT6701Regs::kHYST_0;
-  CHECK(this->template WriteField<uint8_t, kHYST_2, kHYST_0>(
-      static_cast<uint8_t>(hysteresis)));
+  CHECK(this->template WriteField<uint8_t, kHYST_2, kHYST_0>(static_cast<uint8_t>(hysteresis)));
   return Error::kOk;
 }
 

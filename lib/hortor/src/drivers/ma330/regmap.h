@@ -40,17 +40,14 @@ class Regmap : public regmap::Regmap<RegSPI> {
   Error WriteRotationDirection(uint8_t value);
   Error WriteFilterWidth(uint8_t value);
   Error WriteHysteresis(uint8_t value);
-  Error WriteFieldStrengthThresholds(uint8_t high_threshold,
-                                     uint8_t low_threshold);
+  Error WriteFieldStrengthThresholds(uint8_t high_threshold, uint8_t low_threshold);
 };
 
 }  // namespace hortor::drivers::MA330
 
 namespace hortor::drivers::MA330 {
 
-inline Error Regmap::Init(SPIClass*          spi,
-                          int                cs_pin,
-                          const SPISettings& spi_settings) {
+inline Error Regmap::Init(SPIClass* spi, int cs_pin, const SPISettings& spi_settings) {
   CHECK(transport_.Init(spi, cs_pin, spi_settings));
   return Error::kOk;
 }
@@ -203,8 +200,7 @@ inline Error Regmap::WriteHysteresis(uint8_t value) {
   return Error::kOk;
 }
 
-inline Error Regmap::WriteFieldStrengthThresholds(uint8_t high_threshold,
-                                                  uint8_t low_threshold) {
+inline Error Regmap::WriteFieldStrengthThresholds(uint8_t high_threshold, uint8_t low_threshold) {
   using kMGLT = MA330Regs::kMGLT;
   using kMGHT = MA330Regs::kMGHT;
   CHECK(WriteField<kMGLT>(low_threshold));

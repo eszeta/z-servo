@@ -17,8 +17,7 @@ using Base = servo::Encoder<Encoder, kResolutionBits>;
 
 class Encoder : public Base {
  public:
-  static constexpr uint8_t kResolutionBits =
-      hortor::drivers::MA330::kResolutionBits;
+  static constexpr uint8_t kResolutionBits = hortor::drivers::MA330::kResolutionBits;
   struct Config : public Base::Config {
     SPIClass* spi;
     uint8_t   cs_pin;
@@ -37,8 +36,7 @@ class Encoder : public Base {
 namespace hortor::drivers::MA330 {
 
 inline Error Encoder::Init(const Config& config) {
-  CHECK(regmap_.Init(config.spi, config.cs_pin,
-                     SPISettings(1000000, MSBFIRST, SPI_MODE3)));
+  CHECK(regmap_.Init(config.spi, config.cs_pin, SPISettings(1000000, MSBFIRST, SPI_MODE3)));
   CHECK(Base::Init(config));
   return Error::kOk;
 }

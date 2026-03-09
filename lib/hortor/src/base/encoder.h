@@ -138,8 +138,7 @@ int32_t Encoder<DerivedType, Bits>::homing_offset() const {
 }
 
 template <typename DerivedType, uint8_t Bits>
-void Encoder<DerivedType, Bits>::set_homing_offset(
-    const int32_t homing_offset) {
+void Encoder<DerivedType, Bits>::set_homing_offset(const int32_t homing_offset) {
   const auto delta_offset = homing_offset - homing_offset_;
   pos_ += delta_offset;
   homing_offset_ = homing_offset;
@@ -161,8 +160,7 @@ Error Encoder<DerivedType, Bits>::Process(float dt) {
   uint32_t raw_new;
   CHECK(ReadRaw(raw_new));
 
-  const int32_t delta =
-      static_cast<int32_t>(raw_new) - static_cast<int32_t>(raw_pos_);
+  const int32_t delta = static_cast<int32_t>(raw_new) - static_cast<int32_t>(raw_pos_);
 
   const auto delta_enc = math::wrap_pm(delta, kResolution.kEncoderCpr);
 
@@ -187,11 +185,10 @@ Error Encoder<DerivedType, Bits>::ReadRaw(uint32_t& out_raw) {
 template <typename DerivedType, uint8_t Bits>
 Error Encoder<DerivedType, Bits>::recalibrate() {
   CHECK(ReadRaw(raw_pos_));
-  const auto reverse_val = static_cast<int32_t>(reverse_);
-  const auto local_pos   = static_cast<int32_t>(raw_pos_) * reverse_val;
-  const auto normal_pos  = math::mod(local_pos, kResolution.kEncoderCpr);
-  const auto pos_with_offset =
-      math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
+  const auto reverse_val     = static_cast<int32_t>(reverse_);
+  const auto local_pos       = static_cast<int32_t>(raw_pos_) * reverse_val;
+  const auto normal_pos      = math::mod(local_pos, kResolution.kEncoderCpr);
+  const auto pos_with_offset = math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
 
   constexpr float kEdgeWindowDeg = 1.0f;
   const float     edge_counts_f =

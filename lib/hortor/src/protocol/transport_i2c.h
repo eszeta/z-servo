@@ -22,11 +22,11 @@ class TransportI2C : public Transport<TransportI2C> {
  public:
   Error Init(TwoWire* wire);
 
-  bool ReadByteImpl(uint8_t& byte);
+  bool   ReadByteImpl(uint8_t& byte);
   size_t AvailableImpl();
-  Error WriteImpl(const uint8_t* data, const size_t size);
-  bool ConsumePacketImpl();
-  void SetReceiverImpl(InstProtocol* protocol, InstPacket* inst_packet);
+  Error  WriteImpl(const uint8_t* data, const size_t size);
+  bool   ConsumePacketImpl();
+  void   SetReceiverImpl(InstProtocol* protocol, InstPacket* inst_packet);
 
   void OnReceive(int howMany);
   void OnRequest();
@@ -34,7 +34,7 @@ class TransportI2C : public Transport<TransportI2C> {
  private:
   TwoWire* wire_ = nullptr;
 
-  InstProtocol* protocol_ptr_   = nullptr;
+  InstProtocol* protocol_ptr_    = nullptr;
   InstPacket*   inst_packet_ptr_ = nullptr;
   volatile bool packet_ready_    = false;
 
@@ -74,16 +74,14 @@ inline bool TransportI2C::ConsumePacketImpl() {
   return true;
 }
 
-inline void TransportI2C::SetReceiverImpl(InstProtocol* protocol,
-                                           InstPacket*   inst_packet) {
-  protocol_ptr_   = protocol;
+inline void TransportI2C::SetReceiverImpl(InstProtocol* protocol, InstPacket* inst_packet) {
+  protocol_ptr_    = protocol;
   inst_packet_ptr_ = inst_packet;
 }
 
 inline void TransportI2C::OnReceive(int howMany) {
   (void)howMany;
-  if (wire_ == nullptr || protocol_ptr_ == nullptr ||
-      inst_packet_ptr_ == nullptr) {
+  if (wire_ == nullptr || protocol_ptr_ == nullptr || inst_packet_ptr_ == nullptr) {
     return;
   }
   while (wire_->available()) {

@@ -18,16 +18,16 @@ constexpr uint32_t kBaudRateTable[] = {9600,    57600,   115200,  1000000,
 namespace Converters {
 
 // 统一使用语义化 *Converter 命名。
-using VoltageCvt  = regmap::RatioConverter<float, 1, 10>;      // 0.1V / LSB
-using PwmPctCvt   = regmap::RatioConverter<float, 113, 1000>;  // 0.113% / LSB
-using VelocityCvt = regmap::RatioConverter<float, 229, 1000>;  // 0.229RPM / LSB
-using MsCvt       = regmap::RatioConverter<uint16_t, 20>;      // 20ms / LSB
-using UsCvt       = regmap::RatioConverter<uint16_t, 2>;       // 2us / LSB
-using CurrentCvt  = regmap::RatioConverter<float, 1, 1000>;    // 0.001A / LSB
-using FeedforwardGainCvt = regmap::RatioConverter<float, 1, 4>;    // raw / 4
-using PidPCvt            = regmap::RatioConverter<float, 1, 128>;  // raw / 128
-using PidICvt = regmap::RatioConverter<float, 1, 65536>;  // raw / 65536
-using PidDCvt = regmap::RatioConverter<float, 1, 16>;     // raw / 16
+using VoltageCvt         = regmap::RatioConverter<float, 1, 10>;      // 0.1V / LSB
+using PwmPctCvt          = regmap::RatioConverter<float, 113, 1000>;  // 0.113% / LSB
+using VelocityCvt        = regmap::RatioConverter<float, 229, 1000>;  // 0.229RPM / LSB
+using MsCvt              = regmap::RatioConverter<uint16_t, 20>;      // 20ms / LSB
+using UsCvt              = regmap::RatioConverter<uint16_t, 2>;       // 2us / LSB
+using CurrentCvt         = regmap::RatioConverter<float, 1, 1000>;    // 0.001A / LSB
+using FeedforwardGainCvt = regmap::RatioConverter<float, 1, 4>;       // raw / 4
+using PidPCvt            = regmap::RatioConverter<float, 1, 128>;     // raw / 128
+using PidICvt            = regmap::RatioConverter<float, 1, 65536>;   // raw / 65536
+using PidDCvt            = regmap::RatioConverter<float, 1, 16>;      // raw / 16
 }  // namespace Converters
 /**
  * @brief 控制表
@@ -302,11 +302,10 @@ constexpr size_t kTotalSize = 0xC0;
 namespace TableBlocks {
 using protocol::ControlTableBlock;
 
-struct kEeprom : ControlTableBlock<ControlTable::kFirmwareVersion,
-                                   ControlTable::kFeedforward1stGain> {};
-struct kRam : ControlTableBlock<ControlTable::kTorqueEnable,
-                                ControlTable::kPresentTemperature> {};
-struct kAlign : ControlTableBlock<ControlTable::kAlignToPosition,
-                                  ControlTable::kAlignToPosition> {};
+struct kEeprom
+    : ControlTableBlock<ControlTable::kFirmwareVersion, ControlTable::kFeedforward1stGain> {};
+struct kRam : ControlTableBlock<ControlTable::kTorqueEnable, ControlTable::kPresentTemperature> {};
+struct kAlign : ControlTableBlock<ControlTable::kAlignToPosition, ControlTable::kAlignToPosition> {
+};
 }  // namespace TableBlocks
 }  // namespace hortor::slave

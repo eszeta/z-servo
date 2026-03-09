@@ -65,17 +65,11 @@ class Slave : public hortor::Noncopyable {
  protected:
   Error Execute(const InstPacket& packet);
 
-  Error Response(const uint8_t  reply_idx,
-                 const uint8_t* parameter,
-                 const size_t   parameter_size);
+  Error Response(const uint8_t reply_idx, const uint8_t* parameter, const size_t parameter_size);
 
-  Error WriteRegs(const uint8_t  address,
-                  const uint8_t* data,
-                  const size_t   size);
+  Error WriteRegs(const uint8_t address, const uint8_t* data, const size_t size);
 
-  Error AfterWriteRegs(const uint8_t  address,
-                       const uint8_t* data,
-                       const size_t   size);
+  Error AfterWriteRegs(const uint8_t address, const uint8_t* data, const size_t size);
 
   Error PingHandler(const InstPacket& packet);
   Error ReadDataHandler(const InstPacket& packet, const bool response);
@@ -122,7 +116,6 @@ class Slave : public hortor::Noncopyable {
    * @brief 读数据缓冲区（ReadData/BulkRead 共用，避免栈上大分配）
    */
   uint8_t read_buffer_[128] = {};
-
 };
 
 }  // namespace hortor::protocol
@@ -166,8 +159,7 @@ ChannelType* Slave<DerivedType, RegmapType, ChannelType>::channel() {
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-void Slave<DerivedType, RegmapType, ChannelType>::set_channel(
-    ChannelType* channel) {
+void Slave<DerivedType, RegmapType, ChannelType>::set_channel(ChannelType* channel) {
   channel_ = channel;
 }
 
@@ -182,8 +174,7 @@ uint8_t Slave<DerivedType, RegmapType, ChannelType>::id() const {
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-void Slave<DerivedType, RegmapType, ChannelType>::set_return_level(
-    const uint8_t return_level) {
+void Slave<DerivedType, RegmapType, ChannelType>::set_return_level(const uint8_t return_level) {
   return_level_ = return_level;
 }
 
@@ -193,8 +184,7 @@ uint8_t Slave<DerivedType, RegmapType, ChannelType>::return_level() const {
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::Execute(
-    const InstPacket& packet) {
+Error Slave<DerivedType, RegmapType, ChannelType>::Execute(const InstPacket& packet) {
   const auto isBroadcast = packet.id == kBroadcastId;
   const auto isSelf      = packet.id == id_;
   if (!isSelf && !isBroadcast) {
@@ -237,21 +227,19 @@ Error Slave<DerivedType, RegmapType, ChannelType>::Execute(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::Response(
-    const uint8_t  reply_idx,
-    const uint8_t* parameter,
-    const size_t   parameter_size) {
+Error Slave<DerivedType, RegmapType, ChannelType>::Response(const uint8_t  reply_idx,
+                                                            const uint8_t* parameter,
+                                                            const size_t   parameter_size) {
   StatusPacket packet;
-  CHECK(channel_->parser()->CreateResponse(id_, status_, parameter,
-                                          parameter_size, packet));
+  CHECK(channel_->parser()->CreateResponse(id_, status_, parameter, parameter_size, packet));
   CHECK(channel_->Response(packet, reply_idx));
   return Error::kOk;
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::WriteRegs(const uint8_t address,
-                                                          const uint8_t* data,
-                                                          const size_t   size) {
+Error Slave<DerivedType, RegmapType, ChannelType>::WriteRegs(const uint8_t  address,
+                                                             const uint8_t* data,
+                                                             const size_t   size) {
   VERIFY(data != nullptr && size != 0, Error::kInvalidArg);
   CHECK(regmap_->Write(address, data, size));
   CHECK(AfterWriteRegs(address, data, size));
@@ -259,25 +247,21 @@ Error Slave<DerivedType, RegmapType, ChannelType>::WriteRegs(const uint8_t addre
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::AfterWriteRegs(
-    const uint8_t  address,
-    const uint8_t* data,
-    const size_t   size) {
-  return static_cast<DerivedType*>(this)->AfterWriteRegsImpl(address, data,
-                                                             size);
+Error Slave<DerivedType, RegmapType, ChannelType>::AfterWriteRegs(const uint8_t  address,
+                                                                  const uint8_t* data,
+                                                                  const size_t   size) {
+  return static_cast<DerivedType*>(this)->AfterWriteRegsImpl(address, data, size);
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::PingHandler(
-    const InstPacket& packet) {
+Error Slave<DerivedType, RegmapType, ChannelType>::PingHandler(const InstPacket& packet) {
   CHECK(Response(0, nullptr, 0));
   return Error::kOk;
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::ReadDataHandler(
-    const InstPacket& packet,
-    const bool        response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::ReadDataHandler(const InstPacket& packet,
+                                                                   const bool        response) {
   const uint8_t address = packet.parameter[0];
   const uint8_t size    = packet.parameter[1];
   CHECK(regmap_->Read(address, size, read_buffer_));
@@ -288,9 +272,8 @@ Error Slave<DerivedType, RegmapType, ChannelType>::ReadDataHandler(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::WriteDataHandler(
-    const InstPacket& packet,
-    const bool        response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::WriteDataHandler(const InstPacket& packet,
+                                                                    const bool        response) {
   const uint8_t address = packet.parameter[0];
   const uint8_t size    = packet.GetParameterSize() - 1;
   CHECK(WriteRegs(address, packet.parameter + 1, size));
@@ -301,9 +284,8 @@ Error Slave<DerivedType, RegmapType, ChannelType>::WriteDataHandler(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::RegWriteHandler(
-    const InstPacket& packet,
-    const bool        response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::RegWriteHandler(const InstPacket& packet,
+                                                                   const bool        response) {
   const size_t size = packet.GetBufferSize();
   if (async_write_buffer_size_ + size > sizeof(async_write_buffer_)) {
     return Error::kOutOfRange;
@@ -317,9 +299,8 @@ Error Slave<DerivedType, RegmapType, ChannelType>::RegWriteHandler(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::ActionHandler(
-    const InstPacket& packet,
-    const bool        response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::ActionHandler(const InstPacket& packet,
+                                                                 const bool        response) {
   const uint8_t* buffer = async_write_buffer_;
   if (async_write_buffer_size_ == 0) {
     if (response) {
@@ -329,10 +310,9 @@ Error Slave<DerivedType, RegmapType, ChannelType>::ActionHandler(
     return Error::kOk;
   }
   while (async_write_buffer_size_ > 0) {
-    const InstPacket* const reg_write_packet =
-        reinterpret_cast<const InstPacket*>(buffer);
-    const size_t packet_size = reg_write_packet->GetBufferSize();
-    constexpr size_t kMinPacketSize = 6;  // header(2)+id(1)+length(1)+inst(1)+chk(1)
+    const InstPacket* const reg_write_packet = reinterpret_cast<const InstPacket*>(buffer);
+    const size_t            packet_size      = reg_write_packet->GetBufferSize();
+    constexpr size_t        kMinPacketSize   = 6;  // header(2)+id(1)+length(1)+inst(1)+chk(1)
     if (async_write_buffer_size_ < packet_size || packet_size < kMinPacketSize ||
         packet_size > InstPacket::kBufferCapacity) {
       break;
@@ -351,9 +331,8 @@ Error Slave<DerivedType, RegmapType, ChannelType>::ActionHandler(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::SyncWriteHandler(
-    const InstPacket& packet,
-    const bool        response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::SyncWriteHandler(const InstPacket& packet,
+                                                                    const bool        response) {
   const uint8_t  address        = packet.parameter[0];
   const uint8_t  data_size      = packet.parameter[1];
   const uint8_t  parameter_size = packet.GetParameterSize();
@@ -375,9 +354,8 @@ Error Slave<DerivedType, RegmapType, ChannelType>::SyncWriteHandler(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::BulkReadHandler(
-    const InstPacket& packet,
-    const bool        response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::BulkReadHandler(const InstPacket& packet,
+                                                                   const bool        response) {
   const uint8_t  parameter_size = packet.GetParameterSize();
   const uint8_t  block_count    = (parameter_size - 1) / 3;
   const uint8_t* parameter      = packet.parameter + 1;
@@ -398,9 +376,8 @@ Error Slave<DerivedType, RegmapType, ChannelType>::BulkReadHandler(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::ResetHandler(
-    const InstPacket& packet,
-    const bool        response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::ResetHandler(const InstPacket& packet,
+                                                                const bool        response) {
   if (response) {
     CHECK(Response(0, nullptr, 0));
   }
@@ -409,16 +386,13 @@ Error Slave<DerivedType, RegmapType, ChannelType>::ResetHandler(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::AfterResetHandler(
-    const InstPacket& packet,
-    const bool        response) {
-  return static_cast<DerivedType*>(this)->AfterResetHandlerImpl(packet,
-                                                                response);
+Error Slave<DerivedType, RegmapType, ChannelType>::AfterResetHandler(const InstPacket& packet,
+                                                                     const bool        response) {
+  return static_cast<DerivedType*>(this)->AfterResetHandlerImpl(packet, response);
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::InstructionError(
-    const bool response) {
+Error Slave<DerivedType, RegmapType, ChannelType>::InstructionError(const bool response) {
   status_.instruction_error = true;
   if (response) {
     CHECK(Response(0, nullptr, 0));
@@ -427,14 +401,12 @@ Error Slave<DerivedType, RegmapType, ChannelType>::InstructionError(
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-bool Slave<DerivedType, RegmapType, ChannelType>::CheckResponse(
-    const uint8_t instruction) const {
+bool Slave<DerivedType, RegmapType, ChannelType>::CheckResponse(const uint8_t instruction) const {
   switch (return_level_) {
     case 0:
       return instruction == Instruction::kPing;
     case 1:
-      return instruction == Instruction::kPing ||
-             instruction == Instruction::kReadData ||
+      return instruction == Instruction::kPing || instruction == Instruction::kReadData ||
              instruction == Instruction::kBulkRead;
     case 2:
       return true;

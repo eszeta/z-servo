@@ -31,9 +31,7 @@ class Pid : public hortor::Noncopyable {
    * @param dt - 时间间隔(秒)
    * @return 控制输出
    */
-  float Compute(const float error,
-                const float dt,
-                const float feedforward = 0.0f);
+  float Compute(const float error, const float dt, const float feedforward = 0.0f);
 
   /**
    * @brief 重置PID控制器状态
@@ -69,9 +67,7 @@ namespace hortor::math {
 
 inline Pid::Pid(const Config& config) : config_(config) {}
 
-inline float Pid::Compute(const float error,
-                          const float dt,
-                          const float feedforward) {
+inline float Pid::Compute(const float error, const float dt, const float feedforward) {
   const float proportional = config_.kp * error;
 
   const float integral = integral_accumulator_ +

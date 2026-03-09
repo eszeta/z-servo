@@ -16,8 +16,7 @@ template <typename ServoType, typename ChannelType>
 class Slave;
 
 template <typename ServoType, typename ChannelType>
-using Base =
-    protocol::Slave<Slave<ServoType, ChannelType>, Regmap, ChannelType>;
+using Base = protocol::Slave<Slave<ServoType, ChannelType>, Regmap, ChannelType>;
 
 template <typename ServoType, typename ChannelType>
 class Slave : public Base<ServoType, ChannelType> {
@@ -27,12 +26,9 @@ class Slave : public Base<ServoType, ChannelType> {
 
   Error Init();
 
-  Error AfterResetHandlerImpl(const protocol::InstPacket& packet,
-                              const bool                  response);
+  Error AfterResetHandlerImpl(const protocol::InstPacket& packet, const bool response);
 
-  Error AfterWriteRegsImpl(const uint8_t  address,
-                           const uint8_t* data,
-                           const size_t   size);
+  Error AfterWriteRegsImpl(const uint8_t address, const uint8_t* data, const size_t size);
 
   Error AfterProcessImpl(float dt);
 
@@ -73,17 +69,16 @@ Error Slave<ServoType, ChannelType>::Init() {
 }
 
 template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::AfterResetHandlerImpl(
-    const protocol::InstPacket& packet,
-    const bool                  response) {
+Error Slave<ServoType, ChannelType>::AfterResetHandlerImpl(const protocol::InstPacket& packet,
+                                                           const bool                  response) {
   CHECK(this->regmap_->RecoveryEeprom());
   return Error::kOk;
 }
 
 template <typename ServoType, typename ChannelType>
 Error Slave<ServoType, ChannelType>::AfterWriteRegsImpl(const uint8_t  address,
-                                                     const uint8_t* data,
-                                                     const size_t   size) {
+                                                        const uint8_t* data,
+                                                        const size_t   size) {
   if (TableBlocks::kEeprom::InBlock(address, size)) {
     CHECK(this->regmap_->StoreEeprom());
   }

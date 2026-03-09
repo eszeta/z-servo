@@ -36,8 +36,8 @@ enum : uint8_t {
 };
 }  // namespace Instruction
 
-constexpr uint8_t kHeaderByte   = 0xff;
-constexpr uint8_t kBroadcastId  = 0xfe;
+constexpr uint8_t kHeaderByte  = 0xff;
+constexpr uint8_t kBroadcastId = 0xfe;
 
 template <typename T, uint8_t Address>
 using ControlTableItem = regmap::Field<T, Address, 0, sizeof(T) * 8>;
@@ -63,8 +63,7 @@ struct ControlTableBlock : public hortor::Noncopyable {
   static constexpr uint8_t kEnd   = EndType::kAddress + EndType::kSize;
 
   static constexpr uint8_t size() { return kEnd - kBegin; }
-  static constexpr bool    InBlock(const uint8_t address,
-                                   const uint8_t access_size) {
+  static constexpr bool    InBlock(const uint8_t address, const uint8_t access_size) {
     return address < kEnd && address + access_size > kBegin;
   }
 };
