@@ -40,7 +40,6 @@ using InfoLEDInfo = InfoLED::InfoType;
 using Error = hortor::Error;
 using hortor::IsFail;
 using Monitor       = hortor::utils::Monitor<Servo>;
-using Commander     = hortor::utils::Commander;
 using TaskScheduler = hortor::utils::TaskScheduler<>;
 using hortor::utils::DebugEnable;
 
@@ -65,7 +64,6 @@ Encoder       encoder{};
 Current       current_sensor{};
 Servo         servo{};
 Monitor       monitor{};
-Commander     commander{};
 TaskScheduler scheduler{};
 
 // 系统初始化
