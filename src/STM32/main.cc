@@ -8,7 +8,8 @@
 #include <drivers/drv8231a/drv8231a.h>
 #include <drivers/mt6701/mt6701.h>
 #include <info_led/info_led.h>
-#include <protocol/port_i2c.h>
+#include <protocol/channel.h>
+#include <protocol/transport_i2c.h>
 #include <slave/slave.h>
 #include <utils/commander.h>
 #include <utils/debug_print.h>
@@ -18,7 +19,8 @@
 constexpr auto kResolutionBits = 12;
 
 // 总线与协议
-using Port = hortor::protocol::PortI2C;
+using Transport = hortor::protocol::TransportI2C;
+using Channel   = hortor::protocol::ProtocolChannel<Transport>;
 
 // 驱动组件
 using Motor   = hortor::drivers::DRV8231A::Motor;
@@ -27,7 +29,7 @@ using Current = hortor::drivers::CurrentMirror::Current;
 
 // 伺服与从机
 using Servo  = hortor::servo::Servo<Motor, Encoder, Current, kResolutionBits>;
-using Slave  = hortor::slave::Slave<Servo, Port>;
+using Slave  = hortor::slave::Slave<Servo, Channel>;
 using Regmap = hortor::slave::Regmap;
 
 // 信息灯
@@ -57,7 +59,7 @@ TwoWire        wire_slave(PB7, PA15);
 
 InfoLED       led{};
 Regmap        regmap{};
-Port          port{};
+Channel       channel{};
 Slave         slave{};
 Motor         motor_driver{};
 Encoder       encoder{};
@@ -73,6 +75,9 @@ Error SystemSetup();
 Error MainLoopCallback(float dt);
 // 调试输出回调函数
 Error DebugOutputCallback(float dt);
+// I2C 从机回调
+void OnI2cReceive(int n);
+void OnI2cRequest();
 
 // cppcheck-suppress unusedFunction
 void setup() {
@@ -106,7 +111,6 @@ Error SystemSetup() {
   led.SetInfo(InfoLEDInfo::kOk);
 
   wire_sensor.begin();
-  wire_slave.begin();
 
   CHECK(motor_driver.Init({
       .pin_in1              = PA0,
@@ -132,13 +136,16 @@ Error SystemSetup() {
   servo.set_encoder(&encoder);
   servo.set_current_sensor(&current_sensor);
   CHECK(servo.Init());
-
   CHECK(regmap.Init());
-  CHECK(port.Init(&wire_slave));
+  CHECK(channel.Init(&wire_slave));
   slave.set_regmap(&regmap);
-  slave.set_port(&port);
+  slave.set_channel(&channel);
   slave.set_servo(&servo);
   CHECK(slave.Init());
+
+  wire_slave.begin(slave.id());
+  wire_slave.onReceive(OnI2cReceive);
+  wire_slave.onRequest(OnI2cRequest);
 
   monitor.set_port(&serial_debug);
   monitor.set_servo(&servo);
@@ -167,4 +174,12 @@ Error DebugOutputCallback(float dt) {
   led.Process(dt);
   CHECK(monitor.Process(dt));
   return Error::kOk;
+}
+
+void OnI2cReceive(int n) {
+  channel.transport()->OnReceive(n);
+}
+
+void OnI2cRequest() {
+  channel.transport()->OnRequest();
 }

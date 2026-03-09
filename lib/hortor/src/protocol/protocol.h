@@ -103,12 +103,12 @@ inline size_t InstPacket::GetBufferSize() const {
 }
 
 inline uint8_t InstPacket::CalculateChecksum() const {
-  uint8_t       checksum = id + length + instructionOrError;
-  const uint8_t l        = GetParameterSize();
-  for (uint8_t i = PacketIndex::kId; i < l; i++) {
+  uint8_t checksum = 0;
+  const uint8_t end = PacketIndex::kParameter + GetParameterSize();
+  for (uint8_t i = PacketIndex::kId; i < end; i++) {
     checksum += buffer[i];
   }
-  return ~(static_cast<uint8_t>(checksum));
+  return ~checksum;
 }
 
 inline Error InstProtocol::Process(InstPacket&   packet,
@@ -117,14 +117,14 @@ inline Error InstProtocol::Process(InstPacket&   packet,
   is_complete = false;
   switch (packet_state_) {
     case PacketState::kHeader1: {
-      if (recv_data == 0xff) {
+      if (recv_data == kHeaderByte) {
         packet_state_  = PacketState::kHeader2;
         packet.header1 = recv_data;
       }
       break;
     }
     case PacketState::kHeader2: {
-      if (recv_data == 0xff) {
+      if (recv_data == kHeaderByte) {
         packet_state_  = PacketState::kId;
         packet.header2 = recv_data;
       } else {
@@ -176,6 +176,7 @@ inline Error InstProtocol::Process(InstPacket&   packet,
         packet_state_ = PacketState::kHeader1;
         return Error::kBadData;
       }
+      packet_state_ = PacketState::kHeader1;
       break;
     }
     default: {
@@ -191,8 +192,8 @@ inline Error InstProtocol::CreateResponse(const uint8_t          id,
                                           const uint8_t*         parameter,
                                           const size_t           parameter_size,
                                           StatusPacket&          packet) {
-  packet.header1            = 0xff;
-  packet.header2            = 0xff;
+  packet.header1            = kHeaderByte;
+  packet.header2            = kHeaderByte;
   packet.id                 = id;
   packet.instructionOrError = status.value;
   if (parameter == nullptr) {

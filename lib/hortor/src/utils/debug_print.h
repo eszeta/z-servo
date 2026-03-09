@@ -12,14 +12,11 @@ extern Print* debug_print;
 
 void DebugEnable(Print* _debugPrint);
 
-template <typename T>
-void DebugPrint(const T& val);
-template <typename T>
-void DebugPrintln(const T& val);
-template <typename T, typename U>
-void DebugPrint(const T& msg, const U& val);
-template <typename T, typename U>
-void DebugPrintln(const T& msg, const U& val);
+template <typename... Args>
+void DebugPrint(const Args&... args);
+
+template <typename... Args>
+void DebugPrintln(const Args&... args);
 }  // namespace hortor::utils
 
 namespace hortor::utils {
@@ -34,33 +31,22 @@ inline void DebugEnable(Print* _debugPrint) {
 inline void DebugEnable(Print* /*_debugPrint*/) {}
 #endif
 
-template <typename T>
-void DebugPrint(const T& val) {
+template <typename... Args>
+void DebugPrint(const Args&... args) {
 #ifndef DISABLE_DEBUG
-  debug_print->print(val);
+  (debug_print->print(args), ...);
 #endif
 }
 
-template <typename T>
-void DebugPrintln(const T& val) {
+template <typename... Args>
+void DebugPrintln(const Args&... args) {
 #ifndef DISABLE_DEBUG
-  debug_print->println(val);
-#endif
-}
-
-template <typename T, typename U>
-void DebugPrint(const T& msg, const U& val) {
-#ifndef DISABLE_DEBUG
-  debug_print->print(msg);
-  debug_print->print(val);
-#endif
-}
-
-template <typename T, typename U>
-void DebugPrintln(const T& msg, const U& val) {
-#ifndef DISABLE_DEBUG
-  debug_print->print(msg);
-  debug_print->println(val);
+  if constexpr (sizeof...(Args) == 0) {
+    debug_print->println();
+  } else {
+    (debug_print->print(args), ...);
+    debug_print->println();
+  }
 #endif
 }
 

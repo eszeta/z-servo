@@ -141,12 +141,12 @@ constexpr int16_t CombineToInt16(const uint8_t highByte,
 
 /**
  * @brief 将补码转换为原码
- * @param value 补码值（uint16_t）
- * @param sign 符号位索引
+ * @param value 补码值（int16_t）
+ * @param sign 符号位索引（默认 15）
  * @return 原码值（uint16_t，最高位为符号位）
  */
 constexpr uint16_t TwosToSign(const int16_t value,
-                              const uint8_t sign) noexcept {
+                              const uint8_t sign = 15) noexcept {
   if (value >= 0) {
     return static_cast<uint16_t>(value);
   }
@@ -154,35 +154,17 @@ constexpr uint16_t TwosToSign(const int16_t value,
 }
 
 /**
- * @brief 将补码转换为原码
- * @param value 补码值（int16_t）
- * @return 原码值（uint16_t，最高位为符号位）
- */
-constexpr uint16_t TwosToSign(const int16_t value) noexcept {
-  return TwosToSign(static_cast<uint16_t>(value), 15);
-}
-
-/**
  * @brief 将原码转换为补码
  * @param value 原码值（uint16_t，最高位为符号位）
- * @param sign 符号位索引
- * @return 补码值（uint16_t）
+ * @param sign 符号位索引（默认 15）
+ * @return 补码值（int16_t）
  */
 constexpr int16_t SignToTwos(const uint16_t value,
-                             const uint8_t  sign) noexcept {
+                             const uint8_t sign = 15) noexcept {
   if (!IsBitSet(value, sign)) {
     return static_cast<int16_t>(value);
   }
   return -static_cast<int16_t>(ClearBit(value, sign));
-}
-
-/**
- * @brief 将原码转换为补码
- * @param value 原码值（uint16_t，最高位为符号位）
- * @return 补码值（int16_t）
- */
-constexpr int16_t SignToTwos(const uint16_t value) noexcept {
-  return static_cast<int16_t>(SignToTwos(value, 15));
 }
 
 }  // namespace hortor::utils::bit_utils

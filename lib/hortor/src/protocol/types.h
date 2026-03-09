@@ -36,7 +36,8 @@ enum : uint8_t {
 };
 }  // namespace Instruction
 
-constexpr uint8_t kBroadcastId = 0xfe;
+constexpr uint8_t kHeaderByte   = 0xff;
+constexpr uint8_t kBroadcastId  = 0xfe;
 
 template <typename T, uint8_t Address>
 using ControlTableItem = regmap::Field<T, Address, 0, sizeof(T) * 8>;
