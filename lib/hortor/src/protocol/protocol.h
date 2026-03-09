@@ -57,9 +57,11 @@ typedef InstPacket StatusPacket;
 class InstProtocol : public hortor::Noncopyable {
  public:
   Error Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete);
-  Error CreateResponse(const uint8_t id, const StatusErrorBits& status,
-                       const uint8_t* parameter, const size_t parameter_size,
-                       StatusPacket& packet);
+  Error CreateResponse(const uint8_t          id,
+                       const StatusErrorBits& status,
+                       const uint8_t*         parameter,
+                       const size_t           parameter_size,
+                       StatusPacket&          packet);
 
  private:
   uint8_t     param_pos_    = 0;
@@ -109,8 +111,9 @@ inline uint8_t InstPacket::CalculateChecksum() const {
   return ~(static_cast<uint8_t>(checksum));
 }
 
-inline Error InstProtocol::Process(InstPacket& packet, const uint8_t recv_data,
-                                   bool& is_complete) {
+inline Error InstProtocol::Process(InstPacket&   packet,
+                                   const uint8_t recv_data,
+                                   bool&         is_complete) {
   is_complete = false;
   switch (packet_state_) {
     case PacketState::kHeader1: {

@@ -7,9 +7,12 @@
 
 #include "base/current.h"
 
-namespace hortor::drivers::current_mirror {
+namespace hortor::drivers::CurrentMirror {
 
-class CurrentMirror : public servo::Current<CurrentMirror> {
+class Current;
+using Base = servo::Current<Current>;
+
+class Current : public Base {
  public:
   struct Config {
     uint8_t  pin_adc;              // ADC 引脚
@@ -36,11 +39,11 @@ class CurrentMirror : public servo::Current<CurrentMirror> {
   uint16_t calibration_samples_ = 50;
 };
 
-}  // namespace hortor::drivers::current_mirror
+}  // namespace hortor::drivers::CurrentMirror
 
-namespace hortor::drivers::current_mirror {
+namespace hortor::drivers::CurrentMirror {
 
-inline Error CurrentMirror::Init(const Config& config) {
+inline Error Current::Init(const Config& config) {
   VERIFY(config.pin_adc != 0, Error::kInvalidArg);
   pin_adc_             = config.pin_adc;
   calibration_samples_ = config.calibration_samples;
@@ -58,7 +61,7 @@ inline Error CurrentMirror::Init(const Config& config) {
   return Error::kOk;
 }
 
-inline Error CurrentMirror::ReadCurrentImpl(float& current) {
+inline Error Current::ReadCurrentImpl(float& current) {
   float voltage;
   CHECK(ReadADCVoltage(voltage));
 
@@ -68,7 +71,7 @@ inline Error CurrentMirror::ReadCurrentImpl(float& current) {
   return Error::kOk;
 }
 
-inline Error CurrentMirror::CalibrateOffsets() {
+inline Error Current::CalibrateOffsets() {
   zero_offset_voltage_ = 0.0f;
 
   for (uint16_t i = 0; i < calibration_samples_; ++i) {
@@ -82,10 +85,10 @@ inline Error CurrentMirror::CalibrateOffsets() {
   return Error::kOk;
 }
 
-inline Error CurrentMirror::ReadADCVoltage(float& voltage) {
+inline Error Current::ReadADCVoltage(float& voltage) {
   const uint16_t adc_raw = analogRead(pin_adc_);
   voltage                = static_cast<float>(adc_raw) * adc_to_voltage_;
   return Error::kOk;
 }
 
-}  // namespace hortor::drivers::current_mirror
+}  // namespace hortor::drivers::CurrentMirror

@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "plain.h"
+#include "reg_spi.h"
 #include "types.h"
 
 namespace hortor::drivers::MA330 {
@@ -14,7 +14,7 @@ namespace hortor::drivers::MA330 {
 /**
  * @brief MA330寄存器映射类
  */
-class RegMap : public regmap::RegMap<SpiPlain> {
+class Regmap : public regmap::Regmap<RegSPI> {
  public:
   Error Init(SPIClass* spi, int cs_pin, const SPISettings& spi_settings);
   Error ReadRaw(uint16_t& angle_raw);
@@ -48,43 +48,44 @@ class RegMap : public regmap::RegMap<SpiPlain> {
 
 namespace hortor::drivers::MA330 {
 
-inline Error RegMap::Init(SPIClass* spi, int cs_pin,
+inline Error Regmap::Init(SPIClass*          spi,
+                          int                cs_pin,
                           const SPISettings& spi_settings) {
-  CHECK(plain_.Init(spi, cs_pin, spi_settings));
+  CHECK(transport_.Init(spi, cs_pin, spi_settings));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadRaw(uint16_t& angle_raw) {
-  CHECK(plain_.ReadRaw(angle_raw));
+inline Error Regmap::ReadRaw(uint16_t& angle_raw) {
+  CHECK(transport_.ReadRaw(angle_raw));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadZero(uint16_t& zero) {
+inline Error Regmap::ReadZero(uint16_t& zero) {
   using kZ_H = MA330Regs::kZ_H;
   using kZ_L = MA330Regs::kZ_L;
   CHECK(ReadField<uint16_t, kZ_H, kZ_L>(zero));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadBiasCurrentTrimming(uint8_t& bias_current_trimming) {
+inline Error Regmap::ReadBiasCurrentTrimming(uint8_t& bias_current_trimming) {
   using kBCT = MA330Regs::kBCT;
   CHECK(ReadField<kBCT>(bias_current_trimming));
   return Error::kOk;
 }
 
-inline Error RegMap::IsEnableTrimmingX(bool& enable) {
+inline Error Regmap::IsEnableTrimmingX(bool& enable) {
   using kETX = MA330Regs::kETX;
   CHECK(ReadField<kETX>(enable));
   return Error::kOk;
 }
 
-inline Error RegMap::IsEnableTrimmingY(bool& enable) {
+inline Error Regmap::IsEnableTrimmingY(bool& enable) {
   using kETY = MA330Regs::kETY;
   CHECK(ReadField<kETY>(enable));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadPulsesPerTurn(uint16_t& pulses_per_turn) {
+inline Error Regmap::ReadPulsesPerTurn(uint16_t& pulses_per_turn) {
   uint16_t result;
   using kPPT_H = MA330Regs::kPPT_H;
   using kPPT_L = MA330Regs::kPPT_L;
@@ -93,49 +94,49 @@ inline Error RegMap::ReadPulsesPerTurn(uint16_t& pulses_per_turn) {
   return Error::kOk;
 }
 
-inline Error RegMap::ReadIndexLength(uint8_t& index_length) {
+inline Error Regmap::ReadIndexLength(uint8_t& index_length) {
   using kILIP = MA330Regs::kILIP;
   CHECK(ReadField<kILIP>(index_length));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadNumberPolePairs(uint8_t& number_pole_pairs) {
+inline Error Regmap::ReadNumberPolePairs(uint8_t& number_pole_pairs) {
   using kNPP = MA330Regs::kNPP;
   CHECK(ReadField<kNPP>(number_pole_pairs));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadRotationDirection(uint8_t& direction) {
+inline Error Regmap::ReadRotationDirection(uint8_t& direction) {
   using kRD = MA330Regs::kRD;
   CHECK(ReadField<kRD>(direction));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadFieldStrengthHighThreshold(uint8_t& high_threshold) {
+inline Error Regmap::ReadFieldStrengthHighThreshold(uint8_t& high_threshold) {
   using kMGHT = MA330Regs::kMGHT;
   CHECK(ReadField<kMGHT>(high_threshold));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadFieldStrengthLowThreshold(uint8_t& low_threshold) {
+inline Error Regmap::ReadFieldStrengthLowThreshold(uint8_t& low_threshold) {
   using kMGLT = MA330Regs::kMGLT;
   CHECK(ReadField<kMGLT>(low_threshold));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadFilterWidth(uint8_t& filter_width) {
+inline Error Regmap::ReadFilterWidth(uint8_t& filter_width) {
   using kFW = MA330Regs::kFW;
   CHECK(ReadField<kFW>(filter_width));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadHysteresis(uint8_t& hysteresis) {
+inline Error Regmap::ReadHysteresis(uint8_t& hysteresis) {
   using kHYS = MA330Regs::kHYS;
   CHECK(ReadField<kHYS>(hysteresis));
   return Error::kOk;
 }
 
-inline Error RegMap::ReadFieldStrength(FieldStrength& field_strength) {
+inline Error Regmap::ReadFieldStrength(FieldStrength& field_strength) {
   uint8_t result;
   using kMGL_MGH = MA330Regs::kMGL_MGH;
   CHECK(ReadField<kMGL_MGH>(result));
@@ -143,20 +144,20 @@ inline Error RegMap::ReadFieldStrength(FieldStrength& field_strength) {
   return Error::kOk;
 }
 
-inline Error RegMap::WriteZero(uint16_t value) {
+inline Error Regmap::WriteZero(uint16_t value) {
   using kZ_H = MA330Regs::kZ_H;
   using kZ_L = MA330Regs::kZ_L;
   CHECK(WriteField<uint16_t, kZ_H, kZ_L>(value));
   return Error::kOk;
 }
 
-inline Error RegMap::WriteBiasCurrentTrimming(uint8_t value) {
+inline Error Regmap::WriteBiasCurrentTrimming(uint8_t value) {
   using kBCT = MA330Regs::kBCT;
   CHECK(WriteField<kBCT>(value));
   return Error::kOk;
 }
 
-inline Error RegMap::WriteTrimmingEnabled(bool Xenabled, bool Yenabled) {
+inline Error Regmap::WriteTrimmingEnabled(bool Xenabled, bool Yenabled) {
   using kETX = MA330Regs::kETX;
   using kETY = MA330Regs::kETY;
   CHECK(WriteField<kETX>(Xenabled));
@@ -164,7 +165,7 @@ inline Error RegMap::WriteTrimmingEnabled(bool Xenabled, bool Yenabled) {
   return Error::kOk;
 }
 
-inline Error RegMap::WritePulsesPerTurn(uint16_t value) {
+inline Error Regmap::WritePulsesPerTurn(uint16_t value) {
   uint16_t ppt_val = value - 1;
   using kPPT_H     = MA330Regs::kPPT_H;
   using kPPT_L     = MA330Regs::kPPT_L;
@@ -172,37 +173,37 @@ inline Error RegMap::WritePulsesPerTurn(uint16_t value) {
   return Error::kOk;
 }
 
-inline Error RegMap::WriteIndexLength(uint8_t value) {
+inline Error Regmap::WriteIndexLength(uint8_t value) {
   using kILIP = MA330Regs::kILIP;
   CHECK(WriteField<kILIP>(value));
   return Error::kOk;
 }
 
-inline Error RegMap::WriteNumberPolePairs(uint8_t value) {
+inline Error Regmap::WriteNumberPolePairs(uint8_t value) {
   using kNPP = MA330Regs::kNPP;
   CHECK(WriteField<kNPP>(value));
   return Error::kOk;
 }
 
-inline Error RegMap::WriteRotationDirection(uint8_t value) {
+inline Error Regmap::WriteRotationDirection(uint8_t value) {
   using kRD = MA330Regs::kRD;
   CHECK(WriteField<kRD>(value));
   return Error::kOk;
 }
 
-inline Error RegMap::WriteFilterWidth(uint8_t value) {
+inline Error Regmap::WriteFilterWidth(uint8_t value) {
   using kFW = MA330Regs::kFW;
   CHECK(WriteField<kFW>(value));
   return Error::kOk;
 }
 
-inline Error RegMap::WriteHysteresis(uint8_t value) {
+inline Error Regmap::WriteHysteresis(uint8_t value) {
   using kHYS = MA330Regs::kHYS;
   CHECK(WriteField<kHYS>(value));
   return Error::kOk;
 }
 
-inline Error RegMap::WriteFieldStrengthThresholds(uint8_t high_threshold,
+inline Error Regmap::WriteFieldStrengthThresholds(uint8_t high_threshold,
                                                   uint8_t low_threshold) {
   using kMGLT = MA330Regs::kMGLT;
   using kMGHT = MA330Regs::kMGHT;

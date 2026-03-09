@@ -12,10 +12,10 @@ namespace hortor::regmap {
 /**
  * @brief 寄存器映射基类
  */
-template <typename PlainType>
-class RegMap : public hortor::Noncopyable {
+template <typename TransportType>
+class Regmap : public hortor::Noncopyable {
  public:
-  PlainType& plain();
+  TransportType& transport();
 
   template <typename T>
   Error Write(const uint8_t address, const T data);
@@ -40,45 +40,47 @@ class RegMap : public hortor::Noncopyable {
   Error ReadField(T& value);
 
  protected:
-  PlainType plain_;
+  TransportType transport_;
 };
 
 }  // namespace hortor::regmap
 
 namespace hortor::regmap {
 
-template <typename PlainType>
-PlainType& RegMap<PlainType>::plain() {
-  return plain_;
+template <typename TransportType>
+TransportType& Regmap<TransportType>::transport() {
+  return transport_;
 }
 
-template <typename PlainType>
+template <typename TransportType>
 template <typename T>
-Error RegMap<PlainType>::Write(const uint8_t address, const T data) {
+Error Regmap<TransportType>::Write(const uint8_t address, const T data) {
   return Write(address, reinterpret_cast<const uint8_t*>(&data), sizeof(T));
 }
 
-template <typename PlainType>
-Error RegMap<PlainType>::Write(const uint8_t address, const uint8_t* data,
-                               const size_t size) {
-  return plain_.Write(address, data, size);
+template <typename TransportType>
+Error Regmap<TransportType>::Write(const uint8_t  address,
+                                   const uint8_t* data,
+                                   const size_t   size) {
+  return transport_.Write(address, data, size);
 }
 
-template <typename PlainType>
+template <typename TransportType>
 template <typename T>
-Error RegMap<PlainType>::Read(const uint8_t address, T& data) {
+Error Regmap<TransportType>::Read(const uint8_t address, T& data) {
   return Read(address, sizeof(T), reinterpret_cast<uint8_t*>(&data));
 }
 
-template <typename PlainType>
-Error RegMap<PlainType>::Read(const uint8_t address, const size_t size,
-                              uint8_t* data) {
-  return plain_.Read(address, size, data);
+template <typename TransportType>
+Error Regmap<TransportType>::Read(const uint8_t address,
+                                  const size_t  size,
+                                  uint8_t*      data) {
+  return transport_.Read(address, size, data);
 }
 
-template <typename PlainType>
+template <typename TransportType>
 template <typename T>
-Error RegMap<PlainType>::WriteField(
+Error Regmap<TransportType>::WriteField(
     typename Trait::WriteValueTypeOf<T>::Type value) {
   using FieldBase = typename Trait::FieldOf<T>::Type;
   typename FieldBase::access_t access;
@@ -89,9 +91,9 @@ Error RegMap<PlainType>::WriteField(
   return Error::kOk;
 }
 
-template <typename PlainType>
+template <typename TransportType>
 template <typename T, typename HighFieldType, typename LowFieldType>
-Error RegMap<PlainType>::WriteField(T value) {
+Error Regmap<TransportType>::WriteField(T value) {
   typename HighFieldType::access_t high_access;
   typename LowFieldType::access_t  low_access;
   CHECK(Read(HighFieldType::kAddress, high_access));
@@ -103,9 +105,9 @@ Error RegMap<PlainType>::WriteField(T value) {
   return Error::kOk;
 }
 
-template <typename PlainType>
+template <typename TransportType>
 template <typename T>
-Error RegMap<PlainType>::ReadField(
+Error Regmap<TransportType>::ReadField(
     typename Trait::ReadValueTypeOf<T>::Type& value) {
   using FieldBase = typename Trait::FieldOf<T>::Type;
   typename FieldBase::access_t access;
@@ -115,9 +117,9 @@ Error RegMap<PlainType>::ReadField(
   return Error::kOk;
 }
 
-template <typename PlainType>
+template <typename TransportType>
 template <typename T, typename HighFieldType, typename LowFieldType>
-Error RegMap<PlainType>::ReadField(T& value) {
+Error Regmap<TransportType>::ReadField(T& value) {
   typename HighFieldType::access_t high_access;
   typename LowFieldType::access_t  low_access;
   CHECK(Read(HighFieldType::kAddress, high_access));

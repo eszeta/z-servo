@@ -12,7 +12,7 @@
 
 namespace hortor::regmap {
 
-class SpiPlain : public hortor::Noncopyable {
+class RegSPI : public hortor::Noncopyable {
  public:
   SPIClass*   spi();
   int         cs_pin() const;
@@ -32,20 +32,21 @@ class SpiPlain : public hortor::Noncopyable {
 
 namespace hortor::regmap {
 
-inline SPIClass* SpiPlain::spi() {
+inline SPIClass* RegSPI::spi() {
   return spi_;
 }
 
-inline int SpiPlain::cs_pin() const {
+inline int RegSPI::cs_pin() const {
   return cs_pin_;
 }
 
-inline SPISettings SpiPlain::spi_settings() const {
+inline SPISettings RegSPI::spi_settings() const {
   return spi_settings_;
 }
 
-inline Error SpiPlain::Init(SPIClass* spi, int cs_pin,
-                            const SPISettings& spi_settings) {
+inline Error RegSPI::Init(SPIClass*          spi,
+                          int                cs_pin,
+                          const SPISettings& spi_settings) {
   VERIFY(spi, Error::kInvalidArg);
   spi_          = spi;
   cs_pin_       = cs_pin;
@@ -55,8 +56,9 @@ inline Error SpiPlain::Init(SPIClass* spi, int cs_pin,
   return Error::kOk;
 }
 
-inline Error SpiPlain::Write(const uint8_t address, const uint8_t* data,
-                             const size_t size) {
+inline Error RegSPI::Write(const uint8_t  address,
+                           const uint8_t* data,
+                           const size_t   size) {
   VERIFY(spi_ && data, Error::kInvalidArg);
   spi_->beginTransaction(spi_settings_);
   if (cs_pin_ >= 0)
@@ -69,8 +71,9 @@ inline Error SpiPlain::Write(const uint8_t address, const uint8_t* data,
   return Error::kOk;
 }
 
-inline Error SpiPlain::Read(const uint8_t address, const size_t size,
-                            uint8_t* data) {
+inline Error RegSPI::Read(const uint8_t address,
+                          const size_t  size,
+                          uint8_t*      data) {
   VERIFY(spi_, Error::kInvalidArg);
   spi_->beginTransaction(spi_settings_);
   if (cs_pin_ >= 0)

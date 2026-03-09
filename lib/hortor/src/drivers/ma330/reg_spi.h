@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 
-#include "regmap/spi_plain.h"
+#include "regmap/reg_spi.h"
 
 namespace hortor::drivers::MA330 {
 
@@ -15,7 +15,7 @@ namespace hortor::drivers::MA330 {
  * 实现通过SPI协议与MA330传感器通信的功能。
  * SPI模式提供更高的通信速度，但功能有限，主要用于角度读取。
  */
-class SpiPlain : public regmap::SpiPlain {
+class RegSPI : public regmap::RegSPI {
  public:
   Error Write(const uint8_t address, const uint8_t* data, const size_t size);
   Error Read(const uint8_t address, const size_t size, uint8_t* data);
@@ -29,8 +29,9 @@ class SpiPlain : public regmap::SpiPlain {
 
 namespace hortor::drivers::MA330 {
 
-inline Error SpiPlain::Write(const uint8_t address, const uint8_t* data,
-                             const size_t size) {
+inline Error RegSPI::Write(const uint8_t  address,
+                           const uint8_t* data,
+                           const size_t   size) {
   VERIFY(data, Error::kInvalidArg);
   for (size_t i = 0; i < size; ++i) {
     uint16_t cmd = 0x8000 | (((address + i) & 0x1F) << 8) | data[i];
@@ -41,8 +42,9 @@ inline Error SpiPlain::Write(const uint8_t address, const uint8_t* data,
   return Error::kOk;
 }
 
-inline Error SpiPlain::Read(const uint8_t address, const size_t size,
-                            uint8_t* data) {
+inline Error RegSPI::Read(const uint8_t address,
+                          const size_t  size,
+                          uint8_t*      data) {
   VERIFY(data, Error::kInvalidArg);
   for (size_t i = 0; i < size; ++i) {
     uint16_t cmd   = 0x4000 | (((address + i) & 0x001F) << 8);
@@ -54,12 +56,12 @@ inline Error SpiPlain::Read(const uint8_t address, const size_t size,
   return Error::kOk;
 }
 
-inline Error SpiPlain::ReadRaw(uint16_t& angle_raw) {
+inline Error RegSPI::ReadRaw(uint16_t& angle_raw) {
   angle_raw = transfer16(0x0000);
   return Error::kOk;
 }
 
-inline uint16_t SpiPlain::transfer16(uint16_t outValue) {
+inline uint16_t RegSPI::transfer16(uint16_t outValue) {
   spi_->beginTransaction(spi_settings_);
   if (cs_pin_ >= 0)
     digitalWrite(cs_pin_, LOW);

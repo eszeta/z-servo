@@ -16,7 +16,7 @@ namespace hortor::regmap {
  *
  * 实现通过I2C协议与设备通信的功能。
  */
-class I2CPlain : public hortor::Noncopyable {
+class RegI2C : public hortor::Noncopyable {
  public:
   Error Init(TwoWire* wire, const int address);
   Error Write(const uint8_t address, const uint8_t* data, const size_t size);
@@ -31,15 +31,16 @@ class I2CPlain : public hortor::Noncopyable {
 
 namespace hortor::regmap {
 
-inline Error I2CPlain::Init(TwoWire* wire, const int address) {
+inline Error RegI2C::Init(TwoWire* wire, const int address) {
   VERIFY(wire, Error::kInvalidArg);
   wire_    = wire;
   address_ = address;
   return Error::kOk;
 }
 
-inline Error I2CPlain::Write(const uint8_t address, const uint8_t* data,
-                             const size_t size) {
+inline Error RegI2C::Write(const uint8_t  address,
+                           const uint8_t* data,
+                           const size_t   size) {
   VERIFY(wire_ && data, Error::kInvalidArg);
   wire_->beginTransmission(address_);
   wire_->write(address);
@@ -50,8 +51,9 @@ inline Error I2CPlain::Write(const uint8_t address, const uint8_t* data,
   return Error::kOk;
 }
 
-inline Error I2CPlain::Read(const uint8_t address, const size_t size,
-                            uint8_t* data) {
+inline Error RegI2C::Read(const uint8_t address,
+                          const size_t  size,
+                          uint8_t*      data) {
   VERIFY(wire_ && data, Error::kInvalidArg);
   wire_->beginTransmission(address_);
   wire_->write(address);

@@ -100,16 +100,6 @@ enum class Status : uint8_t {
   kFieldError  = 0x3,  // 磁场错误，无法检测到有效磁场
 };
 
-/**
- * @brief 总线类型枚举
- *
- * 定义MT6701传感器支持的不同通信总线类型。
- */
-enum class PlainType : uint8_t {
-  kI2C,  // I2C总线通信
-  kSPI,  // SPI总线通信
-};
-
 /** @brief SSI时钟频率，定义SPI通信的时钟速率（1MHz） */
 constexpr uint32_t kSSIClock = 1000000;
 /** @brief I2C默认地址，MT6701传感器的7位I2C地址 */

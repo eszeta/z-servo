@@ -12,44 +12,45 @@
 namespace hortor::drivers::MA330 {
 constexpr uint8_t kResolutionBits = 14;
 
-class MA330;
-using MA330Base = servo::Encoder<MA330, kResolutionBits>;
-class MA330 : public MA330Base {
+class Encoder;
+using Base = servo::Encoder<Encoder, kResolutionBits>;
+
+class Encoder : public Base {
  public:
   static constexpr uint8_t kResolutionBits =
       hortor::drivers::MA330::kResolutionBits;
-  struct Config : public MA330Base::Config {
+  struct Config : public Base::Config {
     SPIClass* spi;
     uint8_t   cs_pin;
   };
 
   Error   Init(const Config& config);
   Error   ReadRawImpl(uint32_t& out_raw);
-  RegMap* regmap();
+  Regmap* regmap();
 
  private:
-  RegMap regmap_;
+  Regmap regmap_;
 };
 
 }  // namespace hortor::drivers::MA330
 
 namespace hortor::drivers::MA330 {
 
-inline Error MA330::Init(const Config& config) {
+inline Error Encoder::Init(const Config& config) {
   CHECK(regmap_.Init(config.spi, config.cs_pin,
                      SPISettings(1000000, MSBFIRST, SPI_MODE3)));
-  CHECK(MA330Base::Init(config));
+  CHECK(Base::Init(config));
   return Error::kOk;
 }
 
-inline Error MA330::ReadRawImpl(uint32_t& out_raw) {
+inline Error Encoder::ReadRawImpl(uint32_t& out_raw) {
   uint16_t raw;
   CHECK(regmap_.ReadRaw(raw));
   out_raw = static_cast<uint32_t>(raw);
   return Error::kOk;
 }
 
-inline RegMap* MA330::regmap() {
+inline Regmap* Encoder::regmap() {
   return &regmap_;
 }
 

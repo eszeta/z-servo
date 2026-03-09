@@ -6,20 +6,19 @@
 #include <Arduino.h>
 
 #include "hortor.h"
-#include "protocol/i2c_port_handler.h"
+#include "protocol/port_i2c.h"
 #include "protocol/slave.h"
 #include "regmap.h"
 
-namespace hortor::servo_slave {
-template <typename ServoType>
+namespace hortor::slave {
+template <typename ServoType, typename PortType>
 class Slave;
 
-template <typename ServoType>
-using SlaveBase =
-    protocol::Slave<Slave<ServoType>, RegMap, protocol::I2cPortHandler>;
+template <typename ServoType, typename PortType>
+using Base = protocol::Slave<Slave<ServoType, PortType>, Regmap, PortType>;
 
-template <typename ServoType>
-class Slave : public SlaveBase<ServoType> {
+template <typename ServoType, typename PortType>
+class Slave : public Base<ServoType, PortType> {
  public:
   ServoType* servo();
   Error      set_servo(ServoType* servo);
@@ -29,8 +28,9 @@ class Slave : public SlaveBase<ServoType> {
   Error AfterResetHandlerImpl(const protocol::InstPacket& packet,
                               const bool                  response);
 
-  Error AfterWriteRegsImpl(const uint8_t address, const uint8_t* data,
-                           const size_t size);
+  Error AfterWriteRegsImpl(const uint8_t  address,
+                           const uint8_t* data,
+                           const size_t   size);
 
   Error AfterProcessImpl(float dt);
 
@@ -46,41 +46,42 @@ class Slave : public SlaveBase<ServoType> {
   Error UpdateMotorStatus();
 };
 
-}  // namespace hortor::servo_slave
+}  // namespace hortor::slave
 
-namespace hortor::servo_slave {
+namespace hortor::slave {
 
-template <typename ServoType>
-ServoType* Slave<ServoType>::servo() {
+template <typename ServoType, typename PortType>
+ServoType* Slave<ServoType, PortType>::servo() {
   return servo_;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::set_servo(ServoType* servo) {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::set_servo(ServoType* servo) {
   servo_ = servo;
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::Init() {
-  CHECK(SlaveBase<ServoType>::Init());
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::Init() {
+  CHECK(Base<ServoType, PortType>::Init());
   CHECK(ApplyProtocolConfig());
   CHECK(ApplyMotorConfig());
   CHECK(UpdateMotorStatus());
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::AfterResetHandlerImpl(
-    const protocol::InstPacket& packet, const bool response) {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::AfterResetHandlerImpl(
+    const protocol::InstPacket& packet,
+    const bool                  response) {
   CHECK(this->regmap_->RecoveryEeprom());
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::AfterWriteRegsImpl(const uint8_t  address,
-                                           const uint8_t* data,
-                                           const size_t   size) {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::AfterWriteRegsImpl(const uint8_t  address,
+                                                     const uint8_t* data,
+                                                     const size_t   size) {
   if (TableBlocks::kEeprom::InBlock(address, size)) {
     CHECK(this->regmap_->StoreEeprom());
   }
@@ -93,16 +94,16 @@ Error Slave<ServoType>::AfterWriteRegsImpl(const uint8_t  address,
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::AfterProcessImpl(float dt) {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::AfterProcessImpl(float dt) {
   realtime_tick_ += dt * 1000;
   this->regmap_->WriteRealtimeTick(realtime_tick_);
   CHECK(UpdateMotorStatus());
   return UpdateStatus();
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::UpdateStatus() {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::UpdateStatus() {
   const auto hardware_error         = servo_->hardware_error_status();
   this->status_.input_voltage_error = hardware_error.input_voltage_error;
   this->status_.angle_limit_error   = hardware_error.angle_limit_error;
@@ -112,25 +113,25 @@ Error Slave<ServoType>::UpdateStatus() {
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::ApplyProtocolConfig() {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::ApplyProtocolConfig() {
   this->set_id(this->regmap_->ReadId());
   this->set_return_level(this->regmap_->ReadStatusReturnLevel());
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::ApplyAlignToPosition() {
-  if (this->regmap_->ReadAlignToPosition()) {
-    const auto align_to_position = this->regmap_->ReadAlignToPosition();
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::ApplyAlignToPosition() {
+  const auto align_to_position = this->regmap_->ReadAlignToPosition();
+  if (align_to_position) {
     servo_->AlignToPosition(align_to_position);
     this->regmap_->WriteAlignToPosition(0);
   }
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::ApplyMotorConfig() {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::ApplyMotorConfig() {
   const auto drive_mode = this->regmap_->ReadDriveMode();
   servo_->set_drive_mode(drive_mode);
 
@@ -208,8 +209,8 @@ Error Slave<ServoType>::ApplyMotorConfig() {
   return Error::kOk;
 }
 
-template <typename ServoType>
-Error Slave<ServoType>::UpdateMotorStatus() {
+template <typename ServoType, typename PortType>
+Error Slave<ServoType, PortType>::UpdateMotorStatus() {
   const auto torque_enable = servo_->torque_enable();
   this->regmap_->WriteTorqueEnable(torque_enable);
 
@@ -243,4 +244,4 @@ Error Slave<ServoType>::UpdateMotorStatus() {
   return Error::kOk;
 }
 
-}  // namespace hortor::servo_slave
+}  // namespace hortor::slave

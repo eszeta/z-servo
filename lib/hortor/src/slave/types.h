@@ -7,7 +7,7 @@
 
 #include "protocol/types.h"
 
-namespace hortor::servo_slave {
+namespace hortor::slave {
 
 constexpr uint32_t kBaudRateTable[] = {9600,    57600,   115200,  1000000,
                                        2000000, 3000000, 4000000, 4500000};
@@ -309,4 +309,4 @@ struct kRam : ControlTableBlock<ControlTable::kTorqueEnable,
 struct kAlign : ControlTableBlock<ControlTable::kAlignToPosition,
                                   ControlTable::kAlignToPosition> {};
 }  // namespace TableBlocks
-}  // namespace hortor::servo_slave
+}  // namespace hortor::slave

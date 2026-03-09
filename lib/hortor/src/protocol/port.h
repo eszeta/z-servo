@@ -21,7 +21,7 @@ namespace hortor::protocol {
  * @tparam Derived 派生类类型
  */
 template <typename DerivedType>
-class PortHandler : public hortor::Noncopyable {
+class Port : public hortor::Noncopyable {
  public:
   /**
    * @brief 处理数据
@@ -31,8 +31,10 @@ class PortHandler : public hortor::Noncopyable {
    * @param is_complete 是否完成
    * @return 错误码
    */
-  Error Process(InstProtocol& protocol, const float dt, InstPacket& inst_packet,
-                bool& is_complete);
+  Error Process(InstProtocol& protocol,
+                const float   dt,
+                InstPacket&   inst_packet,
+                bool&         is_complete);
 
   /**
    * @brief 发送响应数据
@@ -58,21 +60,22 @@ class PortHandler : public hortor::Noncopyable {
 namespace hortor::protocol {
 
 template <typename DerivedType>
-Error PortHandler<DerivedType>::Process(InstProtocol& protocol, const float dt,
-                                        InstPacket& inst_packet,
-                                        bool&       is_complete) {
+Error Port<DerivedType>::Process(InstProtocol& protocol,
+                                 const float   dt,
+                                 InstPacket&   inst_packet,
+                                 bool&         is_complete) {
   return static_cast<DerivedType*>(this)->ProcessImpl(protocol, dt, inst_packet,
                                                       is_complete);
 }
 
 template <typename DerivedType>
-Error PortHandler<DerivedType>::Response(const StatusPacket& packet,
-                                         const uint8_t       reply_idx) {
+Error Port<DerivedType>::Response(const StatusPacket& packet,
+                                  const uint8_t       reply_idx) {
   return static_cast<DerivedType*>(this)->ResponseImpl(packet, reply_idx);
 }
 
 template <typename DerivedType>
-void PortHandler<DerivedType>::SetResponseDelay(const float response_delay) {
+void Port<DerivedType>::SetResponseDelay(const float response_delay) {
   response_delay_ = response_delay;
 }
 

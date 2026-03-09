@@ -6,7 +6,7 @@
 #include <Arduino.h>
 
 #include "hortor.h"
-#include "port_handler.h"
+#include "port.h"
 #include "protocol.h"
 #include "types.h"
 
@@ -16,35 +16,18 @@
 
 namespace hortor::protocol {
 
-class SerialPortHandler : public PortHandler<SerialPortHandler> {
+class PortSerial : public Port<PortSerial> {
  public:
-  /**
-   * @brief 初始化
-   * @param serial 串口
-   * @return 错误码
-   */
   Error Init(HardwareSerial* serial) {
     serial_ = serial;
     return Error::kOk;
   }
 
-  /**
-   * @brief 处理数据实现
-   * @param protocol 协议处理器
-   * @param dt 时间间隔(秒)
-   * @param inst_packet 指令包
-   * @param is_complete 是否完成
-   * @return 错误码
-   */
-  Error ProcessImpl(InstProtocol& protocol, const float dt,
-                    InstPacket& inst_packet, bool& is_complete);
+  Error ProcessImpl(InstProtocol& protocol,
+                    const float   dt,
+                    InstPacket&   inst_packet,
+                    bool&         is_complete);
 
-  /**
-   * @brief 发送响应数据实现
-   * @param packet 状态包
-   * @param reply_idx 回复索引
-   * @return 错误码
-   */
   Error ResponseImpl(const StatusPacket& packet, const uint8_t reply_idx);
 
  private:
@@ -57,10 +40,10 @@ class SerialPortHandler : public PortHandler<SerialPortHandler> {
 
 namespace hortor::protocol {
 
-inline Error SerialPortHandler::ProcessImpl(InstProtocol& protocol,
-                                            const float   dt,
-                                            InstPacket&   inst_packet,
-                                            bool&         is_complete) {
+inline Error PortSerial::ProcessImpl(InstProtocol& protocol,
+                                     const float   dt,
+                                     InstPacket&   inst_packet,
+                                     bool&         is_complete) {
   delay_time_ -= dt;
   if (delay_time_ <= 0 && response_pending_) {
     response_pending_        = false;
@@ -78,8 +61,8 @@ inline Error SerialPortHandler::ProcessImpl(InstProtocol& protocol,
   return Error::kOk;
 }
 
-inline Error SerialPortHandler::ResponseImpl(const StatusPacket& packet,
-                                             const uint8_t       reply_idx) {
+inline Error PortSerial::ResponseImpl(const StatusPacket& packet,
+                                      const uint8_t       reply_idx) {
   const size_t size = packet.GetBufferSize();
   memcpy(status_packet_.buffer, packet.buffer, size);
   delay_time_       = response_delay_ * (reply_idx + 1);

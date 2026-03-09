@@ -21,8 +21,8 @@ constexpr uint8_t kResolutionBits = 14;
  * 使用BusType枚举作为模板参数，通过模板偏特化为不同总线类型提供实现。
  * 支持I2C和SPI两种通信方式，每种方式有独立的Init方法签名。
  */
-template <PlainType PlainType>
-class MT6701;
+template <BusType Bus>
+class Encoder;
 
 /**
  * @brief MT6701磁性角度传感器私有基类
@@ -30,12 +30,11 @@ class MT6701;
  * 包含所有与总线无关的公共代码，避免在特化中重复实现。
  * 使用CRTP模式继承servo::Encoder，提供统一的传感器接口。
  */
-template <PlainType PlainType>
-class MT6701Base;
+template <BusType Bus>
+class EncoderBase;
 
-template <PlainType PlainType>
-class MT6701Base
-    : public servo::Encoder<MT6701Base<PlainType>, kResolutionBits> {
+template <BusType Bus>
+class EncoderBase : public servo::Encoder<EncoderBase<Bus>, kResolutionBits> {
  public:
   static constexpr uint8_t kResolutionBits =
       hortor::drivers::MT6701::kResolutionBits;
@@ -45,7 +44,7 @@ class MT6701Base
    *
    * 返回控制器实例的引用，用于直接操作传感器的配置和状态。
    */
-  RegMap<PlainType>& regmap() { return regmap_; }
+  Regmap<Bus>& regmap() { return regmap_; }
 
   /**
    * @brief 获取原始角度值
@@ -59,7 +58,7 @@ class MT6701Base
 
  protected:
   /** @brief 寄存器映射实例，负责与传感器的具体通信操作 */
-  RegMap<PlainType> regmap_;
+  Regmap<Bus> regmap_;
 };
 
 /**
@@ -70,9 +69,9 @@ class MT6701Base
  * 本特化使用I2C接口与传感器通信，支持角度读取和状态查询。
  */
 
-using I2CBase = MT6701Base<PlainType::kI2C>;
+using I2CBase = EncoderBase<BusType::kI2C>;
 template <>
-class MT6701<PlainType::kI2C> : public I2CBase {
+class Encoder<BusType::kI2C> : public I2CBase {
  public:
   struct Config : public I2CBase::Config {
     TwoWire* wire;
@@ -92,9 +91,9 @@ class MT6701<PlainType::kI2C> : public I2CBase {
  * MT6701是一款高精度、低功耗的磁性角度传感器，提供14位分辨率的角度测量。
  * 本特化使用SPI接口与传感器通信，支持角度读取和状态查询。
  */
-using SPIBase = MT6701Base<PlainType::kSPI>;
+using SPIBase = EncoderBase<BusType::kSPI>;
 template <>
-class MT6701<PlainType::kSPI> : public SPIBase {
+class Encoder<BusType::kSPI> : public SPIBase {
  public:
   struct Config : public SPIBase::Config {
     SPIClass*   spi;
@@ -113,8 +112,8 @@ class MT6701<PlainType::kSPI> : public SPIBase {
 
 namespace hortor::drivers::MT6701 {
 
-template <PlainType PlainType>
-Error MT6701Base<PlainType>::ReadRawImpl(uint32_t& out_raw) {
+template <BusType Bus>
+Error EncoderBase<Bus>::ReadRawImpl(uint32_t& out_raw) {
   uint16_t raw;
   Status   status        = Status::kNormal;
   bool     button_pushed = false;

@@ -7,7 +7,7 @@
 
 #include "base/servo.h"
 #include "hortor.h"
-#include "port_handler.h"
+#include "port.h"
 #include "protocol.h"
 #include "types.h"
 
@@ -17,10 +17,10 @@ namespace hortor::protocol {
  * @brief 协议从机类（CRTP 基类）
  *
  * @tparam DERIVED 派生类类型（CRTP）
- * @tparam RegMapType 寄存器映射类型
- * @tparam PortHandlerType 端口处理器类型
+ * @tparam RegmapType 寄存器映射类型
+ * @tparam PortType 指令端口类型
  */
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
+template <typename DerivedType, typename RegmapType, typename PortType>
 class Slave : public hortor::Noncopyable {
  public:
   /**
@@ -47,15 +47,15 @@ class Slave : public hortor::Noncopyable {
    * @brief 获取寄存器映射
    * @return 寄存器映射
    */
-  RegMapType* regmap();
-  void        set_regmap(RegMapType* regmap);
+  RegmapType* regmap();
+  void        set_regmap(RegmapType* regmap);
 
   /**
-   * @brief 获取端口处理器
-   * @return 端口处理器
+   * @brief 获取协议
+   * @return 协议
    */
-  PortHandlerType* port_handler();
-  void             set_port_handler(PortHandlerType* port_handler);
+  PortType* port();
+  void      set_port(PortType* port);
 
   void    set_id(const uint8_t id);
   uint8_t id() const;
@@ -65,14 +65,17 @@ class Slave : public hortor::Noncopyable {
  protected:
   Error Execute(const InstPacket& packet);
 
-  Error Response(const uint8_t reply_idx, const uint8_t* parameter,
-                 const size_t parameter_size);
+  Error Response(const uint8_t  reply_idx,
+                 const uint8_t* parameter,
+                 const size_t   parameter_size);
 
-  Error WriteRegs(const uint8_t address, const uint8_t* data,
-                  const size_t size);
+  Error WriteRegs(const uint8_t  address,
+                  const uint8_t* data,
+                  const size_t   size);
 
-  Error AfterWriteRegs(const uint8_t address, const uint8_t* data,
-                       const size_t size);
+  Error AfterWriteRegs(const uint8_t  address,
+                       const uint8_t* data,
+                       const size_t   size);
 
   Error PingHandler(const InstPacket& packet);
   Error ReadDataHandler(const InstPacket& packet, const bool response);
@@ -101,11 +104,11 @@ class Slave : public hortor::Noncopyable {
   /**
    * @brief 寄存器映射指针
    */
-  RegMapType* regmap_ = nullptr;
+  RegmapType* regmap_ = nullptr;
   /**
    * @brief 指令传输接口
    */
-  PortHandlerType* port_handler_ = nullptr;
+  PortType* port_ = nullptr;
   /**
    * @brief 异步写缓冲区
    */
@@ -124,15 +127,15 @@ class Slave : public hortor::Noncopyable {
 
 namespace hortor::protocol {
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::Init() {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::Init() {
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::Process(float dt) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::Process(float dt) {
   bool is_complete = false;
-  CHECK(port_handler_->Process(protocol_, dt, inst_packet_, is_complete));
+  CHECK(port_->Process(protocol_, dt, inst_packet_, is_complete));
   if (is_complete) {
     CHECK(Execute(inst_packet_));
   }
@@ -140,57 +143,54 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::Process(float dt) {
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::AfterProcess(float dt) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::AfterProcess(float dt) {
   return static_cast<DerivedType*>(this)->AfterProcessImpl(dt);
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-RegMapType* Slave<DerivedType, RegMapType, PortHandlerType>::regmap() {
+template <typename DerivedType, typename RegmapType, typename PortType>
+RegmapType* Slave<DerivedType, RegmapType, PortType>::regmap() {
   return regmap_;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-void Slave<DerivedType, RegMapType, PortHandlerType>::set_regmap(
-    RegMapType* regmap) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+void Slave<DerivedType, RegmapType, PortType>::set_regmap(RegmapType* regmap) {
   regmap_ = regmap;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-PortHandlerType*
-Slave<DerivedType, RegMapType, PortHandlerType>::port_handler() {
-  return port_handler_;
+template <typename DerivedType, typename RegmapType, typename PortType>
+PortType* Slave<DerivedType, RegmapType, PortType>::port() {
+  return port_;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-void Slave<DerivedType, RegMapType, PortHandlerType>::set_port_handler(
-    PortHandlerType* port_handler) {
-  port_handler_ = port_handler;
+template <typename DerivedType, typename RegmapType, typename PortType>
+void Slave<DerivedType, RegmapType, PortType>::set_port(PortType* port) {
+  port_ = port;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-void Slave<DerivedType, RegMapType, PortHandlerType>::set_id(const uint8_t id) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+void Slave<DerivedType, RegmapType, PortType>::set_id(const uint8_t id) {
   id_ = id;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-uint8_t Slave<DerivedType, RegMapType, PortHandlerType>::id() const {
+template <typename DerivedType, typename RegmapType, typename PortType>
+uint8_t Slave<DerivedType, RegmapType, PortType>::id() const {
   return id_;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-void Slave<DerivedType, RegMapType, PortHandlerType>::set_return_level(
+template <typename DerivedType, typename RegmapType, typename PortType>
+void Slave<DerivedType, RegmapType, PortType>::set_return_level(
     const uint8_t return_level) {
   return_level_ = return_level;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-uint8_t Slave<DerivedType, RegMapType, PortHandlerType>::return_level() const {
+template <typename DerivedType, typename RegmapType, typename PortType>
+uint8_t Slave<DerivedType, RegmapType, PortType>::return_level() const {
   return return_level_;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::Execute(
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::Execute(
     const InstPacket& packet) {
   const auto isBroadcast = packet.id == kBroadcastId;
   const auto isSelf      = packet.id == id_;
@@ -233,42 +233,47 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::Execute(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::Response(
-    const uint8_t reply_idx, const uint8_t* parameter,
-    const size_t parameter_size) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::Response(
+    const uint8_t  reply_idx,
+    const uint8_t* parameter,
+    const size_t   parameter_size) {
   CHECK(protocol_.CreateResponse(id_, status_, parameter, parameter_size,
                                  status_packet_));
-  CHECK(port_handler_->Response(status_packet_, reply_idx));
+  CHECK(port_->Response(status_packet_, reply_idx));
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::WriteRegs(
-    const uint8_t address, const uint8_t* data, const size_t size) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::WriteRegs(const uint8_t address,
+                                                          const uint8_t* data,
+                                                          const size_t   size) {
   VERIFY(data != nullptr && size != 0, Error::kInvalidArg);
   CHECK(regmap_->Write(address, data, size));
   CHECK(AfterWriteRegs(address, data, size));
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::AfterWriteRegs(
-    const uint8_t address, const uint8_t* data, const size_t size) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::AfterWriteRegs(
+    const uint8_t  address,
+    const uint8_t* data,
+    const size_t   size) {
   return static_cast<DerivedType*>(this)->AfterWriteRegsImpl(address, data,
                                                              size);
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::PingHandler(
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::PingHandler(
     const InstPacket& packet) {
   CHECK(Response(0, nullptr, 0));
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::ReadDataHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::ReadDataHandler(
+    const InstPacket& packet,
+    const bool        response) {
   const uint8_t address = packet.parameter[0];
   const uint8_t size    = packet.parameter[1];
   uint8_t       buffer[128];
@@ -279,9 +284,10 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::ReadDataHandler(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::WriteDataHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::WriteDataHandler(
+    const InstPacket& packet,
+    const bool        response) {
   const uint8_t address = packet.parameter[0];
   const uint8_t size    = packet.GetParameterSize() - 1;
   CHECK(WriteRegs(address, packet.parameter + 1, size));
@@ -291,9 +297,10 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::WriteDataHandler(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::RegWriteHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::RegWriteHandler(
+    const InstPacket& packet,
+    const bool        response) {
   const size_t size = packet.GetBufferSize();
   if (async_write_buffer_size_ + size > sizeof(async_write_buffer_)) {
     return Error::kOutOfRange;
@@ -306,9 +313,10 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::RegWriteHandler(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::ActionHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::ActionHandler(
+    const InstPacket& packet,
+    const bool        response) {
   const uint8_t* buffer = async_write_buffer_;
   if (async_write_buffer_size_ == 0) {
     if (response) {
@@ -337,9 +345,10 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::ActionHandler(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::SyncWriteHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::SyncWriteHandler(
+    const InstPacket& packet,
+    const bool        response) {
   const uint8_t  address        = packet.parameter[0];
   const uint8_t  data_size      = packet.parameter[1];
   const uint8_t  parameter_size = packet.GetParameterSize();
@@ -360,9 +369,10 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::SyncWriteHandler(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::BulkReadHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::BulkReadHandler(
+    const InstPacket& packet,
+    const bool        response) {
   const uint8_t  parameter_size = packet.GetParameterSize();
   const uint8_t  block_count    = (parameter_size - 1) / 3;
   uint8_t        buffer[128];
@@ -383,9 +393,10 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::BulkReadHandler(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::ResetHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::ResetHandler(
+    const InstPacket& packet,
+    const bool        response) {
   if (response) {
     CHECK(Response(0, nullptr, 0));
   }
@@ -393,15 +404,16 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::ResetHandler(
   return Error::kOk;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::AfterResetHandler(
-    const InstPacket& packet, const bool response) {
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::AfterResetHandler(
+    const InstPacket& packet,
+    const bool        response) {
   return static_cast<DerivedType*>(this)->AfterResetHandlerImpl(packet,
                                                                 response);
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-Error Slave<DerivedType, RegMapType, PortHandlerType>::InstructionError(
+template <typename DerivedType, typename RegmapType, typename PortType>
+Error Slave<DerivedType, RegmapType, PortType>::InstructionError(
     const bool response) {
   status_.instruction_error = true;
   if (response) {
@@ -410,8 +422,8 @@ Error Slave<DerivedType, RegMapType, PortHandlerType>::InstructionError(
   return Error::kBadData;
 }
 
-template <typename DerivedType, typename RegMapType, typename PortHandlerType>
-bool Slave<DerivedType, RegMapType, PortHandlerType>::CheckResponse(
+template <typename DerivedType, typename RegmapType, typename PortType>
+bool Slave<DerivedType, RegmapType, PortType>::CheckResponse(
     const uint8_t instruction) const {
   switch (return_level_) {
     case 0:

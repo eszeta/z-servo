@@ -25,7 +25,9 @@ namespace hortor::servo {
  * 该类实现了舵机的核心控制功能，包括位置控制、速度控制、电流控制等。
  * 支持多种控制模式，并提供完整的PID控制和保护功能。
  */
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 class Servo : public hortor::Noncopyable {
  public:
@@ -438,28 +440,36 @@ class Servo : public hortor::Noncopyable {
 
 namespace hortor::servo {
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 Error Servo<MotorType, EncoderType, CurrentType, Bits>::Init() {
   current_timeout_limiter_.set_timeout_duration(0.3f);
   return Error::kOk;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 DriveModeBits Servo<MotorType, EncoderType, CurrentType, Bits>::drive_mode()
     const {
   return drive_mode_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_drive_mode(
     const DriveModeBits drive_mode) {
   drive_mode_ = drive_mode;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_drive_mode(
     const uint8_t drive_mode) {
@@ -470,49 +480,63 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_drive_mode(
       drive_mode_.encoder_reverse_mode ? Reverse::kReverse : Reverse::kNormal);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 OperatingMode Servo<MotorType, EncoderType, CurrentType, Bits>::operating_mode()
     const {
   return operating_mode_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_operating_mode(
     const OperatingMode operating_mode) {
   operating_mode_ = operating_mode;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_operating_mode(
     const uint8_t operating_mode) {
   operating_mode_ = static_cast<OperatingMode>(operating_mode);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 ShutdownBits Servo<MotorType, EncoderType, CurrentType, Bits>::shutdown()
     const {
   return shutdown_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_shutdown(
     const ShutdownBits shutdown) {
   shutdown_ = shutdown;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_shutdown(
     const uint8_t shutdown) {
   shutdown_.value = shutdown;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::homing_offset()
     const {
@@ -522,7 +546,9 @@ int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::homing_offset()
   return math::mapResolution(homing_offset, kBits, kTargetBits);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_homing_offset(
     const int32_t homing_offset) {
@@ -533,69 +559,89 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_homing_offset(
   encoder_pll_.encoder()->set_homing_offset(mapped_offset);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::moving_threshold()
     const {
   return moving_threshold_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_moving_threshold(
     const float moving_threshold) {
   moving_threshold_ = moving_threshold;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 uint8_t Servo<MotorType, EncoderType, CurrentType, Bits>::temperature_limit()
     const {
   return temperature_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_temperature_limit(
     const uint8_t temperature_limit) {
   temperature_limit_ = temperature_limit;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::max_voltage_limit()
     const {
   return max_voltage_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_max_voltage_limit(
     const float max_voltage_limit) {
   max_voltage_limit_ = max_voltage_limit;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::min_voltage_limit()
     const {
   return min_voltage_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_min_voltage_limit(
     const float min_voltage_limit) {
   min_voltage_limit_ = min_voltage_limit;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::pwm_limit() const {
   return pwm_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_pwm_limit(
     const float pwm_limit) {
@@ -603,13 +649,17 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_pwm_limit(
   position_pid_.set_limit(pwm_limit);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::current_limit() const {
   return current_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_current_limit(
     const float current_limit) {
@@ -617,55 +667,71 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_current_limit(
   current_timeout_limiter_.set_threshold(current_limit);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::velocity_limit() const {
   return velocity_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_velocity_limit(
     const float velocity_limit) {
   velocity_limit_ = velocity_limit;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 uint32_t Servo<MotorType, EncoderType, CurrentType, Bits>::min_position_limit()
     const {
   return min_position_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_min_position_limit(
     const uint32_t min_position_limit) {
   min_position_limit_ = min_position_limit;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 uint32_t Servo<MotorType, EncoderType, CurrentType, Bits>::max_position_limit()
     const {
   return max_position_limit_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_max_position_limit(
     const uint32_t max_position_limit) {
   max_position_limit_ = max_position_limit;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::protection_time()
     const {
   return protection_time_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_protection_time(
     const float protection_time) {
@@ -673,338 +739,442 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_protection_time(
   current_timeout_limiter_.set_timeout_duration(protection_time);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 math::Pid& Servo<MotorType, EncoderType, CurrentType, Bits>::position_pid() {
   return position_pid_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_position_pid(
-    const float kp, const float ki, const float kd) {
+    const float kp,
+    const float ki,
+    const float kd) {
   position_pid_.set_kp(kp);
   position_pid_.set_ki(ki);
   position_pid_.set_kd(kd);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 math::Pid& Servo<MotorType, EncoderType, CurrentType, Bits>::velocity_pid() {
   return velocity_pid_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_velocity_pid(
-    const float kp, const float ki, const float kd) {
+    const float kp,
+    const float ki,
+    const float kd) {
   velocity_pid_.set_kp(kp);
   velocity_pid_.set_ki(ki);
   velocity_pid_.set_kd(kd);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 math::LowPassFilter&
 Servo<MotorType, EncoderType, CurrentType, Bits>::current_lpf() {
   return current_lpf_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_current_lpf(
     const float time_constant) {
   current_lpf_.set_time_constant(time_constant);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::feedforward_1st_gain()
     const {
   return feedforward_1st_gain_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_feedforward_1st_gain(
     const float feedforward_1st_gain) {
   feedforward_1st_gain_ = feedforward_1st_gain;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::feedforward_2nd_gain()
     const {
   return feedforward_2nd_gain_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_feedforward_2nd_gain(
     const float feedforward_2nd_gain) {
   feedforward_2nd_gain_ = feedforward_2nd_gain;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 bool Servo<MotorType, EncoderType, CurrentType, Bits>::torque_enable() const {
   return torque_enable_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_torque_enable(
     const bool torque_enable) {
   torque_enable_ = torque_enable;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
-HardwareErrorStatusBits Servo<MotorType, EncoderType, CurrentType,
-                              Bits>::hardware_error_status() const {
+HardwareErrorStatusBits
+Servo<MotorType, EncoderType, CurrentType, Bits>::hardware_error_status()
+    const {
   return hardware_error_status_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
-uint8_t Servo<MotorType, EncoderType, CurrentType,
-              Bits>::hardware_error_status_value() const {
+uint8_t
+Servo<MotorType, EncoderType, CurrentType, Bits>::hardware_error_status_value()
+    const {
   return hardware_error_status_.value;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
-void Servo<MotorType, EncoderType, CurrentType,
-           Bits>::set_hardware_error_status(const HardwareErrorStatusBits
-                                                hardware_error_status) {
+void Servo<MotorType, EncoderType, CurrentType, Bits>::
+    set_hardware_error_status(
+        const HardwareErrorStatusBits hardware_error_status) {
   hardware_error_status_ = hardware_error_status;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::
     set_hardware_error_status(const uint8_t hardware_error_status) {
   hardware_error_status_.value = hardware_error_status;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::goal_pwm() const {
   return goal_pwm_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_goal_pwm(
     const float goal_pwm) {
   goal_pwm_ = goal_pwm;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::goal_current() const {
   return goal_current_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_goal_current(
     const float goal_current) {
   goal_current_ = goal_current;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::goal_velocity() const {
   return goal_velocity_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_goal_velocity(
     const float goal_velocity) {
   goal_velocity_ = goal_velocity;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::goal_position()
     const {
   return goal_position_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_goal_position(
     const int32_t goal_position) {
   goal_position_ = goal_position;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::present_position()
     const {
   return present_position_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_position(
     const int32_t present_position) {
   present_position_ = present_position;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::present_velocity()
     const {
   return present_velocity_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_velocity(
     const int32_t present_velocity) {
   present_velocity_ = present_velocity;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::present_current()
     const {
   return present_current_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_current(
     const float present_current) {
   present_current_ = present_current;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::present_input_voltage()
     const {
   return present_input_voltage_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
-void Servo<MotorType, EncoderType, CurrentType,
-           Bits>::set_present_input_voltage(const float present_input_voltage) {
+void Servo<MotorType, EncoderType, CurrentType, Bits>::
+    set_present_input_voltage(const float present_input_voltage) {
   present_input_voltage_ = present_input_voltage;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::present_temperature()
     const {
   return present_temperature_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_temperature(
     const float present_temperature) {
   present_temperature_ = present_temperature;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 float Servo<MotorType, EncoderType, CurrentType, Bits>::present_pwm() const {
   return present_pwm_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_pwm(
     const float present_pwm) {
   present_pwm_ = present_pwm;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 bool Servo<MotorType, EncoderType, CurrentType, Bits>::moving() const {
   return moving_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_moving(
     const bool moving) {
   moving_ = moving;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 MovingStatusBits
 Servo<MotorType, EncoderType, CurrentType, Bits>::moving_status() const {
   return moving_status_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 uint8_t Servo<MotorType, EncoderType, CurrentType, Bits>::moving_status_value()
     const {
   return moving_status_.value;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_moving_status(
     const MovingStatusBits control_mode) {
   moving_status_ = control_mode;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_moving_status(
     const uint8_t moving_status) {
   moving_status_.value = moving_status;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 EncoderType* Servo<MotorType, EncoderType, CurrentType, Bits>::encoder() {
   return encoder_pll_.encoder();
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_encoder(
     EncoderType* encoder) {
   encoder_pll_.set_encoder(encoder);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 CurrentType*
 Servo<MotorType, EncoderType, CurrentType, Bits>::current_sensor() {
   return current_sensor_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_current_sensor(
     CurrentType* current_sensor) {
   current_sensor_ = current_sensor;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 MotorType* Servo<MotorType, EncoderType, CurrentType, Bits>::motor() {
   return motor_;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_motor(
     MotorType* motor) {
   motor_ = motor;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 Error Servo<MotorType, EncoderType, CurrentType, Bits>::Process(float dt) {
   CHECK(RefreshPresent(dt));
@@ -1013,14 +1183,18 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::Process(float dt) {
   return Error::kOk;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::AlignToPosition(
     uint32_t target) {
   encoder_pll_.encoder()->AlignToPosition(target);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 Error Servo<MotorType, EncoderType, CurrentType, Bits>::RefreshPresent(
     float dt) {
@@ -1038,7 +1212,9 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::RefreshPresent(
   return Error::kOk;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 Error Servo<MotorType, EncoderType, CurrentType, Bits>::CheckPresent(float dt) {
   const auto current = present_current();
@@ -1050,7 +1226,9 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::CheckPresent(float dt) {
   return Error::kOk;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 Error Servo<MotorType, EncoderType, CurrentType, Bits>::ExecuteOperatingMode(
     float dt) {
@@ -1077,7 +1255,9 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::ExecuteOperatingMode(
   return Error::kOk;
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::positionMode(float dt) {
   const auto limited_goal_position = GetLimitedGoalPosition();
@@ -1089,14 +1269,19 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::positionMode(float dt) {
   SetMotorPower(pwm);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
-int32_t Servo<MotorType, EncoderType, CurrentType,
-              Bits>::GetLimitedGoalPosition() const {
+int32_t
+Servo<MotorType, EncoderType, CurrentType, Bits>::GetLimitedGoalPosition()
+    const {
   return constrain(goal_position_, min_position_limit_, max_position_limit_);
 }
 
-template <typename MotorType, typename EncoderType, typename CurrentType,
+template <typename MotorType,
+          typename EncoderType,
+          typename CurrentType,
           uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::SetMotorPower(
     const float pwm) {

@@ -10,9 +10,10 @@
 
 namespace hortor::drivers::MP6515 {
 
-class MP6515;
-using MP6515Base = servo::Motor<MP6515>;
-class MP6515 final : public MP6515Base {
+class Motor;
+using Base = servo::Motor<Motor>;
+
+class Motor final : public Base {
  public:
   struct Config {
     uint8_t pin_phase;  // PHASE 相位引脚
@@ -37,12 +38,12 @@ class MP6515 final : public MP6515Base {
 
 namespace hortor::drivers::MP6515 {
 
-inline Error MP6515::Init(const Config& config) {
+inline Error Motor::Init(const Config& config) {
   VERIFY(config.pin_phase != 0 && config.pin_enbl != 0 &&
              config.pin_brake != 0 && config.pin_sleep != 0,
          Error::kInvalidArg);
 
-  CHECK(MP6515Base::Init());
+  CHECK(Base::Init());
 
   pin_phase_ = config.pin_phase;
   pin_enbl_  = config.pin_enbl;
@@ -62,7 +63,7 @@ inline Error MP6515::Init(const Config& config) {
   return Error::kOk;
 }
 
-inline void MP6515::SetPWMImpl(float pwm) {
+inline void Motor::SetPWMImpl(float pwm) {
   pwm = pwm * static_cast<int8_t>(reverse_);
   pwm = constrain(pwm, -1.0f, 1.0f);
 
@@ -80,11 +81,11 @@ inline void MP6515::SetPWMImpl(float pwm) {
   }
 }
 
-inline void MP6515::BrakeImpl() {
+inline void Motor::BrakeImpl() {
   digitalWrite(pin_brake_, HIGH);
 }
 
-inline void MP6515::CoastImpl() {
+inline void Motor::CoastImpl() {
   digitalWrite(pin_brake_, LOW);
   digitalWrite(pin_enbl_, LOW);
 }

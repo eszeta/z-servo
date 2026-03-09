@@ -2,71 +2,69 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <Arduino.h>
-#include <SPI.h>
 #include <Wire.h>
 #include <base/servo.h>
 #include <drivers/current_mirror/current_mirror.h>
 #include <drivers/drv8231a/drv8231a.h>
-#include <drivers/lsm6dsow/lsm6dsow.h>
 #include <drivers/mt6701/mt6701.h>
 #include <info_led/info_led.h>
-#include <math/math.h>
-#include <servo_slave/slave.h>
+#include <protocol/port_i2c.h>
+#include <slave/slave.h>
 #include <utils/commander.h>
 #include <utils/debug_print.h>
 #include <utils/monitor.h>
 #include <utils/task_scheduler.h>
 
-using hortor::Error;
-using hortor::IsFail;
-using hortor::info_led::LedMode;
-using hortor::utils::Commander;
-using hortor::utils::DebugEnable;
-using hortor::utils::Monitor;
-using hortor::utils::TaskScheduler;
-using InfoLEDType     = hortor::info_led::InfoLED<LedMode::kOpenDrain>;
-using InfoLEDInfoType = InfoLEDType::InfoType;
-using PortHandlerType = hortor::protocol::I2cPortHandler;
-using ReverseType     = hortor::servo::Reverse;
-using SlaveRegMapType = hortor::servo_slave::RegMap;
-using PlainType       = hortor::drivers::MT6701::PlainType;
-using Encoder         = hortor::drivers::MT6701::MT6701<PlainType::kI2C>;
-using EncoderConfig   = Encoder::Config;
-using Current         = hortor::drivers::current_mirror::CurrentMirror;
-using Motor           = hortor::drivers::DRV8231A::DRV8231A;
-
-// 信息灯引脚
-constexpr auto kInfoLedPin = PA12;
-// 主控制循环频率 1000Hz
-constexpr auto kMainLoopRateHz = 1000;
-// 调试输出频率 10Hz
-constexpr auto kDebugOutputRateHz = 10;
-// Servo逻辑分辨率位数
 constexpr auto kResolutionBits = 12;
 
-// 伺服电机类型别名，简化复杂的模板类型
-using ServoType =
-    hortor::servo::Servo<Motor, Encoder, Current, kResolutionBits>;
+// 总线与协议
+using Port = hortor::protocol::PortI2C;
 
-using SlaveType = hortor::servo_slave::Slave<ServoType>;
+// 驱动组件
+using Motor   = hortor::drivers::DRV8231A::Motor;
+using Encoder = hortor::drivers::MT6701::Encoder<hortor::BusType::kI2C>;
+using Current = hortor::drivers::CurrentMirror::Current;
+
+// 伺服与从机
+using Servo  = hortor::servo::Servo<Motor, Encoder, Current, kResolutionBits>;
+using Slave  = hortor::slave::Slave<Servo, Port>;
+using Regmap = hortor::slave::Regmap;
+
+// 信息灯
+using InfoLED =
+    hortor::info_led::InfoLED<hortor::info_led::LedMode::kOpenDrain>;
+using InfoLEDInfo = InfoLED::InfoType;
+
+// 工具
+using Error = hortor::Error;
+using hortor::IsFail;
+using Monitor       = hortor::utils::Monitor<Servo>;
+using Commander     = hortor::utils::Commander;
+using TaskScheduler = hortor::utils::TaskScheduler<>;
+using hortor::utils::DebugEnable;
+
+// 编码器配置
+using EncoderConfig = Encoder::Config;
+using Reverse       = hortor::servo::Reverse;
+
+constexpr auto kInfoLedPin        = PA12;
+constexpr auto kMainLoopRateHz    = 1000;
+constexpr auto kDebugOutputRateHz = 10;
 
 HardwareSerial serial_debug(PB4, PB3);
 TwoWire        wire_sensor(PA8, PA9);
 TwoWire        wire_slave(PB7, PA15);
 
-InfoLEDType     info_led{};
-SlaveRegMapType regmap{};
-PortHandlerType port_handler{};
-SlaveType       slave{};
-
-Motor     motor_driver{};
-Encoder   encoder{};
-Current   current_sensor{};
-ServoType servo{};
-
-Monitor<ServoType> monitor{};
-Commander          commander{};
-// 集中式任务调度器（固定容量，避免动态分配）
+InfoLED       led{};
+Regmap        regmap{};
+Port          port{};
+Slave         slave{};
+Motor         motor_driver{};
+Encoder       encoder{};
+Current       current_sensor{};
+Servo         servo{};
+Monitor       monitor{};
+Commander     commander{};
 TaskScheduler scheduler{};
 
 // 系统初始化
@@ -80,7 +78,7 @@ Error DebugOutputCallback(float dt);
 void setup() {
   const auto error = SystemSetup();
   if (IsFail(error)) {
-    info_led.ShowErrorCode(static_cast<uint8_t>(error));
+    led.ShowErrorCode(static_cast<uint8_t>(error));
     scheduler.ClearTasks();
     scheduler.AddTask(DebugOutputCallback,
                       kDebugOutputRateHz);  // 10Hz 调试输出
@@ -92,7 +90,7 @@ void loop() {
   // 统一调度与睡眠（按最小周期）
   // 运行时错误不 Panic，而是点亮故障灯并继续运行（允许通信恢复）
   if (IsFail(scheduler.Tick())) {
-    info_led.SetInfo(InfoLEDInfoType::kError);
+    led.SetInfo(InfoLEDInfo::kError);
   }
 }
 
@@ -104,8 +102,8 @@ Error SystemSetup() {
   DebugEnable(&serial_debug);
   hortor::utils::DebugPrintln(F("setup"));
 
-  info_led.Init(kInfoLedPin);
-  info_led.SetInfo(InfoLEDInfoType::kOk);
+  led.Init(kInfoLedPin);
+  led.SetInfo(InfoLEDInfo::kOk);
 
   wire_sensor.begin();
   wire_slave.begin();
@@ -119,7 +117,7 @@ Error SystemSetup() {
 
   EncoderConfig encoder_config{};
   encoder_config.homing_offset = 0;
-  encoder_config.reverse       = ReverseType::kNormal;
+  encoder_config.reverse       = Reverse::kNormal;
   encoder_config.wire          = &wire_sensor;
 
   CHECK(encoder.Init(encoder_config));
@@ -136,9 +134,9 @@ Error SystemSetup() {
   CHECK(servo.Init());
 
   CHECK(regmap.Init());
-  CHECK(port_handler.Init(&wire_slave));
+  CHECK(port.Init(&wire_slave));
   slave.set_regmap(&regmap);
-  slave.set_port_handler(&port_handler);
+  slave.set_port(&port);
   slave.set_servo(&servo);
   CHECK(slave.Init());
 
@@ -166,7 +164,7 @@ Error MainLoopCallback(float dt) {
  * @param dt 距离上次调用的时间间隔（秒）
  */
 Error DebugOutputCallback(float dt) {
-  info_led.Process(dt);
+  led.Process(dt);
   CHECK(monitor.Process(dt));
   return Error::kOk;
 }

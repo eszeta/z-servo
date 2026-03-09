@@ -8,6 +8,7 @@ AlignConsecutiveShortCaseStatements:
 AlignEscapedNewlines: LeftWithLastLine            # 宏续行符 \ 以末行左边缘对齐（默认：Left）
 AlignOperands: AlignAfterOperator                 # 多行表达式操作数在运算符后对齐（默认：Align）
 AllowAllParametersOfDeclarationOnNextLine: false  # 禁止所有参数换到下一行（默认：true）
+BinPackParameters: OnePerLine                     # 超宽时每个参数单独一行（默认：true）
 AllowShortBlocksOnASingleLine: Empty              # 仅空块可单行（默认：Never）
 AllowShortFunctionsOnASingleLine: Inline          # 仅 inline 函数可单行（默认：All）
 AllowShortIfStatementsOnASingleLine: Never        # 禁止短 if 单行（默认：WithoutElse）

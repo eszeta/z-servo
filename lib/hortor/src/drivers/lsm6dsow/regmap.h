@@ -4,7 +4,7 @@
 #pragma once
 
 #include "base/types.h"
-#include "regmap/i2c_plain.h"
+#include "regmap/reg_i2c.h"
 #include "regmap/regmap.h"
 #include "types.h"
 
@@ -13,7 +13,7 @@ namespace hortor::drivers::LSM6DSOW {
 /**
  * @brief LSM6DSOW控制器类
  */
-class RegMap : public regmap::RegMap<regmap::I2CPlain> {
+class Regmap : public regmap::Regmap<regmap::RegI2C> {
  public:
   Error Init(TwoWire* wire, const int address);
   Error ReadAcceleration(float& x, float& y, float& z);
@@ -28,8 +28,8 @@ class RegMap : public regmap::RegMap<regmap::I2CPlain> {
 
 namespace hortor::drivers::LSM6DSOW {
 
-inline Error RegMap::Init(TwoWire* wire, const int address) {
-  CHECK(plain_.Init(wire, address));
+inline Error Regmap::Init(TwoWire* wire, const int address) {
+  CHECK(transport_.Init(wire, address));
 
   uint8_t value;
   using kWHO_AM_I = LSM6DSOWRegs::kWHO_AM_I;
@@ -51,7 +51,7 @@ inline Error RegMap::Init(TwoWire* wire, const int address) {
   return Error::kOk;
 }
 
-inline Error RegMap::ReadAcceleration(float& x, float& y, float& z) {
+inline Error Regmap::ReadAcceleration(float& x, float& y, float& z) {
   const uint8_t size = 6;
   uint8_t       data[size];
   using kOUTX_A = LSM6DSOWRegs::kOUTX_A;
@@ -65,7 +65,7 @@ inline Error RegMap::ReadAcceleration(float& x, float& y, float& z) {
   return Error::kOk;
 }
 
-inline bool RegMap::AccelerationAvailable() {
+inline bool Regmap::AccelerationAvailable() {
   uint8_t value;
   using kXLDA     = LSM6DSOWRegs::kXLDA;
   const Error err = ReadField<kXLDA>(value);
@@ -75,7 +75,7 @@ inline bool RegMap::AccelerationAvailable() {
   return value & 0x01;
 }
 
-inline Error RegMap::ReadGyroscope(float& x, float& y, float& z) {
+inline Error Regmap::ReadGyroscope(float& x, float& y, float& z) {
   const uint8_t size = 6;
   uint8_t       data[size];
   using kOUTX_L_G = LSM6DSOWRegs::kOUTX_L_G;
@@ -89,7 +89,7 @@ inline Error RegMap::ReadGyroscope(float& x, float& y, float& z) {
   return Error::kOk;
 }
 
-inline bool RegMap::GyroscopeAvailable() {
+inline bool Regmap::GyroscopeAvailable() {
   uint8_t value;
   using kGDA      = LSM6DSOWRegs::kGDA;
   const Error err = ReadField<kGDA>(value);
@@ -99,7 +99,7 @@ inline bool RegMap::GyroscopeAvailable() {
   return value & 0x02;
 }
 
-inline Error RegMap::ReadTemperature(float& temperature_deg) {
+inline Error Regmap::ReadTemperature(float& temperature_deg) {
   const uint8_t size = 2;
   uint8_t       data[size];
   using kOUT_TEMP = LSM6DSOWRegs::kOUT_TEMP;
@@ -109,7 +109,7 @@ inline Error RegMap::ReadTemperature(float& temperature_deg) {
   return Error::kOk;
 }
 
-inline bool RegMap::TemperatureAvailable() {
+inline bool Regmap::TemperatureAvailable() {
   uint8_t value;
   using kTDA      = LSM6DSOWRegs::kTDA;
   const Error err = ReadField<kTDA>(value);

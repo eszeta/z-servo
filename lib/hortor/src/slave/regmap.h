@@ -13,22 +13,22 @@
 
 #include <Arduino.h>
 
-#include "regmap/mmio_plain.h"
+#include "regmap/reg_mmio.h"
 #include "types.h"
 
 #ifndef EEPROM_DISABLE
 #include <EEPROM.h>
 #endif
 
-namespace hortor::servo_slave {
+namespace hortor::slave {
 
 /**
  * @brief 伺服从机寄存器映射实现
  */
-class RegMap : public regmap::RegMap<regmap::MmioPlain> {
+class Regmap : public regmap::Regmap<regmap::RegMmio> {
  public:
   Error Init() {
-    CHECK(plain_.Init(table_, sizeof(table_)));
+    CHECK(transport_.Init(table_, sizeof(table_)));
     CHECK(LoadEeprom());
     // 检查EEPROM是否为空
     if (IsEepromEmpty()) {
@@ -1702,4 +1702,4 @@ class RegMap : public regmap::RegMap<regmap::MmioPlain> {
   uint8_t table_[ControlTable::kTotalSize] = {};
 };
 
-}  // namespace hortor::servo_slave
+}  // namespace hortor::slave

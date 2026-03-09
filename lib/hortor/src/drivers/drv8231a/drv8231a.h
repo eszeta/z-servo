@@ -9,9 +9,10 @@
 
 namespace hortor::drivers::DRV8231A {
 
-class DRV8231A;
-using DRV8231ABase = servo::Motor<DRV8231A>;
-class DRV8231A final : public DRV8231ABase {
+class Motor;
+using Base = servo::Motor<Motor>;
+
+class Motor final : public Base {
  public:
   struct Config {
     uint8_t pin_in1;                      // IN1 控制引脚
@@ -40,10 +41,10 @@ class DRV8231A final : public DRV8231ABase {
 
 namespace hortor::drivers::DRV8231A {
 
-inline Error DRV8231A::Init(const Config& config) {
+inline Error Motor::Init(const Config& config) {
   VERIFY(config.pin_in1 != 0 && config.pin_in2 != 0, Error::kInvalidArg);
 
-  CHECK(DRV8231ABase::Init());
+  CHECK(Base::Init());
 
   pin_in1_              = config.pin_in1;
   pin_in2_              = config.pin_in2;
@@ -63,7 +64,7 @@ inline Error DRV8231A::Init(const Config& config) {
   return Error::kOk;
 }
 
-inline void DRV8231A::SetPWMImpl(float pwm) {
+inline void Motor::SetPWMImpl(float pwm) {
   pwm = pwm * static_cast<int8_t>(reverse_);
   pwm = constrain(pwm, -1.0f, 1.0f);
 
@@ -76,24 +77,24 @@ inline void DRV8231A::SetPWMImpl(float pwm) {
   }
 }
 
-inline void DRV8231A::BrakeImpl() {
+inline void Motor::BrakeImpl() {
   digitalWrite(pin_in1_, HIGH);
   digitalWrite(pin_in2_, HIGH);
 }
 
-inline void DRV8231A::CoastImpl() {
+inline void Motor::CoastImpl() {
   digitalWrite(pin_in1_, LOW);
   digitalWrite(pin_in2_, LOW);
 }
 
-inline bool DRV8231A::HasFault() const {
+inline bool Motor::HasFault() const {
   if (pin_nfault_ == 0) {
     return false;
   }
   return digitalRead(pin_nfault_) == LOW;
 }
 
-inline void DRV8231A::SetPWMFastDecay(float pwm) {
+inline void Motor::SetPWMFastDecay(float pwm) {
   if (pwm > 0.0f) {
     analogWrite(pin_in1_, static_cast<uint32_t>(255 * pwm));
     digitalWrite(pin_in2_, LOW);
@@ -106,7 +107,7 @@ inline void DRV8231A::SetPWMFastDecay(float pwm) {
   }
 }
 
-inline void DRV8231A::SetPWMSlowDecay(float pwm) {
+inline void Motor::SetPWMSlowDecay(float pwm) {
   if (pwm > 0.0f) {
     digitalWrite(pin_in1_, HIGH);
     analogWrite(pin_in2_, static_cast<uint32_t>(255 * (1.0f - pwm)));
