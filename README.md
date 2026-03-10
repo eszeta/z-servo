@@ -1,6 +1,6 @@
 # Hortor-Servo
 
-Hortor-Servo 是一个基于 Arduino 的舵机控制系统，支持 STM32 和 GD32 架构。该系统提供了精确的位置控制、速度控制和电流检测功能，适用于各类舵机应用场景。
+Hortor-Servo 是一个基于 Arduino 的舵机控制系统，支持 STM32。该系统提供了精确的位置控制、速度控制和电流检测功能，适用于各类舵机应用场景。
 
 ## 核心特性
 
@@ -38,7 +38,7 @@ Hortor-Servo 是一个基于 Arduino 的舵机控制系统，支持 STM32 和 GD
 本项目使用 PlatformIO 构建系统，支持以下MCU：
 
 - STM32G431CB
-- GD32F130G8
+- STM32G030C8T6
 
 ## 许可证
 
