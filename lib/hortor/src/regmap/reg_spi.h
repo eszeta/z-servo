@@ -61,7 +61,7 @@ inline Error RegSPI::Write(const uint8_t address, const uint8_t* data, const siz
   if (cs_pin_ >= 0)
     digitalWrite(cs_pin_, LOW);
   spi_->transfer(address);
-  spi_->transfer(const_cast<uint8_t*>(data), nullptr, size);
+  spi_->transfer(const_cast<uint8_t*>(data), size);
   if (cs_pin_ >= 0)
     digitalWrite(cs_pin_, HIGH);
   spi_->endTransaction();

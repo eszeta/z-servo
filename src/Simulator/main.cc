@@ -1,14 +1,12 @@
-#include "ArduinoFake.h"
+// Copyright 2025 ES_ZETA
+// SPDX-License-Identifier: Apache-2.0
+
+#include <Arduino.h>
 
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(100);
 }
 
 int main() {

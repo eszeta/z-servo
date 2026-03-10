@@ -28,7 +28,7 @@ enum class PacketState : uint8_t {
   kChecksum,
 };
 
-struct __packed InstPacket {
+struct __attribute__((packed)) InstPacket {
   static constexpr uint8_t kBufferCapacity  = 128;
   static constexpr uint8_t kParameterOffset = 5;
   union {

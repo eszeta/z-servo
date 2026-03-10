@@ -42,7 +42,6 @@ class InfoLED : public hortor::Noncopyable {
   enum class InfoType { kOk, kWarning, kError, kFatalError, kMax };
 
   void Init(uint32_t pin);
-  void Init(PinName pinName);
   void SetInfo(InfoType type);
   void Stop();
   void ShowErrorCode(uint8_t code);
@@ -98,12 +97,7 @@ constexpr uint8_t kCycleGap   = BlinkUnit::Make(1000, false);
 
 template <LedMode Mode>
 void InfoLED<Mode>::Init(uint32_t pin) {
-  Init(digitalPinToPinName(pin));
-}
-
-template <LedMode Mode>
-void InfoLED<Mode>::Init(PinName pinName) {
-  led_.Init(pinName);
+  led_.Init(pin);
 }
 
 template <LedMode Mode>

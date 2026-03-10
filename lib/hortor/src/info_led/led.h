@@ -35,11 +35,6 @@ class LED final : public hortor::Noncopyable {
    */
   void Init(uint32_t pin);
   /**
-   * @brief 初始化
-   * @param pinName 引脚名
-   */
-  void Init(PinName pinName);
-  /**
    * @brief 设置状态
    * @param value 状态
    */
@@ -57,7 +52,7 @@ class LED final : public hortor::Noncopyable {
   /**
    * @brief 引脚
    */
-  PinName pin_name_ = NC;
+  uint32_t pin_ = NC;
 };
 
 }  // namespace hortor::info_led
@@ -66,16 +61,11 @@ namespace hortor::info_led {
 
 template <LedMode Mode>
 void LED<Mode>::Init(uint32_t pin) {
-  Init(digitalPinToPinName(pin));
-}
-
-template <LedMode Mode>
-void LED<Mode>::Init(PinName pinName) {
-  pin_name_ = pinName;
+  pin_ = pin;
   if constexpr (Mode == LedMode::kOpenDrain) {
-    pinMode(pinName, OUTPUT_OPEN_DRAIN);
+    pinMode(pin_, OUTPUT_OPEN_DRAIN);
   } else {
-    pinMode(pinName, OUTPUT);
+    pinMode(pin_, OUTPUT);
   }
   Turn(false);
 }
@@ -87,9 +77,9 @@ void LED<Mode>::Turn(bool value) {
   }
   state_ = value;
   if constexpr (Mode == LedMode::kOpenDrain) {
-    digitalWrite(pin_name_, value ? LOW : HIGH);
+    digitalWrite(pin_, value ? LOW : HIGH);
   } else {
-    digitalWrite(pin_name_, value ? HIGH : LOW);
+    digitalWrite(pin_, value ? HIGH : LOW);
   }
 }
 

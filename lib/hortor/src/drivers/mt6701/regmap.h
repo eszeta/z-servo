@@ -122,7 +122,7 @@ inline Error RegmapBase<BusType::kSPI>::ReadRaw(uint16_t& angle_raw,
     uint8_t  status : 2;
     uint8_t  button : 1;
     uint8_t  track  : 1;
-  } __packed* raw = reinterpret_cast<decltype(raw)>(data);
+  } __attribute__((packed))* raw = reinterpret_cast<decltype(raw)>(data);
 
   angle_raw     = raw->angle;
   field_status  = static_cast<Status>(raw->status);

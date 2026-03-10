@@ -49,13 +49,24 @@ using hortor::utils::DebugEnable;
 using EncoderConfig = Encoder::Config;
 using Reverse       = hortor::servo::Reverse;
 
-constexpr auto kInfoLedPin        = PA12;
+// 引脚定义
+constexpr auto kPinInfoLed    = PA12;
+constexpr auto kPinMotorIn1   = PA0;
+constexpr auto kPinMotorIn2   = PA2;
+constexpr auto kPinCurrentAdc = PA3;
+constexpr auto kPinSensorSda  = PA8;
+constexpr auto kPinSensorScl  = PA9;
+constexpr auto kPinSlaveSda   = PB7;
+constexpr auto kPinSlaveScl   = PA15;
+constexpr auto kPinDebugTx    = PB4;
+constexpr auto kPinDebugRx    = PB3;
+
 constexpr auto kMainLoopRateHz    = 1000;
 constexpr auto kDebugOutputRateHz = 10;
 
-HardwareSerial serial_debug(PB4, PB3);
-TwoWire        wire_sensor(PA8, PA9);
-TwoWire        wire_slave(PB7, PA15);
+HardwareSerial serial_debug(kPinDebugTx, kPinDebugRx);
+TwoWire        wire_sensor(kPinSensorSda, kPinSensorScl);
+TwoWire        wire_slave(kPinSlaveSda, kPinSlaveScl);
 
 InfoLED       led{};
 Regmap        regmap{};
@@ -111,14 +122,14 @@ Error SystemSetup() {
   DebugEnable(&serial_debug);
   hortor::utils::DebugPrintln(F("setup"));
 
-  led.Init(kInfoLedPin);
+  led.Init(kPinInfoLed);
   led.SetInfo(InfoLEDInfo::kOk);
 
   wire_sensor.begin();
 
   CHECK(motor_driver.Init({
-      .pin_in1              = PA0,
-      .pin_in2              = PA2,
+      .pin_in1              = kPinMotorIn1,
+      .pin_in2              = kPinMotorIn2,
       .pin_nfault           = 0,     // 如果硬件连接了 nFAULT，填入引脚号
       .slow_decay_threshold = 0.3f,  // 低于 30% 使用慢速衰减
   }));
@@ -129,7 +140,7 @@ Error SystemSetup() {
   encoder_config.wire          = &wire_sensor;
 
   CHECK(encoder.Init(encoder_config));
-  CHECK(current_sensor.Init({.pin_adc             = PA3,
+  CHECK(current_sensor.Init({.pin_adc             = kPinCurrentAdc,
                              .ripropi_ohms        = 1000.0f,
                              .scaling_factor      = 1500.0f,
                              .adc_resolution_bits = 12,
