@@ -18,16 +18,17 @@ constexpr uint32_t kBaudRateTable[] = {9600,    57600,   115200,  1000000,
 namespace Converters {
 
 // 统一使用语义化 *Converter 命名。
-using VoltageCvt         = regmap::RatioConverter<float, 1, 10>;      // 0.1V / LSB
-using PwmPctCvt          = regmap::RatioConverter<float, 113, 1000>;  // 0.113% / LSB
-using VelocityCvt        = regmap::RatioConverter<float, 229, 1000>;  // 0.229RPM / LSB
-using MsCvt              = regmap::RatioConverter<uint16_t, 20>;      // 20ms / LSB
-using UsCvt              = regmap::RatioConverter<uint16_t, 2>;       // 2us / LSB
-using CurrentCvt         = regmap::RatioConverter<float, 1, 1000>;    // 0.001A / LSB
-using FeedforwardGainCvt = regmap::RatioConverter<float, 1, 4>;       // raw / 4
-using PidPCvt            = regmap::RatioConverter<float, 1, 128>;     // raw / 128
-using PidICvt            = regmap::RatioConverter<float, 1, 65536>;   // raw / 65536
-using PidDCvt            = regmap::RatioConverter<float, 1, 16>;      // raw / 16
+using VoltageCvt  = regmap::RatioConverter<float, 1, 10>;         // 0.1V / LSB
+using PwmPctCvt   = regmap::RatioConverter<float, 113, 1000>;     // 0.113% / LSB
+using VelocityCvt = regmap::RatioConverter<float, 229, 1000>;     // 0.229RPM / LSB
+using MsCvt       = regmap::RatioConverter<uint16_t, 20>;         // 20ms / LSB
+using UsCvt       = regmap::RatioConverter<uint16_t, 2>;          // 2us / LSB
+using CurrentCvt  = regmap::RatioConverter<float, 1, 1000>;       // 0.001A / LSB
+using FFGainCvt   = regmap::RatioConverter<float, 1, 4>;          // raw / 4
+using PidPCvt     = regmap::RatioConverter<float, 1, 128>;        // raw / 128
+using PidICvt     = regmap::RatioConverter<float, 1, 65536>;      // raw / 65536
+using PidDCvt     = regmap::RatioConverter<float, 1, 16>;         // raw / 16
+using AccCvt      = regmap::RatioConverter<float, 214577, 1000>;  // 214.577 rev/min² / LSB
 }  // namespace Converters
 /**
  * @brief 控制表
@@ -50,16 +51,17 @@ template <uint8_t Address>
 using CTIB8 = protocol::ControlTableItemB8<Address>;
 
 // 统一使用语义化 *Converter 命名。
-using VoltageCvt         = Converters::VoltageCvt;
-using PwmPctCvt          = Converters::PwmPctCvt;
-using VelocityCvt        = Converters::VelocityCvt;
-using MsCvt              = Converters::MsCvt;
-using UsCvt              = Converters::UsCvt;
-using CurrentCvt         = Converters::CurrentCvt;
-using FeedforwardGainCvt = Converters::FeedforwardGainCvt;
-using PidPCvt            = Converters::PidPCvt;
-using PidICvt            = Converters::PidICvt;
-using PidDCvt            = Converters::PidDCvt;
+using VoltageCvt  = Converters::VoltageCvt;
+using PwmPctCvt   = Converters::PwmPctCvt;
+using VelocityCvt = Converters::VelocityCvt;
+using MsCvt       = Converters::MsCvt;
+using UsCvt       = Converters::UsCvt;
+using CurrentCvt  = Converters::CurrentCvt;
+using FFGainCvt   = Converters::FFGainCvt;
+using PidPCvt     = Converters::PidPCvt;
+using PidICvt     = Converters::PidICvt;
+using PidDCvt     = Converters::PidDCvt;
+using AccCvt      = Converters::AccCvt;
 
 //--------------------------------------------------------------------------
 // EEPROM 区（掉电保存）
@@ -150,12 +152,12 @@ struct kVelocityLimit : CTIU32<0x49> {
   using converter_t               = VelocityCvt;
 };
 /** @brief 位置上限 | 单位: pulse | 访问: RW */
-struct kMaxPositionLimit : CTIU32<0x4D> {
-  static constexpr uint32_t kDefault = 4095;
+struct kMaxPositionLimit : CTIS32<0x4D> {
+  static constexpr int32_t kDefault = 4095;
 };
 /** @brief 位置下限 | 单位: pulse | 访问: RW */
-struct kMinPositionLimit : CTIU32<0x51> {
-  static constexpr uint32_t kDefault = 0;
+struct kMinPositionLimit : CTIS32<0x51> {
+  static constexpr int32_t kDefault = 0;
 };
 /** @brief 过载保护时间 | 单位: 20ms | 访问: RW */
 struct kProtectionTime : CTIU8<0x55> {
@@ -193,16 +195,27 @@ struct kPositionPGain : CTIU16<0x68> {
 /** @brief 前馈二阶增益 | 单位: - | 访问: RW */
 struct kFeedforward2ndGain : CTIU16<0x6A> {
   static constexpr float kDefault = 0.0f;
-  using converter_t               = FeedforwardGainCvt;
+  using converter_t               = FFGainCvt;
 };
 /** @brief 前馈一阶增益 | 单位: - | 访问: RW */
 struct kFeedforward1stGain : CTIU16<0x6C> {
   static constexpr float kDefault = 0.0f;
-  using converter_t               = FeedforwardGainCvt;
+  using converter_t               = FFGainCvt;
 };
 /* 0x6E-0x6F: 保留，用于PID参数组扩展 */
 
-/* 0x70-0x7F: 保留 */
+/* 轮廓参数组 (0x70-0x7F, 16字节) */
+/** @brief 轮廓加速度 | 单位: 214.577 rev/min² | 访问: RW */
+struct kProfileAcceleration : CTIU32<0x70> {
+  static constexpr float kDefault = 0.0f;
+  using converter_t               = AccCvt;
+};
+/** @brief 轮廓速度 | 单位: 0.229 rev/min | 访问: RW */
+struct kProfileVelocity : CTIU32<0x74> {
+  static constexpr float kDefault = 0.0f;
+  using converter_t               = VelocityCvt;
+};
+/* 0x78-0x7F: 保留，用于轮廓参数组扩展 */
 
 //--------------------------------------------------------------------------
 // RAM 区（掉电不保存）
@@ -294,7 +307,17 @@ struct kPresentInputVoltage : CTIU16<0xB0> {
 struct kPresentTemperature : CTIU8<0xB2> {
   static constexpr uint8_t kDefault = 0;
 };
-/* 0xB4-0xBF: 保留，用于状态反馈组扩展 */
+/* 0xB3: gap */
+/** @brief 期望速度轨迹 | 单位: 0.229 rev/min | 访问: R */
+struct kVelocityTrajectory : CTIS32<0xB4> {
+  static constexpr float kDefault = 0.0f;
+  using converter_t               = VelocityCvt;
+};
+/** @brief 期望位置轨迹 | 单位: pulse | 访问: R */
+struct kPositionTrajectory : CTIS32<0xB8> {
+  static constexpr int32_t kDefault = 0;
+};
+/* 0xBC-0xBF: 保留，用于状态反馈组扩展 */
 
 constexpr size_t kTotalSize = 0xC0;
 };  // namespace ControlTable
@@ -302,9 +325,9 @@ constexpr size_t kTotalSize = 0xC0;
 namespace TableBlocks {
 using protocol::ControlTableBlock;
 
-struct kEeprom
-    : ControlTableBlock<ControlTable::kFirmwareVersion, ControlTable::kFeedforward1stGain> {};
-struct kRam : ControlTableBlock<ControlTable::kTorqueEnable, ControlTable::kPresentTemperature> {};
+struct kEeprom : ControlTableBlock<ControlTable::kFirmwareVersion, ControlTable::kProfileVelocity> {
+};
+struct kRam : ControlTableBlock<ControlTable::kTorqueEnable, ControlTable::kPositionTrajectory> {};
 struct kAlign : ControlTableBlock<ControlTable::kAlignToPosition, ControlTable::kAlignToPosition> {
 };
 }  // namespace TableBlocks

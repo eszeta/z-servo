@@ -107,15 +107,23 @@ union DriveModeBits {
 
 /**
  * @brief 运动状态
+ *
+ * 位布局与 Dynamixel XL330 Moving Status(123) 对齐：
+ *   Bit0: In-Position
+ *   Bit1: Profile Ongoing（Profile 正在执行中）
+ *   Bit2: 保留
+ *   Bit3: Following Error（跟随误差过大）
+ *   Bit4-5: Profile 类型（0=Step, 1=Rect, 2=Triangular, 3=Trapezoidal）
+ *   Bit6-7: 保留
  */
 union MovingStatusBits {
   uint8_t value = 0;
   struct {
     bool    in_position      : 1;  // 位0: 已到达目标位置
-    bool    reserved_bit1    : 1;  // 位1: 保留
+    bool    profile_ongoing  : 1;  // 位1: Profile 执行中
     bool    reserved_bit2    : 1;  // 位2: 保留
     bool    following_error  : 1;  // 位3: 跟随误差
-    uint8_t reserved_bits4_5 : 2;  // 位4-5: 保留
+    uint8_t profile_type     : 2;  // 位4-5: Profile类型(0=Step,1=Rect,2=Tri,3=Trap)
     uint8_t reserved_bits6_7 : 2;  // 位6-7: 保留
   };
 };

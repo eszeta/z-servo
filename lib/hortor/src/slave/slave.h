@@ -186,6 +186,12 @@ Error Slave<ServoType, ChannelType>::ApplyMotorConfig() {
   const auto feedforward_1st_gain = this->regmap_->ReadFeedforward1stGain();
   servo_->set_feedforward_1st_gain(feedforward_1st_gain);
 
+  const auto profile_acceleration = this->regmap_->ReadProfileAcceleration();
+  servo_->set_profile_acceleration(profile_acceleration);
+
+  const auto profile_velocity = this->regmap_->ReadProfileVelocity();
+  servo_->set_profile_velocity(profile_velocity);
+
   const auto torque_enable = this->regmap_->ReadTorqueEnable();
   servo_->set_torque_enable(torque_enable);
 
@@ -237,6 +243,12 @@ Error Slave<ServoType, ChannelType>::UpdateMotorStatus() {
 
   const auto present_pwm = servo_->present_pwm();
   this->regmap_->WritePresentPwm(present_pwm);
+
+  const auto velocity_trajectory = servo_->velocity_trajectory();
+  this->regmap_->WriteVelocityTrajectory(velocity_trajectory);
+
+  const auto position_trajectory = servo_->position_trajectory();
+  this->regmap_->WritePositionTrajectory(position_trajectory);
 
   return Error::kOk;
 }

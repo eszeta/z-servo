@@ -12,6 +12,7 @@
 #include "math/lowpass_filter.h"
 #include "math/math.h"
 #include "math/pid.h"
+#include "math/profile.h"
 #include "motor.h"
 #include "types.h"
 #include "utils/debug_print.h"
@@ -100,12 +101,12 @@ class Servo : public hortor::Noncopyable {
   void  set_velocity_limit(const float velocity_limit);
 
   /** @brief 位置下限 */
-  uint32_t min_position_limit() const;
-  void     set_min_position_limit(const uint32_t min_position_limit);
+  int32_t min_position_limit() const;
+  void    set_min_position_limit(const int32_t min_position_limit);
 
   /** @brief 位置上限 */
-  uint32_t max_position_limit() const;
-  void     set_max_position_limit(const uint32_t max_position_limit);
+  int32_t max_position_limit() const;
+  void    set_max_position_limit(const int32_t max_position_limit);
 
   /** @brief 保护时间 */
   float protection_time() const;
@@ -136,6 +137,14 @@ class Servo : public hortor::Noncopyable {
   /** @brief 二阶前馈增益（加速度前馈，已转换为浮点数） */
   float feedforward_2nd_gain() const;
   void  set_feedforward_2nd_gain(const float feedforward_2nd_gain);
+
+  /** @brief 轮廓加速度（rev/min/s） */
+  float profile_acceleration() const;
+  void  set_profile_acceleration(const float profile_acceleration);
+
+  /** @brief 轮廓速度（rev/min） */
+  float profile_velocity() const;
+  void  set_profile_velocity(const float profile_velocity);
 
 #pragma endregion  // "PID 参数组"
 
@@ -182,12 +191,12 @@ class Servo : public hortor::Noncopyable {
   //==============================================================================
 #pragma region "状态反馈组"
   /** @brief 当前位置 */
-  int32_t present_position() const;
-  void    set_present_position(const int32_t present_position);
+  float present_position() const;
+  void  set_present_position(const float present_position);
 
   /** @brief 当前速度 */
-  int32_t present_velocity() const;
-  void    set_present_velocity(const int32_t present_velocity);
+  float present_velocity() const;
+  void  set_present_velocity(const float present_velocity);
 
   /** @brief 当前电流 */
   float present_current() const;
@@ -204,6 +213,14 @@ class Servo : public hortor::Noncopyable {
   /** @brief 当前PWM */
   float present_pwm() const;
   void  set_present_pwm(const float present_pwm);
+
+  /** @brief 期望速度轨迹（rev/min） */
+  float velocity_trajectory() const;
+  void  set_velocity_trajectory(const float velocity_trajectory);
+
+  /** @brief 期望位置轨迹（pulse） */
+  int32_t position_trajectory() const;
+  void    set_position_trajectory(const int32_t position_trajectory);
 
   /** @brief 运动状态 */
   bool moving() const;
@@ -283,9 +300,9 @@ class Servo : public hortor::Noncopyable {
   /** @brief 速度上限 */
   float velocity_limit_ = 0.0f;
   /** @brief 位置上限 */
-  uint32_t max_position_limit_ = kResolution.kMax;
+  int32_t max_position_limit_ = static_cast<int32_t>(kResolution.kMax);
   /** @brief 位置下限 */
-  uint32_t min_position_limit_ = 0;
+  int32_t min_position_limit_ = 0;
   /** @brief 保护时间 */
   float protection_time_ = 0.0f;
 #pragma endregion  // "保护限制组"
@@ -310,6 +327,23 @@ class Servo : public hortor::Noncopyable {
 
   /** @brief 前馈一阶增益 */
   float feedforward_1st_gain_ = 0.0f;
+
+  /** @brief 轮廓加速度 [rev/min²] */
+  float profile_acceleration_ = 0.0f;
+
+  /** @brief 轮廓速度 [RPM] */
+  float profile_velocity_ = 0.0f;
+
+  /** @brief 速度轮廓生成器 */
+  math::Profile profile_{math::Profile::Config{.cpr = kResolution.kEncoderCpr}};
+
+  /**
+   * @brief 当前 Profile 对应的目标位置（限位后）
+   *
+   * 与 profile_.goal() 对比，若不同则触发 Profile 重建。
+   * 初始化为极端值确保首次 positionMode 调用时一定重建。
+   */
+  int32_t profile_active_goal_ = INT32_MIN;
 
 #pragma endregion  // "PID 参数组"
 
@@ -347,6 +381,12 @@ class Servo : public hortor::Noncopyable {
   // 状态反馈组
   //==============================================================================
 #pragma region "状态反馈组"
+  /** @brief 期望速度轨迹 [rev/min] */
+  float velocity_trajectory_ = 0.0f;
+
+  /** @brief 期望位置轨迹 [pulse] */
+  int32_t position_trajectory_ = 0;
+
   /** @brief 运动状态 */
   bool moving_ = false;
 
@@ -360,10 +400,10 @@ class Servo : public hortor::Noncopyable {
   float present_current_ = 0.0f;
 
   /** @brief 当前速度 */
-  int32_t present_velocity_ = 0;
+  float present_velocity_ = 0.0f;
 
   /** @brief 当前位置 */
-  int32_t present_position_ = 0;
+  float present_position_ = 0.0f;
 
   /** @brief 当前输入电压 */
   float present_input_voltage_ = 0.0f;
@@ -424,6 +464,8 @@ class Servo : public hortor::Noncopyable {
    * @param pwm PWM值
    */
   void SetMotorPower(const float pwm);
+
+  void MotorCoast();
 };
 
 }  // namespace hortor::servo
@@ -463,13 +505,18 @@ OperatingMode Servo<MotorType, EncoderType, CurrentType, Bits>::operating_mode()
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_operating_mode(
     const OperatingMode operating_mode) {
+  if (operating_mode != operating_mode_) {
+    // 模式切换时重置 Profile，确保新模式从零状态开始
+    profile_active_goal_ = INT32_MIN;
+    position_pid_.Reset();
+  }
   operating_mode_ = operating_mode;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_operating_mode(
     const uint8_t operating_mode) {
-  operating_mode_ = static_cast<OperatingMode>(operating_mode);
+  set_operating_mode(static_cast<OperatingMode>(operating_mode));
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
@@ -583,24 +630,24 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_velocity_limit(
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
-uint32_t Servo<MotorType, EncoderType, CurrentType, Bits>::min_position_limit() const {
+int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::min_position_limit() const {
   return min_position_limit_;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_min_position_limit(
-    const uint32_t min_position_limit) {
+    const int32_t min_position_limit) {
   min_position_limit_ = min_position_limit;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
-uint32_t Servo<MotorType, EncoderType, CurrentType, Bits>::max_position_limit() const {
+int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::max_position_limit() const {
   return max_position_limit_;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_max_position_limit(
-    const uint32_t max_position_limit) {
+    const int32_t max_position_limit) {
   max_position_limit_ = max_position_limit;
 }
 
@@ -677,12 +724,39 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_feedforward_2nd_gain(
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+float Servo<MotorType, EncoderType, CurrentType, Bits>::profile_acceleration() const {
+  return profile_acceleration_;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+void Servo<MotorType, EncoderType, CurrentType, Bits>::set_profile_acceleration(
+    const float profile_acceleration) {
+  profile_acceleration_ = profile_acceleration;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+float Servo<MotorType, EncoderType, CurrentType, Bits>::profile_velocity() const {
+  return profile_velocity_;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+void Servo<MotorType, EncoderType, CurrentType, Bits>::set_profile_velocity(
+    const float profile_velocity) {
+  profile_velocity_ = profile_velocity;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 bool Servo<MotorType, EncoderType, CurrentType, Bits>::torque_enable() const {
   return torque_enable_;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_torque_enable(const bool torque_enable) {
+  if (torque_enable && !torque_enable_) {
+    // 从关断切换到使能：重置 Profile，确保从当前实际位置开始规划轨迹
+    profile_active_goal_ = INT32_MIN;
+    position_pid_.Reset();
+  }
   torque_enable_ = torque_enable;
 }
 
@@ -752,24 +826,24 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::set_goal_position(
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
-int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::present_position() const {
+float Servo<MotorType, EncoderType, CurrentType, Bits>::present_position() const {
   return present_position_;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_position(
-    const int32_t present_position) {
+    const float present_position) {
   present_position_ = present_position;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
-int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::present_velocity() const {
+float Servo<MotorType, EncoderType, CurrentType, Bits>::present_velocity() const {
   return present_velocity_;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_velocity(
-    const int32_t present_velocity) {
+    const float present_velocity) {
   present_velocity_ = present_velocity;
 }
 
@@ -814,6 +888,28 @@ float Servo<MotorType, EncoderType, CurrentType, Bits>::present_pwm() const {
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::set_present_pwm(const float present_pwm) {
   present_pwm_ = present_pwm;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+float Servo<MotorType, EncoderType, CurrentType, Bits>::velocity_trajectory() const {
+  return velocity_trajectory_;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+void Servo<MotorType, EncoderType, CurrentType, Bits>::set_velocity_trajectory(
+    const float velocity_trajectory) {
+  velocity_trajectory_ = velocity_trajectory;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::position_trajectory() const {
+  return position_trajectory_;
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+void Servo<MotorType, EncoderType, CurrentType, Bits>::set_position_trajectory(
+    const int32_t position_trajectory) {
+  position_trajectory_ = position_trajectory;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
@@ -921,6 +1017,7 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::CheckPresent(float dt) {
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 Error Servo<MotorType, EncoderType, CurrentType, Bits>::ExecuteOperatingMode(float dt) {
   if (!torque_enable()) {
+    MotorCoast();
     return Error::kOk;
   }
   switch (operating_mode()) {
@@ -945,13 +1042,46 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::ExecuteOperatingMode(flo
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::positionMode(float dt) {
-  const auto limited_goal_position = GetLimitedGoalPosition();
-  const auto error                 = limited_goal_position - present_position_;
-  const auto velocity_ff           = feedforward_1st_gain();
-  const auto acceleration_ff       = 0.0f * feedforward_2nd_gain();
-  const auto feedforward           = velocity_ff + acceleration_ff;
-  const auto pwm                   = position_pid_.Compute(error, dt, feedforward);
+  // 1. 目标位置（限位后），目标变更时重建 Profile 并重置 PID
+  const int32_t limited_goal = GetLimitedGoalPosition();
+  if (limited_goal != profile_active_goal_) {
+    profile_.SetGoal(present_position_, limited_goal, profile_velocity_, profile_acceleration_);
+    profile_active_goal_ = limited_goal;
+    position_pid_.Reset();
+  }
+
+  // 2. 推进轮廓
+  profile_.Process(dt);
+
+  // 3. 将轨迹写入状态寄存器（AfterProcessImpl 会同步到 Regmap）
+  velocity_trajectory_ = profile_.velocity_trajectory_rpm();
+  position_trajectory_ = profile_.position_trajectory();
+
+  // 4. PID 误差 = 轨迹位置 - 当前位置（参考块图：Profile 输出作为 PID 参考输入）
+  const float error = static_cast<float>(position_trajectory_) - present_position_;
+
+  // 5. 前馈（对应块图中 K_FF1st·s 和 K_FF2nd·s² 两路）
+  //    FF1st 乘以轨迹速度 [counts/s]，单位与 encoder_pll_.velocity() 一致
+  //    FF2nd 乘以轨迹加速度 [counts/s²]
+  const float velocity_ff     = feedforward_1st_gain_ * profile_.velocity_trajectory_cps();
+  const float acceleration_ff = feedforward_2nd_gain_ * profile_.acceleration_cps2();
+  const float feedforward     = velocity_ff + acceleration_ff;
+
+  // 6. PID 输出 → PWM
+  const float pwm = position_pid_.Compute(error, dt, feedforward);
   SetMotorPower(pwm);
+
+  // 7. 更新 moving_ 和 moving_status_
+  moving_ = !profile_.is_complete() || (fabsf(present_velocity_) > moving_threshold_);
+
+  MovingStatusBits status{};
+  status.profile_ongoing = !profile_.is_complete();
+  status.profile_type    = static_cast<uint8_t>(profile_.type());
+  // In-Position：Profile 完成且位置误差小于运动阈值对应的脉冲数
+  const float threshold_pulse =
+      moving_threshold_ * static_cast<float>(kResolution.kEncoderCpr) / 60.0f;
+  status.in_position = profile_.is_complete() && (fabsf(error) <= threshold_pulse);
+  moving_status_     = status;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
@@ -963,6 +1093,11 @@ template <typename MotorType, typename EncoderType, typename CurrentType, uint8_
 void Servo<MotorType, EncoderType, CurrentType, Bits>::SetMotorPower(const float pwm) {
   set_present_pwm(pwm);
   motor_->SetPWM(pwm);
+}
+
+template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
+void Servo<MotorType, EncoderType, CurrentType, Bits>::MotorCoast() {
+  motor_->Coast();
 }
 
 }  // namespace hortor::servo

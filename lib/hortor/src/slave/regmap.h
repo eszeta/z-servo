@@ -630,9 +630,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
 
   /**
    * @brief 获取位置上限 (R/W)
-   * @return max_position_limit 位置上限（pulse）
-   *
-   * 范围: 0-4095 pulse
+   * @return max_position_limit 位置上限（pulse，有符号）
    *
    * 【功能说明】
    * - 限制 Position Control Mode 下的最大位置
@@ -640,35 +638,28 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * - Goal Position 会被限制在 [Min Position Limit, Max Position Limit] 范围内
    * - 修改后需要重启生效
    *
-   * 【典型参数】
-   * - 全范围：4095（0-360°）
-   * - 安全范围：3500-4000（留出安全裕度）
-   * - 限制范围：2000-3000（特定应用）
-   *
    * @note 确保 Max Position Limit >= Min Position Limit
    */
-  uint32_t ReadMaxPositionLimit() {
-    uint32_t value;
+  int32_t ReadMaxPositionLimit() {
+    int32_t value;
     ReadField<ControlTable::kMaxPositionLimit>(value);
     return value;
   }
 
   /**
    * @brief 设置位置上限 (R/W)
-   * @param[in] value 位置上限（pulse）
+   * @param[in] value 位置上限（pulse，有符号）
    *
    * @warning 如果设置不当，可能导致舵机无法移动
    * @note 修改后需调用 StoreEeprom() 并重启生效
    */
-  void WriteMaxPositionLimit(const uint32_t value) {
+  void WriteMaxPositionLimit(const int32_t value) {
     WriteField<ControlTable::kMaxPositionLimit>(value);
   }
 
   /**
    * @brief 获取位置下限 (R/W)
-   * @return min_position_limit 位置下限（pulse）
-   *
-   * 范围: 0-4095 pulse
+   * @return min_position_limit 位置下限（pulse，有符号）
    *
    * 【功能说明】
    * - 限制 Position Control Mode 下的最小位置
@@ -676,24 +667,19 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * - Goal Position 会被限制在 [Min Position Limit, Max Position Limit] 范围内
    * - 修改后需要重启生效
    *
-   * 【典型参数】
-   * - 全范围：0（0°）
-   * - 安全范围：50-100（留出安全裕度）
-   * - 限制范围：500-1000（特定应用）
-   *
    * @note 确保 Max Position Limit >= Min Position Limit
    */
-  uint32_t ReadMinPositionLimit() {
-    uint32_t value;
+  int32_t ReadMinPositionLimit() {
+    int32_t value;
     ReadField<ControlTable::kMinPositionLimit>(value);
     return value;
   }
 
   /**
    * @brief 设置位置下限 (R/W)
-   * @param[in] value 位置下限（pulse）
+   * @param[in] value 位置下限（pulse，有符号）
    */
-  void WriteMinPositionLimit(const uint32_t value) {
+  void WriteMinPositionLimit(const int32_t value) {
     WriteField<ControlTable::kMinPositionLimit>(value);
   }
 
@@ -989,10 +975,63 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
 #pragma endregion  // "PID 参数组"
 
   //==============================================================================
-  // 保留区域 (0x70-0x7F, EEPROM)
+  // 轮廓参数组 (0x70-0x7F, EEPROM)
   //==============================================================================
-#pragma region "保留区域"
-#pragma endregion  // "保留区域"
+#pragma region "轮廓参数组"
+
+  /**
+   * @brief 获取轮廓加速度 (R/W)
+   * @return rpm2 轮廓加速度（rev/min²）
+   *
+   * 【功能说明】
+   * - 设置位置控制轨迹生成器的加速度限制
+   * - 对应 Dynamixel Profile Acceleration (108)，单位 214.577 rev/min² / LSB
+   * - 0: 不限制加速度（阶跃）
+   * - 仅在 Position Control Mode 和 Extended Position Control Mode 有效
+   *
+   * @note 作为 EEPROM 参数与 PID 增益同类，掉电保存
+   */
+  float ReadProfileAcceleration() {
+    float value;
+    ReadField<ControlTable::kProfileAcceleration>(value);
+    return value;
+  }
+
+  /**
+   * @brief 设置轮廓加速度 (R/W)
+   * @param[in] value 轮廓加速度（rev/min/s）
+   */
+  void WriteProfileAcceleration(const float value) {
+    WriteField<ControlTable::kProfileAcceleration>(value);
+  }
+
+  /**
+   * @brief 获取轮廓速度 (R/W)
+   * @return rpm 轮廓速度（rev/min）
+   *
+   * 【功能说明】
+   * - 设置位置控制轨迹生成器的最大速度限制
+   * - 对应 Dynamixel Profile Velocity (112)
+   * - 0: 不限制速度（阶跃）
+   * - 仅在 Position Control Mode 和 Extended Position Control Mode 有效
+   *
+   * @note 作为 EEPROM 参数与 PID 增益同类，掉电保存
+   */
+  float ReadProfileVelocity() {
+    float value;
+    ReadField<ControlTable::kProfileVelocity>(value);
+    return value;
+  }
+
+  /**
+   * @brief 设置轮廓速度 (R/W)
+   * @param[in] value 轮廓速度（rev/min）
+   */
+  void WriteProfileVelocity(const float value) {
+    WriteField<ControlTable::kProfileVelocity>(value);
+  }
+
+#pragma endregion  // "轮廓参数组"
 
   //==============================================================================
   // 控制命令组 (0x80-0x8F, RAM)
@@ -1548,6 +1587,58 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
     WriteField<ControlTable::kPresentTemperature>(value);
   }
 
+  /**
+   * @brief 获取期望速度轨迹 (R)
+   * @return rpm 期望速度轨迹（rev/min）
+   *
+   * 【功能说明】
+   * - 位置控制模式下，轨迹生成器输出的期望速度
+   * - 对应 Dynamixel Velocity Trajectory (136)
+   * - 用于前馈控制和运动监控
+   * - 实时更新，反映当前轨迹速度
+   *
+   * @note 此寄存器为只读，由控制器自动更新
+   */
+  float ReadVelocityTrajectory() {
+    float value;
+    ReadField<ControlTable::kVelocityTrajectory>(value);
+    return value;
+  }
+
+  /**
+   * @brief 写入期望速度轨迹 (R，仅内部同步)
+   * @param[in] value 期望速度轨迹（rev/min）
+   */
+  void WriteVelocityTrajectory(const float value) {
+    WriteField<ControlTable::kVelocityTrajectory>(value);
+  }
+
+  /**
+   * @brief 获取期望位置轨迹 (R)
+   * @return pulse 期望位置轨迹（pulse）
+   *
+   * 【功能说明】
+   * - 位置控制模式下，轨迹生成器输出的期望位置
+   * - 对应 Dynamixel Position Trajectory (140)
+   * - 用于跟踪误差监控和调试
+   * - 实时更新，反映当前轨迹位置
+   *
+   * @note 此寄存器为只读，由控制器自动更新
+   */
+  int32_t ReadPositionTrajectory() {
+    int32_t value;
+    ReadField<ControlTable::kPositionTrajectory>(value);
+    return value;
+  }
+
+  /**
+   * @brief 写入期望位置轨迹 (R，仅内部同步)
+   * @param[in] value 期望位置轨迹（pulse）
+   */
+  void WritePositionTrajectory(const int32_t value) {
+    WriteField<ControlTable::kPositionTrajectory>(value);
+  }
+
 #pragma endregion  // "状态反馈组"
 
   //==============================================================================
@@ -1585,6 +1676,8 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
     RestoreEeprom<ControlTable::kPositionPGain>();
     RestoreEeprom<ControlTable::kFeedforward2ndGain>();
     RestoreEeprom<ControlTable::kFeedforward1stGain>();
+    RestoreEeprom<ControlTable::kProfileAcceleration>();
+    RestoreEeprom<ControlTable::kProfileVelocity>();
     CHECK(StoreEeprom());
     return Error::kOk;
   }
