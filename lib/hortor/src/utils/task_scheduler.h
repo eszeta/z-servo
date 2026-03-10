@@ -7,8 +7,8 @@
 
 #include <array>
 
-#include "base/types.h"
-#include "hortor.h"
+#include "noncopyable.h"
+#include "servo/types.h"
 
 namespace hortor::utils {
 

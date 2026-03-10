@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 
-#include "hortor.h"
-#include "math/math.h"
+#include "math.h"
+#include "noncopyable.h"
 
 namespace hortor::math {
 

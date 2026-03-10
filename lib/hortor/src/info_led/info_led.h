@@ -11,7 +11,7 @@
 
 #include "error.h"
 #include "led.h"
-
+#include "servo/types.h"
 namespace hortor::info_led {
 
 /**

@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "base/types.h"
+#include "drivers/lsm6dsow/types.h"
 #include "regmap/reg_i2c.h"
 #include "regmap/regmap.h"
-#include "types.h"
+#include "servo/types.h"
 
 namespace hortor::drivers::LSM6DSOW {
 

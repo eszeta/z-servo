@@ -5,12 +5,11 @@
 
 #include <Arduino.h>
 
-#include "base/servo.h"
 #include "channel.h"
-#include "hortor.h"
+#include "error.h"
+#include "noncopyable.h"
 #include "protocol.h"
-#include "types.h"
-
+#include "protocol/types.h"
 namespace hortor::protocol {
 
 /**

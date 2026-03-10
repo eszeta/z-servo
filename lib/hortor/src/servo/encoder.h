@@ -5,11 +5,10 @@
 
 #include <Arduino.h>
 
-#include "hortor.h"
 #include "math/lowpass_filter.h"
 #include "math/math.h"
 #include "math/resolution.h"
-#include "types.h"
+#include "servo/types.h"
 
 namespace hortor::servo {
 

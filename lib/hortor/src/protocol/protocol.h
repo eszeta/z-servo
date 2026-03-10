@@ -7,9 +7,9 @@
 
 #include <cstring>
 
-#include "base/types.h"
-#include "hortor.h"
-#include "types.h"
+#include "noncopyable.h"
+#include "protocol/types.h"
+#include "servo/types.h"
 
 namespace hortor::protocol {
 

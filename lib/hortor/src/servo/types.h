@@ -5,8 +5,6 @@
 
 #include <Arduino.h>
 
-#include "math/pid.h"
-
 namespace hortor::servo {
 
 /**

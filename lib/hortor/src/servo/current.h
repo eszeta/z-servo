@@ -5,8 +5,9 @@
 
 #include <Arduino.h>
 
-#include "hortor.h"
-#include "types.h"
+#include "error.h"
+#include "noncopyable.h"
+#include "servo/types.h"
 
 namespace hortor::servo {
 

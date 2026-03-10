@@ -5,10 +5,9 @@
 
 #include <Arduino.h>
 
-#include "base/types.h"
-#include "hortor.h"
 #include "math.h"
 #include "resolution.h"
+#include "servo/types.h"
 
 namespace hortor::math {
 

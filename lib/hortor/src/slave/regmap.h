@@ -15,7 +15,7 @@
 #include <EEPROM.h>
 
 #include "regmap/reg_mmio.h"
-#include "types.h"
+#include "slave/types.h"
 
 namespace hortor::slave {
 

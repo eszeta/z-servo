@@ -7,11 +7,10 @@
 #include <SPI.h>
 #include <Wire.h>
 
-#include "base/types.h"
-#include "hortor.h"
+#include "drivers/mt6701/types.h"
 #include "regmap/reg_i2c.h"
 #include "regmap/reg_spi.h"
-#include "types.h"
+#include "servo/types.h"
 
 namespace hortor::drivers::MT6701 {
 

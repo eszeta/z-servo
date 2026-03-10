@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 
-#include "hortor.h"
+#include "error.h"
 #include "protocol/channel.h"
 #include "protocol/slave.h"
 #include "protocol/transport_i2c.h"

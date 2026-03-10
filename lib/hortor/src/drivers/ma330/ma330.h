@@ -5,9 +5,9 @@
 
 #include <SPI.h>
 
-#include "base/encoder.h"
-#include "base/types.h"
 #include "regmap.h"
+#include "servo/encoder.h"
+#include "servo/types.h"
 
 namespace hortor::drivers::MA330 {
 constexpr uint8_t kResolutionBits = 14;

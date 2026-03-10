@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 
-#include "base/motor.h"
+#include "servo/motor.h"
 
 namespace hortor::drivers::DRV8231A {
 

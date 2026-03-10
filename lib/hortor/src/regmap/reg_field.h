@@ -8,7 +8,7 @@
 #include <tuple>
 #include <type_traits>
 
-#include "hortor.h"
+#include "noncopyable.h"
 #include "utils/bit_utils.h"
 
 namespace hortor::regmap {

@@ -5,9 +5,10 @@
 
 #include <Wire.h>
 
-#include "base/types.h"
-#include "hortor.h"
+#include "error.h"
+#include "noncopyable.h"
 #include "regmap.h"
+#include "servo/types.h"
 
 namespace hortor::regmap {
 

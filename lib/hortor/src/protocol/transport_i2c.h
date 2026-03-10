@@ -6,7 +6,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include "hortor.h"
 #include "protocol.h"
 #include "transport.h"
 

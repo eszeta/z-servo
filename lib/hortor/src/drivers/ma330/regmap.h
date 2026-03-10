@@ -6,8 +6,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+#include "drivers/ma330/types.h"
 #include "reg_spi.h"
-#include "types.h"
 
 namespace hortor::drivers::MA330 {
 

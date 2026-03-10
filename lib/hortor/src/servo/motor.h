@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include "hortor.h"
-#include "types.h"
+#include "servo/types.h"
 
 namespace hortor::servo {
 

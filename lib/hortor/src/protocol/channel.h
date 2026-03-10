@@ -5,10 +5,10 @@
 
 #include <Arduino.h>
 
-#include "hortor.h"
+#include "noncopyable.h"
 #include "protocol.h"
+#include "protocol/types.h"
 #include "transport.h"
-#include "types.h"
 
 namespace hortor::protocol {
 

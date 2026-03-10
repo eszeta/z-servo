@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include "base/types.h"
-#include "hortor.h"
+#include "error.h"
+#include "noncopyable.h"
 #include "regmap/reg_field.h"
+#include "servo/types.h"
 
 namespace hortor::regmap {
 

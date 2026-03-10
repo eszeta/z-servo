@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 
-#include "base/current.h"
+#include "servo/current.h"
 
 namespace hortor::drivers::CurrentMirror {
 

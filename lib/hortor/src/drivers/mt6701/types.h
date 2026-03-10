@@ -153,4 +153,8 @@ struct kA_START_0 : FieldU08<0x3F, 0, 8> {};
 struct kA_STOP_0 : FieldU08<0x40, 0, 8> {};
 };  // namespace MT6701Regs
 
+enum class BusType : uint8_t {
+  kI2C,  // I2C总线通信
+  kSPI,  // SPI总线通信
+};
 };  // namespace hortor::drivers::MT6701

@@ -3,13 +3,14 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <base/servo.h>
 #include <drivers/current_mirror/current_mirror.h>
 #include <drivers/drv8231a/drv8231a.h>
 #include <drivers/mt6701/mt6701.h>
 #include <info_led/info_led.h>
 #include <protocol/channel.h>
 #include <protocol/transport_i2c.h>
+#include <servo/servo.h>
+#include <servo/types.h>
 #include <slave/slave.h>
 #include <utils/commander.h>
 #include <utils/debug_print.h>
@@ -23,9 +24,10 @@ using Transport = hortor::protocol::TransportI2C;
 using Channel   = hortor::protocol::ProtocolChannel<Transport>;
 
 // 驱动组件
-using Motor   = hortor::drivers::DRV8231A::Motor;
-using Encoder = hortor::drivers::MT6701::Encoder<hortor::BusType::kI2C>;
-using Current = hortor::drivers::CurrentMirror::Current;
+using Motor      = hortor::drivers::DRV8231A::Motor;
+using EncoderBus = hortor::drivers::MT6701::BusType;
+using Encoder    = hortor::drivers::MT6701::Encoder<EncoderBus::kI2C>;
+using Current    = hortor::drivers::CurrentMirror::Current;
 
 // 伺服与从机
 using Servo  = hortor::servo::Servo<Motor, Encoder, Current, kResolutionBits>;

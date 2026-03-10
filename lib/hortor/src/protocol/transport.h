@@ -5,7 +5,8 @@
 
 #include <Arduino.h>
 
-#include "hortor.h"
+#include "error.h"
+#include "noncopyable.h"
 #include "protocol.h"
 
 namespace hortor::protocol {

@@ -5,8 +5,7 @@
 
 #include <Arduino.h>
 
-#include "base/motor.h"
-#include "hortor.h"
+#include "servo/motor.h"
 
 namespace hortor::drivers::MP6515 {
 
