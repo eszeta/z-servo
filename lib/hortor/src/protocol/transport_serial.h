@@ -9,10 +9,6 @@
 #include "protocol.h"
 #include "transport.h"
 
-#ifdef ARDUINO_ARCH_STM32
-#include <HardwareSerial.h>
-#endif
-
 namespace hortor::protocol {
 
 /**

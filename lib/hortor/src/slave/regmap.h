@@ -12,13 +12,10 @@
 #pragma once
 
 #include <Arduino.h>
+#include <EEPROM.h>
 
 #include "regmap/reg_mmio.h"
 #include "types.h"
-
-#ifndef EEPROM_DISABLE
-#include <EEPROM.h>
-#endif
 
 namespace hortor::slave {
 
@@ -1687,13 +1684,11 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @return 错误码
    */
   Error LoadEeprom() {
-#ifndef EEPROM_DISABLE
     int pos = 0;
     for (uint8_t address = TableBlocks::kEeprom::kBegin; address < TableBlocks::kEeprom::kEnd;
          ++address) {
       table_[address] = EEPROM.read(pos++);
     }
-#endif
     return Error::kOk;
   }
 
@@ -1702,13 +1697,11 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @return 错误码
    */
   Error StoreEeprom() {
-#ifndef EEPROM_DISABLE
     int pos = 0;
     for (uint8_t address = TableBlocks::kEeprom::kBegin; address < TableBlocks::kEeprom::kEnd;
          ++address) {
       EEPROM.update(pos++, table_[address]);
     }
-#endif
     return Error::kOk;
   }
 
@@ -1727,7 +1720,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * @brief 检测 EEPROM 存档是否为空（未初始化）
    * @return true 若 EEPROM 区全为 0xFF 或 0x00
    *
-   * 擦除后的 Flash/EEPROM 通常为 0xFF；EEPROM_DISABLE 时 table_ 初始化为 0。
+   * 擦除后的 Flash/EEPROM 通常为 0xFF；
    */
   bool IsEepromEmpty() const {
     const auto first = table_[TableBlocks::kEeprom::kBegin];
