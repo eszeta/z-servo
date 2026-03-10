@@ -192,7 +192,8 @@ Error Encoder<DerivedType, Bits>::recalibrate() {
   constexpr float kEdgeWindowDeg = 1.0f;
   const float     edge_counts_f =
       (static_cast<float>(kResolution.kEncoderCpr) / 360.0f) * kEdgeWindowDeg;
-  const int32_t edge_threshold = max(ceil(edge_counts_f), 1.0f);
+  const float   ce             = ceil(edge_counts_f);
+  const int32_t edge_threshold = (ce > 1.0f) ? static_cast<int32_t>(ce) : 1;
   if (pos_with_offset > kResolution.kEncoderCpr - edge_threshold) {
     pos_ = pos_with_offset - kResolution.kEncoderCpr;
   } else {

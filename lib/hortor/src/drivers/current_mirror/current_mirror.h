@@ -44,6 +44,7 @@ class Current : public Base {
 namespace hortor::drivers::CurrentMirror {
 
 inline Error Current::Init(const Config& config) {
+  CHECK(Base::Init());
   VERIFY(config.pin_adc != 0, Error::kInvalidArg);
   pin_adc_             = config.pin_adc;
   calibration_samples_ = config.calibration_samples;

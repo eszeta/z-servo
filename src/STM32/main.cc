@@ -72,9 +72,9 @@ InfoLED       led{};
 Regmap        regmap{};
 Channel       channel{};
 Slave         slave{};
-Motor         motor_driver{};
+Motor         motor{};
 Encoder       encoder{};
-Current       current_sensor{};
+Current       current{};
 Servo         servo{};
 Monitor       monitor{};
 TaskScheduler scheduler{};
@@ -127,7 +127,7 @@ Error SystemSetup() {
 
   wire_sensor.begin();
 
-  CHECK(motor_driver.Init({
+  CHECK(motor.Init({
       .pin_in1              = kPinMotorIn1,
       .pin_in2              = kPinMotorIn2,
       .pin_nfault           = 0,     // 如果硬件连接了 nFAULT，填入引脚号
@@ -140,16 +140,16 @@ Error SystemSetup() {
   encoder_config.wire          = &wire_sensor;
 
   CHECK(encoder.Init(encoder_config));
-  CHECK(current_sensor.Init({.pin_adc             = kPinCurrentAdc,
-                             .ripropi_ohms        = 1000.0f,
-                             .scaling_factor      = 1500.0f,
-                             .adc_resolution_bits = 12,
-                             .adc_vref_volts      = 3.3f,
-                             .calibration_samples = 50}));
+  CHECK(current.Init({.pin_adc             = kPinCurrentAdc,
+                      .ripropi_ohms        = 1000.0f,
+                      .scaling_factor      = 1500.0f,
+                      .adc_resolution_bits = 12,
+                      .adc_vref_volts      = 3.3f,
+                      .calibration_samples = 50}));
 
-  servo.set_motor(&motor_driver);
+  servo.set_motor(&motor);
   servo.set_encoder(&encoder);
-  servo.set_current_sensor(&current_sensor);
+  servo.set_current_sensor(&current);
   CHECK(servo.Init());
   CHECK(regmap.Init());
   CHECK(channel.Init(&wire_slave));

@@ -3,12 +3,66 @@
 
 #include <Arduino.h>
 
+#include "error.h"
+#include "servo/servo.h"
+#include "servo/types.h"
+#include "simulator/current.h"
+#include "simulator/encoder.h"
+#include "simulator/motor.h"
+#include "simulator/plant.h"
+#include "utils/task_scheduler.h"
+
+constexpr uint8_t kResolutionBits = 12;
+
+using Motor          = hortor::simulator::SimulatorMotor;
+using Encoder        = hortor::simulator::SimulatorEncoder;
+using Current        = hortor::simulator::SimulatorCurrent;
+using SimulatorPlant = hortor::simulator::SimulatorPlant;
+using Servo          = hortor::servo::Servo<Motor, Encoder, Current, kResolutionBits>;
+using TaskScheduler  = hortor::utils::TaskScheduler<>;
+using EncoderConfig  = Encoder::Config;
+using Reverse        = hortor::servo::Reverse;
+
+constexpr uint32_t kMainLoopRateHz = 1000;
+
+Motor          motor{};
+Encoder        encoder{};
+Current        current{};
+Servo          servo{};
+SimulatorPlant plant{};
+TaskScheduler  scheduler{};
+
+static hortor::Error MainLoopCallback(float dt) {
+  CHECK(plant.Process(dt));
+  return servo.Process(dt);
+}
+
 void setup() {
+  EncoderConfig encoder_config{};
+  encoder_config.homing_offset = 0;
+  encoder_config.reverse       = Reverse::kNormal;
+
+  encoder.Init(encoder_config);
+  current.Init();
+  motor.Init();
+
+  servo.set_motor(&motor);
+  servo.set_encoder(&encoder);
+  servo.set_current_sensor(&current);
+
+  plant.set_motor(&motor);
+  plant.set_encoder(&encoder);
+  plant.set_current_sensor(&current);
+
+  servo.Init();
+
+  scheduler.AddTask(MainLoopCallback, kMainLoopRateHz);
 }
 
 void loop() {
+  const auto err = scheduler.Tick();
+  (void)err;
 }
-
 int main() {
   setup();
   while (true) {

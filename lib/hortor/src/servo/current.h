@@ -20,6 +20,11 @@ template <typename DerivedType>
 class Current : public hortor::Noncopyable {
  public:
   /**
+   * @brief 初始化电流传感器
+   * @return Error 错误码
+   */
+  Error Init();
+  /**
    * @brief 获取当前电流读数
    * @param current 以安培(A)为单位的电流值
    * @return Error 错误码
@@ -38,6 +43,11 @@ class Current : public hortor::Noncopyable {
 }  // namespace hortor::servo
 
 namespace hortor::servo {
+
+template <typename DerivedType>
+Error Current<DerivedType>::Init() {
+  return Error::kOk;
+}
 
 template <typename DerivedType>
 Error Current<DerivedType>::ReadCurrent(float& current) {
