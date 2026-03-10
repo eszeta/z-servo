@@ -1,7 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+#ifdef PIO_UNIT_TESTING
+#include <ArduinoFake.h>
+#else
 #include <Arduino.h>
+#endif
 
 #include "error.h"
 #include "servo/servo.h"
@@ -62,11 +66,4 @@ void setup() {
 void loop() {
   const auto err = scheduler.Tick();
   (void)err;
-}
-int main() {
-  setup();
-  while (true) {
-    loop();
-  }
-  return 0;
 }
