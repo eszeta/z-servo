@@ -28,7 +28,7 @@ class TaskScheduler : public hortor::Noncopyable {
   struct TaskDesc {
     Callback callback     = nullptr;  // 任务回调
     uint32_t period_us    = 0;        // 任务周期（微秒）
-    uint32_t last_time_us = 0;        // 上次执行时间（微秒）
+    uint32_t next_time_us = 0;        // 下次执行时刻（微秒）
   };
 
   static constexpr float kMicroToSec = 1.0f / 1000000.0f;
@@ -78,7 +78,7 @@ Error TaskScheduler<MaxTasks>::AddTask(Callback callback, uint32_t rate_hz) {
   const uint32_t idx       = size_;
   tasks_[idx].callback     = callback;
   tasks_[idx].period_us    = period_us;
-  tasks_[idx].last_time_us = micros() - period_us;
+  tasks_[idx].next_time_us = micros();
   size_ += 1;
   UpdateMinPeriod();
   return Error::kOk;
@@ -116,11 +116,10 @@ template <uint32_t MaxTasks>
 Error TaskScheduler<MaxTasks>::TickNonBlocking() {
   const uint32_t now = micros();
   for (uint32_t i = 0; i < size_; ++i) {
-    TaskDesc&      t       = tasks_[i];
-    const uint32_t elapsed = now - t.last_time_us;
-    if (elapsed >= t.period_us) {
-      const float dt = static_cast<float>(elapsed) * kMicroToSec;
-      t.last_time_us = now;
+    TaskDesc& t = tasks_[i];
+    if (now >= t.next_time_us) {
+      const float dt = static_cast<float>(t.period_us) * kMicroToSec;
+      t.next_time_us += t.period_us;
       CHECK(t.callback(dt));
     }
   }

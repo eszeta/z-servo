@@ -81,6 +81,8 @@ TaskScheduler scheduler{};
 
 // 系统初始化
 Error SystemSetup();
+// 系统循环
+Error SystemLoop();
 // 主控制循环回调函数
 Error MainLoopCallback(float dt);
 // 调试输出回调函数
@@ -101,17 +103,10 @@ void setup() {
 
 // cppcheck-suppress unusedFunction
 void loop() {
-  const auto error = scheduler.Tick();
+  const auto error = SystemLoop();
   if (IsFail(error)) {
     EnterErrorMode(error);
   }
-}
-
-// 进入错误模式
-void EnterErrorMode(Error error) {
-  led.ShowErrorCode(static_cast<uint8_t>(error));
-  scheduler.ClearTasks();
-  scheduler.AddTask(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
 }
 
 Error SystemSetup() {
@@ -169,6 +164,17 @@ Error SystemSetup() {
   scheduler.AddTask(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制
   scheduler.AddTask(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
   return Error::kOk;
+}
+
+Error SystemLoop() {
+  return scheduler.Tick();
+}
+
+// 进入错误模式
+void EnterErrorMode(Error error) {
+  led.ShowErrorCode(static_cast<uint8_t>(error));
+  scheduler.ClearTasks();
+  scheduler.AddTask(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
 }
 
 /**
