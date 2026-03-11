@@ -17,7 +17,9 @@ namespace ProfileTest {
 using Profile = hortor::math::Profile;
 using Type    = hortor::math::Profile::Type;
 
-static constexpr uint16_t kCpr = 4096;
+static constexpr uint16_t kCpr             = 4096;
+static constexpr int      kMaxRectSteps    = 500;   // 步数足够 Rect 轮廓到达 goal
+static constexpr int      kMaxProfileSteps = 2000;  // 步数足够梯形/三角形轮廓到达 goal
 
 // 测试用例：profile_velocity_rpm==0 时 Step，立即完成且位置等于 goal
 void test_set_goal_step_zero_velocity(void) {
@@ -46,7 +48,7 @@ void test_rect_position_linear_then_complete(void) {
 
   float       prev_pos = static_cast<float>(p.position_trajectory());
   const float dt       = 0.01f;
-  for (int i = 0; i < 500; ++i) {
+  for (int i = 0; i < kMaxRectSteps; ++i) {
     p.Process(dt);
     if (p.is_complete()) {
       TEST_ASSERT_EQUAL_INT32(1000, p.position_trajectory());
@@ -66,11 +68,12 @@ void test_profile_process_reaches_goal(void) {
   p.SetGoal(0.0f, 5000, 120.0f, 1000.0f);
 
   const float dt = 0.005f;
-  for (int i = 0; i < 2000 && !p.is_complete(); ++i) {
+  for (int i = 0; i < kMaxProfileSteps && !p.is_complete(); ++i) {
     p.Process(dt);
   }
   TEST_ASSERT_TRUE(p.is_complete());
   TEST_ASSERT_EQUAL_INT32(5000, p.position_trajectory());
+  TEST_ASSERT_TRUE(p.type() == Type::kTrapezoidal || p.type() == Type::kTriangular);
 }
 
 void run_tests(void) {

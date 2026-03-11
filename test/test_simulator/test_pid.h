@@ -26,7 +26,16 @@ void test_p_only(void) {
   TEST_ASSERT_FLOAT_WITHIN(1e-5f, -3.0f, pid.Compute(-3.0f, 0.01f));
 }
 
+// 测试用例：前馈项叠加到输出，output = PID(error, dt) + feedforward
+void test_feedforward(void) {
+  Config      cfg{1.0f, 0.0f, 0.0f, 0.0f, 100.0f};
+  Pid         pid(cfg);
+  const float out = pid.Compute(5.0f, 0.01f, 1.0f);
+  TEST_ASSERT_FLOAT_WITHIN(1e-5f, 5.0f + 1.0f, out);
+}
+
 // 测试用例：积分累加与 Reset 后积分归零
+// 首步梯形积分：integral = ki*dt*0.5*(e + e_prev)，Reset 后 e_prev=0 故首步 out = ki*dt*0.5*1
 void test_integral_and_reset(void) {
   Config cfg{0.0f, 10.0f, 0.0f, 0.0f, 100.0f};
   Pid    pid(cfg);
@@ -51,13 +60,14 @@ void test_limit_and_antiwindup(void) {
   TEST_ASSERT_TRUE(out >= -1.0f);
 }
 
-// 测试用例：D 项 (error - previous_error)/dt
+// 测试用例：D 项 D = kd*(error - previous_error)/dt，此处 kd=2、dt=0.01、delta_error=1 => D=200
+// limit 需大于 200，否则输出被限幅无法验证 D 项数值。
 void test_derivative(void) {
-  Config cfg{0.0f, 0.0f, 2.0f, 0.0f, 100.0f};
+  Config cfg{0.0f, 0.0f, 2.0f, 0.0f, 500.0f};
   Pid    pid(cfg);
   pid.Compute(0.0f, 0.01f);
   float out = pid.Compute(1.0f, 0.01f);
-  TEST_ASSERT_TRUE(out >= 99.0f && out <= 201.0f);
+  TEST_ASSERT_FLOAT_WITHIN(1.0f, 200.0f, out);
 }
 
 // 测试用例：kp/ki/kd/ka/limit getter/setter
@@ -77,6 +87,7 @@ void test_getters_setters(void) {
 
 void run_tests(void) {
   RUN_TEST(PidTest::test_p_only);
+  RUN_TEST(PidTest::test_feedforward);
   RUN_TEST(PidTest::test_integral_and_reset);
   RUN_TEST(PidTest::test_limit_and_antiwindup);
   RUN_TEST(PidTest::test_derivative);

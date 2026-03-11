@@ -85,6 +85,7 @@ void test_combine_uint16_int16(void) {
 void test_twos_to_sign(void) {
   TEST_ASSERT_EQUAL_UINT16(0, bu::TwosToSign(0));
   TEST_ASSERT_EQUAL_UINT16(100, bu::TwosToSign(100));
+  TEST_ASSERT_EQUAL_UINT16(0x8001, bu::TwosToSign(-1));
   TEST_ASSERT_TRUE(bu::IsBitSet(bu::TwosToSign(-1), 15));
   TEST_ASSERT_EQUAL_UINT16(1, bu::ClearBit(bu::TwosToSign(-1), 15));
 }

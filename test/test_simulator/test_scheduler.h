@@ -59,6 +59,7 @@ void test_add_task_success(void) {
 // 测试用例：添加任务非法参数
 // 1) callback 为 nullptr 时 AddTask 应返回 kInvalidArg，size 保持 0。
 // 2) rate_hz 为 0 时 AddTask 应返回 kInvalidArg，size 保持 0。
+// 3) rate_hz > 1000000 导致 period_us==0 时 AddTask 应返回 kInvalidArg，size 保持 0。
 void test_add_task_invalid_args(void) {
   Scheduler s;
   auto      err = s.AddTask(nullptr, 1000);
@@ -66,6 +67,10 @@ void test_add_task_invalid_args(void) {
   TEST_ASSERT_EQUAL_UINT32(0, s.size());
 
   err = s.AddTask(DummyCallback, 0);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kInvalidArg), static_cast<int>(err));
+  TEST_ASSERT_EQUAL_UINT32(0, s.size());
+
+  err = s.AddTask(DummyCallback, 2000000);  // 1000000/2000000 == 0
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kInvalidArg), static_cast<int>(err));
   TEST_ASSERT_EQUAL_UINT32(0, s.size());
 }
@@ -81,6 +86,15 @@ void test_add_task_full(void) {
   const auto err = s.AddTask(DummyCallback, 300);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kInvalidArg), static_cast<int>(err));
   TEST_ASSERT_EQUAL_UINT32(2, s.size());
+}
+
+// 测试用例：RemoveTask(nullptr) 应返回 kInvalidArg
+void test_remove_task_null_callback(void) {
+  Scheduler s;
+  s.AddTask(DummyCallback, 1000);
+  const auto err = s.RemoveTask(nullptr);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kInvalidArg), static_cast<int>(err));
+  TEST_ASSERT_EQUAL_UINT32(1, s.size());
 }
 
 // 测试用例：按回调移除任务
@@ -119,8 +133,8 @@ void test_clear_tasks(void) {
   TEST_ASSERT_EQUAL_UINT32(0, s.min_period_us());
 }
 
-// 测试用例：Tick 触发回调
-// 添加一个 1000Hz 任务后调用一次 Tick()，该任务回调应被调用恰好 1 次，
+// 测试用例：Tick 触发回调并返回 kOk
+// 添加一个 1000Hz 任务后调用一次 Tick()，应返回 kOk，该任务回调被调用恰好 1 次，
 // 且传入的 dt 约为 0.001s（1/1000）。
 void test_tick_invokes_callback(void) {
   Scheduler s;
@@ -134,24 +148,15 @@ void test_tick_invokes_callback(void) {
   TEST_ASSERT_FLOAT_WITHIN(1e-6f, 0.001f, g_tick_last_dt);  // 1/1000 Hz
 }
 
-// 测试用例：Tick 正常返回
-// 添加任务后调用 Tick()（内部会执行任务并在不足周期时 delay），应返回 kOk 且不崩溃。
-void test_tick_returns_ok(void) {
-  Scheduler s;
-  s.AddTask(DummyCallback, 1000);
-  const auto err = s.Tick();
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(err));
-}
-
 void run_tests(void) {
   RUN_TEST(SchedulerTest::test_initial_state);
   RUN_TEST(SchedulerTest::test_add_task_success);
   RUN_TEST(SchedulerTest::test_add_task_invalid_args);
   RUN_TEST(SchedulerTest::test_add_task_full);
+  RUN_TEST(SchedulerTest::test_remove_task_null_callback);
   RUN_TEST(SchedulerTest::test_remove_task);
   RUN_TEST(SchedulerTest::test_clear_tasks);
   RUN_TEST(SchedulerTest::test_tick_invokes_callback);
-  RUN_TEST(SchedulerTest::test_tick_returns_ok);
 }
 
 }  // namespace SchedulerTest

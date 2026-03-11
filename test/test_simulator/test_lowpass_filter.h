@@ -26,6 +26,15 @@ void test_constructor_and_time_constant(void) {
   TEST_ASSERT_EQUAL_FLOAT(0.1f, f2.time_constant());
 }
 
+// 测试用例：set_time_constant(0) 或负数不更新，time_constant() 保持原值
+void test_set_time_constant_zero_or_negative_ignored(void) {
+  Filter f(0.5f);
+  f.set_time_constant(0.0f);
+  TEST_ASSERT_EQUAL_FLOAT(0.5f, f.time_constant());
+  f.set_time_constant(-0.1f);
+  TEST_ASSERT_EQUAL_FLOAT(0.5f, f.time_constant());
+}
+
 // 测试用例：dt<=0 时 Compute 直接返回输入 x
 void test_compute_zero_dt_returns_input(void) {
   Filter f(0.1f);
@@ -58,6 +67,7 @@ void test_reset(void) {
 
 void run_tests(void) {
   RUN_TEST(LowPassFilterTest::test_constructor_and_time_constant);
+  RUN_TEST(LowPassFilterTest::test_set_time_constant_zero_or_negative_ignored);
   RUN_TEST(LowPassFilterTest::test_compute_zero_dt_returns_input);
   RUN_TEST(LowPassFilterTest::test_compute_step_converges);
   RUN_TEST(LowPassFilterTest::test_reset);
