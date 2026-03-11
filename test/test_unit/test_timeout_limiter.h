@@ -3,10 +3,7 @@
 
 #pragma once
 
-/**
- * @file test_timeout_limiter.h
- * @brief TimeoutLimiter 单元测试：初始/设置、Process 累加与清零、Reset。
- */
+/* TimeoutLimiter 单元测试。覆盖初始/设置、Process 累加与清零、Reset。 */
 
 #include <unity.h>
 
@@ -16,7 +13,7 @@ namespace TimeoutLimiterTest {
 
 using Limiter = hortor::utils::TimeoutLimiter;
 
-// 测试用例：初始状态与 setter/getter
+// 验证初始状态与 setter/getter。
 void test_initial_and_setters(void) {
   Limiter l;
   TEST_ASSERT_EQUAL_FLOAT(0.0f, l.threshold());
@@ -28,7 +25,7 @@ void test_initial_and_setters(void) {
   TEST_ASSERT_EQUAL_FLOAT(0.5f, l.timeout_duration());
 }
 
-// 测试用例：当前值未超阈值时 Process 不触发超时
+// 验证当前值未超阈值时 Process 不触发超时。
 void test_process_below_threshold(void) {
   Limiter l;
   l.set_threshold(10.0f);
@@ -36,10 +33,10 @@ void test_process_below_threshold(void) {
 
   TEST_ASSERT_FALSE(l.Process(5.0f, 0.2f));
   TEST_ASSERT_FALSE(l.Process(5.0f, 0.2f));
-  TEST_ASSERT_FALSE(l.Process(10.0f, 0.2f));  // 等于阈值不算超过
+  TEST_ASSERT_FALSE(l.Process(10.0f, 0.2f));  // 等于阈值不视为超过
 }
 
-// 测试用例：当前值超过阈值后累加 dt，达到 timeout_duration 时返回 true
+// 验证超过阈值后累加 dt，达到 timeout_duration 时返回 true。
 void test_process_above_threshold_accumulates(void) {
   Limiter l;
   l.set_threshold(0.0f);
@@ -50,7 +47,7 @@ void test_process_above_threshold_accumulates(void) {
   TEST_ASSERT_TRUE(l.Process(1.0f, 0.2f));  // 0.2+0.2+0.2 >= 0.5
 }
 
-// 测试用例：超过阈值后再次低于阈值则累加时间清零
+// 验证超过阈值后再次低于阈值则累加时间清零。
 void test_process_drop_below_resets_accumulator(void) {
   Limiter l;
   l.set_threshold(10.0f);
@@ -62,7 +59,7 @@ void test_process_drop_below_resets_accumulator(void) {
   TEST_ASSERT_TRUE(l.Process(20.0f, 0.8f));   // 0.3+0.8 >= 1.0
 }
 
-// 测试用例：Reset 后累加时间归零，行为与初始一致
+// 验证 Reset 后累加时间归零，行为与初始一致。
 void test_reset(void) {
   Limiter l;
   l.set_threshold(0.0f);

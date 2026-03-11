@@ -3,10 +3,7 @@
 
 #pragma once
 
-/**
- * @file test_math.h
- * @brief math 工具函数单元测试：mapResolution、mod、fmodf_pos、wrap_pm。
- */
+/* math 工具函数单元测试。覆盖 mapResolution、mod、fmodf_pos、wrap_pm。 */
 
 #include <unity.h>
 
@@ -16,7 +13,7 @@ namespace MathTest {
 
 namespace m = hortor::math;
 
-// 测试用例：mapResolution 不同位数缩放与边界
+// 验证 mapResolution 不同位宽缩放与边界。
 void test_map_resolution(void) {
   TEST_ASSERT_EQUAL_UINT32(0, m::mapResolution<uint32_t>(0, 8, 12));
   TEST_ASSERT_EQUAL_UINT32(255, m::mapResolution<uint32_t>(255, 8, 8));
@@ -26,7 +23,7 @@ void test_map_resolution(void) {
   TEST_ASSERT_TRUE(u16_8_12 >= 4094 && u16_8_12 <= 4095);
 }
 
-// 测试用例：mod 结果始终在 [0, divisor)
+// 验证 mod 结果始终在 [0, divisor)。
 void test_mod(void) {
   TEST_ASSERT_EQUAL_INT(0, m::mod(0, 5));
   TEST_ASSERT_EQUAL_INT(2, m::mod(2, 5));
@@ -36,7 +33,7 @@ void test_mod(void) {
   TEST_ASSERT_EQUAL_INT(2, m::mod(-1, 3));
 }
 
-// 测试用例：fmodf_pos 结果非负
+// 验证 fmodf_pos 结果非负。
 void test_fmodf_pos(void) {
   TEST_ASSERT_FLOAT_WITHIN(1e-6f, 1.0f, m::fmodf_pos(5.0f, 2.0f));
   TEST_ASSERT_FLOAT_WITHIN(1e-6f, 0.0f, m::fmodf_pos(4.0f, 2.0f));
@@ -44,7 +41,7 @@ void test_fmodf_pos(void) {
   TEST_ASSERT_FLOAT_WITHIN(1e-6f, 1.5f, m::fmodf_pos(-2.5f, 2.0f));
 }
 
-// 测试用例：wrap_pm 周期折叠到 ±y/2 区间
+// 验证 wrap_pm 将周期折叠到 ±y/2 区间。
 void test_wrap_pm(void) {
   TEST_ASSERT_FLOAT_WITHIN(1e-5f, 0.0f, m::wrap_pm(0.0f, 360.0f));
   TEST_ASSERT_FLOAT_WITHIN(1e-5f, 90.0f, m::wrap_pm(90.0f, 360.0f));

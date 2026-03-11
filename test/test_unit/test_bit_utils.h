@@ -3,11 +3,8 @@
 
 #pragma once
 
-/**
- * @file test_bit_utils.h
- * @brief bit_utils 单元测试：GetValue/IsMaskSet/IsBitSet、Set/Clear/Toggle、
- *       CreateMask、CombineToUint16/Int16、TwosToSign/SignToTwos。
- */
+/* bit_utils 单元测试。覆盖 GetValue/IsMaskSet/IsBitSet、Set/Clear/Toggle、
+ * CreateMask、CombineToUint16/Int16、TwosToSign/SignToTwos。 */
 
 #include <unity.h>
 
@@ -17,7 +14,7 @@ namespace BitUtilsTest {
 
 namespace bu = hortor::utils::bit_utils;
 
-// 测试用例：GetValue 提取掩码内的值
+// 验证 GetValue 按掩码提取值。
 void test_get_value(void) {
   TEST_ASSERT_EQUAL_UINT32(0, bu::GetValue(0xFFu, 0u));
   TEST_ASSERT_EQUAL_UINT32(0x0F, bu::GetValue(0xFFu, 0x0Fu));
@@ -26,7 +23,7 @@ void test_get_value(void) {
                           bu::GetValue(static_cast<uint8_t>(0x0F), static_cast<uint8_t>(0x04)));
 }
 
-// 测试用例：IsMaskSet 判断掩码位是否置位
+// 验证 IsMaskSet 判断掩码位是否置位。
 void test_is_mask_set(void) {
   TEST_ASSERT_FALSE(bu::IsMaskSet(0u, 1u));
   TEST_ASSERT_TRUE(bu::IsMaskSet(0xFFu, 0x80u));
@@ -34,7 +31,7 @@ void test_is_mask_set(void) {
   TEST_ASSERT_FALSE(bu::IsMaskSet(0x01u, 0x02u));
 }
 
-// 测试用例：IsBitSet 判断特定位是否置位
+// 验证 IsBitSet 判断特定位是否置位。
 void test_is_bit_set(void) {
   TEST_ASSERT_FALSE(bu::IsBitSet(0u, 0));
   TEST_ASSERT_TRUE(bu::IsBitSet(1u, 0));
@@ -42,7 +39,7 @@ void test_is_bit_set(void) {
   TEST_ASSERT_FALSE(bu::IsBitSet(0x7Fu, 7));
 }
 
-// 测试用例：SetMaskBit/ClearMaskBit/ToggleMaskBit 按掩码设置、清除、翻转
+// 验证 SetMaskBit/ClearMaskBit/ToggleMaskBit 按掩码设置、清除、翻转。
 void test_set_clear_toggle_mask(void) {
   uint8_t x = 0;
   x         = bu::SetMaskBit(x, static_cast<uint8_t>(0x0Cu));
@@ -53,7 +50,7 @@ void test_set_clear_toggle_mask(void) {
   TEST_ASSERT_EQUAL_UINT8(0x0Bu, x);
 }
 
-// 测试用例：SetBit/ClearBit/ToggleBit 按位索引设置、清除、翻转
+// 验证 SetBit/ClearBit/ToggleBit 按位索引设置、清除、翻转。
 void test_set_clear_toggle_bit(void) {
   uint16_t x = 0;
   x          = bu::SetBit(x, 5);
@@ -65,7 +62,7 @@ void test_set_clear_toggle_bit(void) {
   TEST_ASSERT_EQUAL_UINT16(0, x);
 }
 
-// 测试用例：CreateMask 生成连续位宽掩码
+// 验证 CreateMask 生成指定位宽与起始位的掩码。
 void test_create_mask(void) {
   TEST_ASSERT_EQUAL_UINT32(0xFu, bu::CreateMask(0, 4));
   TEST_ASSERT_EQUAL_UINT32(0xF0u, bu::CreateMask(4, 4));
@@ -73,7 +70,7 @@ void test_create_mask(void) {
   TEST_ASSERT_EQUAL_UINT32(0x3FF00u, bu::CreateMask(8, 10));
 }
 
-// 测试用例：CombineToUint16/CombineToInt16 高低字节拼接与符号
+// 验证 CombineToUint16/CombineToInt16 高低字节拼接与符号。
 void test_combine_uint16_int16(void) {
   TEST_ASSERT_EQUAL_UINT16(0x1234, bu::CombineToUint16(0x12, 0x34));
   TEST_ASSERT_EQUAL_UINT16(0, bu::CombineToUint16(0, 0));
@@ -81,7 +78,7 @@ void test_combine_uint16_int16(void) {
   TEST_ASSERT_EQUAL_INT16(0x7FFF, bu::CombineToInt16(0x7F, 0xFF));
 }
 
-// 测试用例：TwosToSign 补码转原码
+// 验证 TwosToSign 补码转原码。
 void test_twos_to_sign(void) {
   TEST_ASSERT_EQUAL_UINT16(0, bu::TwosToSign(0));
   TEST_ASSERT_EQUAL_UINT16(100, bu::TwosToSign(100));
@@ -90,7 +87,7 @@ void test_twos_to_sign(void) {
   TEST_ASSERT_EQUAL_UINT16(1, bu::ClearBit(bu::TwosToSign(-1), 15));
 }
 
-// 测试用例：SignToTwos 原码转补码
+// 验证 SignToTwos 原码转补码。
 void test_sign_to_twos(void) {
   TEST_ASSERT_EQUAL_INT16(0, bu::SignToTwos(0));
   TEST_ASSERT_EQUAL_INT16(100, bu::SignToTwos(100));

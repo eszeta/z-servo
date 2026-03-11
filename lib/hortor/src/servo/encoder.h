@@ -5,6 +5,8 @@
 
 #include <Arduino.h>
 
+#include <algorithm>
+
 #include "math/lowpass_filter.h"
 #include "math/math.h"
 #include "math/resolution.h"
@@ -25,6 +27,10 @@ class Encoder : public hortor::Noncopyable {
 
   /** @brief 传感器分辨率（编译期常量，存储在Flash） */
   static constexpr math::Resolution<Bits> kResolution{};
+
+  /** @brief Recalibrate 末端区宽度（counts），pos_with_offset > CPR - kRecalibrateEdgeThreshold 时走末端分支；1° 对应 ceil(CPR/360)，至少 1 */
+  static constexpr int32_t kRecalibrateEdgeThreshold =
+      std::max(1, static_cast<int32_t>((kResolution.kEncoderCpr + 359) / 360));
 
   /**
    * @brief 获取原始计数值
@@ -88,7 +94,7 @@ class Encoder : public hortor::Noncopyable {
    */
   Error ReadRaw(uint32_t& out_raw);
 
-  Error recalibrate();
+  Error Recalibrate();
 
   // ========== 状态变量 ==========
   /** @brief 原始值 [0, CPR-1] */
@@ -128,7 +134,7 @@ Reverse Encoder<DerivedType, Bits>::reverse() const {
 template <typename DerivedType, uint8_t Bits>
 void Encoder<DerivedType, Bits>::set_reverse(const Reverse reverse) {
   reverse_ = reverse;
-  recalibrate();
+  Recalibrate();
 }
 
 template <typename DerivedType, uint8_t Bits>
@@ -151,7 +157,7 @@ Error Encoder<DerivedType, Bits>::Init(const Config& config) {
   homing_offset_ = config.homing_offset;
   reverse_       = config.reverse;
 
-  return recalibrate();
+  return Recalibrate();
 }
 
 template <typename DerivedType, uint8_t Bits>
@@ -170,8 +176,7 @@ Error Encoder<DerivedType, Bits>::Process(float dt) {
 
 template <typename DerivedType, uint8_t Bits>
 Error Encoder<DerivedType, Bits>::AlignToPosition(uint32_t target) {
-  const auto current_normalized = math::mod(pos(), kResolution.kEncoderCpr);
-  const auto delta_to_target    = target - current_normalized;
+  const auto delta_to_target = static_cast<int32_t>(target) - pos();
   set_homing_offset(homing_offset_ + delta_to_target);
   return Error::kOk;
 }
@@ -182,19 +187,14 @@ Error Encoder<DerivedType, Bits>::ReadRaw(uint32_t& out_raw) {
 }
 
 template <typename DerivedType, uint8_t Bits>
-Error Encoder<DerivedType, Bits>::recalibrate() {
+Error Encoder<DerivedType, Bits>::Recalibrate() {
   CHECK(ReadRaw(raw_pos_));
   const auto reverse_val     = static_cast<int32_t>(reverse_);
   const auto local_pos       = static_cast<int32_t>(raw_pos_) * reverse_val;
   const auto normal_pos      = math::mod(local_pos, kResolution.kEncoderCpr);
   const auto pos_with_offset = math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
 
-  constexpr float kEdgeWindowDeg = 1.0f;
-  const float     edge_counts_f =
-      (static_cast<float>(kResolution.kEncoderCpr) / 360.0f) * kEdgeWindowDeg;
-  const float   ce             = ceil(edge_counts_f);
-  const int32_t edge_threshold = (ce > 1.0f) ? static_cast<int32_t>(ce) : 1;
-  if (pos_with_offset > kResolution.kEncoderCpr - edge_threshold) {
+  if (pos_with_offset > kResolution.kEncoderCpr - kRecalibrateEdgeThreshold) {
     pos_ = pos_with_offset - kResolution.kEncoderCpr;
   } else {
     pos_ = pos_with_offset;

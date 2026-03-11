@@ -50,11 +50,7 @@ void loop() {
 }
 
 Error SystemSetup() {
-  EncoderConfig encoder_config{};
-  encoder_config.homing_offset = 0;
-  encoder_config.reverse       = Reverse::kNormal;
-
-  encoder.Init(encoder_config);
+  encoder.Init({.homing_offset = 0, .reverse = Reverse::kNormal});
   current.Init();
   motor.Init();
 

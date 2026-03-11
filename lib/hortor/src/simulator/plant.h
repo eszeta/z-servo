@@ -4,7 +4,6 @@
 #pragma once
 
 #include "error.h"
-#include "math/math.h"
 #include "simulator/current.h"
 #include "simulator/encoder.h"
 #include "simulator/motor.h"
@@ -29,9 +28,8 @@ class SimulatorPlant {
   Error Process(float dt);
 
  private:
-  static constexpr float    kCpsPerPwm     = 1000.0f;  // counts/s per unit PWM
-  static constexpr float    kCurrentPerPwm = 1.0f;     // A per unit PWM
-  static constexpr uint32_t kCpr           = (1U << kSimEncoderBits);
+  static constexpr float kCpsPerPwm     = 1000.0f;  // counts/s per unit PWM
+  static constexpr float kCurrentPerPwm = 1.0f;     // A per unit PWM
 
   SimulatorMotor*   motor_          = nullptr;
   SimulatorEncoder* encoder_        = nullptr;
@@ -45,13 +43,12 @@ namespace hortor::simulator {
 
 inline Error SimulatorPlant::Process(float dt) {
   if (motor_ == nullptr || encoder_ == nullptr || current_sensor_ == nullptr) {
-    return Error::kOk;
+    return Error::kInvalidArg;
   }
   const float pwm = motor_->last_pwm();
   sim_position_ += kCpsPerPwm * pwm * dt;
   const auto pos_counts = static_cast<int32_t>(sim_position_);
-  const auto raw = static_cast<uint32_t>(hortor::math::mod(pos_counts, static_cast<int32_t>(kCpr)));
-  encoder_->SetRawPosition(raw);
+  encoder_->SetRawPosition(pos_counts);
   current_sensor_->SetCurrent(kCurrentPerPwm * pwm);
   return Error::kOk;
 }

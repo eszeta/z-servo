@@ -1,5 +1,4 @@
 ---
-description: Google C++ 命名与结构规范
-alwaysApply: true
+alwaysApply: false
 ---
 **参考**：[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)

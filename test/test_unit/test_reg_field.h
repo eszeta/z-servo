@@ -3,11 +3,8 @@
 
 #pragma once
 
-/**
- * @file test_reg_field.h
- * @brief regmap::reg_field 单元测试：Trait::SignExtend、Field GetValue/SetValue/Clear、
- *       Converter/RatioConverter、Merged2。
- */
+/* regmap::reg_field 单元测试。覆盖 Trait::SignExtend、Field GetValue/SetValue/Clear、
+ * Converter/RatioConverter、Merged2。 */
 
 #include <unity.h>
 
@@ -17,7 +14,7 @@ namespace RegFieldTest {
 
 namespace reg = hortor::regmap;
 
-// 测试用例：Trait::SignExtend 按位宽符号扩展
+// 验证 Trait::SignExtend 按位宽做符号扩展。
 void test_trait_sign_extend(void) {
   TEST_ASSERT_EQUAL_INT16(0, (reg::Trait::SignExtend<int16_t, 4>(0)));
   TEST_ASSERT_EQUAL_INT16(7, (reg::Trait::SignExtend<int16_t, 4>(7)));
@@ -29,7 +26,7 @@ void test_trait_sign_extend(void) {
 using FieldU8  = reg::Field<uint8_t, 0, 2, 4>;
 using FieldS12 = reg::Field<int16_t, 0, 0, 12>;
 
-// 测试用例：无符号 Field GetValue/SetValue/Clear
+// 验证无符号 Field 的 GetValue/SetValue/Clear。
 void test_field_unsigned_get_set_clear(void) {
   FieldU8::access_t data = 0xFFu;
   TEST_ASSERT_EQUAL_UINT8(0x0Fu, FieldU8::GetValue(data));
@@ -40,7 +37,7 @@ void test_field_unsigned_get_set_clear(void) {
   TEST_ASSERT_EQUAL_UINT8(0xC3u, data);
 }
 
-// 测试用例：有符号 Field GetValue/SetValue 与符号扩展
+// 验证有符号 Field 的 GetValue/SetValue 与符号扩展。
 void test_field_signed_get_set(void) {
   FieldS12::access_t data = 0;
   FieldS12::SetValue(2047, data);
@@ -51,13 +48,13 @@ void test_field_signed_get_set(void) {
   TEST_ASSERT_EQUAL_INT16(-2048, FieldS12::GetValue(data));
 }
 
-// 测试用例：Converter FromRaw/ToRaw 往返
+// 验证 Converter FromRaw/ToRaw 往返一致。
 void test_converter_roundtrip(void) {
   TEST_ASSERT_EQUAL_INT16(100, reg::Converter<int16_t>::FromRaw<uint16_t>(100));
   TEST_ASSERT_EQUAL_UINT16(100, reg::Converter<int16_t>::ToRaw<uint16_t>(100));
 }
 
-// 测试用例：RatioConverter 比例换算与往返
+// 验证 RatioConverter 比例换算与往返。
 void test_ratio_converter(void) {
   using RC = reg::RatioConverter<int32_t, 360, 4096>;
   TEST_ASSERT_EQUAL_INT32(0, RC::FromRaw<uint16_t>(0));
@@ -70,7 +67,7 @@ using High4   = reg::Field<uint8_t, 0, 4, 4>;
 using Low4    = reg::Field<uint8_t, 0, 0, 4>;
 using Merged8 = reg::Merged2<uint8_t, High4, Low4>;
 
-// 测试用例：Merged2 高低段拼接 GetValue/SetValue 一致
+// 验证 Merged2 高低段拼接后 GetValue/SetValue 一致。
 void test_merged2_get_set(void) {
   High4::access_t high = 0;
   Low4::access_t  low  = 0;

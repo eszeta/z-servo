@@ -3,10 +3,7 @@
 
 #pragma once
 
-/**
- * @file test_profile.h
- * @brief Profile 单元测试：SetGoal Step/Rect、Process 推进与完成、梯形阶段。
- */
+/* Profile 单元测试。覆盖 SetGoal Step/Rect、Process 推进与完成、梯形阶段。 */
 
 #include <unity.h>
 
@@ -21,7 +18,7 @@ static constexpr uint16_t kCpr             = 4096;
 static constexpr int      kMaxRectSteps    = 500;   // 步数足够 Rect 轮廓到达 goal
 static constexpr int      kMaxProfileSteps = 2000;  // 步数足够梯形/三角形轮廓到达 goal
 
-// 测试用例：profile_velocity_rpm==0 时 Step，立即完成且位置等于 goal
+// 验证 profile_velocity_rpm==0 时 Step 立即完成且位置等于 goal。
 void test_set_goal_step_zero_velocity(void) {
   Profile p(Profile::Config{kCpr});
   p.SetGoal(0.0f, 100, 0.0f, 0.0f);
@@ -31,7 +28,7 @@ void test_set_goal_step_zero_velocity(void) {
   TEST_ASSERT_EQUAL_INT32(100, p.goal());
 }
 
-// 测试用例：位移不足半脉冲时 Step，立即完成
+// 验证位移不足半脉冲时 Step 立即完成。
 void test_set_goal_step_small_delta(void) {
   Profile p(Profile::Config{kCpr});
   p.SetGoal(0.0f, 0, 100.0f, 100.0f);
@@ -39,7 +36,7 @@ void test_set_goal_step_small_delta(void) {
   TEST_ASSERT_EQUAL_INT32(0, p.position_trajectory());
 }
 
-// 测试用例：Rect 轮廓位置线性增加，结束时 is_complete 且到达 goal、速度为 0
+// 验证 Rect 轮廓位置线性增加，结束时 is_complete 且到达 goal、速度为 0。
 void test_rect_position_linear_then_complete(void) {
   Profile p(Profile::Config{kCpr});
   p.SetGoal(0.0f, 1000, 60.0f, 0.0f);
@@ -62,7 +59,7 @@ void test_rect_position_linear_then_complete(void) {
   TEST_ASSERT_TRUE(p.is_complete());
 }
 
-// 测试用例：带加速度轮廓 Process 多步后完成并到达 goal
+// 验证带加速度轮廓 Process 多步后完成并到达 goal。
 void test_profile_process_reaches_goal(void) {
   Profile p(Profile::Config{kCpr});
   p.SetGoal(0.0f, 5000, 120.0f, 1000.0f);
