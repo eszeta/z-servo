@@ -39,11 +39,11 @@ class TaskScheduler : public hortor::Noncopyable {
   Error    AddTask(Callback callback, uint32_t rate_hz);
   Error    RemoveTask(const Callback callback);
   Error    ClearTasks();
-  Error    TickNonBlocking();
   Error    Tick();
 
  private:
-  void UpdateMinPeriod();
+  void  UpdateMinPeriod();
+  Error TickNonBlocking();
 
   uint32_t                       size_{0};
   std::array<TaskDesc, MaxTasks> tasks_{};
