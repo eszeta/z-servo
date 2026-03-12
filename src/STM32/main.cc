@@ -142,23 +142,16 @@ Error SystemSetup() {
                       .adc_vref_volts      = 3.3f,
                       .calibration_samples = 50}));
 
-  servo.set_motor(&motor);
-  servo.set_encoder(&encoder);
-  servo.set_current_sensor(&current);
-  CHECK(servo.Init());
+  CHECK(servo.Init(&motor, &encoder, &current));
   CHECK(regmap.Init());
   CHECK(channel.Init(&wire_slave));
-  slave.set_regmap(&regmap);
-  slave.set_channel(&channel);
-  slave.set_servo(&servo);
-  CHECK(slave.Init());
+  CHECK(slave.Init(&servo, &regmap, &channel));
 
   wire_slave.begin(slave.id());
   wire_slave.onReceive(OnI2cReceive);
   wire_slave.onRequest(OnI2cRequest);
 
-  monitor.set_port(&serial_debug);
-  monitor.set_servo(&servo);
+  monitor.Init(&servo, &serial_debug);
 
   // 注册任务：集中式调度
   scheduler.AddTask(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制

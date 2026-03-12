@@ -22,9 +22,8 @@ template <typename ServoType, typename ChannelType>
 class Slave : public Base<ServoType, ChannelType> {
  public:
   ServoType* servo();
-  Error      set_servo(ServoType* servo);
 
-  Error Init();
+  Error Init(ServoType* servo, Regmap* regmap, ChannelType* channel);
 
   Error AfterResetHandlerImpl(const protocol::InstPacket& packet, const bool response);
 
@@ -54,14 +53,9 @@ ServoType* Slave<ServoType, ChannelType>::servo() {
 }
 
 template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::set_servo(ServoType* servo) {
+Error Slave<ServoType, ChannelType>::Init(ServoType* servo, Regmap* regmap, ChannelType* channel) {
+  CHECK(Base<ServoType, ChannelType>::Init(regmap, channel));
   servo_ = servo;
-  return Error::kOk;
-}
-
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::Init() {
-  CHECK(Base<ServoType, ChannelType>::Init());
   CHECK(ApplyProtocolConfig());
   CHECK(ApplyMotorConfig());
   CHECK(UpdateMotorStatus());

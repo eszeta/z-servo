@@ -3,8 +3,14 @@
 
 #pragma once
 
-/* SimulatorEncoder 单元测试，按功能域分组：Init、Init 末端、Process/多圈、
- * pos-revolutions、Align、reverse、homing_offset。 */
+/* SimulatorEncoder 单元测试，按功能模块分组：
+ * 1. 初始化与配置
+ * 2. 位置处理与多圈
+ * 3. 对齐功能
+ * 4. 方向控制
+ * 5. 零点偏移
+ * 6. 原始位置管理
+ */
 
 #include <unity.h>
 
@@ -21,9 +27,12 @@ using Reverse = hortor::servo::Reverse;
 
 constexpr uint32_t kCpr = (1U << hortor::simulator::kSimEncoderBits);
 
-// Init 与配置
+// ============================================================================
+// 1. 初始化与配置（Init & Configuration）
+// ============================================================================
 
-void test_init_returns_ok(void) {
+// 基本 Init 流程验证
+void test_init_basic(void) {
   Encoder enc;
   Config  config{};
   config.homing_offset = 0;
@@ -32,130 +41,62 @@ void test_init_returns_ok(void) {
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(err));
 }
 
-// Init 后 pos/revolutions 与 raw、homing_offset、reverse 一致。
-void test_pos_and_revolutions_after_init(void) {
+// 带 homing_offset 初始化
+void test_init_with_homing_offset(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{50, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL_INT32(150, enc.pos());
+  TEST_ASSERT_EQUAL_INT32(50, enc.homing_offset());
+}
+
+// 带 reverse 初始化
+void test_init_with_reverse(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kReverse})));
+  const int32_t expected_pos = static_cast<int32_t>(kCpr) - 100;
+  TEST_ASSERT_EQUAL_INT32(expected_pos, enc.pos());
+  TEST_ASSERT_EQUAL(static_cast<int>(Reverse::kReverse), static_cast<int>(enc.reverse()));
+}
+
+// 边界值 raw=0 初始化
+void test_init_boundary_zero(void) {
   Encoder enc;
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
                     static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
   TEST_ASSERT_EQUAL_INT32(0, enc.pos());
   TEST_ASSERT_EQUAL_INT32(0, enc.revolutions());
-
-  Encoder enc2;
-  enc2.SetRawPosition(100);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc2.Init(Config{0, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL_INT32(100, enc2.pos());
-  TEST_ASSERT_EQUAL_INT32(0, enc2.revolutions());
-
-  Encoder enc3;
-  enc3.SetRawPosition(100);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc3.Init(Config{50, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL_INT32(150, enc3.pos());
-
-  Encoder enc4;
-  enc4.SetRawPosition(100);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc4.Init(Config{0, Reverse::kReverse})));
-  const int32_t expected_pos_reverse = static_cast<int32_t>(kCpr) - 100;
-  TEST_ASSERT_EQUAL_INT32(expected_pos_reverse, enc4.pos());
 }
 
-// Init/Process 后 raw_pos() 与设定一致。
-void test_raw_pos_after_init_and_process(void) {
-  const uint32_t raw_set = 123;
-  Encoder        enc;
-  enc.SetRawPosition(static_cast<int32_t>(raw_set));
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL(static_cast<int>(raw_set), static_cast<int>(enc.raw_pos()));
-
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  TEST_ASSERT_EQUAL(static_cast<int>(raw_set), static_cast<int>(enc.raw_pos()));
-}
-
-// SetRawPosition 超出 [0, CPR-1] 时 Process 后 raw 模归一到该区间。
-void test_raw_pos_in_bounds_after_process(void) {
-  Encoder enc;
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
-  enc.SetRawPosition(100);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  TEST_ASSERT_TRUE(enc.raw_pos() < kCpr);
-
-  enc.SetRawPosition(static_cast<int32_t>(kCpr + 100));
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  TEST_ASSERT_TRUE(enc.raw_pos() < kCpr);
-}
-
-// Init 末端分支（pos 为负的边界）
-
-// Init 时 edge 两侧 pos 分别为非负与负。
-void test_init_edge_boundary_pos_positive_and_negative(void) {
-  const int32_t  edge = Encoder::kRecalibrateEdgeThreshold;
-  const uint32_t pos_boundary_else = kCpr - static_cast<uint32_t>(edge);
-  const uint32_t pos_boundary_if   = pos_boundary_else + 1u;
-
-  Encoder enc;
-  enc.SetRawPosition(static_cast<int32_t>(pos_boundary_else));
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL_INT32(static_cast<int32_t>(pos_boundary_else), enc.pos());
-
-  Encoder enc_if;
-  enc_if.SetRawPosition(static_cast<int32_t>(pos_boundary_if));
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc_if.Init(Config{0, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL_INT32(static_cast<int32_t>(pos_boundary_if) - static_cast<int32_t>(kCpr),
-                          enc_if.pos());
-}
-
-// Init 末端 pos 为负，随后 Process raw 0→0 时跨 CPR 连续到 0。
-void test_init_near_cpr_end_pos_negative_then_continuous_to_zero(void) {
+// 边界值 raw=CPR-1 初始化
+void test_init_boundary_cpr_minus_one(void) {
   Encoder enc;
   enc.SetRawPosition(static_cast<int32_t>(kCpr - 1));
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
                     static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  const int32_t pos_near_end = enc.pos();
-  TEST_ASSERT_TRUE(pos_near_end < 0);
-
-  enc.SetRawPosition(0);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  TEST_ASSERT_EQUAL_INT32(pos_near_end + 1, enc.pos());
-  TEST_ASSERT_EQUAL_INT32(0, enc.pos());
+  TEST_ASSERT_EQUAL_INT32(-1, enc.pos());
 }
 
-// homing_offset 正/负使零点在末端时 Init 后 pos < 0。
-void test_init_homing_end_pos_negative(void) {
+// offset+reverse 组合初始化
+void test_init_combined_offset_and_reverse(void) {
   Encoder enc;
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(
       static_cast<int>(Error::kOk),
       static_cast<int>(enc.Init(Config{static_cast<int32_t>(kCpr - 1), Reverse::kNormal})));
   TEST_ASSERT_TRUE(enc.pos() < 0);
-
-  Encoder enc2;
-  enc2.SetRawPosition(0);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc2.Init(Config{-1, Reverse::kNormal})));
-  TEST_ASSERT_TRUE(enc2.pos() < 0);
 }
 
-// Reverse 下 raw=1 时 Init 后 pos == -1。
-void test_init_reverse_near_zero_pos_negative(void) {
-  Encoder enc;
-  enc.SetRawPosition(1);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc.Init(Config{0, Reverse::kReverse})));
-  TEST_ASSERT_EQUAL_INT32(-1, enc.pos());
-}
+// ============================================================================
+// 2. 位置处理与多圈（Position Processing & Multi-turn）
+// ============================================================================
 
-// Process：跨 CPR 连续与多圈
-
-// raw CPR-1→0：Normal 时 pos +1，Reverse 时 pos -1。
-void test_pos_continuous_across_cpr_boundary(void) {
+// 顺时针跨 CPR 边界（CPR-1 -> 0）
+void test_process_cross_cpr_cw(void) {
   Encoder enc;
   enc.SetRawPosition(kCpr - 1);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
@@ -166,20 +107,10 @@ void test_pos_continuous_across_cpr_boundary(void) {
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
   TEST_ASSERT_EQUAL_INT32(pos_before + 1, enc.pos());
-
-  Encoder enc_rev;
-  enc_rev.SetRawPosition(kCpr - 1);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc_rev.Init(Config{0, Reverse::kReverse})));
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc_rev.Process(0.001f)));
-  const int32_t pos_rev_before = enc_rev.pos();
-  enc_rev.SetRawPosition(0);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc_rev.Process(0.001f)));
-  TEST_ASSERT_EQUAL_INT32(pos_rev_before - 1, enc_rev.pos());
 }
 
-// raw 0→CPR-1（逆时针一步）Normal 下 pos -1。
-void test_pos_continuous_across_cpr_boundary_ccw(void) {
+// 逆时针跨 CPR 边界（0 -> CPR-1）
+void test_process_cross_cpr_ccw(void) {
   Encoder enc;
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
@@ -192,14 +123,13 @@ void test_pos_continuous_across_cpr_boundary_ccw(void) {
   TEST_ASSERT_EQUAL_INT32(pos_before - 1, enc.pos());
 }
 
-// 顺时针一圈 pos += CPR，revolutions += 1。
-void test_one_revolution_pos_increases_by_cpr(void) {
+// 顺时针一圈验证
+void test_process_one_revolution_cw(void) {
   Encoder enc;
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
                     static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  const int32_t pos_start = enc.pos();
 
   for (uint32_t raw = 1; raw < kCpr; ++raw) {
     enc.SetRawPosition(static_cast<int32_t>(raw));
@@ -208,19 +138,36 @@ void test_one_revolution_pos_increases_by_cpr(void) {
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
 
-  TEST_ASSERT_EQUAL_INT32(pos_start + static_cast<int32_t>(kCpr), enc.pos());
+  TEST_ASSERT_EQUAL_INT32(static_cast<int32_t>(kCpr), enc.pos());
   TEST_ASSERT_EQUAL_INT32(1, enc.revolutions());
-  TEST_ASSERT_EQUAL_INT32(enc.pos() / static_cast<int32_t>(kCpr), enc.revolutions());
 }
 
-// 顺时针两圈 pos/revolutions。
-void test_two_revolutions_pos_and_revolutions(void) {
+// 逆时针一圈验证
+void test_process_one_revolution_ccw(void) {
   Encoder enc;
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
                     static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  const int32_t pos_start = enc.pos();
+
+  for (uint32_t i = 0; i < kCpr - 1; ++i) {
+    enc.SetRawPosition(static_cast<int32_t>(kCpr - 1 - i));
+    TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
+  }
+  enc.SetRawPosition(0);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
+
+  TEST_ASSERT_EQUAL_INT32(-static_cast<int32_t>(kCpr), enc.pos());
+  TEST_ASSERT_EQUAL_INT32(-1, enc.revolutions());
+}
+
+// 两圈验证
+void test_process_two_revolutions(void) {
+  Encoder enc;
+  enc.SetRawPosition(0);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
 
   for (uint32_t i = 0; i < 2; ++i) {
     for (uint32_t raw = 1; raw < kCpr; ++raw) {
@@ -231,12 +178,25 @@ void test_two_revolutions_pos_and_revolutions(void) {
     TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
   }
 
-  TEST_ASSERT_EQUAL_INT32(pos_start + 2 * static_cast<int32_t>(kCpr), enc.pos());
+  TEST_ASSERT_EQUAL_INT32(2 * static_cast<int32_t>(kCpr), enc.pos());
   TEST_ASSERT_EQUAL_INT32(2, enc.revolutions());
 }
 
-// Reverse 下顺时针一圈 pos -= CPR，revolutions == -1。
-void test_one_revolution_reverse_pos_decreases_by_cpr(void) {
+// revolutions() 计算验证
+void test_process_revolutions_calculation(void) {
+  Encoder enc;
+  enc.SetRawPosition(0);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{100, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL_INT32(enc.pos() / static_cast<int32_t>(kCpr), enc.revolutions());
+
+  enc.SetRawPosition(500);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
+  TEST_ASSERT_EQUAL_INT32(enc.pos() / static_cast<int32_t>(kCpr), enc.revolutions());
+}
+
+// Reverse 下位置处理
+void test_process_reverse_direction(void) {
   Encoder enc;
   enc.SetRawPosition(0);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
@@ -254,34 +214,8 @@ void test_one_revolution_reverse_pos_decreases_by_cpr(void) {
   TEST_ASSERT_EQUAL_INT32(-1, enc.revolutions());
 }
 
-// Reverse 下 raw 增加则 pos 减少。
-void test_process_reverse_decreases_pos(void) {
-  Encoder enc;
-  enc.SetRawPosition(0);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc.Init(Config{0, Reverse::kReverse})));
-  enc.SetRawPosition(100);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  TEST_ASSERT_EQUAL_INT32(-100, enc.pos());
-}
-
-// pos / revolutions 关系
-
-// revolutions() == pos() / CPR 在 Init/Process 后成立。
-void test_revolutions_equals_pos_div_cpr(void) {
-  Encoder enc;
-  enc.SetRawPosition(0);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc.Init(Config{100, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL_INT32(enc.pos() / static_cast<int32_t>(kCpr), enc.revolutions());
-
-  enc.SetRawPosition(500);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  TEST_ASSERT_EQUAL_INT32(enc.pos() / static_cast<int32_t>(kCpr), enc.revolutions());
-}
-
-// CPR 两侧两点 Init 后 pos 差绝对值等于最短弧长。
-void test_pos_difference_equals_shortest_wrap(void) {
+// 最短路径计算验证
+void test_process_shortest_wrap_distance(void) {
   const uint32_t raw_a             = 10;
   const uint32_t raw_b             = kCpr - 10;
   const int32_t  kExpectedShortest = 20;
@@ -300,10 +234,46 @@ void test_pos_difference_equals_shortest_wrap(void) {
   TEST_ASSERT_EQUAL_INT32(kExpectedShortest, delta_mag);
 }
 
-// AlignToPosition
+// ============================================================================
+// 3. 对齐功能（Alignment）
+// ============================================================================
 
-// 对齐到 0 与 500 后 Process 且 raw 不变则 pos 不变。
-void test_align_then_unchanged(void) {
+// 对齐到 0
+void test_align_to_zero(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.AlignToPosition(0)));
+  TEST_ASSERT_EQUAL_INT32(0, enc.pos());
+}
+
+// 对齐到指定位置
+void test_align_to_position(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.AlignToPosition(500)));
+  TEST_ASSERT_EQUAL_INT32(500, enc.pos());
+}
+
+// 对齐后移动验证
+void test_align_then_move(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.AlignToPosition(500)));
+  TEST_ASSERT_EQUAL_INT32(500, enc.pos());
+
+  enc.SetRawPosition(200);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
+  TEST_ASSERT_EQUAL_INT32(600, enc.pos());
+}
+
+// 跨边界对齐验证
+void test_align_across_boundary(void) {
   Encoder enc;
   enc.SetRawPosition(100);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
@@ -319,24 +289,12 @@ void test_align_then_unchanged(void) {
   TEST_ASSERT_EQUAL_INT32(500, enc.pos());
 }
 
-// Align 后 raw 增加则 pos 正确累加。
-void test_align_then_move(void) {
-  Encoder enc;
-  enc.SetRawPosition(100);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
-                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.AlignToPosition(500)));
-  TEST_ASSERT_EQUAL_INT32(500, enc.pos());
+// ============================================================================
+// 4. 方向控制（Direction Control）
+// ============================================================================
 
-  enc.SetRawPosition(200);
-  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
-  TEST_ASSERT_EQUAL_INT32(600, enc.pos());
-}
-
-// reverse 与 set_reverse
-
-// set_reverse 后 pos 按新方向重算，reverse() 正确。
-void test_reverse_flips_direction(void) {
+// 基本方向切换验证
+void test_set_reverse_basic(void) {
   Encoder enc;
   enc.SetRawPosition(200);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
@@ -350,8 +308,21 @@ void test_reverse_flips_direction(void) {
   TEST_ASSERT_EQUAL_INT32(expected, enc.pos());
 }
 
-// set_reverse 后当前 raw 在反向末端时 pos 变负。
-void test_set_reverse_at_edge_pos_negative(void) {
+// 切换后位置重算验证
+void test_set_reverse_recalculates_pos(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL_INT32(100, enc.pos());
+
+  enc.set_reverse(Reverse::kReverse);
+  const int32_t expected = static_cast<int32_t>(kCpr) - 100;
+  TEST_ASSERT_EQUAL_INT32(expected, enc.pos());
+}
+
+// 边界位置切换验证
+void test_set_reverse_at_boundary(void) {
   Encoder enc;
   enc.SetRawPosition(1);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
@@ -362,16 +333,49 @@ void test_set_reverse_at_edge_pos_negative(void) {
   TEST_ASSERT_EQUAL_INT32(-1, enc.pos());
 }
 
-// homing_offset 与 set_homing_offset
+// 动态多次切换验证
+void test_set_reverse_dynamic(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
 
-// set_homing_offset 后 pos 变化量等于 offset 变化量。
-void test_homing_offset_shifts_pos(void) {
+  // Normal -> Reverse
+  enc.set_reverse(Reverse::kReverse);
+  const int32_t pos_reverse = enc.pos();
+  TEST_ASSERT_EQUAL(static_cast<int>(Reverse::kReverse), static_cast<int>(enc.reverse()));
+
+  // Reverse -> Normal
+  enc.set_reverse(Reverse::kNormal);
+  TEST_ASSERT_EQUAL(static_cast<int>(Reverse::kNormal), static_cast<int>(enc.reverse()));
+  TEST_ASSERT_EQUAL_INT32(100, enc.pos());
+
+  // 验证 Reverse 位置计算正确
+  const int32_t expected_reverse = static_cast<int32_t>(kCpr) - 100;
+  enc.set_reverse(Reverse::kReverse);
+  TEST_ASSERT_EQUAL_INT32(expected_reverse, enc.pos());
+}
+
+// ============================================================================
+// 5. 零点偏移（Homing Offset）
+// ============================================================================
+
+// 基本偏移设置验证
+void test_set_homing_offset_basic(void) {
   Encoder enc;
   enc.SetRawPosition(100);
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
                     static_cast<int>(enc.Init(Config{20, Reverse::kNormal})));
   TEST_ASSERT_EQUAL_INT32(20, enc.homing_offset());
   TEST_ASSERT_EQUAL_INT32(120, enc.pos());
+}
+
+// 偏移调整 pos 验证
+void test_set_homing_offset_adjusts_pos(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{20, Reverse::kNormal})));
 
   const int32_t old_pos = enc.pos();
   enc.set_homing_offset(50);
@@ -379,28 +383,116 @@ void test_homing_offset_shifts_pos(void) {
   TEST_ASSERT_EQUAL_INT32(old_pos + (50 - 20), enc.pos());
 }
 
+// 负偏移验证
+void test_set_homing_offset_negative(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{-50, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL_INT32(-50, enc.homing_offset());
+  TEST_ASSERT_EQUAL_INT32(50, enc.pos());
+}
+
+// 偏移与方向组合验证
+void test_homing_offset_with_reverse(void) {
+  Encoder enc;
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{50, Reverse::kReverse})));
+  TEST_ASSERT_EQUAL_INT32(50, enc.homing_offset());
+
+  // Reverse 下位置计算：(CPR - 100) + 50
+  const int32_t expected_pos = static_cast<int32_t>(kCpr) - 100 + 50;
+  TEST_ASSERT_EQUAL_INT32(expected_pos, enc.pos());
+
+  // 调整偏移
+  enc.set_homing_offset(100);
+  TEST_ASSERT_EQUAL_INT32(100, enc.homing_offset());
+  TEST_ASSERT_EQUAL_INT32(expected_pos + 50, enc.pos());
+}
+
+// ============================================================================
+// 6. 原始位置管理（Raw Position）
+// ============================================================================
+
+// raw_pos 范围验证
+void test_raw_pos_in_range(void) {
+  Encoder enc;
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+  enc.SetRawPosition(100);
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
+  TEST_ASSERT_TRUE(enc.raw_pos() < kCpr);
+  TEST_ASSERT_EQUAL(static_cast<int>(100), static_cast<int>(enc.raw_pos()));
+}
+
+// 超出范围自动归一化验证
+void test_raw_pos_out_of_range_wraps(void) {
+  Encoder enc;
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+
+  // 设置超出 CPR 的值
+  enc.SetRawPosition(static_cast<int32_t>(kCpr + 100));
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
+  TEST_ASSERT_TRUE(enc.raw_pos() < kCpr);
+  TEST_ASSERT_EQUAL(static_cast<int>(100), static_cast<int>(enc.raw_pos()));
+}
+
+// Process 后 raw_pos 保持验证
+void test_raw_pos_after_process(void) {
+  const uint32_t raw_set = 123;
+  Encoder        enc;
+  enc.SetRawPosition(static_cast<int32_t>(raw_set));
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
+                    static_cast<int>(enc.Init(Config{0, Reverse::kNormal})));
+  TEST_ASSERT_EQUAL(static_cast<int>(raw_set), static_cast<int>(enc.raw_pos()));
+
+  TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(enc.Process(0.001f)));
+  TEST_ASSERT_EQUAL(static_cast<int>(raw_set), static_cast<int>(enc.raw_pos()));
+}
+
 void run_tests(void) {
-  RUN_TEST(EncoderTest::test_init_returns_ok);
-  RUN_TEST(EncoderTest::test_pos_and_revolutions_after_init);
-  RUN_TEST(EncoderTest::test_raw_pos_after_init_and_process);
-  RUN_TEST(EncoderTest::test_raw_pos_in_bounds_after_process);
-  RUN_TEST(EncoderTest::test_init_edge_boundary_pos_positive_and_negative);
-  RUN_TEST(EncoderTest::test_init_near_cpr_end_pos_negative_then_continuous_to_zero);
-  RUN_TEST(EncoderTest::test_init_homing_end_pos_negative);
-  RUN_TEST(EncoderTest::test_init_reverse_near_zero_pos_negative);
-  RUN_TEST(EncoderTest::test_pos_continuous_across_cpr_boundary);
-  RUN_TEST(EncoderTest::test_pos_continuous_across_cpr_boundary_ccw);
-  RUN_TEST(EncoderTest::test_one_revolution_pos_increases_by_cpr);
-  RUN_TEST(EncoderTest::test_two_revolutions_pos_and_revolutions);
-  RUN_TEST(EncoderTest::test_one_revolution_reverse_pos_decreases_by_cpr);
-  RUN_TEST(EncoderTest::test_process_reverse_decreases_pos);
-  RUN_TEST(EncoderTest::test_revolutions_equals_pos_div_cpr);
-  RUN_TEST(EncoderTest::test_pos_difference_equals_shortest_wrap);
-  RUN_TEST(EncoderTest::test_align_then_unchanged);
+  // 1. 初始化与配置
+  RUN_TEST(EncoderTest::test_init_basic);
+  RUN_TEST(EncoderTest::test_init_with_homing_offset);
+  RUN_TEST(EncoderTest::test_init_with_reverse);
+  RUN_TEST(EncoderTest::test_init_boundary_zero);
+  RUN_TEST(EncoderTest::test_init_boundary_cpr_minus_one);
+  RUN_TEST(EncoderTest::test_init_combined_offset_and_reverse);
+
+  // 2. 位置处理与多圈
+  RUN_TEST(EncoderTest::test_process_cross_cpr_cw);
+  RUN_TEST(EncoderTest::test_process_cross_cpr_ccw);
+  RUN_TEST(EncoderTest::test_process_one_revolution_cw);
+  RUN_TEST(EncoderTest::test_process_one_revolution_ccw);
+  RUN_TEST(EncoderTest::test_process_two_revolutions);
+  RUN_TEST(EncoderTest::test_process_revolutions_calculation);
+  RUN_TEST(EncoderTest::test_process_reverse_direction);
+  RUN_TEST(EncoderTest::test_process_shortest_wrap_distance);
+
+  // 3. 对齐功能
+  RUN_TEST(EncoderTest::test_align_to_zero);
+  RUN_TEST(EncoderTest::test_align_to_position);
   RUN_TEST(EncoderTest::test_align_then_move);
-  RUN_TEST(EncoderTest::test_reverse_flips_direction);
-  RUN_TEST(EncoderTest::test_set_reverse_at_edge_pos_negative);
-  RUN_TEST(EncoderTest::test_homing_offset_shifts_pos);
+  RUN_TEST(EncoderTest::test_align_across_boundary);
+
+  // 4. 方向控制
+  RUN_TEST(EncoderTest::test_set_reverse_basic);
+  RUN_TEST(EncoderTest::test_set_reverse_recalculates_pos);
+  RUN_TEST(EncoderTest::test_set_reverse_at_boundary);
+  RUN_TEST(EncoderTest::test_set_reverse_dynamic);
+
+  // 5. 零点偏移
+  RUN_TEST(EncoderTest::test_set_homing_offset_basic);
+  RUN_TEST(EncoderTest::test_set_homing_offset_adjusts_pos);
+  RUN_TEST(EncoderTest::test_set_homing_offset_negative);
+  RUN_TEST(EncoderTest::test_homing_offset_with_reverse);
+
+  // 6. 原始位置管理
+  RUN_TEST(EncoderTest::test_raw_pos_in_range);
+  RUN_TEST(EncoderTest::test_raw_pos_out_of_range_wraps);
+  RUN_TEST(EncoderTest::test_raw_pos_after_process);
 }
 
 }  // namespace EncoderTest

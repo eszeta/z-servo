@@ -27,17 +27,16 @@ class Monitor : public hortor::Noncopyable {
    * @brief 监控输出小数位数
    */
   static constexpr uint8_t kDecimals = 4;  // 监控输出数据的小数位数
-  /**
-   * @brief 使用监控
-   * @param serial 串口
-   */
-  void set_port(Print* serial) { monitorPort_ = serial; }
 
-  /**·
-   * @brief 链接电机
+  /**
+   * @brief 初始化监控
    * @param servo 伺服电机
    */
-  void set_servo(ServoType* servo) { servo_ = servo; }
+  Error Init(ServoType* servo, Print* serial) {
+    servo_       = servo;
+    monitorPort_ = serial;
+    return Error::kOk;
+  }
 
   /**
    * @brief 处理监控

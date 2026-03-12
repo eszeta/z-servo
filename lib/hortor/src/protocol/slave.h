@@ -26,7 +26,7 @@ class Slave : public hortor::Noncopyable {
    * @brief 初始化
    * @return 错误码
    */
-  Error Init();
+  Error Init(RegmapType* regmap, ChannelType* channel);
 
   /**
    * @brief 处理指令
@@ -47,14 +47,12 @@ class Slave : public hortor::Noncopyable {
    * @return 寄存器映射
    */
   RegmapType* regmap();
-  void        set_regmap(RegmapType* regmap);
 
   /**
    * @brief 获取协议通道
    * @return 协议通道
    */
   ChannelType* channel();
-  void         set_channel(ChannelType* channel);
 
   void    set_id(const uint8_t id);
   uint8_t id() const;
@@ -122,7 +120,9 @@ class Slave : public hortor::Noncopyable {
 namespace hortor::protocol {
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-Error Slave<DerivedType, RegmapType, ChannelType>::Init() {
+Error Slave<DerivedType, RegmapType, ChannelType>::Init(RegmapType* regmap, ChannelType* channel) {
+  regmap_  = regmap;
+  channel_ = channel;
   return Error::kOk;
 }
 
@@ -148,18 +148,8 @@ RegmapType* Slave<DerivedType, RegmapType, ChannelType>::regmap() {
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>
-void Slave<DerivedType, RegmapType, ChannelType>::set_regmap(RegmapType* regmap) {
-  regmap_ = regmap;
-}
-
-template <typename DerivedType, typename RegmapType, typename ChannelType>
 ChannelType* Slave<DerivedType, RegmapType, ChannelType>::channel() {
   return channel_;
-}
-
-template <typename DerivedType, typename RegmapType, typename ChannelType>
-void Slave<DerivedType, RegmapType, ChannelType>::set_channel(ChannelType* channel) {
-  channel_ = channel;
 }
 
 template <typename DerivedType, typename RegmapType, typename ChannelType>

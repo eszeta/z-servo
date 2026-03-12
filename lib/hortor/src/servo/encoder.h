@@ -7,7 +7,6 @@
 
 #include <algorithm>
 
-#include "math/lowpass_filter.h"
 #include "math/math.h"
 #include "math/resolution.h"
 #include "servo/types.h"
@@ -28,9 +27,9 @@ class Encoder : public hortor::Noncopyable {
   /** @brief 传感器分辨率（编译期常量，存储在Flash） */
   static constexpr math::Resolution<Bits> kResolution{};
 
-  /** @brief Recalibrate 末端区宽度（counts），pos_with_offset > CPR - kRecalibrateEdgeThreshold 时走末端分支；1° 对应 ceil(CPR/360)，至少 1 */
-  static constexpr int32_t kRecalibrateEdgeThreshold =
-      std::max(1, static_cast<int32_t>((kResolution.kEncoderCpr + 359) / 360));
+  /** @brief Recalibrate 末端区宽度（counts），pos_with_offset > CPR - kEdgeThreshold 时走末端分支；1° 对应 ceil(CPR/360)，至少 1 */
+  static constexpr int32_t kEdgeThreshold =
+      std::max(INT32_C(1), static_cast<int32_t>((kResolution.kEncoderCpr + 359) / 360));
 
   /**
    * @brief 获取原始计数值
@@ -151,9 +150,6 @@ void Encoder<DerivedType, Bits>::set_homing_offset(const int32_t homing_offset) 
 
 template <typename DerivedType, uint8_t Bits>
 Error Encoder<DerivedType, Bits>::Init(const Config& config) {
-  CHECK(ReadRaw(raw_pos_));
-  delay(10);
-
   homing_offset_ = config.homing_offset;
   reverse_       = config.reverse;
 
@@ -162,6 +158,7 @@ Error Encoder<DerivedType, Bits>::Init(const Config& config) {
 
 template <typename DerivedType, uint8_t Bits>
 Error Encoder<DerivedType, Bits>::Process(float dt) {
+  (void)dt;
   uint32_t raw_new;
   CHECK(ReadRaw(raw_new));
 
@@ -194,7 +191,7 @@ Error Encoder<DerivedType, Bits>::Recalibrate() {
   const auto normal_pos      = math::mod(local_pos, kResolution.kEncoderCpr);
   const auto pos_with_offset = math::mod(normal_pos + homing_offset_, kResolution.kEncoderCpr);
 
-  if (pos_with_offset > kResolution.kEncoderCpr - kRecalibrateEdgeThreshold) {
+  if (pos_with_offset > kResolution.kEncoderCpr - kEdgeThreshold) {
     pos_ = pos_with_offset - kResolution.kEncoderCpr;
   } else {
     pos_ = pos_with_offset;

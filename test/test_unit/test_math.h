@@ -41,12 +41,23 @@ void test_fmodf_pos(void) {
   TEST_ASSERT_FLOAT_WITHIN(1e-6f, 1.5f, m::fmodf_pos(-2.5f, 2.0f));
 }
 
-// 验证 wrap_pm 将周期折叠到 ±y/2 区间。
+// 验证 wrap_pm 将周期折叠到 [-y/2, y/2) 区间。
 void test_wrap_pm(void) {
   TEST_ASSERT_FLOAT_WITHIN(1e-5f, 0.0f, m::wrap_pm(0.0f, 360.0f));
   TEST_ASSERT_FLOAT_WITHIN(1e-5f, 90.0f, m::wrap_pm(90.0f, 360.0f));
   TEST_ASSERT_FLOAT_WITHIN(1e-5f, -90.0f, m::wrap_pm(270.0f, 360.0f));
   TEST_ASSERT_FLOAT_WITHIN(1e-5f, 0.0f, m::wrap_pm(360.0f, 360.0f));
+  TEST_ASSERT_FLOAT_WITHIN(1e-5f, -90.0f, m::wrap_pm(-90.0f, 360.0f));
+  TEST_ASSERT_FLOAT_WITHIN(1e-5f, -90.0f, m::wrap_pm(-450.0f, 360.0f));
+  TEST_ASSERT_FLOAT_WITHIN(1e-5f, -180.0f, m::wrap_pm(180.0f, 360.0f));
+
+  TEST_ASSERT_EQUAL_INT(0, m::wrap_pm(0, 360));
+  TEST_ASSERT_EQUAL_INT(90, m::wrap_pm(90, 360));
+  TEST_ASSERT_EQUAL_INT(-90, m::wrap_pm(270, 360));
+  TEST_ASSERT_EQUAL_INT(0, m::wrap_pm(360, 360));
+  TEST_ASSERT_EQUAL_INT(-90, m::wrap_pm(-90, 360));
+  TEST_ASSERT_EQUAL_INT(-90, m::wrap_pm(-450, 360));
+  TEST_ASSERT_EQUAL_INT(-180, m::wrap_pm(180, 360));
 }
 
 void run_tests(void) {

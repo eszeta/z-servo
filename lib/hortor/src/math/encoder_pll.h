@@ -14,10 +14,9 @@ namespace hortor::math {
 template <typename EncoderType, uint8_t Bits>
 class EncoderPll : public hortor::Noncopyable {
  public:
-  Error Init(uint16_t pos);
+  Error Init(EncoderType* encoder);
 
   EncoderType* encoder() const;
-  void         set_encoder(EncoderType* encoder);
 
   /**
    * @brief 获取估计位置
@@ -48,11 +47,11 @@ class EncoderPll : public hortor::Noncopyable {
   static constexpr Resolution<Bits> kResolution{};
 
   /** @brief PLL带宽 [Hz] */
-  const float kPllBandwidth = 200.0f;
+  static constexpr float kPllBandwidth = 200.0f;
   /** @brief PLL比例增益 */
-  const float kPllKp = 2.0f * kPllBandwidth;
+  static constexpr float kPllKp = 2.0f * kPllBandwidth;
   /** @brief PLL积分增益（临界阻尼） */
-  const float kPllKi = 0.25f * kPllKp * kPllKp;
+  static constexpr float kPllKi = 0.25f * kPllKp * kPllKp;
 
   // PLL 状态变量
   /** @brief 线性位置估计（平滑后） */
@@ -71,20 +70,19 @@ class EncoderPll : public hortor::Noncopyable {
 namespace hortor::math {
 
 template <typename EncoderType, uint8_t Bits>
-Error EncoderPll<EncoderType, Bits>::Init(uint16_t pos) {
-  pos_      = static_cast<float>(pos);
-  velocity_ = 0.0f;
+Error EncoderPll<EncoderType, Bits>::Init(EncoderType* encoder) {
+  encoder_                = encoder;
+  const auto encoder_pos  = encoder->pos();
+  const auto encoder_bits = encoder->kResolution.kBits;
+  const auto init_pos     = math::mapResolution(encoder_pos, encoder_bits, kResolution.kBits);
+  pos_                    = static_cast<float>(init_pos);
+  velocity_               = 0.0f;
   return Error::kOk;
 }
 
 template <typename EncoderType, uint8_t Bits>
 EncoderType* EncoderPll<EncoderType, Bits>::encoder() const {
   return encoder_;
-}
-
-template <typename EncoderType, uint8_t Bits>
-void EncoderPll<EncoderType, Bits>::set_encoder(EncoderType* encoder) {
-  encoder_ = encoder;
 }
 
 template <typename EncoderType, uint8_t Bits>
@@ -115,8 +113,9 @@ Error EncoderPll<EncoderType, Bits>::Process(float dt) {
   pos_ += dt * kPllKp * error;
   velocity_ += dt * kPllKi * error;
 
-  const float threshold = 0.5f * dt * kPllKi;
-  if (fabs(velocity_) < threshold) {
+  /** @brief 速度死区：低于此值视为静止，防止数值噪声产生虚假速度 [pulse/s] */
+  static constexpr float kVelocityDeadband = 1.0f;
+  if (fabs(velocity_) < kVelocityDeadband) {
     velocity_ = 0.0f;
   }
   rpm_ = (velocity_ / kResolution.kEncoderCpr) * 60.0f;
