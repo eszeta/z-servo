@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file error.h
+ * @brief 错误码与错误传播宏
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -26,7 +31,14 @@ enum class Error : uint8_t {
   kMax,          ///< 最大错误码（用于数组索引）
 };
 
+/// @brief 判断是否为成功码
+/// @param e 错误码
+/// @return 若 e == kOk 则为 true
 bool IsOk(Error e);
+
+/// @brief 判断是否为失败码
+/// @param e 错误码
+/// @return 若 e != kOk 则为 true
 bool IsFail(Error e);
 
 }  // namespace hortor
@@ -42,9 +54,8 @@ inline bool IsFail(Error e) {
 
 }  // namespace hortor
 
-// =============================================================================
-// 错误传播宏
-// =============================================================================
+/** @name 错误传播宏 */
+/// @{
 
 /// @brief 错误传播：执行表达式，非 kOk 则立即返回该错误码
 ///
@@ -64,3 +75,5 @@ inline bool IsFail(Error e) {
     if (!(cond))          \
       return (err);       \
   } while (0)
+
+/// @}

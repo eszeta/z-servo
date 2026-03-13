@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file bit_utils.h
+ * @brief 位操作工具（掩码、置位、清位、创建掩码）
+ */
+
 #pragma once
 
 #include <Arduino.h>

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file ma330.h
+ * @brief MA330 磁编码器（SPI，14 位）
+ */
+
 #pragma once
 
 #include <SPI.h>
@@ -15,14 +20,21 @@ constexpr uint8_t kResolutionBits = 14;
 class Encoder;
 using Base = servo::Encoder<Encoder, kResolutionBits>;
 
+/// @brief MA330 磁编码器实现（SPI，14 位）
 class Encoder : public Base {
  public:
   static constexpr uint8_t kResolutionBits = hortor::drivers::MA330::kResolutionBits;
+  /// @brief 配置：SPI 与片选
   struct Config : public Base::Config {
     SPIClass* spi;
     uint8_t   cs_pin;
   };
 
+  /**
+   * @brief 初始化 SPI 与编码器
+   * @param config 配置（SPI 与片选）
+   * @return 错误码
+   */
   Error   Init(const Config& config);
   Error   ReadRawImpl(uint32_t& out_raw);
   Regmap* regmap();

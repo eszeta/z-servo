@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file current.h
+ * @brief 仿真电流传感器（电流由 plant 写入，供算法验证）
+ */
+
 #pragma once
 
 #include "servo/current.h"

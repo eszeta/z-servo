@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file current.h
+ * @brief 电流传感器抽象基类（CRTP）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -21,21 +26,22 @@ class Current : public hortor::Noncopyable {
  public:
   /**
    * @brief 初始化电流传感器
-   * @return Error 错误码
+   * @return 错误码
    */
   Error Init();
+
   /**
-   * @brief 获取当前电流读数
-   * @param current 以安培(A)为单位的电流值
-   * @return Error 错误码
+   * @brief 读取当前电流
+   * @param current 输出电流 [A]
+   * @return 错误码
    */
   Error ReadCurrent(float& current);
 
   /**
-   * @brief 读取并平均多次电流采样值
+   * @brief 多次采样并平滑得到平均电流
    * @param n 采样次数
-   * @param current 平均电流值
-   * @return Error 错误码
+   * @param current 输入为初值，输出为平滑后的电流 [A]
+   * @return 错误码
    */
   Error ReadAverageCurrents(int n, float& current);
 };

@@ -1,8 +1,15 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file motor.h
+ * @brief 电机驱动器抽象基类（CRTP）
+ */
+
 #pragma once
 
+#include "error.h"
+#include "noncopyable.h"
 #include "servo/types.h"
 
 namespace hortor::servo {
@@ -16,26 +23,26 @@ template <typename DerivedType>
 class Motor : public hortor::Noncopyable {
  public:
   /**
-   * @brief 获取电机反转
-   * @return 电机反转
+   * @brief 当前转向（正/反）
+   * @return 当前方向 kNormal / kReverse
    */
   Reverse reverse() const;
 
   /**
-   * @brief 设置电机反转
-   * @param reverse 电机反转
+   * @brief 设置转向
+   * @param reverse 方向 kNormal / kReverse
    */
   void set_reverse(const Reverse reverse);
 
   /**
    * @brief 初始化电机驱动器
-   * @param reverse 电机反转
+   * @return 错误码
    */
   Error Init();
 
   /**
-   * @brief 设置电机PWM
-   * @param pwm (-1..1)
+   * @brief 设置 PWM 占空比
+   * @param pwm 占空比，范围 [-1, 1]
    */
   void SetPWM(float pwm);
 
@@ -50,7 +57,7 @@ class Motor : public hortor::Noncopyable {
   void Coast();
 
  protected:
-  /** @brief 电机反转 */
+  /// @brief 电机反转
   Reverse reverse_ = Reverse::kNormal;
 };
 

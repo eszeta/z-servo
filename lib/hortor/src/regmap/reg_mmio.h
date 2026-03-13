@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file reg_mmio.h
+ * @brief 内存映射寄存器访问（直接读写内存区）
+ */
+
 #pragma once
 
 #include <Wire.h>
@@ -13,14 +18,32 @@
 namespace hortor::regmap {
 
 /**
- * @brief 内存映射寄存器访问实现
- *
- * 用于直接访问内存映射的寄存器区域。
+ * @brief 内存映射寄存器，用于 Regmap 的本地表（如 EEPROM 镜像）
  */
 class RegMmio : public hortor::Noncopyable {
  public:
+  /**
+   * @brief 绑定寄存器基址与长度
+   * @param regs 寄存器数组指针
+   * @param size 数组长度 [byte]
+   * @return 错误码
+   */
   Error Init(uint8_t* regs, const size_t size);
+  /**
+   * @brief 写连续寄存器
+   * @param address 起始地址
+   * @param data 数据指针
+   * @param size 字节数
+   * @return 错误码
+   */
   Error Write(const uint8_t address, const uint8_t* data, const size_t size);
+  /**
+   * @brief 读连续寄存器
+   * @param address 起始地址
+   * @param size 字节数
+   * @param data 输出缓冲区
+   * @return 错误码
+   */
   Error Read(const uint8_t address, const size_t size, uint8_t* data);
 
  protected:

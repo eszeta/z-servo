@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file commander.h
+ * @brief 简单串口命令解析（单字符 ID + 空格分隔参数）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -13,9 +18,19 @@ namespace hortor::utils {
 
 typedef void (*CommandCallback)(int argc, char** argv);
 
+/// @brief 串口命令解析器，首字符为命令 ID，后接参数
 class Commander : public hortor::Noncopyable {
  public:
+  /**
+   * @brief 注册命令：id 为首字符，onCommand 为回调
+   * @param id 命令首字符
+   * @param onCommand 回调 (argc, argv)
+   */
   void add(char id, CommandCallback onCommand);
+  /**
+   * @brief 解析并执行一行输入（首字符匹配则调用对应回调）
+   * @param user_input 输入字符串（首字符为命令 ID，后接空格分隔参数）
+   */
   void run(char* user_input);
 
  private:

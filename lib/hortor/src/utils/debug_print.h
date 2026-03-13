@@ -1,20 +1,37 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file debug_print.h
+ * @brief 调试输出（可选 DISABLE_DEBUG 关闭）
+ */
+
 #pragma once
 
 #include <Arduino.h>
 
 namespace hortor::utils {
 #ifndef DISABLE_DEBUG
-extern Print* debug_print;
+extern Print* debug_print;  ///< 调试输出目标（Serial 等）
 #endif
 
+/**
+ * @brief 设置调试输出流
+ * @param _debugPrint 输出目标（如 &Serial）
+ */
 void DebugEnable(Print* _debugPrint);
 
+/**
+ * @brief 打印多个参数（无换行）
+ * @param args 可变参数（支持 print 的类型）
+ */
 template <typename... Args>
 void DebugPrint(const Args&... args);
 
+/**
+ * @brief 打印多个参数并换行
+ * @param args 可变参数（无参数时仅换行）
+ */
 template <typename... Args>
 void DebugPrintln(const Args&... args);
 }  // namespace hortor::utils

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file motor.h
+ * @brief 仿真电机（PWM 由 plant 读取，供算法验证）
+ */
+
 #pragma once
 
 #include "servo/motor.h"

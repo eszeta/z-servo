@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file types.h
+ * @brief 舵机相关类型（工作模式、方向、位域状态）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -82,8 +87,8 @@ enum class OperatingMode : uint8_t {
  * @brief 方向
  */
 enum class Reverse : int8_t {
-  kNormal  = 1,   // clockwise
-  kReverse = -1,  // counterclockwise
+  kNormal  = 1,   ///< 顺时针
+  kReverse = -1,  ///< 逆时针
 };
 
 /**

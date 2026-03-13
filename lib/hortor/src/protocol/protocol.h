@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file protocol.h
+ * @brief DYNAMIXEL Protocol 1.0 指令包解析与状态包构造
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -14,9 +19,8 @@
 namespace hortor::protocol {
 
 /**
- * @brief 指令包状态
- * DYNAMIXEL Protocol 1.0
- * https://emanual.robotis.com/docs/en/dxl/protocol1/
+ * @brief 指令包解析状态机
+ * @see https://emanual.robotis.com/docs/en/dxl/protocol1/
  */
 enum class PacketState : uint8_t {
   kHeader1,
@@ -28,6 +32,7 @@ enum class PacketState : uint8_t {
   kChecksum,
 };
 
+/// @brief 指令包/状态包缓冲区（Dynamixel 协议格式）
 struct __attribute__((packed)) InstPacket {
   static constexpr uint8_t kBufferCapacity  = 128;
   static constexpr uint8_t kParameterOffset = 5;
@@ -54,9 +59,27 @@ struct __attribute__((packed)) InstPacket {
 
 typedef InstPacket StatusPacket;
 
+/// @brief 指令包解析器与状态包构造
 class InstProtocol : public hortor::Noncopyable {
  public:
+  /**
+   * @brief 喂入一字节，推进解析状态
+   * @param packet 当前解析中的包
+   * @param recv_data 本拍接收字节
+   * @param is_complete 输出：是否收完一整包
+   * @return 错误码
+   */
   Error Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete);
+
+  /**
+   * @brief 构造状态包
+   * @param id 从机 ID
+   * @param status 状态错误位
+   * @param parameter 参数区指针，可为 nullptr
+   * @param parameter_size 参数区长度
+   * @param packet 输出的状态包
+   * @return 错误码
+   */
   Error CreateResponse(const uint8_t          id,
                        const StatusErrorBits& status,
                        const uint8_t*         parameter,

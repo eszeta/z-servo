@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file reg_spi.h
+ * @brief MA330 SPI 传输层（角度读取）
+ */
+
 #pragma once
 
 #include <Arduino.h>

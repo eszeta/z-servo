@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file led.h
+ * @brief LED 驱动（开漏/推挽，Turn/Toggle）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -32,11 +37,12 @@ class LED final : public hortor::Noncopyable {
  public:
   /**
    * @brief 初始化
+   * @param pin GPIO 引脚号
    */
   void Init(uint32_t pin);
   /**
    * @brief 设置状态
-   * @param value 状态
+   * @param value true 亮 / false 灭
    */
   void Turn(bool value);
   /**
@@ -45,14 +51,8 @@ class LED final : public hortor::Noncopyable {
   void Toggle();
 
  private:
-  /**
-   * @brief 状态
-   */
-  bool state_ = false;
-  /**
-   * @brief 引脚
-   */
-  uint32_t pin_ = NC;
+  bool     state_ = false;  ///< 当前亮/灭
+  uint32_t pin_   = NC;     ///< GPIO 引脚
 };
 
 }  // namespace hortor::info_led

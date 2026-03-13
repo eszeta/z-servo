@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file regmap.h
+ * @brief LSM6DSOW 寄存器映射（I2C）
+ */
+
 #pragma once
 
 #include "drivers/lsm6dsow/types.h"

@@ -1,59 +1,65 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file imu.h
+ * @brief IMU 抽象基类（CRTP），加速度/陀螺仪/温度
+ */
+
 #pragma once
 
+#include "error.h"
+#include "noncopyable.h"
 #include "servo/types.h"
 
 namespace hortor::servo {
 
 /**
- * @brief IMU类
- * @details 定义了IMU的基本接口
+ * @brief IMU 基本接口
  */
 template <typename DerivedType>
 class IMU : public hortor::Noncopyable {
  public:
   /**
    * @brief 读取加速度
-   * @param x 加速度X轴,单位:g
-   * @param y 加速度Y轴,单位:g
-   * @param z 加速度Z轴,单位:g
-   * @return IMUError 读取结果
+   * @param x 输出 X 轴 [g]
+   * @param y 输出 Y 轴 [g]
+   * @param z 输出 Z 轴 [g]
+   * @return 错误码
    */
   Error ReadAcceleration(float& x, float& y, float& z);
 
   /**
-   * @brief 检查加速度是否可用
-   * @return bool 加速度是否可用
+   * @brief 加速度数据是否就绪
+   * @return 就绪为 true
    */
   bool AccelerationAvailable();
 
   /**
    * @brief 读取陀螺仪
-   * @param x 陀螺仪X轴,单位:度/秒
-   * @param y 陀螺仪Y轴,单位:度/秒
-   * @param z 陀螺仪Z轴,单位:度/秒
-   * @return IMUError 读取结果
+   * @param x 输出 X 轴 [°/s]
+   * @param y 输出 Y 轴 [°/s]
+   * @param z 输出 Z 轴 [°/s]
+   * @return 错误码
    */
   Error ReadGyroscope(float& x, float& y, float& z);
 
   /**
-   * @brief 检查陀螺仪是否可用
-   * @return bool 陀螺仪是否可用
+   * @brief 陀螺仪数据是否就绪
+   * @return 就绪为 true
    */
   bool GyroscopeAvailable();
 
   /**
    * @brief 读取温度
-   * @param temperature_deg 温度
-   * @return IMUError 读取结果
+   * @param temperature_deg 输出温度 [°C]
+   * @return 错误码
    */
   Error ReadTemperature(float& temperature_deg);
 
   /**
-   * @brief 检查温度是否可用
-   * @return bool 温度是否可用
+   * @brief 温度数据是否就绪
+   * @return 就绪为 true
    */
   bool TemperatureAvailable();
 };

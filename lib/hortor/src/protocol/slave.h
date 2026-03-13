@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file slave.h
+ * @brief 协议从机基类（CRTP），指令分发与寄存器读写
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -10,6 +15,7 @@
 #include "noncopyable.h"
 #include "protocol.h"
 #include "protocol/types.h"
+
 namespace hortor::protocol {
 
 /**
@@ -23,7 +29,9 @@ template <typename DerivedType, typename RegmapType, typename ChannelType>
 class Slave : public hortor::Noncopyable {
  public:
   /**
-   * @brief 初始化
+   * @brief 初始化，绑定寄存器映射与协议通道
+   * @param regmap 寄存器映射指针
+   * @param channel 协议通道指针
    * @return 错误码
    */
   Error Init(RegmapType* regmap, ChannelType* channel);
@@ -54,18 +62,51 @@ class Slave : public hortor::Noncopyable {
    */
   ChannelType* channel();
 
-  void    set_id(const uint8_t id);
+  /**
+   * @brief 设置从机 ID
+   * @param id 从机 ID (0–252)
+   */
+  void set_id(const uint8_t id);
+  /** @brief 从机 ID */
   uint8_t id() const;
-  void    set_return_level(const uint8_t return_level);
+  /**
+   * @brief 设置返回级别 0/1/2
+   * @param return_level 返回级别
+   */
+  void set_return_level(const uint8_t return_level);
+  /** @brief 返回级别 */
   uint8_t return_level() const;
 
  protected:
+  /**
+   * @brief 根据指令分发到对应 Handler
+   * @param packet 指令包
+   * @return 错误码
+   */
   Error Execute(const InstPacket& packet);
-
+  /**
+   * @brief 发送状态包
+   * @param reply_idx 回复索引
+   * @param parameter 参数区指针，可为 nullptr
+   * @param parameter_size 参数区长度
+   * @return 错误码
+   */
   Error Response(const uint8_t reply_idx, const uint8_t* parameter, const size_t parameter_size);
-
+  /**
+   * @brief 写寄存器并调用 AfterWriteRegs
+   * @param address 起始地址
+   * @param data 数据指针
+   * @param size 字节数
+   * @return 错误码
+   */
   Error WriteRegs(const uint8_t address, const uint8_t* data, const size_t size);
-
+  /**
+   * @brief 写寄存器后钩子（派生类实现）
+   * @param address 起始地址
+   * @param data 数据指针
+   * @param size 字节数
+   * @return 错误码
+   */
   Error AfterWriteRegs(const uint8_t address, const uint8_t* data, const size_t size);
 
   Error PingHandler(const InstPacket& packet);
@@ -78,41 +119,21 @@ class Slave : public hortor::Noncopyable {
   Error ResetHandler(const InstPacket& packet, const bool response);
   Error AfterResetHandler(const InstPacket& packet, const bool response);
   Error InstructionError(const bool response);
-  bool  CheckResponse(const uint8_t instruction) const;
+  /**
+   * @brief 根据 return_level_ 判断本指令是否需要回复
+   * @param instruction 指令码
+   * @return 需要回复为 true
+   */
+  bool CheckResponse(const uint8_t instruction) const;
 
-  /**
-   * @brief slaveID
-   */
-  uint8_t id_ = 0;
-  /**
-   * @brief 返回级别
-   */
-  uint8_t return_level_ = 0;
-  /**
-   * @brief 状态
-   */
-  StatusErrorBits status_{};
-  /**
-   * @brief 寄存器映射指针
-   */
-  RegmapType* regmap_ = nullptr;
-  /**
-   * @brief 协议通道
-   */
-  ChannelType* channel_ = nullptr;
-  /**
-   * @brief 异步写缓冲区
-   */
-  uint8_t async_write_buffer_[128] = {};
-  /**
-   * @brief 异步写缓冲区大小
-   */
-  size_t async_write_buffer_size_ = 0;
-
-  /**
-   * @brief 读数据缓冲区（ReadData/BulkRead 共用，避免栈上大分配）
-   */
-  uint8_t read_buffer_[128] = {};
+  uint8_t         id_           = 0;                   ///< 从机 ID
+  uint8_t         return_level_ = 0;                   ///< 返回级别 0/1/2
+  StatusErrorBits status_{};                           ///< 状态错误位
+  RegmapType*     regmap_                  = nullptr;  ///< 寄存器映射
+  ChannelType*    channel_                 = nullptr;  ///< 协议通道
+  uint8_t         async_write_buffer_[128] = {};       ///< RegWrite 暂存，Action 时写入
+  size_t          async_write_buffer_size_ = 0;        ///< 暂存长度
+  uint8_t         read_buffer_[128]        = {};       ///< ReadData/BulkRead 共用
 };
 
 }  // namespace hortor::protocol

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file math.h
+ * @brief 数学工具与分辨率映射
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -13,7 +18,7 @@ constexpr float kMicroToSec = 1e-6f;
 /// @brief 毫秒转换为秒
 constexpr float kMilliToSec = 1e-3f;
 
-// 浮点数比较阈值，用于判断值是否接近0
+/// @brief 浮点数比较阈值，用于判断值是否接近 0
 constexpr float kFloatThreshold = 0.001f;
 
 /// @brief 按 max（2^N−1）缩放分辨率，与 STM32duino 行为一致。

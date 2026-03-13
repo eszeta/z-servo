@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file encoder.h
+ * @brief 仿真编码器（位置由 plant 写入，供算法验证）
+ */
+
 #pragma once
 
 #include "error.h"
@@ -11,7 +16,7 @@
 
 namespace hortor::simulator {
 
-/** @brief 仿真编码器分辨率位数，与 Servo kResolutionBits 一致 */
+/// @brief 仿真编码器分辨率位数，与 Servo kResolutionBits 一致
 constexpr uint8_t kSimEncoderBits = 12;
 
 /**

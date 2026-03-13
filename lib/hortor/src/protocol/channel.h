@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file channel.h
+ * @brief 协议通道（Transport + 解析器，收包/发包）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -47,21 +52,20 @@ class ProtocolChannel : public hortor::Noncopyable {
   Error Response(const StatusPacket& packet, const uint8_t reply_idx);
 
   /**
-   * @brief 设置响应延迟（秒，Serial 多从机时使用）
+   * @brief 设置响应延迟 [s]，Serial 多从机时使用
+   * @param response_delay 延迟时间 [s]
    */
   void SetResponseDelay(const float response_delay);
 
-  /**
-   * @brief 获取解析后的指令包（只读）
-   */
+  /** @brief 当前解析到的指令包（只读） */
   const InstPacket& inst_packet() const { return inst_packet_; }
 
-  /**
-   * @brief 获取协议解析器（供 Slave 调用 CreateResponse）
-   */
+  /** @brief 协议解析器，供 Slave 调用 CreateResponse */
   InstProtocol* parser() { return &parser_; }
 
-  TransportType*       transport() { return &transport_; }
+  /** @brief 传输层（可写） */
+  TransportType* transport() { return &transport_; }
+  /** @brief 传输层（只读） */
   const TransportType* transport() const { return &transport_; }
 
  private:

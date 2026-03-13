@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file monitor.h
+ * @brief 舵机状态监控输出（Serial 打印目标/位置/速度/电流/PWM）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -16,17 +21,14 @@ template <typename ServoType>
 class Monitor : public hortor::Noncopyable {
  public:
   enum MonitorBitmap : uint8_t {
-    kTarget   = 0b1000000,  // 监控目标值
-    kPwm      = 0b0100000,  // 监控PWM
-    kCurrent  = 0b0001000,  // 监控电流值
-    kVelocity = 0b0000010,  // 监控速度值
-    kPosition = 0b0000001   // 监控位置值
+    kTarget   = 0b1000000,  ///< 监控目标值
+    kPwm      = 0b0100000,  ///< 监控 PWM
+    kCurrent  = 0b0001000,  ///< 监控电流
+    kVelocity = 0b0000010,  ///< 监控速度
+    kPosition = 0b0000001   ///< 监控位置
   };
 
-  /**
-   * @brief 监控输出小数位数
-   */
-  static constexpr uint8_t kDecimals = 4;  // 监控输出数据的小数位数
+  static constexpr uint8_t kDecimals = 4;  ///< 监控输出小数位数
 
   /**
    * @brief 初始化监控

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file plant.h
+ * @brief 仿真被控对象（PWM→位置/电流，回写 encoder/current）
+ */
+
 #pragma once
 
 #include "error.h"
@@ -28,8 +33,8 @@ class SimulatorPlant {
   Error Process(float dt);
 
  private:
-  static constexpr float kCpsPerPwm     = 1000.0f;  // counts/s per unit PWM
-  static constexpr float kCurrentPerPwm = 1.0f;     // A per unit PWM
+  static constexpr float kCpsPerPwm     = 1000.0f;  ///< counts/s per unit PWM
+  static constexpr float kCurrentPerPwm = 1.0f;     ///< A per unit PWM
 
   SimulatorMotor*   motor_          = nullptr;
   SimulatorEncoder* encoder_        = nullptr;

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file task_scheduler.h
+ * @brief 协作式任务调度器（按周期调用回调）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -26,9 +31,9 @@ class TaskScheduler : public hortor::Noncopyable {
   using Callback = Error (*)(float dt);
 
   struct TaskDesc {
-    Callback callback     = nullptr;  // 任务回调
-    uint32_t period_us    = 0;        // 任务周期（微秒）
-    uint32_t next_time_us = 0;        // 下次执行时刻（微秒）
+    Callback callback     = nullptr;  ///< 任务回调
+    uint32_t period_us    = 0;        ///< 任务周期 [μs]
+    uint32_t next_time_us = 0;        ///< 下次执行时刻 [μs]
   };
 
   static constexpr float kMicroToSec = 1.0f / 1000000.0f;

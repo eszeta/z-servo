@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file servo.h
+ * @brief 舵机控制类（位置/速度/电流/PWM 与保护）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -30,19 +35,21 @@ namespace hortor::servo {
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 class Servo : public hortor::Noncopyable {
  public:
-  /** @brief 舵机分辨率（位数），决定了舵机的精度和量程 */
+  /// @brief 舵机分辨率（位数），决定了舵机的精度和量程
   static constexpr math::Resolution<Bits> kResolution{};
 
   /**
-   * @brief 初始化舵机
+   * @brief 初始化舵机，绑定电机、编码器、电流传感器
+   * @param motor 电机驱动器指针
+   * @param encoder 编码器指针
+   * @param current_sensor 电流传感器指针
+   * @return 错误码
    */
   Error Init(MotorType* motor, EncoderType* encoder, CurrentType* current_sensor);
 
-  //==============================================================================
-  // 运行模式组
-  //==============================================================================
+  /** @name 运行模式组 */
 #pragma region "运行模式组"
-  /** @brief 驱动模式 */
+  /// @brief 驱动模式
   DriveModeBits drive_mode() const { return drive_mode_; }
   void          set_drive_mode(const DriveModeBits v) { drive_mode_ = v; }
   void          set_drive_mode(const uint8_t v) {
@@ -52,7 +59,7 @@ class Servo : public hortor::Noncopyable {
                                                                                   : Reverse::kNormal);
   }
 
-  /** @brief 舵机模式 */
+  /// @brief 舵机模式
   OperatingMode operating_mode() const { return operating_mode_; }
   void          set_operating_mode(const OperatingMode v) {
     if (v != operating_mode_) {
@@ -63,18 +70,16 @@ class Servo : public hortor::Noncopyable {
   }
   void set_operating_mode(const uint8_t v) { set_operating_mode(static_cast<OperatingMode>(v)); }
 
-  /** @brief 关断条件 */
+  /// @brief 关断条件
   ShutdownBits shutdown() const { return shutdown_; }
   void         set_shutdown(const ShutdownBits v) { shutdown_ = v; }
   void         set_shutdown(const uint8_t v) { shutdown_.value = v; }
 
 #pragma endregion  // "运行模式组"
 
-  //==============================================================================
-  // 位置配置组
-  //==============================================================================
+  /** @name 位置配置组 */
 #pragma region "位置配置组"
-  /** @brief 归零偏移 */
+  /// @brief 归零偏移
   int32_t homing_offset() const {
     const auto kBits       = encoder_pll_.encoder()->kResolution.kBits;
     const auto kTargetBits = kResolution.kBits;
@@ -88,55 +93,53 @@ class Servo : public hortor::Noncopyable {
     encoder_pll_.encoder()->set_homing_offset(mapped_offset);
   }
 
-  /** @brief 运动阈值 */
+  /// @brief 运动阈值
   float moving_threshold() const { return moving_threshold_; }
   void  set_moving_threshold(const float v) { moving_threshold_ = v; }
 
 #pragma endregion  // "位置配置组"
 
-  //==============================================================================
-  // 保护限制组
-  //==============================================================================
+  /** @name 保护限制组 */
 #pragma region "保护限制组"
-  /** @brief 温度上限 */
+  /// @brief 温度上限
   uint8_t temperature_limit() const { return temperature_limit_; }
   void    set_temperature_limit(const uint8_t v) { temperature_limit_ = v; }
 
-  /** @brief 最高电压限制 */
+  /// @brief 最高电压限制
   float max_voltage_limit() const { return max_voltage_limit_; }
   void  set_max_voltage_limit(const float v) { max_voltage_limit_ = v; }
 
-  /** @brief 最低电压限制 */
+  /// @brief 最低电压限制
   float min_voltage_limit() const { return min_voltage_limit_; }
   void  set_min_voltage_limit(const float v) { min_voltage_limit_ = v; }
 
-  /** @brief PWM上限 */
+  /// @brief PWM上限
   float pwm_limit() const { return pwm_limit_; }
   void  set_pwm_limit(const float v) {
     pwm_limit_ = v;
     position_pid_.set_limit(v);
   }
 
-  /** @brief 电流上限 */
+  /// @brief 电流上限
   float current_limit() const { return current_limit_; }
   void  set_current_limit(const float v) {
     current_limit_ = v;
     current_timeout_limiter_.set_threshold(v);
   }
 
-  /** @brief 速度上限 */
+  /// @brief 速度上限
   float velocity_limit() const { return velocity_limit_; }
   void  set_velocity_limit(const float v) { velocity_limit_ = v; }
 
-  /** @brief 位置下限 */
+  /// @brief 位置下限
   int32_t min_position_limit() const { return min_position_limit_; }
   void    set_min_position_limit(const int32_t v) { min_position_limit_ = v; }
 
-  /** @brief 位置上限 */
+  /// @brief 位置上限
   int32_t max_position_limit() const { return max_position_limit_; }
   void    set_max_position_limit(const int32_t v) { max_position_limit_ = v; }
 
-  /** @brief 保护时间 */
+  /// @brief 保护时间
   float protection_time() const { return protection_time_; }
   void  set_protection_time(const float v) {
     protection_time_ = v;
@@ -145,11 +148,9 @@ class Servo : public hortor::Noncopyable {
 
 #pragma endregion  // "保护限制组"
 
-  //==============================================================================
-  // PID 参数组
-  //==============================================================================
+  /** @name PID 参数组 */
 #pragma region "PID 参数组"
-  /** @brief 位置环 PID 控制器 */
+  /// @brief 位置环 PID 控制器
   math::Pid& position_pid() { return position_pid_; }
   void       set_position_pid(const float kp, const float ki, const float kd) {
     position_pid_.set_kp(kp);
@@ -157,7 +158,7 @@ class Servo : public hortor::Noncopyable {
     position_pid_.set_kd(kd);
   }
 
-  /** @brief 速度环 PID 控制器 */
+  /// @brief 速度环 PID 控制器
   math::Pid& velocity_pid() { return velocity_pid_; }
   void       set_velocity_pid(const float kp, const float ki, const float kd) {
     velocity_pid_.set_kp(kp);
@@ -165,33 +166,31 @@ class Servo : public hortor::Noncopyable {
     velocity_pid_.set_kd(kd);
   }
 
-  /** @brief 电流低通滤波器 */
+  /// @brief 电流低通滤波器
   math::LowPassFilter& current_lpf() { return current_lpf_; }
   void                 set_current_lpf(const float v) { current_lpf_.set_time_constant(v); }
 
-  /** @brief 一阶前馈增益（速度前馈，已转换为浮点数） */
+  /// @brief 一阶前馈增益（速度前馈，已转换为浮点数）
   float feedforward_1st_gain() const { return feedforward_1st_gain_; }
   void  set_feedforward_1st_gain(const float v) { feedforward_1st_gain_ = v; }
 
-  /** @brief 二阶前馈增益（加速度前馈，已转换为浮点数） */
+  /// @brief 二阶前馈增益（加速度前馈，已转换为浮点数）
   float feedforward_2nd_gain() const { return feedforward_2nd_gain_; }
   void  set_feedforward_2nd_gain(const float v) { feedforward_2nd_gain_ = v; }
 
-  /** @brief 轮廓加速度（rev/min/s） */
+  /// @brief 轮廓加速度（rev/min/s）
   float profile_acceleration() const { return profile_acceleration_; }
   void  set_profile_acceleration(const float v) { profile_acceleration_ = v; }
 
-  /** @brief 轮廓速度（rev/min） */
+  /// @brief 轮廓速度（rev/min）
   float profile_velocity() const { return profile_velocity_; }
   void  set_profile_velocity(const float v) { profile_velocity_ = v; }
 
 #pragma endregion  // "PID 参数组"
 
-  //==============================================================================
-  // 控制命令组
-  //==============================================================================
+  /** @name 控制命令组 */
 #pragma region "控制命令组"
-  /** @brief 扭矩使能状态 */
+  /// @brief 扭矩使能状态
   bool torque_enable() const { return torque_enable_; }
   void set_torque_enable(const bool v) {
     if (v && !torque_enable_) {
@@ -201,7 +200,7 @@ class Servo : public hortor::Noncopyable {
     torque_enable_ = v;
   }
 
-  /** @brief 硬件错误状态 */
+  /// @brief 硬件错误状态
   HardwareErrorStatusBits hardware_error_status() const { return hardware_error_status_; }
   uint8_t hardware_error_status_value() const { return hardware_error_status_.value; }
   void    set_hardware_error_status(const HardwareErrorStatusBits v) { hardware_error_status_ = v; }
@@ -209,69 +208,65 @@ class Servo : public hortor::Noncopyable {
 
 #pragma endregion  // "控制命令组"
 
-  //==============================================================================
-  // 目标值组
-  //==============================================================================
+  /** @name 目标值组 */
 #pragma region "目标值组"
-  /** @brief 目标PWM */
+  /// @brief 目标PWM
   float goal_pwm() const { return goal_pwm_; }
   void  set_goal_pwm(const float v) { goal_pwm_ = v; }
 
-  /** @brief 目标电流 */
+  /// @brief 目标电流
   float goal_current() const { return goal_current_; }
   void  set_goal_current(const float v) { goal_current_ = v; }
 
-  /** @brief 目标速度 */
+  /// @brief 目标速度
   float goal_velocity() const { return goal_velocity_; }
   void  set_goal_velocity(const float v) { goal_velocity_ = v; }
 
-  /** @brief 目标位置 */
+  /// @brief 目标位置
   int32_t goal_position() const { return goal_position_; }
   void    set_goal_position(const int32_t v) { goal_position_ = v; }
 
 #pragma endregion  // "目标值组"
 
-  //==============================================================================
-  // 状态反馈组
-  //==============================================================================
+  /** @name 状态反馈组 */
 #pragma region "状态反馈组"
-  /** @brief 当前位置 */
+  /// @brief 当前位置
   float present_position() const { return present_position_; }
   void  set_present_position(const float v) { present_position_ = v; }
 
-  /** @brief 当前速度 */
+  /// @brief 当前速度
   float present_velocity() const { return present_velocity_; }
   void  set_present_velocity(const float v) { present_velocity_ = v; }
 
-  /** @brief 当前电流 */
+  /// @brief 当前电流
   float present_current() const { return present_current_; }
   void  set_present_current(const float v) { present_current_ = v; }
 
-  /** @brief 当前输入电压 */
+  /// @brief 当前输入电压
   float present_input_voltage() const { return present_input_voltage_; }
   void  set_present_input_voltage(const float v) { present_input_voltage_ = v; }
 
-  /** @brief 当前温度 */
+  /// @brief 当前温度
   float present_temperature() const { return present_temperature_; }
   void  set_present_temperature(const float v) { present_temperature_ = v; }
 
-  /** @brief 当前PWM */
+  /// @brief 当前PWM
   float present_pwm() const { return present_pwm_; }
   void  set_present_pwm(const float v) { present_pwm_ = v; }
 
-  /** @brief 期望速度轨迹（rev/min） */
+  /// @brief 期望速度轨迹（rev/min）
   float velocity_trajectory() const { return velocity_trajectory_; }
   void  set_velocity_trajectory(const float v) { velocity_trajectory_ = v; }
 
-  /** @brief 期望位置轨迹（pulse） */
+  /// @brief 期望位置轨迹（pulse）
   int32_t position_trajectory() const { return position_trajectory_; }
   void    set_position_trajectory(const int32_t v) { position_trajectory_ = v; }
 
-  /** @brief 运动状态 */
+  /// @brief 运动状态
   bool moving() const { return moving_; }
   void set_moving(const bool v) { moving_ = v; }
 
-  /** @brief 运动详细状态 */
+  /// @brief 运动详细状态
   MovingStatusBits moving_status() const { return moving_status_; }
   uint8_t          moving_status_value() const { return moving_status_.value; }
   void             set_moving_status(const MovingStatusBits v) { moving_status_ = v; }
@@ -279,13 +274,13 @@ class Servo : public hortor::Noncopyable {
 
 #pragma endregion  // "状态反馈组"
 
-  /** @brief 编码器 */
+  /// @brief 编码器
   EncoderType* encoder() { return encoder_pll_.encoder(); }
 
-  /** @brief 电流传感器 */
+  /// @brief 电流传感器
   CurrentType* current_sensor() { return current_sensor_; }
 
-  /** @brief 电机驱动器 */
+  /// @brief 电机驱动器
   MotorType* motor() { return motor_; }
 
   /**
@@ -296,87 +291,80 @@ class Servo : public hortor::Noncopyable {
   Error Process(float dt);
 
   /**
-   * @brief 设置为居中位置
+   * @brief 将当前多圈位置对齐到目标（调整 homing_offset 使 pos() == target）
+   * @param target 目标位置 [pulse]
    */
   void AlignToPosition(uint32_t target);
 
  private:
-  //==============================================================================
-  // 运行模式组
-  //==============================================================================
+  /** @name 运行模式组 */
 #pragma region "运行模式组"
-  /** @brief 驱动模式 */
+  /// @brief 驱动模式
   DriveModeBits drive_mode_{};
 
-  /** @brief 舵机模式 */
+  /// @brief 舵机模式
   OperatingMode operating_mode_ = OperatingMode::kPosition;
 
-  /** @brief 关断条件 */
+  /// @brief 关断条件
   ShutdownBits shutdown_{};
 
 #pragma endregion  // "运行模式组"
 
-  //==============================================================================
-  // 位置配置组
-  //==============================================================================
+  /** @name 位置配置组 */
 #pragma region "位置配置组"
-  /** @brief 运动阈值 */
+  /// @brief 运动阈值
   float moving_threshold_ = 0.0f;
 
 #pragma endregion  // "位置配置组"
 
-  //==============================================================================
-  // 保护限制组
-  //==============================================================================
+  /** @name 保护限制组 */
 #pragma region "保护限制组"
-  /** @brief 温度上限 */
+  /// @brief 温度上限
   uint8_t temperature_limit_ = 0;
-  /** @brief 最高电压限制 */
+  /// @brief 最高电压限制
   float max_voltage_limit_ = 0.0f;
-  /** @brief 最低电压限制 */
+  /// @brief 最低电压限制
   float min_voltage_limit_ = 0.0f;
-  /** @brief PWM上限 */
+  /// @brief PWM上限
   float pwm_limit_ = 0.0f;
-  /** @brief 电流上限 */
+  /// @brief 电流上限
   float current_limit_ = 0;
-  /** @brief 速度上限 */
+  /// @brief 速度上限
   float velocity_limit_ = 0.0f;
-  /** @brief 位置上限 */
+  /// @brief 位置上限
   int32_t max_position_limit_ = static_cast<int32_t>(kResolution.kMax);
-  /** @brief 位置下限 */
+  /// @brief 位置下限
   int32_t min_position_limit_ = 0;
-  /** @brief 保护时间 */
+  /// @brief 保护时间
   float protection_time_ = 0.0f;
 #pragma endregion  // "保护限制组"
 
-  //==============================================================================
-  // PID 参数组
-  //==============================================================================
+  /** @name PID 参数组 */
 #pragma region "PID 参数组"
-  /** @brief 速度环 PID 控制器 */
+  /// @brief 速度环 PID 控制器
   math::Pid velocity_pid_{
       math::Pid::Config{.kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .ka = 0.0f, .limit = 1.0f}};
 
-  /** @brief 位置环 PID 控制器 */
+  /// @brief 位置环 PID 控制器
   math::Pid position_pid_{
       math::Pid::Config{.kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .ka = 0.0f, .limit = 1.0f}};
 
-  /** @brief 电流低通滤波器 */
+  /// @brief 电流低通滤波器
   math::LowPassFilter current_lpf_{};
 
-  /** @brief 前馈二阶增益 */
+  /// @brief 前馈二阶增益
   float feedforward_2nd_gain_ = 0.0f;
 
-  /** @brief 前馈一阶增益 */
+  /// @brief 前馈一阶增益
   float feedforward_1st_gain_ = 0.0f;
 
-  /** @brief 轮廓加速度 [rev/min²] */
+  /// @brief 轮廓加速度 [rev/min²]
   float profile_acceleration_ = 0.0f;
 
-  /** @brief 轮廓速度 [RPM] */
+  /// @brief 轮廓速度 [RPM]
   float profile_velocity_ = 0.0f;
 
-  /** @brief 速度轮廓生成器 */
+  /// @brief 速度轮廓生成器
   math::Profile profile_{math::Profile::Config{.cpr = kResolution.kEncoderCpr}};
 
   /**
@@ -389,86 +377,78 @@ class Servo : public hortor::Noncopyable {
 
 #pragma endregion  // "PID 参数组"
 
-  //==============================================================================
-  // 控制命令组
-  //==============================================================================
+  /** @name 控制命令组 */
 #pragma region "控制命令组"
-  /** @brief 扭矩使能状态 */
+  /// @brief 扭矩使能状态
   bool torque_enable_ = false;
 
-  /** @brief 硬件错误状态 */
+  /// @brief 硬件错误状态
   HardwareErrorStatusBits hardware_error_status_{};
 
 #pragma endregion  // "控制命令组"
 
-  //==============================================================================
-  // 目标值组
-  //==============================================================================
+  /** @name 目标值组 */
 #pragma region "目标值组"
-  /** @brief 目标PWM */
+  /// @brief 目标PWM
   float goal_pwm_ = 0.0f;
 
-  /** @brief 目标电流 */
+  /// @brief 目标电流
   float goal_current_ = 0.0f;
 
-  /** @brief 目标速度 */
+  /// @brief 目标速度
   float goal_velocity_ = 0.0f;
 
-  /** @brief 目标位置 */
+  /// @brief 目标位置
   int32_t goal_position_ = 0;
 
 #pragma endregion  // "目标值组"
 
-  //==============================================================================
-  // 状态反馈组
-  //==============================================================================
+  /** @name 状态反馈组 */
 #pragma region "状态反馈组"
-  /** @brief 期望速度轨迹 [rev/min] */
+  /// @brief 期望速度轨迹 [rev/min]
   float velocity_trajectory_ = 0.0f;
 
-  /** @brief 期望位置轨迹 [pulse] */
+  /// @brief 期望位置轨迹 [pulse]
   int32_t position_trajectory_ = 0;
 
-  /** @brief 运动状态 */
+  /// @brief 运动状态
   bool moving_ = false;
 
-  /** @brief 运动详细状态 */
+  /// @brief 运动详细状态
   MovingStatusBits moving_status_{};
 
-  /** @brief 当前PWM */
+  /// @brief 当前PWM
   float present_pwm_ = 0.0f;
 
-  /** @brief 当前电流 */
+  /// @brief 当前电流
   float present_current_ = 0.0f;
 
-  /** @brief 当前速度 */
+  /// @brief 当前速度
   float present_velocity_ = 0.0f;
 
-  /** @brief 当前位置 */
+  /// @brief 当前位置
   float present_position_ = 0.0f;
 
-  /** @brief 当前输入电压 */
+  /// @brief 当前输入电压
   float present_input_voltage_ = 0.0f;
 
-  /** @brief 当前温度 */
+  /// @brief 当前温度
   float present_temperature_ = 0.0f;
 
 #pragma endregion  // "状态反馈组"
 
-  //==============================================================================
-  // 硬件抽象层
-  //==============================================================================
+  /** @name 硬件抽象层 */
 #pragma region "硬件抽象层"
-  /** @brief 电机驱动器 */
+  /// @brief 电机驱动器
   MotorType* motor_ = nullptr;
 
-  /** @brief 编码器PLL */
+  /// @brief 编码器PLL
   math::EncoderPll<EncoderType, Bits> encoder_pll_{};
 
-  /** @brief 电流传感器 */
+  /// @brief 电流传感器
   CurrentType* current_sensor_ = nullptr;
 
-  /** @brief 电流超时限制器 */
+  /// @brief 电流超时限制器
   utils::TimeoutLimiter current_timeout_limiter_{};
 
 #pragma endregion  // "硬件抽象层"

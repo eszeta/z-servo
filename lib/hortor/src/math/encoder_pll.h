@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file encoder_pll.h
+ * @brief 编码器 PLL 位置与速度估计
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -11,28 +16,42 @@
 
 namespace hortor::math {
 
+/**
+ * @brief 编码器 PLL，从编码器读数估计平滑位置与速度
+ * @tparam EncoderType 编码器类型（CRTP 派生）
+ * @tparam Bits 分辨率位数
+ */
 template <typename EncoderType, uint8_t Bits>
 class EncoderPll : public hortor::Noncopyable {
  public:
+  /**
+   * @brief 初始化 PLL，从编码器当前位建立初始状态
+   * @param encoder 编码器指针，须已初始化
+   * @return 错误码
+   */
   Error Init(EncoderType* encoder);
 
+  /**
+   * @brief 返回绑定的编码器指针
+   * @return 编码器指针
+   */
   EncoderType* encoder() const;
 
   /**
-   * @brief 获取估计位置
-   * @return 估计位置（单位：pulse）
+   * @brief 估计位置
+   * @return 估计位置 [pulse]
    */
   float pos() const;
 
   /**
-   * @brief 获取估计速度
-   * @return 估计速度（单位：pulse/秒）
+   * @brief 估计速度（线速度）
+   * @return 估计速度 [pulse/s]
    */
   float velocity() const;
 
   /**
-   * @brief 获取估计速度
-   * @return 估计速度（单位：RPM）
+   * @brief 估计转速
+   * @return 估计转速 [RPM]
    */
   float rpm() const;
 
@@ -46,22 +65,24 @@ class EncoderPll : public hortor::Noncopyable {
  private:
   static constexpr Resolution<Bits> kResolution{};
 
-  /** @brief PLL带宽 [Hz] */
+  /// @brief PLL带宽 [Hz]
   static constexpr float kPllBandwidth = 200.0f;
-  /** @brief PLL比例增益 */
+  /// @brief PLL比例增益
   static constexpr float kPllKp = 2.0f * kPllBandwidth;
-  /** @brief PLL积分增益（临界阻尼） */
+  /// @brief PLL积分增益（临界阻尼）
   static constexpr float kPllKi = 0.25f * kPllKp * kPllKp;
+  /// @brief 速度死区 [pulse/s]，低于此值视为静止
+  static constexpr float kVelocityDeadband = 1.0f;
 
   // PLL 状态变量
-  /** @brief 线性位置估计（平滑后） */
+  /// @brief 线性位置估计（平滑后）
   float pos_ = 0.0f;
-  /** @brief 速度估计 [pulse/s] */
+  /// @brief 速度估计 [pulse/s]
   float velocity_ = 0.0f;
-  /** @brief 速度估计 [RPM] */
+  /// @brief 速度估计 [RPM]
   float rpm_ = 0.0f;
 
-  /** @brief 角度传感器 */
+  /// @brief 角度传感器
   EncoderType* encoder_ = nullptr;
 };
 
@@ -113,8 +134,6 @@ Error EncoderPll<EncoderType, Bits>::Process(float dt) {
   pos_ += dt * kPllKp * error;
   velocity_ += dt * kPllKi * error;
 
-  /** @brief 速度死区：低于此值视为静止，防止数值噪声产生虚假速度 [pulse/s] */
-  static constexpr float kVelocityDeadband = 1.0f;
   if (fabs(velocity_) < kVelocityDeadband) {
     velocity_ = 0.0f;
   }

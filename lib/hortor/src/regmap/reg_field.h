@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file reg_field.h
+ * @brief 寄存器位域与类型转换（Field、Merged2、Converter、Trait）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -12,17 +17,18 @@
 #include "utils/bit_utils.h"
 
 namespace hortor::regmap {
+
+/// @brief 寄存器位域描述（见下方定义）
 template <typename ValueType, uint8_t Address, uint8_t Shift, uint8_t Bits>
 struct Field;
 
+/// @brief 跨两寄存器的合并字段（见下方定义）
 template <typename ValueType, typename HighFieldType, typename LowFieldType>
 struct Merged2;
 
+/// @brief 原始值与用户值转换（见下方定义）
 template <typename ValueType>
 struct Converter;
-
-// template <typename ValueType, int32_t Numerator, int32_t Denominator>
-// struct RatioConverter;
 
 struct Trait;
 
@@ -30,6 +36,7 @@ struct Trait;
 
 namespace hortor::regmap {
 
+/// @brief 寄存器字段元数据与编解码管道（FieldOf、ConverterOf、EncodePipeline 等）
 struct Trait : public hortor::Noncopyable {
   template <typename T>
   struct AccessType {
@@ -42,6 +49,14 @@ struct Trait : public hortor::Noncopyable {
     using Type = std::tuple_element_t<kIndex, std::tuple<uint8_t, uint16_t, uint32_t>>;
   };
 
+  /**
+   * @brief 将 ValidBits 位有符号数符号扩展到 OutType 位宽
+   * @tparam OutType 目标有符号整数类型
+   * @tparam ValidBits 有效位数
+   * @tparam RawType 原始无符号类型
+   * @param raw 原始值
+   * @return 符号扩展后的值
+   */
   template <typename OutType, uint8_t ValidBits, typename RawType>
   static constexpr OutType SignExtend(const RawType raw) noexcept {
     static_assert(std::is_integral_v<OutType>, "SignExtend output type must be integral");
@@ -53,7 +68,6 @@ struct Trait : public hortor::Noncopyable {
     using unsigned_out_t     = std::make_unsigned_t<OutType>;
     constexpr uint8_t kShift = static_cast<uint8_t>(kTargetBits - ValidBits);
 
-    // 先左移让符号位对齐到最高位，再算术右移恢复目标位宽。
     const auto shifted   = static_cast<unsigned_out_t>(static_cast<unsigned_out_t>(raw) << kShift);
     const auto as_signed = static_cast<OutType>(shifted);
     return static_cast<OutType>(as_signed >> kShift);
@@ -140,7 +154,11 @@ struct Field : public hortor::Noncopyable {
   static_assert(Shift < kSizeBits, "Field Shift exceeds underlying access width");
   static_assert(Shift + Bits <= kSizeBits, "Field range exceeds underlying access width");
 
-  // 从寄存器数据中提取当前位域值；有符号值按位宽执行符号扩展。
+  /**
+   * @brief 从寄存器数据中提取位域值，有符号类型做符号扩展
+   * @param data 寄存器原始值
+   * @return 提取出的位域值
+   */
   static constexpr value_t GetValue(const access_t data) noexcept {
     const access_t extracted = static_cast<access_t>((data & kMask) >> kShift);
     if constexpr (std::is_signed_v<value_t>) {
@@ -149,7 +167,11 @@ struct Field : public hortor::Noncopyable {
     return static_cast<value_t>(extracted);
   }
 
-  // 将 value 写入目标位域，不影响其它位。
+  /**
+   * @brief 将 value 写入位域，其它位不变
+   * @param value 要写入的值
+   * @param data 寄存器值（原地修改）
+   */
   static constexpr void SetValue(const value_t value, access_t& data) noexcept {
     const access_t shifted = static_cast<access_t>(static_cast<access_t>(value) << kShift);
     data                   = static_cast<access_t>((data & kClearMask) | (shifted & kMask));
@@ -158,6 +180,7 @@ struct Field : public hortor::Noncopyable {
   static constexpr void Clear(access_t& data) noexcept { data &= kClearMask; }
 };
 
+/// @brief 跨两寄存器的合并字段（高/低字段组合为一个值）
 template <typename ValueType, typename HighFieldType, typename LowFieldType>
 struct Merged2 : public hortor::Noncopyable {
   using Merged2Base   = Merged2<ValueType, HighFieldType, LowFieldType>;
@@ -206,6 +229,7 @@ struct Merged2 : public hortor::Noncopyable {
   }
 };
 
+/// @brief 原始值与用户值的恒等转换（可特化或用 RatioConverter）
 template <typename ValueType>
 struct Converter : public hortor::Noncopyable {
   using value_t = ValueType;
@@ -220,6 +244,7 @@ struct Converter : public hortor::Noncopyable {
   }
 };
 
+/// @brief 原始值与用户值的比例转换（user = raw * Num / Den）
 template <typename ValueType, int32_t Numerator, int32_t Denominator = 1>
 struct RatioConverter : public Converter<ValueType> {
   using value_t = typename regmap::Converter<ValueType>::value_t;

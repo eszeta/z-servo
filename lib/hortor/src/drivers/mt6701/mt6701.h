@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file mt6701.h
+ * @brief MT6701 磁编码器（I2C/SPI，14 位）
+ */
+
 #pragma once
 
 #include <SPI.h>
@@ -55,7 +60,7 @@ class EncoderBase : public servo::Encoder<EncoderBase<Bus>, kResolutionBits> {
   Error ReadRawImpl(uint32_t& out_raw);
 
  protected:
-  /** @brief 寄存器映射实例，负责与传感器的具体通信操作 */
+  /// @brief 寄存器映射实例，负责与传感器的具体通信操作
   Regmap<Bus> regmap_;
 };
 

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file drv8231a.h
+ * @brief DRV8231A 双 H 桥电机驱动（GPIO/PWM）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -12,20 +17,31 @@ namespace hortor::drivers::DRV8231A {
 class Motor;
 using Base = servo::Motor<Motor>;
 
+/// @brief DRV8231A 电机驱动实现（双 H 桥，IN1/IN2 + 可选 nFAULT）
 class Motor final : public Base {
  public:
+  /// @brief 配置：引脚与低速衰减阈值
   struct Config {
-    uint8_t pin_in1;                      // IN1 控制引脚
-    uint8_t pin_in2;                      // IN2 控制引脚
-    uint8_t pin_nfault           = 0;     // nFAULT 引脚（0 表示不使用）
-    float   slow_decay_threshold = 0.3f;  // 低速阈值（低于此值使用慢速衰减）
+    uint8_t pin_in1;                      ///< IN1 控制引脚
+    uint8_t pin_in2;                      ///< IN2 控制引脚
+    uint8_t pin_nfault           = 0;     ///< nFAULT 引脚（0 表示不使用）
+    float   slow_decay_threshold = 0.3f;  ///< 低速阈值（低于此值使用慢速衰减）
   };
 
+  /**
+   * @brief 初始化引脚与参数
+   * @param config 配置（引脚与低速衰减阈值）
+   * @return 错误码
+   */
   Error Init(const Config& config);
   void  SetPWMImpl(float pwm);
   void  BrakeImpl();
   void  CoastImpl();
-  bool  HasFault() const;
+  /**
+   * @brief 是否检测到故障（nFAULT 低）
+   * @return 有故障为 true，无 nFAULT 或未触发为 false
+   */
+  bool HasFault() const;
 
  private:
   void SetPWMFastDecay(float pwm);

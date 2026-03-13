@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file slave.h
+ * @brief 伺服从机（协议从机 + 舵机 + 寄存器映射，I2C/Serial 通道）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -12,35 +17,69 @@
 #include "regmap.h"
 
 namespace hortor::slave {
+
+/** @brief 伺服从机模板（见下方定义） */
 template <typename ServoType, typename ChannelType>
 class Slave;
 
 template <typename ServoType, typename ChannelType>
 using Base = protocol::Slave<Slave<ServoType, ChannelType>, Regmap, ChannelType>;
 
+/**
+ * @brief 伺服从机：绑定舵机与寄存器映射，实现协议指令与寄存器读写
+ * @tparam ServoType 舵机类型（如 Servo<...>）
+ * @tparam ChannelType 协议通道类型（如 ProtocolChannel<TransportI2C>）
+ */
 template <typename ServoType, typename ChannelType>
 class Slave : public Base<ServoType, ChannelType> {
  public:
+  /** @brief 绑定的舵机实例 */
   ServoType* servo();
 
+  /**
+   * @brief 初始化从机，绑定舵机、寄存器映射与通道
+   * @param servo 舵机指针
+   * @param regmap 寄存器映射指针
+   * @param channel 协议通道指针
+   * @return 错误码
+   */
   Error Init(ServoType* servo, Regmap* regmap, ChannelType* channel);
 
+  /**
+   * @brief Reset 指令后钩子（恢复 EEPROM 等）
+   * @param packet 指令包
+   * @param response 是否需要回复
+   * @return 错误码
+   */
   Error AfterResetHandlerImpl(const protocol::InstPacket& packet, const bool response);
 
+  /**
+   * @brief 写寄存器后钩子（存 EEPROM、应用配置等）
+   * @param address 起始地址
+   * @param data 数据指针
+   * @param size 字节数
+   * @return 错误码
+   */
   Error AfterWriteRegsImpl(const uint8_t address, const uint8_t* data, const size_t size);
 
+  /**
+   * @brief 每拍处理完指令后的钩子（写实时状态、更新寄存器）
+   * @param dt 时间间隔 [s]
+   * @return 错误码
+   */
   Error AfterProcessImpl(float dt);
 
+  /** @brief 将舵机状态写回寄存器映射 */
   Error UpdateStatus();
 
  private:
-  ServoType* servo_         = nullptr;
-  uint16_t   realtime_tick_ = 0;
+  ServoType* servo_         = nullptr;  ///< 舵机实例
+  uint16_t   realtime_tick_ = 0;        ///< 实时时钟 [ms]
 
-  Error ApplyProtocolConfig();
-  Error ApplyAlignToPosition();
-  Error ApplyMotorConfig();
-  Error UpdateMotorStatus();
+  Error ApplyProtocolConfig();   ///< 从寄存器应用协议配置到基类
+  Error ApplyAlignToPosition();  ///< 执行对齐到目标位置
+  Error ApplyMotorConfig();      ///< 从寄存器应用电机/舵机配置
+  Error UpdateMotorStatus();     ///< 将舵机状态写回寄存器
 };
 
 }  // namespace hortor::slave

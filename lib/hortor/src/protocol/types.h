@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file types.h
+ * @brief 协议相关类型（包索引、指令码、控制表、状态错误位）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -108,7 +113,7 @@ union StatusErrorBits {
      * Write指令的情况下发送action指令，则将其设为1
      */
     bool instruction_error : 1;
-    bool reserved_bit7     : 1;  // 位7: 保留（保留位）
+    bool reserved_bit7     : 1;  ///< 位7 保留
   };
 };
 

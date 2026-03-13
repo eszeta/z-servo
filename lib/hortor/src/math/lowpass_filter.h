@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file lowpass_filter.h
+ * @brief 一阶低通滤波器
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -11,44 +16,39 @@
 namespace hortor::math {
 
 /**
- * @brief 低通滤波器类
+ * @brief 一阶低通滤波器
  */
 class LowPassFilter : public hortor::Noncopyable {
  public:
   /**
-   * @brief 构造函数
-   * @param time_constant - 低通滤波器时间常数(秒)，必须大于0
+   * @brief 构造并设置时间常数
+   * @param time_constant 时间常数 [s]，须 > 0
    */
   explicit LowPassFilter(float time_constant = 0.1f);
 
   /**
-   * @brief 计算滤波值
-   * @param x - 输入值
-   * @param dt - 时间间隔(秒)，必须大于0
-   * @return 滤波值
+   * @brief 计算滤波输出
+   * @param x 输入值
+   * @param dt 时间间隔 [s]，须 > 0
+   * @return 滤波后的值
    */
   float Compute(float x, float dt);
 
   /**
    * @brief 设置时间常数
-   * @param time_constant - 时间常数(秒)，必须大于0
+   * @param time_constant 时间常数 [s]，须 > 0
    */
   void set_time_constant(float time_constant);
 
-  /**
-   * @brief 获取时间常数
-   * @return 时间常数(秒)
-   */
+  /** @brief 当前时间常数 [s] */
   float time_constant() const;
 
-  /**
-   * @brief 重置滤波器状态
-   */
+  /** @brief 重置内部状态 */
   void Reset();
 
  protected:
-  float time_constant_;  // 低通滤波器时间常数(秒)
-  float y_prev_;         // 上一次滤波值
+  float time_constant_;  ///< 时间常数 [s]
+  float y_prev_;         ///< 上一拍滤波输出
 };
 
 }  // namespace hortor::math

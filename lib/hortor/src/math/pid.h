@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file pid.h
+ * @brief PID 控制器
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -11,47 +16,71 @@
 namespace hortor::math {
 
 /**
- * @brief PID控制器类
+ * @brief PID 控制器类
  */
 class Pid : public hortor::Noncopyable {
  public:
+  /// @brief PID 配置参数
   struct Config {
-    float kp;     // 比例增益 Kp
-    float ki;     // 积分增益 Ki
-    float kd;     // 微分增益 Kd
-    float ka;     // 抗饱和增益 Ka，用于抑制积分饱和
-    float limit;  // 输出限幅值
+    float kp;     ///< 比例增益 Kp
+    float ki;     ///< 积分增益 Ki
+    float kd;     ///< 微分增益 Kd
+    float ka;     ///< 抗饱和增益 Ka，用于抑制积分饱和
+    float limit;  ///< 输出限幅值
   };
 
   explicit Pid(const Config& config);
 
   /**
-   * @brief 计算PID控制器输出（无前馈）
-   * @param error - 控制误差
-   * @param dt - 时间间隔(秒)
-   * @return 控制输出
+   * @brief 计算 PID 控制器输出
+   * @param error 控制误差
+   * @param dt 时间间隔 [s]
+   * @param feedforward 前馈量，默认 0
+   * @return 控制输出（已限幅）
    */
   float Compute(const float error, const float dt, const float feedforward = 0.0f);
 
-  /**
-   * @brief 重置PID控制器状态
-   */
+  /** @brief 重置积分与微分状态 */
   void Reset();
 
-  // 参数设置和获取接口
-  void  set_kp(float kp);
+  /**
+   * @brief 设置比例增益
+   * @param kp 比例增益
+   */
+  void set_kp(float kp);
+  /** @brief 比例增益 */
   float kp() const;
 
-  void  set_ki(float ki);
+  /**
+   * @brief 设置积分增益
+   * @param ki 积分增益
+   */
+  void set_ki(float ki);
+  /** @brief 积分增益 */
   float ki() const;
 
-  void  set_kd(float kd);
+  /**
+   * @brief 设置微分增益
+   * @param kd 微分增益
+   */
+  void set_kd(float kd);
+  /** @brief 微分增益 */
   float kd() const;
 
-  void  set_ka(float ka);
+  /**
+   * @brief 设置抗饱和增益
+   * @param ka 抗饱和增益
+   */
+  void set_ka(float ka);
+  /** @brief 抗饱和增益 */
   float ka() const;
 
-  void  set_limit(float limit);
+  /**
+   * @brief 设置输出限幅值
+   * @param limit 限幅值
+   */
+  void set_limit(float limit);
+  /** @brief 输出限幅值 */
   float limit() const;
 
  private:

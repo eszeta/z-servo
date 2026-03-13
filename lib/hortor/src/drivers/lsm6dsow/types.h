@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file types.h
+ * @brief LSM6DSOW 寄存器与枚举（ODR、量程等）
+ */
+
 #pragma once
 
 #include "regmap/reg_field.h"

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file types.h
+ * @brief MT6701 类型与寄存器定义
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -100,9 +105,9 @@ enum class Status : uint8_t {
   kFieldError  = 0x3,  // 磁场错误，无法检测到有效磁场
 };
 
-/** @brief SSI时钟频率，定义SPI通信的时钟速率（1MHz） */
+/// @brief SSI时钟频率，定义SPI通信的时钟速率（1MHz）
 constexpr uint32_t kSSIClock = 1000000;
-/** @brief I2C默认地址，MT6701传感器的7位I2C地址 */
+/// @brief I2C默认地址，MT6701传感器的7位I2C地址
 constexpr uint8_t kI2CAddress = 0x06;
 
 /**

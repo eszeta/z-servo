@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file regmap.h
+ * @brief MT6701 寄存器映射（I2C/SPI 特化）
+ */
+
 #pragma once
 
 #include <Arduino.h>

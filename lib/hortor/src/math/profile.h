@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file profile.h
+ * @brief 速度轮廓生成器（Velocity-based Profile）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -27,7 +32,7 @@ namespace hortor::math {
  */
 class Profile : public hortor::Noncopyable {
  public:
-  /** @brief 轮廓类型，与 MovingStatus 寄存器 Bit4-5 对应 */
+  /// @brief 轮廓类型，与 MovingStatus 寄存器 Bit4-5 对应
   enum class Type : uint8_t {
     kStep        = 0,  ///< 阶跃（无轮廓）
     kRect        = 1,  ///< 矩形
@@ -60,31 +65,31 @@ class Profile : public hortor::Noncopyable {
    */
   void Process(float dt);
 
-  /** @brief 当前轨迹位置 [pulses] */
+  /// @brief 当前轨迹位置 [pulses]
   int32_t position_trajectory() const { return static_cast<int32_t>(pos_traj_); }
 
-  /** @brief 当前轨迹速度 [RPM]，用于写入寄存器 */
+  /// @brief 当前轨迹速度 [RPM]，用于写入寄存器
   float velocity_trajectory_rpm() const { return vel_traj_rpm_; }
 
-  /** @brief 当前轨迹速度 [counts/s]，用于 FF1st 前馈 */
+  /// @brief 当前轨迹速度 [counts/s]，用于 FF1st 前馈
   float velocity_trajectory_cps() const { return vel_traj_cps_; }
 
-  /** @brief 当前轨迹加速度 [counts/s²]，用于 FF2nd 前馈 */
+  /// @brief 当前轨迹加速度 [counts/s²]，用于 FF2nd 前馈
   float acceleration_cps2() const { return accel_cps2_; }
 
-  /** @brief 轮廓是否已完成 */
+  /// @brief 轮廓是否已完成
   bool is_complete() const { return completed_; }
 
-  /** @brief 当前使用的轮廓类型 */
+  /// @brief 当前使用的轮廓类型
   Type type() const { return type_; }
 
-  /** @brief 当前轮廓的目标位置 [pulses] */
+  /// @brief 当前轮廓的目标位置 [pulses]
   int32_t goal() const { return static_cast<int32_t>(goal_pos_); }
 
  private:
   Config config_;
 
-  // ---- 轮廓参数（SetGoal 时计算，Process 时使用）----
+  /** @name 轮廓参数（SetGoal 时计算，Process 时使用） */
   Type type_      = Type::kStep;
   bool completed_ = true;
 
@@ -93,36 +98,34 @@ class Profile : public hortor::Noncopyable {
   float dir_       = 0.0f;  ///< 方向（+1 或 -1）
 
   float peak_vel_cps_ = 0.0f;  ///< 峰值速度 [counts/s]
-  float peak_vel_rpm_ = 0.0f;  ///< 峰值速度 [RPM]（缓存，避免重复换算）
+  float peak_vel_rpm_ = 0.0f;  ///< 峰值速度 [RPM]（缓存）
   float acc_cps2_     = 0.0f;  ///< 加速度 [counts/s²]
 
-  // 时间节点 [s]
-  float t1_ = 0.0f;  ///< 加速段结束时刻
-  float t2_ = 0.0f;  ///< 匀速段结束时刻（减速开始）
-  float t3_ = 0.0f;  ///< 减速段结束时刻（轮廓总时长）
+  float t1_ = 0.0f;  ///< 加速段结束时刻 [s]
+  float t2_ = 0.0f;  ///< 匀速段结束时刻（减速开始）[s]
+  float t3_ = 0.0f;  ///< 减速段结束时刻（轮廓总时长）[s]
 
-  // 加速段结束时的位移 [pulses]（用于后续相位计算）
-  float d1_ = 0.0f;
-  // 匀速段结束时的位移 [pulses]（相对起点）
-  float d2_ = 0.0f;
+  float d1_ = 0.0f;  ///< 加速段结束时的位移 [pulses]
+  float d2_ = 0.0f;  ///< 匀速段结束时的位移 [pulses]（相对起点）
 
-  // ---- 运行状态（Process 时更新）----
+  /** @name 运行状态（Process 时更新） */
   float elapsed_      = 0.0f;  ///< 已运行时间 [s]
   float pos_traj_     = 0.0f;  ///< 当前轨迹位置 [pulses]
-  float vel_traj_rpm_ = 0.0f;
-  float vel_traj_cps_ = 0.0f;
-  float accel_cps2_   = 0.0f;
+  float vel_traj_rpm_ = 0.0f;  ///< 当前轨迹速度 [RPM]
+  float vel_traj_cps_ = 0.0f;  ///< 当前轨迹速度 [counts/s]
+  float accel_cps2_   = 0.0f;  ///< 当前轨迹加速度 [counts/s²]
 
-  /** @brief 将 counts/s 转换为 RPM */
+  /**
+   * @brief 将 counts/s 转换为 RPM
+   * @param cps 速度 [counts/s]
+   * @return 转速 [RPM]
+   */
   float CpsToRpm(float cps) const { return cps * 60.0f / static_cast<float>(config_.cpr); }
 };
 
 }  // namespace hortor::math
 
-// ============================================================================
-// 实现
-// ============================================================================
-
+/** @name 实现 */
 namespace hortor::math {
 
 inline void Profile::SetGoal(float   start_pos_pulse,

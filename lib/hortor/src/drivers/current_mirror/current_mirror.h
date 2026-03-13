@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file current_mirror.h
+ * @brief 电流镜电流检测（RIPROPI + ADC）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -12,17 +17,24 @@ namespace hortor::drivers::CurrentMirror {
 class Current;
 using Base = servo::Current<Current>;
 
+/// @brief 电流镜电流传感器（RIPROPI + ADC，Init 时校准零点）
 class Current : public Base {
  public:
+  /// @brief 配置：ADC、电阻、换算与校准次数
   struct Config {
-    uint8_t  pin_adc;              // ADC 引脚
-    float    ripropi_ohms;         // RIPROPI 电阻值（欧姆）
-    float    scaling_factor;       // 电流镜系数（μA/A）
-    uint16_t adc_resolution_bits;  // ADC 分辨率（位）
-    float    adc_vref_volts;       // ADC 参考电压（伏特）
-    uint16_t calibration_samples;  // 校准采样次数
+    uint8_t  pin_adc;              ///< ADC 引脚
+    float    ripropi_ohms;         ///< RIPROPI 电阻 [Ω]
+    float    scaling_factor;       ///< 电流镜系数 [μA/A]
+    uint16_t adc_resolution_bits;  ///< ADC 分辨率 [bit]
+    float    adc_vref_volts;       ///< ADC 参考电压 [V]
+    uint16_t calibration_samples;  ///< 校准采样次数
   };
 
+  /**
+   * @brief 初始化 ADC 与零点校准
+   * @param config 配置（ADC、电阻、换算与校准次数）
+   * @return 错误码
+   */
   Error Init(const Config& config);
   Error ReadCurrentImpl(float& current);
 

@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file transport.h
+ * @brief 传输层接口（CRTP），字节读写
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -28,9 +33,7 @@ class Transport : public hortor::Noncopyable {
    */
   bool ReadByte(uint8_t& byte) { return static_cast<DerivedType*>(this)->ReadByteImpl(byte); }
 
-  /**
-   * @brief 可读字节数
-   */
+  /** @brief 当前可读字节数 */
   size_t Available() { return static_cast<DerivedType*>(this)->AvailableImpl(); }
 
   /**
@@ -50,6 +53,8 @@ class Transport : public hortor::Noncopyable {
 
   /**
    * @brief 设置接收目标（I2C 推模式：OnReceive 中直接解析）
+   * @param protocol 解析器指针
+   * @param inst_packet 指令包缓冲区
    */
   void SetReceiver(InstProtocol* protocol, InstPacket* inst_packet) {
     static_cast<DerivedType*>(this)->SetReceiverImpl(protocol, inst_packet);

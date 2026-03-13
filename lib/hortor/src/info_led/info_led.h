@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file info_led.h
+ * @brief 信息 LED（按状态闪烁：Ok/Warning/Error/FatalError）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -11,6 +16,7 @@
 
 #include "error.h"
 #include "led.h"
+#include "noncopyable.h"
 #include "servo/types.h"
 namespace hortor::info_led {
 
@@ -21,10 +27,18 @@ namespace hortor::info_led {
 struct BlinkUnit : public hortor::Noncopyable {
   uint8_t raw;
 
+  /** @brief 持续时间 [ms] */
   uint16_t duration_ms() const { return static_cast<uint16_t>(raw & 0x7Fu) * 20u; }
-  bool     state() const { return (raw & 0x80u) != 0; }
+  /** @brief 亮(true)/灭(false) */
+  bool state() const { return (raw & 0x80u) != 0; }
 
   static constexpr uint8_t kDurationUnitMs = 20;
+  /**
+   * @brief 构造紧凑编码
+   * @param duration_ms 持续时间 [ms]
+   * @param state 亮 true / 灭 false
+   * @return 1 字节编码
+   */
   static constexpr uint8_t Make(uint16_t duration_ms, bool state) {
     return static_cast<uint8_t>((duration_ms / kDurationUnitMs) | (state ? 0x80u : 0u));
   }
@@ -41,10 +55,26 @@ class InfoLED : public hortor::Noncopyable {
  public:
   enum class InfoType { kOk, kWarning, kError, kFatalError, kMax };
 
+  /**
+   * @brief 初始化 LED 引脚
+   * @param pin GPIO 引脚号
+   */
   void Init(uint32_t pin);
+  /**
+   * @brief 设置信息类型（切换闪烁模式）
+   * @param type 信息类型
+   */
   void SetInfo(InfoType type);
   void Stop();
+  /**
+   * @brief 显示错误码闪烁（N 次快闪表示错误码 N）
+   * @param code 错误码 (0–kMax)
+   */
   void ShowErrorCode(uint8_t code);
+  /**
+   * @brief 每拍调用，推进闪烁状态
+   * @param dt 时间间隔 [s]
+   */
   void Process(float dt);
 
  private:

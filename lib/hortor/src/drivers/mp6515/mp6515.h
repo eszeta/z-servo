@@ -1,6 +1,11 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @file mp6515.h
+ * @brief MP6515 单通道电机驱动（PHASE/ENBL/BRAKE/SLEEP）
+ */
+
 #pragma once
 
 #include <Arduino.h>
@@ -12,15 +17,22 @@ namespace hortor::drivers::MP6515 {
 class Motor;
 using Base = servo::Motor<Motor>;
 
+/// @brief MP6515 电机驱动实现
 class Motor final : public Base {
  public:
+  /// @brief 配置：相位、使能、制动、睡眠引脚
   struct Config {
-    uint8_t pin_phase;  // PHASE 相位引脚
-    uint8_t pin_enbl;   // ENABLE 使能引脚（PWM）
-    uint8_t pin_brake;  // BRAKE 制动引脚
-    uint8_t pin_sleep;  // SLEEP 睡眠引脚
+    uint8_t pin_phase;  ///< PHASE 相位引脚
+    uint8_t pin_enbl;   ///< ENABLE 使能引脚（PWM）
+    uint8_t pin_brake;  ///< BRAKE 制动引脚
+    uint8_t pin_sleep;  ///< SLEEP 睡眠引脚
   };
 
+  /**
+   * @brief 初始化引脚
+   * @param config 配置（相位、使能、制动、睡眠引脚）
+   * @return 错误码
+   */
   Error Init(const Config& config);
   void  SetPWMImpl(float pwm);
   void  BrakeImpl();
