@@ -13,14 +13,23 @@ namespace MathTest {
 
 namespace m = hortor::math;
 
-// 验证 mapResolution 不同位宽缩放与边界。
+// 验证 mapResolution（max-based）：PWM/DAC 等非回绕量。
 void test_map_resolution(void) {
   TEST_ASSERT_EQUAL_UINT32(0, m::mapResolution<uint32_t>(0, 8, 12));
   TEST_ASSERT_EQUAL_UINT32(255, m::mapResolution<uint32_t>(255, 8, 8));
-  const uint32_t u32_8_12 = m::mapResolution<uint32_t>(255, 8, 12);
-  TEST_ASSERT_TRUE(u32_8_12 >= 4094 && u32_8_12 <= 4095);
-  const uint16_t u16_8_12 = m::mapResolution<uint16_t>(255, 8, 12);
-  TEST_ASSERT_TRUE(u16_8_12 >= 4094 && u16_8_12 <= 4095);
+  TEST_ASSERT_EQUAL_UINT32(4095, m::mapResolution<uint32_t>(255, 8, 12));
+  TEST_ASSERT_EQUAL_UINT32(255, m::mapResolution<uint32_t>(4095, 12, 8));
+}
+
+// 验证 mapResolutionCpr（CPR-based）：编码器位置等回绕量。
+void test_map_resolution_cpr(void) {
+  TEST_ASSERT_EQUAL_UINT32(0, m::mapResolutionCpr<uint32_t>(0, 8, 12));
+  TEST_ASSERT_EQUAL_UINT32(255, m::mapResolutionCpr<uint32_t>(255, 8, 8));
+  TEST_ASSERT_EQUAL_UINT32(4080, m::mapResolutionCpr<uint32_t>(255, 8, 12));
+  TEST_ASSERT_EQUAL_UINT32(2048, m::mapResolutionCpr<uint32_t>(128, 8, 12));
+  TEST_ASSERT_EQUAL_UINT32(255, m::mapResolutionCpr<uint32_t>(4080, 12, 8));
+  TEST_ASSERT_EQUAL_UINT32(128, m::mapResolutionCpr<uint32_t>(2048, 12, 8));
+  TEST_ASSERT_EQUAL_INT32(-25, m::mapResolutionCpr<int32_t>(-100, 14, 12));
 }
 
 // 验证 mod 结果始终在 [0, divisor)。
@@ -62,6 +71,7 @@ void test_wrap_pm(void) {
 
 void run_tests(void) {
   RUN_TEST(MathTest::test_map_resolution);
+  RUN_TEST(MathTest::test_map_resolution_cpr);
   RUN_TEST(MathTest::test_mod);
   RUN_TEST(MathTest::test_fmodf_pos);
   RUN_TEST(MathTest::test_wrap_pm);

@@ -79,12 +79,12 @@ class Servo : public hortor::Noncopyable {
     const auto kBits       = encoder_pll_.encoder()->kResolution.kBits;
     const auto kTargetBits = kResolution.kBits;
     const auto homing_off  = encoder_pll_.encoder()->homing_offset();
-    return math::mapResolution(homing_off, kBits, kTargetBits);
+    return math::mapResolutionCpr(homing_off, kBits, kTargetBits);
   }
   void set_homing_offset(const int32_t v) {
     const auto kBits         = kResolution.kBits;
     const auto kTargetBits   = encoder_pll_.encoder()->kResolution.kBits;
-    const auto mapped_offset = math::mapResolution(v, kBits, kTargetBits);
+    const auto mapped_offset = math::mapResolutionCpr(v, kBits, kTargetBits);
     encoder_pll_.encoder()->set_homing_offset(mapped_offset);
   }
 

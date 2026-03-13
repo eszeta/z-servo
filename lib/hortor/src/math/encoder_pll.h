@@ -74,7 +74,7 @@ Error EncoderPll<EncoderType, Bits>::Init(EncoderType* encoder) {
   encoder_                = encoder;
   const auto encoder_pos  = encoder->pos();
   const auto encoder_bits = encoder->kResolution.kBits;
-  const auto init_pos     = math::mapResolution(encoder_pos, encoder_bits, kResolution.kBits);
+  const auto init_pos     = math::mapResolutionCpr(encoder_pos, encoder_bits, kResolution.kBits);
   pos_                    = static_cast<float>(init_pos);
   velocity_               = 0.0f;
   return Error::kOk;
@@ -105,7 +105,7 @@ Error EncoderPll<EncoderType, Bits>::Process(float dt) {
   CHECK(encoder_->Process(dt));
   const auto encoder_pos  = encoder_->pos();
   const auto encoder_bits = encoder_->kResolution.kBits;
-  const auto mapped       = math::mapResolution(encoder_pos, encoder_bits, kResolution.kBits);
+  const auto mapped       = math::mapResolutionCpr(encoder_pos, encoder_bits, kResolution.kBits);
   pos_ += dt * velocity_;
 
   float error = static_cast<float>(mapped) - pos_;

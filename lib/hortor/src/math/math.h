@@ -16,14 +16,27 @@ constexpr float kMilliToSec = 1e-3f;
 // 浮点数比较阈值，用于判断值是否接近0
 constexpr float kFloatThreshold = 0.001f;
 
-/// @brief 将数值从 `from` 位分辨率映射到 `to` 位分辨率。
-/// @tparam T 数值类型（通常为整型或浮点型）。
+/// @brief 按 max（2^N−1）缩放分辨率，与 STM32duino 行为一致。
+/// @details 0 映射到 0，max(from) 映射到 max(to)，保持满量程语义。
+///          适用于 PWM 占空比、DAC 输出等非回绕量。
+/// @tparam T 数值类型（整型或浮点型）。
 /// @param value 待映射的原始值。
 /// @param from 输入分辨率位数。
 /// @param to 输出分辨率位数。
-/// @return 映射后的值（按比例缩放）。
+/// @return 映射后的值。
 template <typename T>
 constexpr T mapResolution(T value, uint8_t from, uint8_t to);
+
+/// @brief 按 CPR（2^N）缩放分辨率，保持物理角度不变。
+/// @details 等价于 value × 2^to / 2^from。
+///          适用于编码器位置等回绕量。
+/// @tparam T 数值类型（整型或浮点型）。
+/// @param value 待映射的原始值。
+/// @param from 输入分辨率位数。
+/// @param to 输出分辨率位数。
+/// @return 映射后的值。
+template <typename T>
+constexpr T mapResolutionCpr(T value, uint8_t from, uint8_t to);
 
 /// @brief 计算始终为非负的模运算结果。
 /// @param dividend 被除数。
@@ -55,10 +68,20 @@ namespace hortor::math {
 
 template <typename T>
 constexpr T mapResolution(T value, uint8_t from, uint8_t to) {
+  if (from == to)
+    return value;
   const float max_from = static_cast<float>((1ULL << from) - 1);
   const float max_to   = static_cast<float>((1ULL << to) - 1);
-  const float scale    = max_to / max_from;
-  return static_cast<T>(value * scale);
+  return static_cast<T>(value * (max_to / max_from));
+}
+
+template <typename T>
+constexpr T mapResolutionCpr(T value, uint8_t from, uint8_t to) {
+  if (from == to)
+    return value;
+  const float cpr_from = static_cast<float>(1ULL << from);
+  const float cpr_to   = static_cast<float>(1ULL << to);
+  return static_cast<T>(value * (cpr_to / cpr_from));
 }
 
 constexpr int mod(const int dividend, const int divisor) {
