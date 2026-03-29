@@ -1,6 +1,8 @@
 ---
+description: "Drafting or editing git commit messages, PR titles, merge commit messages, or Conventional Commits–style summaries for this repository (Chinese body, English type/scope)."
 alwaysApply: false
 ---
+
 # Git Commit Message Convention
 
 **IMPORTANT: When generating git commit messages, you MUST follow these rules strictly.**
