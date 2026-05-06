@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include <Arduino.h>
+#include <cstddef>
+#include <cstdint>
 
 namespace hortor::utils::bit_utils {
 

@@ -20,6 +20,7 @@
 #include "test_plant.h"
 #include "test_profile.h"
 #include "test_reg_field.h"
+#include "test_regmap_transport.h"
 #include "test_scheduler.h"
 #include "test_timeout_limiter.h"
 
@@ -56,6 +57,7 @@ int main(int argc, char** argv) {
   RUN_TEST_GROUP(PidTest);
   RUN_TEST_GROUP(ProfileTest);
   RUN_TEST_GROUP(RegFieldTest);
+  RUN_TEST_GROUP(RegmapTransportTest);
   RUN_TEST_GROUP(SchedulerTest);
   RUN_TEST_GROUP(TimeoutLimiterTest);
   RUN_TEST_GROUP(MotorTest);

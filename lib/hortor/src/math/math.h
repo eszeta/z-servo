@@ -10,6 +10,8 @@
 
 #include <Arduino.h>
 
+#include <type_traits>
+
 namespace hortor::math {
 
 /// @brief 微秒转换为秒
@@ -75,9 +77,15 @@ template <typename T>
 constexpr T mapResolution(T value, uint8_t from, uint8_t to) {
   if (from == to)
     return value;
-  const float max_from = static_cast<float>((1ULL << from) - 1);
-  const float max_to   = static_cast<float>((1ULL << to) - 1);
-  return static_cast<T>(value * (max_to / max_from));
+  if constexpr (std::is_integral_v<T>) {
+    const int64_t max_from = static_cast<int64_t>((1ULL << from) - 1);
+    const int64_t max_to   = static_cast<int64_t>((1ULL << to) - 1);
+    return static_cast<T>((static_cast<int64_t>(value) * max_to) / max_from);
+  } else {
+    const float max_from = static_cast<float>((1ULL << from) - 1);
+    const float max_to   = static_cast<float>((1ULL << to) - 1);
+    return static_cast<T>(value * (max_to / max_from));
+  }
 }
 
 template <typename T>

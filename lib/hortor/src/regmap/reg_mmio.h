@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include <Wire.h>
+#include <cstddef>
+#include <cstdint>
 
 #include "error.h"
 #include "noncopyable.h"
@@ -63,7 +64,8 @@ inline Error RegMmio::Init(uint8_t* regs, const size_t size) {
 }
 
 inline Error RegMmio::Write(const uint8_t address, const uint8_t* data, const size_t size) {
-  VERIFY(address + size <= size_, Error::kInvalidArg);
+  VERIFY(regs_ && data, Error::kInvalidArg);
+  VERIFY(size <= size_ && address <= size_ - size, Error::kInvalidArg);
   for (size_t i = 0; i < size; ++i) {
     regs_[address + i] = data[i];
   }
@@ -71,7 +73,8 @@ inline Error RegMmio::Write(const uint8_t address, const uint8_t* data, const si
 }
 
 inline Error RegMmio::Read(const uint8_t address, const size_t size, uint8_t* data) {
-  VERIFY(address + size <= size_, Error::kInvalidArg);
+  VERIFY(regs_ && data, Error::kInvalidArg);
+  VERIFY(size <= size_ && address <= size_ - size, Error::kInvalidArg);
   for (size_t i = 0; i < size; ++i) {
     data[i] = regs_[address + i];
   }

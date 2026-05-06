@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <Arduino.h>
-
+#include <cstddef>
+#include <cstdint>
 #include <tuple>
 #include <type_traits>
 

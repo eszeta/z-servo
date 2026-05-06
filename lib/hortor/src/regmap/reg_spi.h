@@ -82,8 +82,10 @@ inline Error RegSPI::Init(SPIClass* spi, int cs_pin, const SPISettings& spi_sett
   spi_          = spi;
   cs_pin_       = cs_pin;
   spi_settings_ = spi_settings;
-  pinMode(cs_pin, OUTPUT);
-  digitalWrite(cs_pin, HIGH);
+  if (cs_pin_ >= 0) {
+    pinMode(cs_pin_, OUTPUT);
+    digitalWrite(cs_pin_, HIGH);
+  }
   return Error::kOk;
 }
 
@@ -101,7 +103,7 @@ inline Error RegSPI::Write(const uint8_t address, const uint8_t* data, const siz
 }
 
 inline Error RegSPI::Read(const uint8_t address, const size_t size, uint8_t* data) {
-  VERIFY(spi_, Error::kInvalidArg);
+  VERIFY(spi_ && data, Error::kInvalidArg);
   spi_->beginTransaction(spi_settings_);
   if (cs_pin_ >= 0)
     digitalWrite(cs_pin_, LOW);
