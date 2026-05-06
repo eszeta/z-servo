@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file regmap.h
+ * @file mt6701_regmap.h
  * @brief MT6701 寄存器映射（I2C/SPI 特化）
  */
 
@@ -12,10 +12,10 @@
 #include <SPI.h>
 #include <Wire.h>
 
-#include "drivers/mt6701/types.h"
+#include "drivers/mt6701/mt6701_types.h"
+#include "error.h"
 #include "regmap/reg_i2c.h"
 #include "regmap/reg_spi.h"
-#include "servo/types.h"
 
 namespace hortor::drivers::MT6701 {
 

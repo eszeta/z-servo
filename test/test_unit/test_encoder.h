@@ -15,7 +15,7 @@
 #include <unity.h>
 
 #include "error.h"
-#include "servo/types.h"
+#include "servo/servo_types.h"
 #include "simulator/encoder.h"
 
 #define ASSERT_OK(expr) TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(expr))

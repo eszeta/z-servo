@@ -5,7 +5,7 @@
 
 #include "error.h"
 #include "servo/servo.h"
-#include "servo/types.h"
+#include "servo/servo_types.h"
 #include "simulator/current.h"
 #include "simulator/encoder.h"
 #include "simulator/motor.h"
@@ -50,19 +50,15 @@ void loop() {
 }
 
 Error SystemSetup() {
-  encoder.Init({.homing_offset = 0, .reverse = Reverse::kNormal});
-  current.Init();
-  motor.Init();
-
-  servo.set_motor(&motor);
-  servo.set_encoder(&encoder);
-  servo.set_current_sensor(&current);
+  CHECK(encoder.Init({.homing_offset = 0, .reverse = Reverse::kNormal}));
+  CHECK(current.Init());
+  CHECK(motor.Init());
 
   plant.set_motor(&motor);
   plant.set_encoder(&encoder);
   plant.set_current_sensor(&current);
 
-  servo.Init();
+  CHECK(servo.Init(&motor, &encoder, &current));
 
   scheduler.AddTask(MainLoopCallback, kMainLoopRateHz);
   return Error::kOk;

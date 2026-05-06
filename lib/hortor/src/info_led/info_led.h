@@ -15,9 +15,8 @@
 #include <iterator>
 
 #include "error.h"
-#include "led.h"
+#include "info_led/led.h"
 #include "noncopyable.h"
-#include "servo/types.h"
 namespace hortor::info_led {
 
 /**

@@ -12,8 +12,7 @@
 
 #include "error.h"
 #include "noncopyable.h"
-#include "regmap.h"
-#include "servo/types.h"
+#include "regmap/regmap_base.h"
 
 namespace hortor::regmap {
 

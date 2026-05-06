@@ -10,7 +10,7 @@
 
 #include <Arduino.h>
 
-#include "math.h"
+#include "math/math.h"
 #include "noncopyable.h"
 
 namespace hortor::math {

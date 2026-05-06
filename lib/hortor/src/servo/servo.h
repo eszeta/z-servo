@@ -20,7 +20,7 @@
 #include "servo/current.h"
 #include "servo/encoder.h"
 #include "servo/motor.h"
-#include "servo/types.h"
+#include "servo/servo_types.h"
 #include "utils/debug_print.h"
 #include "utils/timeout_limiter.h"
 
@@ -49,14 +49,18 @@ class Servo : public hortor::Noncopyable {
 
   /** @name 运行模式组 */
 #pragma region "运行模式组"
-  /// @brief 驱动模式
-  DriveModeBits drive_mode() const { return drive_mode_; }
-  void          set_drive_mode(const DriveModeBits v) { drive_mode_ = v; }
-  void          set_drive_mode(const uint8_t v) {
-    drive_mode_.value = v;
-    motor_->set_reverse(drive_mode_.moto_reverse_mode ? Reverse::kReverse : Reverse::kNormal);
-    encoder_pll_.encoder()->set_reverse(drive_mode_.encoder_reverse_mode ? Reverse::kReverse
-                                                                                  : Reverse::kNormal);
+  /// @brief 电机反向模式
+  bool motor_reverse_mode() const { return motor_reverse_mode_; }
+  void set_motor_reverse_mode(const bool v) {
+    motor_reverse_mode_ = v;
+    motor_->set_reverse(v ? Reverse::kReverse : Reverse::kNormal);
+  }
+
+  /// @brief 编码器反向模式
+  bool encoder_reverse_mode() const { return encoder_reverse_mode_; }
+  void set_encoder_reverse_mode(const bool v) {
+    encoder_reverse_mode_ = v;
+    encoder_pll_.encoder()->set_reverse(v ? Reverse::kReverse : Reverse::kNormal);
   }
 
   /// @brief 舵机模式
@@ -70,10 +74,25 @@ class Servo : public hortor::Noncopyable {
   }
   void set_operating_mode(const uint8_t v) { set_operating_mode(static_cast<OperatingMode>(v)); }
 
-  /// @brief 关断条件
-  ShutdownBits shutdown() const { return shutdown_; }
-  void         set_shutdown(const ShutdownBits v) { shutdown_ = v; }
-  void         set_shutdown(const uint8_t v) { shutdown_.value = v; }
+  /// @brief 输入电压错误关断使能
+  bool shutdown_input_voltage_error() const { return shutdown_input_voltage_error_; }
+  void set_shutdown_input_voltage_error(const bool v) { shutdown_input_voltage_error_ = v; }
+
+  /// @brief 过温错误关断使能
+  bool shutdown_overheating_error() const { return shutdown_overheating_error_; }
+  void set_shutdown_overheating_error(const bool v) { shutdown_overheating_error_ = v; }
+
+  /// @brief 电机编码器错误关断使能
+  bool shutdown_motor_encoder_error() const { return shutdown_motor_encoder_error_; }
+  void set_shutdown_motor_encoder_error(const bool v) { shutdown_motor_encoder_error_ = v; }
+
+  /// @brief 电气冲击错误关断使能
+  bool shutdown_electrical_shock_error() const { return shutdown_electrical_shock_error_; }
+  void set_shutdown_electrical_shock_error(const bool v) { shutdown_electrical_shock_error_ = v; }
+
+  /// @brief 过载错误关断使能
+  bool shutdown_overload_error() const { return shutdown_overload_error_; }
+  void set_shutdown_overload_error(const bool v) { shutdown_overload_error_ = v; }
 
 #pragma endregion  // "运行模式组"
 
@@ -116,8 +135,8 @@ class Servo : public hortor::Noncopyable {
   /// @brief PWM上限
   float pwm_limit() const { return pwm_limit_; }
   void  set_pwm_limit(const float v) {
-    pwm_limit_ = v;
-    position_pid_.set_limit(v);
+    pwm_limit_ = constrain(v, 0.0f, 1.0f);
+    position_pid_.set_limit(pwm_limit_);
   }
 
   /// @brief 电流上限
@@ -178,13 +197,23 @@ class Servo : public hortor::Noncopyable {
   float feedforward_2nd_gain() const { return feedforward_2nd_gain_; }
   void  set_feedforward_2nd_gain(const float v) { feedforward_2nd_gain_ = v; }
 
-  /// @brief 轮廓加速度（rev/min/s）
+  /// @brief 轮廓加速度 [rev/min²]
   float profile_acceleration() const { return profile_acceleration_; }
-  void  set_profile_acceleration(const float v) { profile_acceleration_ = v; }
+  void  set_profile_acceleration(const float v) {
+    if (fabsf(v - profile_acceleration_) > math::kFloatThreshold) {
+      profile_active_goal_ = INT32_MIN;
+    }
+    profile_acceleration_ = v;
+  }
 
-  /// @brief 轮廓速度（rev/min）
+  /// @brief 轮廓速度 [RPM]
   float profile_velocity() const { return profile_velocity_; }
-  void  set_profile_velocity(const float v) { profile_velocity_ = v; }
+  void  set_profile_velocity(const float v) {
+    if (fabsf(v - profile_velocity_) > math::kFloatThreshold) {
+      profile_active_goal_ = INT32_MIN;
+    }
+    profile_velocity_ = v;
+  }
 
 #pragma endregion  // "PID 参数组"
 
@@ -200,19 +229,41 @@ class Servo : public hortor::Noncopyable {
     torque_enable_ = v;
   }
 
-  /// @brief 硬件错误状态
-  HardwareErrorStatusBits hardware_error_status() const { return hardware_error_status_; }
-  uint8_t hardware_error_status_value() const { return hardware_error_status_.value; }
-  void    set_hardware_error_status(const HardwareErrorStatusBits v) { hardware_error_status_ = v; }
-  void    set_hardware_error_status(const uint8_t v) { hardware_error_status_.value = v; }
+  /// @brief 输入电压硬件错误
+  bool hardware_input_voltage_error() const { return hardware_input_voltage_error_; }
+  void set_hardware_input_voltage_error(const bool v) { hardware_input_voltage_error_ = v; }
+
+  /// @brief 过温硬件错误
+  bool hardware_overheating_error() const { return hardware_overheating_error_; }
+  void set_hardware_overheating_error(const bool v) { hardware_overheating_error_ = v; }
+
+  /// @brief 电机编码器硬件错误
+  bool hardware_motor_encoder_error() const { return hardware_motor_encoder_error_; }
+  void set_hardware_motor_encoder_error(const bool v) { hardware_motor_encoder_error_ = v; }
+
+  /// @brief 电气冲击硬件错误
+  bool hardware_electrical_shock_error() const { return hardware_electrical_shock_error_; }
+  void set_hardware_electrical_shock_error(const bool v) { hardware_electrical_shock_error_ = v; }
+
+  /// @brief 过载硬件错误
+  bool hardware_overload_error() const { return hardware_overload_error_; }
+  void set_hardware_overload_error(const bool v) { hardware_overload_error_ = v; }
+
+  /// @brief 角度限制硬件错误
+  bool hardware_angle_limit_error() const { return hardware_angle_limit_error_; }
+  void set_hardware_angle_limit_error(const bool v) { hardware_angle_limit_error_ = v; }
+
+  /// @brief 范围硬件错误
+  bool hardware_range_error() const { return hardware_range_error_; }
+  void set_hardware_range_error(const bool v) { hardware_range_error_ = v; }
 
 #pragma endregion  // "控制命令组"
 
   /** @name 目标值组 */
 #pragma region "目标值组"
-  /// @brief 目标PWM
+  /// @brief 目标PWM [normalized -1..1]
   float goal_pwm() const { return goal_pwm_; }
-  void  set_goal_pwm(const float v) { goal_pwm_ = v; }
+  void  set_goal_pwm(const float v) { goal_pwm_ = constrain(v, -1.0f, 1.0f); }
 
   /// @brief 目标电流
   float goal_current() const { return goal_current_; }
@@ -234,7 +285,7 @@ class Servo : public hortor::Noncopyable {
   float present_position() const { return present_position_; }
   void  set_present_position(const float v) { present_position_ = v; }
 
-  /// @brief 当前速度
+  /// @brief 当前速度 [RPM]
   float present_velocity() const { return present_velocity_; }
   void  set_present_velocity(const float v) { present_velocity_ = v; }
 
@@ -250,11 +301,11 @@ class Servo : public hortor::Noncopyable {
   float present_temperature() const { return present_temperature_; }
   void  set_present_temperature(const float v) { present_temperature_ = v; }
 
-  /// @brief 当前PWM
+  /// @brief 当前PWM [normalized -1..1]
   float present_pwm() const { return present_pwm_; }
-  void  set_present_pwm(const float v) { present_pwm_ = v; }
+  void  set_present_pwm(const float v) { present_pwm_ = constrain(v, -1.0f, 1.0f); }
 
-  /// @brief 期望速度轨迹（rev/min）
+  /// @brief 期望速度轨迹 [RPM]
   float velocity_trajectory() const { return velocity_trajectory_; }
   void  set_velocity_trajectory(const float v) { velocity_trajectory_ = v; }
 
@@ -266,11 +317,21 @@ class Servo : public hortor::Noncopyable {
   bool moving() const { return moving_; }
   void set_moving(const bool v) { moving_ = v; }
 
-  /// @brief 运动详细状态
-  MovingStatusBits moving_status() const { return moving_status_; }
-  uint8_t          moving_status_value() const { return moving_status_.value; }
-  void             set_moving_status(const MovingStatusBits v) { moving_status_ = v; }
-  void             set_moving_status(const uint8_t v) { moving_status_.value = v; }
+  /// @brief 是否到达目标位置
+  bool moving_in_position() const { return moving_in_position_; }
+  void set_moving_in_position(const bool v) { moving_in_position_ = v; }
+
+  /// @brief Profile 是否正在执行
+  bool moving_profile_ongoing() const { return moving_profile_ongoing_; }
+  void set_moving_profile_ongoing(const bool v) { moving_profile_ongoing_ = v; }
+
+  /// @brief 是否存在跟随误差
+  bool moving_following_error() const { return moving_following_error_; }
+  void set_moving_following_error(const bool v) { moving_following_error_ = v; }
+
+  /// @brief 当前 Profile 类型
+  uint8_t moving_profile_type() const { return moving_profile_type_; }
+  void    set_moving_profile_type(const uint8_t v) { moving_profile_type_ = v; }
 
 #pragma endregion  // "状态反馈组"
 
@@ -297,22 +358,34 @@ class Servo : public hortor::Noncopyable {
   void AlignToPosition(uint32_t target);
 
  private:
+  /// @brief Profile 完成后，位置误差小于该值视为到位 [pulse]
+  static constexpr float kInPositionTolerancePulse = 1.0f;
+  /// @brief 位置误差超过该值视为没有跟上轨迹 [pulse]
+  static constexpr float kFollowingTolerancePulse = 1.0f;
+
   /** @name 运行模式组 */
 #pragma region "运行模式组"
-  /// @brief 驱动模式
-  DriveModeBits drive_mode_{};
+  /// @brief 电机反向模式
+  bool motor_reverse_mode_ = false;
+
+  /// @brief 编码器反向模式
+  bool encoder_reverse_mode_ = false;
 
   /// @brief 舵机模式
   OperatingMode operating_mode_ = OperatingMode::kPosition;
 
   /// @brief 关断条件
-  ShutdownBits shutdown_{};
+  bool shutdown_input_voltage_error_    = false;
+  bool shutdown_overheating_error_      = false;
+  bool shutdown_motor_encoder_error_    = false;
+  bool shutdown_electrical_shock_error_ = false;
+  bool shutdown_overload_error_         = false;
 
 #pragma endregion  // "运行模式组"
 
   /** @name 位置配置组 */
 #pragma region "位置配置组"
-  /// @brief 运动阈值
+  /// @brief 运动阈值 [RPM]
   float moving_threshold_ = 0.0f;
 
 #pragma endregion  // "位置配置组"
@@ -325,7 +398,7 @@ class Servo : public hortor::Noncopyable {
   float max_voltage_limit_ = 0.0f;
   /// @brief 最低电压限制
   float min_voltage_limit_ = 0.0f;
-  /// @brief PWM上限
+  /// @brief PWM上限 [normalized 0..1]
   float pwm_limit_ = 0.0f;
   /// @brief 电流上限
   float current_limit_ = 0;
@@ -383,13 +456,19 @@ class Servo : public hortor::Noncopyable {
   bool torque_enable_ = false;
 
   /// @brief 硬件错误状态
-  HardwareErrorStatusBits hardware_error_status_{};
+  bool hardware_input_voltage_error_    = false;
+  bool hardware_overheating_error_      = false;
+  bool hardware_motor_encoder_error_    = false;
+  bool hardware_electrical_shock_error_ = false;
+  bool hardware_overload_error_         = false;
+  bool hardware_angle_limit_error_      = false;
+  bool hardware_range_error_            = false;
 
 #pragma endregion  // "控制命令组"
 
   /** @name 目标值组 */
 #pragma region "目标值组"
-  /// @brief 目标PWM
+  /// @brief 目标PWM [normalized -1..1]
   float goal_pwm_ = 0.0f;
 
   /// @brief 目标电流
@@ -415,15 +494,18 @@ class Servo : public hortor::Noncopyable {
   bool moving_ = false;
 
   /// @brief 运动详细状态
-  MovingStatusBits moving_status_{};
+  bool    moving_in_position_     = false;
+  bool    moving_profile_ongoing_ = false;
+  bool    moving_following_error_ = false;
+  uint8_t moving_profile_type_    = 0;
 
-  /// @brief 当前PWM
+  /// @brief 当前PWM [normalized -1..1]
   float present_pwm_ = 0.0f;
 
   /// @brief 当前电流
   float present_current_ = 0.0f;
 
-  /// @brief 当前速度
+  /// @brief 当前速度 [RPM]
   float present_velocity_ = 0.0f;
 
   /// @brief 当前位置
@@ -470,10 +552,10 @@ class Servo : public hortor::Noncopyable {
   Error ExecuteOperatingMode(float dt);
 
   /**
-   * @brief 位置控制
+   * @brief 运行共享位置闭环
    * @param dt 时间间隔(秒)
    */
-  void positionMode(float dt);
+  void RunPositionControl(float dt);
 
   /**
    * @brief 获取限位后的目标位置
@@ -483,7 +565,7 @@ class Servo : public hortor::Noncopyable {
 
   /**
    * @brief 设置电机功率
-   * @param pwm PWM值
+   * @param pwm PWM 值 [normalized -1..1]
    */
   void SetMotorPower(const float pwm);
 
@@ -536,9 +618,9 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::RefreshPresent(float dt)
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 Error Servo<MotorType, EncoderType, CurrentType, Bits>::CheckPresent(float dt) {
-  const auto current                    = present_current();
-  hardware_error_status_.overload_error = current_timeout_limiter_.Process(current, dt);
-  if (hardware_error_status_.overload_error) {
+  const auto current       = present_current();
+  hardware_overload_error_ = current_timeout_limiter_.Process(current, dt);
+  if (hardware_overload_error_) {
     set_torque_enable(false);
   }
   return Error::kOk;
@@ -552,43 +634,49 @@ Error Servo<MotorType, EncoderType, CurrentType, Bits>::ExecuteOperatingMode(flo
   }
   switch (operating_mode()) {
     case OperatingMode::kCurrent:
-      break;
     case OperatingMode::kVelocity:
-      break;
-    case OperatingMode::kPosition:
-      positionMode(dt);
-      break;
-    case OperatingMode::kExtendedPosition:
-      break;
     case OperatingMode::kCurrentPosition:
+      MotorCoast();
+      return Error::kUnsupported;
+    case OperatingMode::kPosition:
+    case OperatingMode::kExtendedPosition:
+      RunPositionControl(dt);
       break;
     case OperatingMode::kPwm:
+      SetMotorPower(goal_pwm_);
       break;
     default:
+      MotorCoast();
       return Error::kUnsupported;
   }
   return Error::kOk;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
-void Servo<MotorType, EncoderType, CurrentType, Bits>::positionMode(float dt) {
-  // 1. 目标位置（限位后），目标变更时重建 Profile 并重置 PID
-  const int32_t limited_goal = GetLimitedGoalPosition();
-  if (limited_goal != profile_active_goal_) {
-    profile_.SetGoal(present_position_, limited_goal, profile_velocity_, profile_acceleration_);
-    profile_active_goal_ = limited_goal;
+void Servo<MotorType, EncoderType, CurrentType, Bits>::RunPositionControl(float dt) {
+  const int32_t target_goal =
+      operating_mode() == OperatingMode::kPosition ? GetLimitedGoalPosition() : goal_position_;
+
+  // 1. 目标位置变更时重建 Profile 并重置 PID
+  if (target_goal != profile_active_goal_) {
+    const float start_position =
+        profile_.is_complete() ? present_position_ : profile_.position_trajectory();
+    profile_.SetGoal(start_position, target_goal, profile_velocity_, profile_acceleration_);
+    profile_active_goal_ = target_goal;
     position_pid_.Reset();
   }
 
   // 2. 推进轮廓
   profile_.Process(dt);
 
+  const float position_trajectory = profile_.position_trajectory();
+
   // 3. 将轨迹写入状态寄存器（AfterProcessImpl 会同步到 Regmap）
   velocity_trajectory_ = profile_.velocity_trajectory_rpm();
-  position_trajectory_ = profile_.position_trajectory();
+  position_trajectory_ = static_cast<int32_t>(position_trajectory);
 
   // 4. PID 误差 = 轨迹位置 - 当前位置（参考块图：Profile 输出作为 PID 参考输入）
-  const float error = static_cast<float>(position_trajectory_) - present_position_;
+  const float error = position_trajectory - present_position_;
 
   // 5. 前馈（对应块图中 K_FF1st·s 和 K_FF2nd·s² 两路）
   //    FF1st 乘以轨迹速度 [counts/s]，单位与 encoder_pll_.velocity() 一致
@@ -601,17 +689,13 @@ void Servo<MotorType, EncoderType, CurrentType, Bits>::positionMode(float dt) {
   const float pwm = position_pid_.Compute(error, dt, feedforward);
   SetMotorPower(pwm);
 
-  // 7. 更新 moving_ 和 moving_status_
+  // 7. 更新运动语义状态，由 slave 层打包成寄存器值
   moving_ = !profile_.is_complete() || (fabsf(present_velocity_) > moving_threshold_);
 
-  MovingStatusBits status{};
-  status.profile_ongoing = !profile_.is_complete();
-  status.profile_type    = static_cast<uint8_t>(profile_.type());
-  // In-Position：Profile 完成且位置误差小于运动阈值对应的脉冲数
-  const float threshold_pulse =
-      moving_threshold_ * static_cast<float>(kResolution.kEncoderCpr) / 60.0f;
-  status.in_position = profile_.is_complete() && (fabsf(error) <= threshold_pulse);
-  moving_status_     = status;
+  moving_profile_ongoing_ = !profile_.is_complete();
+  moving_profile_type_    = static_cast<uint8_t>(profile_.type());
+  moving_in_position_     = profile_.is_complete() && (fabsf(error) <= kInPositionTolerancePulse);
+  moving_following_error_ = fabsf(error) > kFollowingTolerancePulse;
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
@@ -621,12 +705,14 @@ int32_t Servo<MotorType, EncoderType, CurrentType, Bits>::GetLimitedGoalPosition
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::SetMotorPower(const float pwm) {
-  set_present_pwm(pwm);
-  motor_->SetPWM(pwm);
+  const float limited_pwm = constrain(pwm, -position_pid_.limit(), position_pid_.limit());
+  set_present_pwm(limited_pwm);
+  motor_->SetPWM(present_pwm_);
 }
 
 template <typename MotorType, typename EncoderType, typename CurrentType, uint8_t Bits>
 void Servo<MotorType, EncoderType, CurrentType, Bits>::MotorCoast() {
+  set_present_pwm(0.0f);
   motor_->Coast();
 }
 

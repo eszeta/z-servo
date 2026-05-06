@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file types.h
+ * @file ma330_types.h
  * @brief MA330 寄存器字段与枚举
  */
 

@@ -14,7 +14,7 @@
 #include "protocol/channel.h"
 #include "protocol/slave.h"
 #include "protocol/transport_i2c.h"
-#include "regmap.h"
+#include "slave/slave_regmap.h"
 
 namespace hortor::slave {
 
@@ -134,12 +134,11 @@ Error Slave<ServoType, ChannelType>::AfterProcessImpl(float dt) {
 
 template <typename ServoType, typename ChannelType>
 Error Slave<ServoType, ChannelType>::UpdateStatus() {
-  const auto hardware_error         = servo_->hardware_error_status();
-  this->status_.input_voltage_error = hardware_error.input_voltage_error;
-  this->status_.angle_limit_error   = hardware_error.angle_limit_error;
-  this->status_.overheating_error   = hardware_error.overheating_error;
-  this->status_.range_error         = hardware_error.range_error;
-  this->status_.overload_error      = hardware_error.overload_error;
+  this->status_.input_voltage_error = servo_->hardware_input_voltage_error();
+  this->status_.angle_limit_error   = servo_->hardware_angle_limit_error();
+  this->status_.overheating_error   = servo_->hardware_overheating_error();
+  this->status_.range_error         = servo_->hardware_range_error();
+  this->status_.overload_error      = servo_->hardware_overload_error();
   return Error::kOk;
 }
 
@@ -162,14 +161,21 @@ Error Slave<ServoType, ChannelType>::ApplyAlignToPosition() {
 
 template <typename ServoType, typename ChannelType>
 Error Slave<ServoType, ChannelType>::ApplyMotorConfig() {
-  const auto drive_mode = this->regmap_->ReadDriveMode();
-  servo_->set_drive_mode(drive_mode);
+  ControlBits::DriveModeBits drive_mode{};
+  drive_mode.value = this->regmap_->ReadDriveMode();
+  servo_->set_motor_reverse_mode(drive_mode.motor_reverse_mode);
+  servo_->set_encoder_reverse_mode(drive_mode.encoder_reverse_mode);
 
   const auto operating_mode = this->regmap_->ReadOperatingMode();
   servo_->set_operating_mode(operating_mode);
 
-  const auto shutdown = this->regmap_->ReadShutdown();
-  servo_->set_shutdown(shutdown);
+  ControlBits::ShutdownBits shutdown{};
+  shutdown.value = this->regmap_->ReadShutdown();
+  servo_->set_shutdown_input_voltage_error(shutdown.input_voltage_error);
+  servo_->set_shutdown_overheating_error(shutdown.overheating_error);
+  servo_->set_shutdown_motor_encoder_error(shutdown.motor_encoder_error);
+  servo_->set_shutdown_electrical_shock_error(shutdown.electrical_shock_error);
+  servo_->set_shutdown_overload_error(shutdown.overload_error);
 
   const auto homing_offset = this->regmap_->ReadHomingOffset();
   servo_->set_homing_offset(homing_offset);
@@ -228,9 +234,6 @@ Error Slave<ServoType, ChannelType>::ApplyMotorConfig() {
   const auto torque_enable = this->regmap_->ReadTorqueEnable();
   servo_->set_torque_enable(torque_enable);
 
-  const auto hardware_error_status = this->regmap_->ReadHardwareErrorStatus();
-  servo_->set_hardware_error_status(hardware_error_status);
-
   const auto goal_pwm = this->regmap_->ReadGoalPwm();
   servo_->set_goal_pwm(goal_pwm);
 
@@ -250,14 +253,25 @@ Error Slave<ServoType, ChannelType>::UpdateMotorStatus() {
   const auto torque_enable = servo_->torque_enable();
   this->regmap_->WriteTorqueEnable(torque_enable);
 
-  const auto hardware_error_status = servo_->hardware_error_status_value();
-  this->regmap_->WriteHardwareErrorStatus(hardware_error_status);
+  ControlBits::HardwareErrorStatusBits hardware_error_status{};
+  hardware_error_status.input_voltage_error    = servo_->hardware_input_voltage_error();
+  hardware_error_status.overheating_error      = servo_->hardware_overheating_error();
+  hardware_error_status.motor_encoder_error    = servo_->hardware_motor_encoder_error();
+  hardware_error_status.electrical_shock_error = servo_->hardware_electrical_shock_error();
+  hardware_error_status.overload_error         = servo_->hardware_overload_error();
+  hardware_error_status.angle_limit_error      = servo_->hardware_angle_limit_error();
+  hardware_error_status.range_error            = servo_->hardware_range_error();
+  this->regmap_->WriteHardwareErrorStatus(hardware_error_status.value);
 
   const auto moving = servo_->moving();
   this->regmap_->WriteMoving(moving);
 
-  const auto moving_status = servo_->moving_status_value();
-  this->regmap_->WriteMovingStatus(moving_status);
+  ControlBits::MovingStatusBits moving_status{};
+  moving_status.in_position     = servo_->moving_in_position();
+  moving_status.profile_ongoing = servo_->moving_profile_ongoing();
+  moving_status.following_error = servo_->moving_following_error();
+  moving_status.profile_type    = servo_->moving_profile_type();
+  this->regmap_->WriteMovingStatus(moving_status.value);
 
   const auto present_position = servo_->present_position();
   this->regmap_->WritePresentPosition(present_position);

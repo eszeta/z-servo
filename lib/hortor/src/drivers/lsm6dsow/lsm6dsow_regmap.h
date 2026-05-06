@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file regmap.h
+ * @file lsm6dsow_regmap.h
  * @brief LSM6DSOW 寄存器映射（I2C）
  */
 
 #pragma once
 
-#include "drivers/lsm6dsow/types.h"
+#include "drivers/lsm6dsow/lsm6dsow_types.h"
+#include "error.h"
 #include "regmap/reg_i2c.h"
-#include "regmap/regmap.h"
-#include "servo/types.h"
+#include "regmap/regmap_base.h"
 
 namespace hortor::drivers::LSM6DSOW {
 

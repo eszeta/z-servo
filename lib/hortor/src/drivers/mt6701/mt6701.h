@@ -11,10 +11,10 @@
 #include <SPI.h>
 #include <Wire.h>
 
-#include "drivers/mt6701/types.h"
-#include "regmap.h"
+#include "drivers/mt6701/mt6701_regmap.h"
+#include "drivers/mt6701/mt6701_types.h"
 #include "servo/encoder.h"
-#include "servo/types.h"
+#include "servo/servo_types.h"
 
 namespace hortor::drivers::MT6701 {
 constexpr uint8_t kResolutionBits = 14;

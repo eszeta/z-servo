@@ -12,9 +12,9 @@
 
 #include <cstring>
 
+#include "error.h"
 #include "noncopyable.h"
-#include "protocol/types.h"
-#include "servo/types.h"
+#include "protocol/protocol_types.h"
 
 namespace hortor::protocol {
 

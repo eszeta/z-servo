@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file types.h
+ * @file control_table.h
  * @brief 从机控制表类型与单位转换（XL330 兼容）
  */
 
@@ -10,19 +10,73 @@
 
 #include <Arduino.h>
 
-#include "protocol/types.h"
+#include "protocol/protocol_types.h"
 
 namespace hortor::slave {
 
 constexpr uint32_t kBaudRateTable[] = {9600,    57600,   115200,  1000000,
                                        2000000, 3000000, 4000000, 4500000};
 
+namespace ControlBits {
+
+union DriveModeBits {
+  uint8_t value = 0;
+  struct {
+    bool motor_reverse_mode   : 1;  // 位0 0: 正转, 1: 反转
+    bool encoder_reverse_mode : 1;  // 位1 0: 正转, 1: 反转
+    bool reserved_bit2        : 1;  // 位2 保留
+    bool reserved_bit3        : 1;  // 位3 保留
+    bool reserved_bit4        : 1;  // 位4 保留
+    bool reserved_bit5        : 1;  // 位5 保留
+    bool reserved_bit6        : 1;  // 位6 保留
+    bool reserved_bit7        : 1;  // 位7 保留
+  };
+};
+
+union ShutdownBits {
+  uint8_t value = 0;
+  struct {
+    bool input_voltage_error    : 1;  // 位0: 输入电压超出范围
+    bool overheating_error      : 1;  // 位1: 温度超过上限
+    bool motor_encoder_error    : 1;  // 位2: 编码器故障
+    bool electrical_shock_error : 1;  // 位3: 电气冲击
+    bool overload_error         : 1;  // 位4: 过载
+  };
+};
+
+union HardwareErrorStatusBits {
+  uint8_t value = 0;
+  struct {
+    bool input_voltage_error    : 1;  // 位0: 输入电压超出范围
+    bool overheating_error      : 1;  // 位1: 温度超过上限
+    bool motor_encoder_error    : 1;  // 位2: 编码器故障
+    bool electrical_shock_error : 1;  // 位3: 电气冲击
+    bool overload_error         : 1;  // 位4: 过载
+    bool angle_limit_error      : 1;  // 位5: 角度超出范围
+    bool range_error            : 1;  // 位6: 范围错误
+  };
+};
+
+union MovingStatusBits {
+  uint8_t value = 0;
+  struct {
+    bool    in_position      : 1;  // 位0: 已到达目标位置
+    bool    profile_ongoing  : 1;  // 位1: Profile 执行中
+    bool    reserved_bit2    : 1;  // 位2: 保留
+    bool    following_error  : 1;  // 位3: 跟随误差
+    uint8_t profile_type     : 2;  // 位4-5: Profile类型(0=Step,1=Rect,2=Tri,3=Trap)
+    uint8_t reserved_bits6_7 : 2;  // 位6-7: 保留
+  };
+};
+
+}  // namespace ControlBits
+
 /** @name 单位转换辅助函数 */
 namespace Converters {
 
 // 统一使用语义化 *Converter 命名。
 using VoltageCvt  = regmap::RatioConverter<float, 1, 10>;         // 0.1V / LSB
-using PwmPctCvt   = regmap::RatioConverter<float, 113, 1000>;     // 0.113% / LSB
+using PwmCvt      = regmap::RatioConverter<float, 113, 100000>;   // 0.00113 normalized / LSB
 using VelocityCvt = regmap::RatioConverter<float, 229, 1000>;     // 0.229RPM / LSB
 using MsCvt       = regmap::RatioConverter<uint16_t, 20>;         // 20ms / LSB
 using UsCvt       = regmap::RatioConverter<uint16_t, 2>;          // 2us / LSB
@@ -55,7 +109,7 @@ using CTIB8 = protocol::ControlTableItemB8<Address>;
 
 // 统一使用语义化 *Converter 命名。
 using VoltageCvt  = Converters::VoltageCvt;
-using PwmPctCvt   = Converters::PwmPctCvt;
+using PwmCvt      = Converters::PwmCvt;
 using VelocityCvt = Converters::VelocityCvt;
 using MsCvt       = Converters::MsCvt;
 using UsCvt       = Converters::UsCvt;
@@ -139,10 +193,10 @@ struct kMinVoltageLimit : CTIU16<0x43> {
   static constexpr float kDefault = 5.0f;
   using converter_t               = VoltageCvt;
 };
-/// @brief PWM上限 | 单位: 0.113% | 访问: RW
+/// @brief PWM上限 | 单位: normalized PWM (raw 0.113%/LSB) | 访问: RW
 struct kPwmLimit : CTIU16<0x45> {
-  static constexpr float kDefault = 100.0f;
-  using converter_t               = PwmPctCvt;
+  static constexpr float kDefault = 1.0f;
+  using converter_t               = PwmCvt;
 };
 /// @brief 电流上限 | 单位: 0.001A | 访问: RW
 struct kCurrentLimit : CTIU16<0x47> {
@@ -248,10 +302,10 @@ struct kBusWatchdog : CTIU8<0x85> {
 /* 0x86-0x8F: 保留，用于控制命令组扩展 */
 
 /* 目标值组 (0x90-0x9F, 16字节) */
-/// @brief 目标PWM | 单位: 0.113% | 访问: RW
+/// @brief 目标PWM | 单位: normalized PWM (raw 0.113%/LSB) | 访问: RW
 struct kGoalPwm : CTIS16<0x90> {
   static constexpr float kDefault = 0.0f;
-  using converter_t               = PwmPctCvt;
+  using converter_t               = PwmCvt;
 };
 /// @brief 目标电流 | 单位: 0.001A | 访问: RW
 struct kGoalCurrent : CTIU16<0x92> {
@@ -282,10 +336,10 @@ struct kMoving : CTIB8<0xA2> {
 struct kMovingStatus : CTIU8<0xA3> {
   static constexpr uint8_t kDefault = 0;
 };
-/// @brief 当前PWM | 单位: 0.113% | 访问: R
+/// @brief 当前PWM | 单位: normalized PWM (raw 0.113%/LSB) | 访问: R
 struct kPresentPwm : CTIS16<0xA4> {
   static constexpr float kDefault = 0.0f;
-  using converter_t               = PwmPctCvt;
+  using converter_t               = PwmCvt;
 };
 /// @brief 当前电流 | 单位: 0.001A | 访问: R
 struct kPresentCurrent : CTIU16<0xA6> {

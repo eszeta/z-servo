@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file types.h
+ * @file protocol_types.h
  * @brief 协议相关类型（包索引、指令码、控制表、状态错误位）
  */
 
@@ -12,7 +12,6 @@
 
 #include "noncopyable.h"
 #include "regmap/reg_field.h"
-#include "servo/types.h"
 
 namespace hortor::protocol {
 /**

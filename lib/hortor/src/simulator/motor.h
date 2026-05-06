@@ -9,7 +9,6 @@
 #pragma once
 
 #include "servo/motor.h"
-#include "servo/types.h"
 
 namespace hortor::simulator {
 

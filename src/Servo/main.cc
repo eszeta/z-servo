@@ -10,7 +10,7 @@
 #include <protocol/channel.h>
 #include <protocol/transport_i2c.h>
 #include <servo/servo.h>
-#include <servo/types.h>
+#include <servo/servo_types.h>
 #include <slave/slave.h>
 #include <utils/commander.h>
 #include <utils/debug_print.h>

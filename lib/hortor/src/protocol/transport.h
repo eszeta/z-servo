@@ -12,7 +12,7 @@
 
 #include "error.h"
 #include "noncopyable.h"
-#include "protocol.h"
+#include "protocol/protocol.h"
 
 namespace hortor::protocol {
 

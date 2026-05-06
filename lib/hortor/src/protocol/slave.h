@@ -10,11 +10,11 @@
 
 #include <Arduino.h>
 
-#include "channel.h"
 #include "error.h"
 #include "noncopyable.h"
-#include "protocol.h"
-#include "protocol/types.h"
+#include "protocol/channel.h"
+#include "protocol/protocol.h"
+#include "protocol/protocol_types.h"
 
 namespace hortor::protocol {
 

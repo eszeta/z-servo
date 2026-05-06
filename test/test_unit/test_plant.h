@@ -8,7 +8,7 @@
 #include <unity.h>
 
 #include "error.h"
-#include "servo/types.h"
+#include "servo/servo_types.h"
 #include "simulator/current.h"
 #include "simulator/encoder.h"
 #include "simulator/motor.h"

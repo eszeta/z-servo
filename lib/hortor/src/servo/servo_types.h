@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file types.h
+ * @file servo_types.h
  * @brief 舵机相关类型（工作模式、方向、位域状态）
  */
 
@@ -89,75 +89,5 @@ enum class OperatingMode : uint8_t {
 enum class Reverse : int8_t {
   kNormal  = 1,   ///< 顺时针
   kReverse = -1,  ///< 逆时针
-};
-
-/**
- * @brief 驱动模式
- */
-union DriveModeBits {
-  uint8_t value = 0;
-  struct {
-    bool moto_reverse_mode    : 1;  // 位0 0: 正转, 1: 反转
-    bool encoder_reverse_mode : 1;  // 位1 0: 正转, 1: 反转
-    bool reserved_bit2        : 1;  // 位2 保留
-    bool reserved_bit3        : 1;  // 位3 保留
-    bool reserved_bit4        : 1;  // 位4 保留
-    bool reserved_bit5        : 1;  // 位5 保留
-    bool reserved_bit6        : 1;  // 位6 保留
-    bool reserved_bit7        : 1;  // 位7 保留
-  };
-};
-
-/**
- * @brief 运动状态
- *
- * 位布局与 Dynamixel XL330 Moving Status(123) 对齐：
- *   Bit0: In-Position
- *   Bit1: Profile Ongoing（Profile 正在执行中）
- *   Bit2: 保留
- *   Bit3: Following Error（跟随误差过大）
- *   Bit4-5: Profile 类型（0=Step, 1=Rect, 2=Triangular, 3=Trapezoidal）
- *   Bit6-7: 保留
- */
-union MovingStatusBits {
-  uint8_t value = 0;
-  struct {
-    bool    in_position      : 1;  // 位0: 已到达目标位置
-    bool    profile_ongoing  : 1;  // 位1: Profile 执行中
-    bool    reserved_bit2    : 1;  // 位2: 保留
-    bool    following_error  : 1;  // 位3: 跟随误差
-    uint8_t profile_type     : 2;  // 位4-5: Profile类型(0=Step,1=Rect,2=Tri,3=Trap)
-    uint8_t reserved_bits6_7 : 2;  // 位6-7: 保留
-  };
-};
-
-/**
- * @brief 关断条件
- */
-union ShutdownBits {
-  uint8_t value = 0;
-  struct {
-    bool input_voltage_error    : 1;  // 位0: 输入电压超出范围
-    bool overheating_error      : 1;  // 位1: 温度超过上限
-    bool motor_encoder_error    : 1;  // 位2: 编码器故障
-    bool electrical_shock_error : 1;  // 位3: 电气冲击
-    bool overload_error         : 1;  // 位4: 过载
-  };
-};
-
-/**
- * @brief 硬件错误状态
- */
-union HardwareErrorStatusBits {
-  uint8_t value = 0;
-  struct {
-    bool input_voltage_error    : 1;  // 位0: 输入电压超出范围
-    bool overheating_error      : 1;  // 位1: 温度超过上限
-    bool motor_encoder_error    : 1;  // 位2: 编码器故障
-    bool electrical_shock_error : 1;  // 位3: 电气冲击
-    bool overload_error         : 1;  // 位4: 过载
-    bool angle_limit_error      : 1;  // 位5: 角度超出范围
-    bool range_error            : 1;  // 位6: 范围错误
-  };
 };
 }  // namespace hortor::servo

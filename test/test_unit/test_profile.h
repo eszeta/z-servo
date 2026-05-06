@@ -24,7 +24,7 @@ void test_set_goal_step_zero_velocity(void) {
   p.SetGoal(0.0f, 100, 0.0f, 0.0f);
   TEST_ASSERT_EQUAL(static_cast<uint8_t>(Type::kStep), static_cast<uint8_t>(p.type()));
   TEST_ASSERT_TRUE(p.is_complete());
-  TEST_ASSERT_EQUAL_INT32(100, p.position_trajectory());
+  TEST_ASSERT_FLOAT_WITHIN(1e-5f, 100.0f, p.position_trajectory());
   TEST_ASSERT_EQUAL_INT32(100, p.goal());
 }
 
@@ -33,7 +33,7 @@ void test_set_goal_step_small_delta(void) {
   Profile p(Profile::Config{kCpr});
   p.SetGoal(0.0f, 0, 100.0f, 100.0f);
   TEST_ASSERT_TRUE(p.is_complete());
-  TEST_ASSERT_EQUAL_INT32(0, p.position_trajectory());
+  TEST_ASSERT_FLOAT_WITHIN(1e-5f, 0.0f, p.position_trajectory());
 }
 
 // 验证 Rect 轮廓位置线性增加，结束时 is_complete 且到达 goal、速度为 0。
@@ -43,20 +43,30 @@ void test_rect_position_linear_then_complete(void) {
   TEST_ASSERT_EQUAL(static_cast<uint8_t>(Type::kRect), static_cast<uint8_t>(p.type()));
   TEST_ASSERT_FALSE(p.is_complete());
 
-  float       prev_pos = static_cast<float>(p.position_trajectory());
+  float       prev_pos = p.position_trajectory();
   const float dt       = 0.01f;
   for (int i = 0; i < kMaxRectSteps; ++i) {
     p.Process(dt);
     if (p.is_complete()) {
-      TEST_ASSERT_EQUAL_INT32(1000, p.position_trajectory());
+      TEST_ASSERT_FLOAT_WITHIN(1e-5f, 1000.0f, p.position_trajectory());
       TEST_ASSERT_FLOAT_WITHIN(0.1f, 0.0f, p.velocity_trajectory_cps());
       break;
     }
-    float pos = static_cast<float>(p.position_trajectory());
+    float pos = p.position_trajectory();
     TEST_ASSERT_TRUE(pos >= prev_pos - 0.1f);
     prev_pos = pos;
   }
   TEST_ASSERT_TRUE(p.is_complete());
+}
+
+void test_position_trajectory_preserves_subpulse_motion(void) {
+  Profile p(Profile::Config{kCpr});
+  p.SetGoal(0.0f, 100, 1.0f, 0.0f);
+
+  p.Process(0.001f);
+
+  TEST_ASSERT_EQUAL_INT32(0, static_cast<int32_t>(p.position_trajectory()));
+  TEST_ASSERT_TRUE(p.position_trajectory() > 0.0f);
 }
 
 // 验证带加速度轮廓 Process 多步后完成并到达 goal。
@@ -69,7 +79,7 @@ void test_profile_process_reaches_goal(void) {
     p.Process(dt);
   }
   TEST_ASSERT_TRUE(p.is_complete());
-  TEST_ASSERT_EQUAL_INT32(5000, p.position_trajectory());
+  TEST_ASSERT_FLOAT_WITHIN(1e-5f, 5000.0f, p.position_trajectory());
   TEST_ASSERT_TRUE(p.type() == Type::kTrapezoidal || p.type() == Type::kTriangular);
 }
 
@@ -77,6 +87,7 @@ void run_tests(void) {
   RUN_TEST(ProfileTest::test_set_goal_step_zero_velocity);
   RUN_TEST(ProfileTest::test_set_goal_step_small_delta);
   RUN_TEST(ProfileTest::test_rect_position_linear_then_complete);
+  RUN_TEST(ProfileTest::test_position_trajectory_preserves_subpulse_motion);
   RUN_TEST(ProfileTest::test_profile_process_reaches_goal);
 }
 

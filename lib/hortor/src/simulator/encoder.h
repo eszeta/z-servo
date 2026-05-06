@@ -12,7 +12,7 @@
 #include "math/math.h"
 #include "math/resolution.h"
 #include "servo/encoder.h"
-#include "servo/types.h"
+#include "servo/servo_types.h"
 
 namespace hortor::simulator {
 

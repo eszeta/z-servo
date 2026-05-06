@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file regmap.h
+ * @file regmap_base.h
  * @brief 寄存器映射基类，按地址/字段读写
  */
 
@@ -11,7 +11,6 @@
 #include "error.h"
 #include "noncopyable.h"
 #include "regmap/reg_field.h"
-#include "servo/types.h"
 
 namespace hortor::regmap {
 

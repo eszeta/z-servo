@@ -29,8 +29,8 @@ void test_mmio_rejects_invalid_init_and_uninitialized_access(void) {
 }
 
 void test_mmio_reads_writes_and_checks_bounds(void) {
-  uint8_t regs[4] = {};
-  uint8_t input[2] = {0xAA, 0xBB};
+  uint8_t regs[4]   = {};
+  uint8_t input[2]  = {0xAA, 0xBB};
   uint8_t output[2] = {};
   RegMmio mmio;
 

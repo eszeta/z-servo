@@ -10,6 +10,11 @@
 #include <chrono>
 #include <thread>
 
+#include "../test_unit/test_current.h"
+#include "../test_unit/test_encoder.h"
+#include "../test_unit/test_motor.h"
+#include "../test_unit/test_plant.h"
+
 using namespace fakeit;
 
 #define RUN_TEST_GROUP(TEST)                                                           \

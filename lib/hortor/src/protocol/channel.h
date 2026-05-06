@@ -11,9 +11,9 @@
 #include <Arduino.h>
 
 #include "noncopyable.h"
-#include "protocol.h"
-#include "protocol/types.h"
-#include "transport.h"
+#include "protocol/protocol.h"
+#include "protocol/protocol_types.h"
+#include "protocol/transport.h"
 
 namespace hortor::protocol {
 

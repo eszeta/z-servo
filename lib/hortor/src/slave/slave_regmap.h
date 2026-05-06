@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file regmap.h
+ * @file slave_regmap.h
  * @brief 伺服从机寄存器映射
  *
  * 参考: DYNAMIXEL XL330 控制表
@@ -12,17 +12,19 @@
 #pragma once
 
 #include <Arduino.h>
-#include <EEPROM.h>
 
 #include "regmap/reg_mmio.h"
-#include "slave/types.h"
+#include "slave/control_table.h"
+#include "slave/slave_regmap_impl.h"
 
 namespace hortor::slave {
 
 /**
  * @brief 伺服从机寄存器映射实现
  */
-class Regmap : public regmap::Regmap<regmap::RegMmio> {
+class Regmap : public regmap::Regmap<regmap::RegMmio>, public detail::EepromStore<Regmap> {
+  friend class detail::EepromStore<Regmap>;
+
  public:
   Error Init() {
     CHECK(transport_.Init(table_, sizeof(table_)));
@@ -528,9 +530,9 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
 
   /**
    * @brief 获取 PWM 上限 (R/W)
-   * @return percent PWM 上限（%）
+   * @return PWM 上限（normalized 0.0-1.0）
    *
-   * 范围: 0-100%
+   * 范围: 0.0-1.0
    *
    * 【功能说明】
    * - 限制电机驱动器的 PWM 占空比
@@ -539,9 +541,9 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * - 修改后需要重启生效
    *
    * 【典型参数】
-   * - 保守设置: 50-70%（安全运行）
-   * - 标准设置: 80-90%（平衡性能）
-   * - 极限设置: 95-100%（最大性能）
+   * - 保守设置: 0.5-0.7（安全运行）
+   * - 标准设置: 0.8-0.9（平衡性能）
+   * - 极限设置: 0.95-1.0（最大性能）
    *
    * @note Goal PWM 和 Present PWM 不会超过此值
    */
@@ -553,7 +555,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
 
   /**
    * @brief 设置 PWM 上限 (R/W)
-   * @param[in] value PWM 上限（%）
+   * @param[in] value PWM 上限（normalized 0.0-1.0）
    */
   void WritePwmLimit(const float value) { WriteField<ControlTable::kPwmLimit>(value); }
 
@@ -1173,9 +1175,9 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
 
   /**
    * @brief 获取目标 PWM (R/W)
-   * @return percent 目标 PWM（%）
+   * @return 目标 PWM（normalized -1.0-1.0）
    *
-   * 范围: -100.0 ~ 100.0%
+   * 范围: -1.0 ~ 1.0
    *
    * 【功能说明】
    * - 设置电机驱动器的 PWM 占空比
@@ -1184,10 +1186,10 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
    * - 受 PWM Limit 限制
    *
    * 【典型参数】
-   * - 停止: 0%（无输出）
-   * - 低速: ±10-30%（低速运行）
-   * - 中速: ±30-70%（中速运行）
-   * - 高速: ±70-100%（高速运行）
+   * - 停止: 0.0（无输出）
+   * - 低速: ±0.1-0.3（低速运行）
+   * - 中速: ±0.3-0.7（中速运行）
+   * - 高速: ±0.7-1.0（高速运行）
    *
    * @note 仅在 PWM Control Mode 有效
    */
@@ -1199,7 +1201,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
 
   /**
    * @brief 设置目标 PWM (R/W)
-   * @param[in] value 目标 PWM（%）
+   * @param[in] value 目标 PWM（normalized -1.0-1.0）
    */
   void WriteGoalPwm(const float value) { WriteField<ControlTable::kGoalPwm>(value); }
 
@@ -1420,7 +1422,7 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
 
   /**
    * @brief 写入当前 PWM (R，仅内部同步)
-   * @param[in] value 当前 PWM
+   * @param[in] value 当前 PWM（normalized -1.0-1.0）
    */
   void WritePresentPwm(const float value) { WriteField<ControlTable::kPresentPwm>(value); }
 
@@ -1616,100 +1618,6 @@ class Regmap : public regmap::Regmap<regmap::RegMmio> {
   }
 
 #pragma endregion  // "状态反馈组"
-
-  /** @name EEPROM 持久化辅助 */
-
-  /**
-   * @brief 恢复 EEPROM 为默认值
-   * @return 错误码
-   * @note 恢复EEPROM为默认值，但不恢复ID
-   */
-  Error RecoveryEeprom() {
-    RestoreEeprom<ControlTable::kFirmwareVersion>();
-    RestoreEeprom<ControlTable::kBaudRate>();
-    RestoreEeprom<ControlTable::kReturnDelayTime>();
-    RestoreEeprom<ControlTable::kStatusReturnLevel>();
-    RestoreEeprom<ControlTable::kDriveMode>();
-    RestoreEeprom<ControlTable::kOperatingMode>();
-    RestoreEeprom<ControlTable::kShutdown>();
-    RestoreEeprom<ControlTable::kHomingOffset>();
-    RestoreEeprom<ControlTable::kMovingThreshold>();
-    RestoreEeprom<ControlTable::kTemperatureLimit>();
-    RestoreEeprom<ControlTable::kMaxVoltageLimit>();
-    RestoreEeprom<ControlTable::kMinVoltageLimit>();
-    RestoreEeprom<ControlTable::kPwmLimit>();
-    RestoreEeprom<ControlTable::kCurrentLimit>();
-    RestoreEeprom<ControlTable::kVelocityLimit>();
-    RestoreEeprom<ControlTable::kMaxPositionLimit>();
-    RestoreEeprom<ControlTable::kMinPositionLimit>();
-    RestoreEeprom<ControlTable::kProtectionTime>();
-    RestoreEeprom<ControlTable::kVelocityIGain>();
-    RestoreEeprom<ControlTable::kVelocityPGain>();
-    RestoreEeprom<ControlTable::kPositionDGain>();
-    RestoreEeprom<ControlTable::kPositionIGain>();
-    RestoreEeprom<ControlTable::kPositionPGain>();
-    RestoreEeprom<ControlTable::kFeedforward2ndGain>();
-    RestoreEeprom<ControlTable::kFeedforward1stGain>();
-    RestoreEeprom<ControlTable::kProfileAcceleration>();
-    RestoreEeprom<ControlTable::kProfileVelocity>();
-    CHECK(StoreEeprom());
-    return Error::kOk;
-  }
-
-  /**
-   * @brief 加载 EEPROM
-   * @return 错误码
-   */
-  Error LoadEeprom() {
-    int pos = 0;
-    for (uint8_t address = TableBlocks::kEeprom::kBegin; address < TableBlocks::kEeprom::kEnd;
-         ++address) {
-      table_[address] = EEPROM.read(pos++);
-    }
-    return Error::kOk;
-  }
-
-  /**
-   * @brief 存储 EEPROM
-   * @return 错误码
-   */
-  Error StoreEeprom() {
-    int pos = 0;
-    for (uint8_t address = TableBlocks::kEeprom::kBegin; address < TableBlocks::kEeprom::kEnd;
-         ++address) {
-      EEPROM.update(pos++, table_[address]);
-    }
-    return Error::kOk;
-  }
-
-  /**
-   * @brief 将单个 EEPROM 寄存器恢复为默认值
-   * @tparam T 寄存器类型
-   * @return 错误码
-   */
-  template <typename T>
-  constexpr Error RestoreEeprom() {
-    CHECK(this->template WriteField<T>(T::kDefault));
-    return Error::kOk;
-  }
-
-  /**
-   * @brief 检测 EEPROM 存档是否为空（未初始化）
-   * @return true 若 EEPROM 区全为 0xFF 或 0x00
-   *
-   * 擦除后的 Flash/EEPROM 通常为 0xFF；
-   */
-  bool IsEepromEmpty() const {
-    const auto first = table_[TableBlocks::kEeprom::kBegin];
-    const auto begin = TableBlocks::kEeprom::kBegin;
-    const auto end   = TableBlocks::kEeprom::kEnd;
-    for (uint8_t address = begin; address < end; ++address) {
-      if (table_[address] != first) {
-        return false;
-      }
-    }
-    return first == 0x00 || first == 0xFF;
-  }
 
   // 控制表缓存，按 ControlTable 地址空间顺序线性存储。
   uint8_t table_[ControlTable::kTotalSize] = {};

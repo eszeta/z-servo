@@ -10,7 +10,7 @@
 
 #include <Arduino.h>
 
-#include "math.h"
+#include "math/math.h"
 #include "noncopyable.h"
 
 namespace hortor::math {
@@ -66,7 +66,7 @@ class Profile : public hortor::Noncopyable {
   void Process(float dt);
 
   /// @brief 当前轨迹位置 [pulses]
-  int32_t position_trajectory() const { return static_cast<int32_t>(pos_traj_); }
+  float position_trajectory() const { return pos_traj_; }
 
   /// @brief 当前轨迹速度 [RPM]，用于写入寄存器
   float velocity_trajectory_rpm() const { return vel_traj_rpm_; }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file regmap.h
+ * @file ma330_regmap.h
  * @brief MA330 寄存器映射
  */
 
@@ -11,8 +11,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "drivers/ma330/types.h"
-#include "reg_spi.h"
+#include "drivers/ma330/ma330_types.h"
+#include "drivers/ma330/reg_spi.h"
 
 namespace hortor::drivers::MA330 {
 

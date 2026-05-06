@@ -10,9 +10,9 @@
 
 #include <Arduino.h>
 
-#include "math.h"
-#include "resolution.h"
-#include "servo/types.h"
+#include "math/math.h"
+#include "math/resolution.h"
+#include "servo/servo_types.h"
 
 namespace hortor::math {
 

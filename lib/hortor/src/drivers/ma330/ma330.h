@@ -10,9 +10,9 @@
 
 #include <SPI.h>
 
-#include "regmap.h"
+#include "drivers/ma330/ma330_regmap.h"
+#include "error.h"
 #include "servo/encoder.h"
-#include "servo/types.h"
 
 namespace hortor::drivers::MA330 {
 constexpr uint8_t kResolutionBits = 14;

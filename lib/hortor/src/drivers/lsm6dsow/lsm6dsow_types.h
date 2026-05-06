@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file types.h
+ * @file lsm6dsow_types.h
  * @brief LSM6DSOW 寄存器与枚举（ODR、量程等）
  */
 

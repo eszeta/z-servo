@@ -11,8 +11,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include "drivers/lsm6dsow/types.h"
-#include "regmap.h"
+#include "drivers/lsm6dsow/lsm6dsow_regmap.h"
+#include "drivers/lsm6dsow/lsm6dsow_types.h"
 #include "servo/imu.h"
 
 namespace hortor::drivers::LSM6DSOW {

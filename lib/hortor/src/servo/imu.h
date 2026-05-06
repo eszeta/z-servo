@@ -10,7 +10,7 @@
 
 #include "error.h"
 #include "noncopyable.h"
-#include "servo/types.h"
+#include "servo/servo_types.h"
 
 namespace hortor::servo {
 

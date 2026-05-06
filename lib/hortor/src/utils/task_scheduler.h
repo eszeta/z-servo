@@ -12,8 +12,8 @@
 
 #include <array>
 
+#include "error.h"
 #include "noncopyable.h"
-#include "servo/types.h"
 
 namespace hortor::utils {
 

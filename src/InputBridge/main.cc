@@ -6,7 +6,7 @@
 #include <info_led/info_led.h>
 #include <math/resolution.h>
 #include <protocol/protocol.h>
-#include <slave/types.h>
+#include <slave/control_table.h>
 #include <utils/commander.h>
 #include <utils/task_scheduler.h>
 

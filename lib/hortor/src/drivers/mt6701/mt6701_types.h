@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @file types.h
+ * @file mt6701_types.h
  * @brief MT6701 类型与寄存器定义
  */
 

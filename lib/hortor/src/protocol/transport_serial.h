@@ -10,8 +10,8 @@
 
 #include <Arduino.h>
 
-#include "protocol.h"
-#include "transport.h"
+#include "protocol/protocol.h"
+#include "protocol/transport.h"
 
 namespace hortor::protocol {
 

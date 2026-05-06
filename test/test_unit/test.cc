@@ -22,6 +22,7 @@
 #include "test_reg_field.h"
 #include "test_regmap_transport.h"
 #include "test_scheduler.h"
+#include "test_servo.h"
 #include "test_timeout_limiter.h"
 
 using namespace fakeit;
@@ -64,5 +65,6 @@ int main(int argc, char** argv) {
   RUN_TEST_GROUP(EncoderTest);
   RUN_TEST_GROUP(CurrentTest);
   RUN_TEST_GROUP(PlantTest);
+  RUN_TEST_GROUP(ServoTest);
   return UNITY_END();
 }
