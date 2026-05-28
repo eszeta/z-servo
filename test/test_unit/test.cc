@@ -4,11 +4,11 @@
 /* 工具与算法单元测试入口。使用 Unity 驱动各模块测试组，Arduino 假对象提供
  * micros/delay 时间语义；支持环境变量 TEST_GROUP 按组过滤。 */
 
-#include <Arduino.h>
-#include <unity.h>
-
 #include <chrono>
 #include <thread>
+
+#include <Arduino.h>
+#include <unity.h>
 
 #include "test_bit_utils.h"
 #include "test_current.h"
@@ -49,6 +49,8 @@ void setUp(void) {
   });
   When(Method(ArduinoFake(Function), delay)).AlwaysDo([](unsigned int /*ms*/) {});
 }
+
+void tearDown(void) {}
 
 int main(int argc, char** argv) {
   UNITY_BEGIN();
