@@ -13,7 +13,7 @@
 #include "error.h"
 #include "protocol/channel.h"
 #include "protocol/slave.h"
-#include "protocol/transport_i2c.h"
+#include "protocol/transport/transport_i2c.h"
 #include "slave/slave_regmap.h"
 
 namespace hortor::slave {

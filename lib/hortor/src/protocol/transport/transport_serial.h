@@ -10,8 +10,8 @@
 
 #include <Arduino.h>
 
-#include "protocol/protocol.h"
-#include "protocol/transport.h"
+#include "error.h"
+#include "protocol/transport/transport.h"
 
 namespace hortor::protocol {
 
@@ -30,28 +30,12 @@ class TransportSerial : public Transport<TransportSerial> {
     return Error::kOk;
   }
 
-  /**
-   * @brief 从串口读取一字节（CRTP 实现）
-   * @param byte 输出字节
-   * @return 有数据返回 true，否则 false
-   */
-  bool ReadByteImpl(uint8_t& byte);
-  /** @brief 当前可读字节数（CRTP 实现） */
+  bool   ReadByteImpl(uint8_t& byte);
   size_t AvailableImpl();
-  /**
-   * @brief 写入字节到串口（CRTP 实现）
-   * @param data 数据指针
-   * @param size 字节数
-   * @return 错误码
-   */
-  Error WriteImpl(const uint8_t* data, const size_t size);
-  /// @brief 串口无包边界，恒返回 false（CRTP 实现）
-  bool ConsumePacketImpl() { return false; }
-  /// @brief 串口无需设置接收目标，空实现（CRTP 实现）
-  void SetReceiverImpl(InstProtocol*, InstPacket*) {}
+  Error  WriteImpl(const uint8_t* data, const size_t size);
 
  private:
-  HardwareSerial* serial_ = nullptr;  ///< 绑定的串口
+  HardwareSerial* serial_ = nullptr;
 };
 
 }  // namespace hortor::protocol
@@ -62,12 +46,12 @@ inline bool TransportSerial::ReadByteImpl(uint8_t& byte) {
   if (serial_ == nullptr || serial_->available() == 0) {
     return false;
   }
-  byte = serial_->read();
+  byte = static_cast<uint8_t>(serial_->read());
   return true;
 }
 
 inline size_t TransportSerial::AvailableImpl() {
-  return serial_ != nullptr ? serial_->available() : 0;
+  return serial_ != nullptr ? static_cast<size_t>(serial_->available()) : 0;
 }
 
 inline Error TransportSerial::WriteImpl(const uint8_t* data, const size_t size) {

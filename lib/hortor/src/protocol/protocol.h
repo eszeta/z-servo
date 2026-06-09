@@ -10,8 +10,6 @@
 
 #include <Arduino.h>
 
-#include <cstring>
-
 #include "error.h"
 #include "noncopyable.h"
 #include "protocol/protocol_types.h"

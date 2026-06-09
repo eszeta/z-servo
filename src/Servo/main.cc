@@ -8,7 +8,7 @@
 #include <drivers/mt6701/mt6701.h>
 #include <info_led/info_led.h>
 #include <protocol/channel.h>
-#include <protocol/transport_i2c.h>
+#include <protocol/transport/transport_i2c.h>
 #include <servo/servo.h>
 #include <servo/servo_types.h>
 #include <slave/slave.h>
@@ -191,7 +191,7 @@ Error DebugOutputCallback(float dt) {
 }
 
 void OnI2cReceive(int n) {
-  channel.transport()->OnReceive(n);
+  (void)n;
 }
 
 void OnI2cRequest() {

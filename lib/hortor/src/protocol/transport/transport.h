@@ -12,7 +12,6 @@
 
 #include "error.h"
 #include "noncopyable.h"
-#include "protocol/protocol.h"
 
 namespace hortor::protocol {
 
@@ -44,20 +43,6 @@ class Transport : public hortor::Noncopyable {
    */
   Error Write(const uint8_t* data, const size_t size) {
     return static_cast<DerivedType*>(this)->WriteImpl(data, size);
-  }
-
-  /**
-   * @brief 消费已就绪的包（I2C 推模式：返回 true 并清除 packet_ready）
-   */
-  bool ConsumePacket() { return static_cast<DerivedType*>(this)->ConsumePacketImpl(); }
-
-  /**
-   * @brief 设置接收目标（I2C 推模式：OnReceive 中直接解析）
-   * @param protocol 解析器指针
-   * @param inst_packet 指令包缓冲区
-   */
-  void SetReceiver(InstProtocol* protocol, InstPacket* inst_packet) {
-    static_cast<DerivedType*>(this)->SetReceiverImpl(protocol, inst_packet);
   }
 };
 

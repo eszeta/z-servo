@@ -13,7 +13,7 @@
 #include "noncopyable.h"
 #include "protocol/protocol.h"
 #include "protocol/protocol_types.h"
-#include "protocol/transport.h"
+#include "protocol/transport/transport.h"
 
 namespace hortor::protocol {
 
@@ -29,7 +29,7 @@ template <typename TransportType>
 class ProtocolChannel : public hortor::Noncopyable {
  public:
   /**
-   * @brief 初始化（设置 Transport 的接收目标并初始化传输层，需在 wire.begin 前调用）
+   * @brief 初始化传输层（I2C 须在 wire.begin 前调用 Init 绑定 TwoWire）
    * @param args 转发给 Transport::Init 的参数（如 TwoWire* 或 HardwareSerial*）
    */
   template <typename... Args>
@@ -86,18 +86,12 @@ namespace hortor::protocol {
 template <typename TransportType>
 template <typename... Args>
 Error ProtocolChannel<TransportType>::Init(Args&&... args) {
-  transport_.SetReceiver(&parser_, &inst_packet_);
   return transport_.Init(std::forward<Args>(args)...);
 }
 
 template <typename TransportType>
 Error ProtocolChannel<TransportType>::Process(const float dt, bool& is_complete) {
   is_complete = false;
-
-  if (transport_.ConsumePacket()) {
-    is_complete = true;
-    return Error::kOk;
-  }
 
   if (response_pending_) {
     delay_remaining_ -= dt;
@@ -110,7 +104,7 @@ Error ProtocolChannel<TransportType>::Process(const float dt, bool& is_complete)
 
   while (transport_.Available() > 0) {
     uint8_t byte = 0;
-    if (!transport_.ReadByte(byte)) {
+    if (transport_.Available() == 0) {
       break;
     }
     CHECK(parser_.Process(inst_packet_, byte, is_complete));
