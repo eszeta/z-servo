@@ -44,35 +44,6 @@ enum : uint8_t {
 constexpr uint8_t kHeaderByte  = 0xff;
 constexpr uint8_t kBroadcastId = 0xfe;
 
-template <typename T, uint8_t Address>
-using ControlTableItem = regmap::Field<T, Address, 0, sizeof(T) * 8>;
-
-template <uint8_t Address>
-using ControlTableItemU8 = ControlTableItem<uint8_t, Address>;
-template <uint8_t Address>
-using ControlTableItemU16 = ControlTableItem<uint16_t, Address>;
-template <uint8_t Address>
-using ControlTableItemU32 = ControlTableItem<uint32_t, Address>;
-template <uint8_t Address>
-using ControlTableItemS8 = ControlTableItem<int8_t, Address>;
-template <uint8_t Address>
-using ControlTableItemS16 = ControlTableItem<int16_t, Address>;
-template <uint8_t Address>
-using ControlTableItemS32 = ControlTableItem<int32_t, Address>;
-template <uint8_t Address>
-using ControlTableItemB8 = ControlTableItem<bool, Address>;
-
-template <typename BeginType, typename EndType>
-struct ControlTableBlock : public hortor::Noncopyable {
-  static constexpr uint8_t kBegin = BeginType::kAddress;
-  static constexpr uint8_t kEnd   = EndType::kAddress + EndType::kSize;
-
-  static constexpr uint8_t size() { return kEnd - kBegin; }
-  static constexpr bool    InBlock(const uint8_t address, const uint8_t access_size) {
-    return address < kEnd && address + access_size > kBegin;
-  }
-};
-
 union StatusErrorBits {
   uint8_t value = 0;
   struct {

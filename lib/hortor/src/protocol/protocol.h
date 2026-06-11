@@ -58,7 +58,7 @@ struct __attribute__((packed)) InstPacket {
 typedef InstPacket StatusPacket;
 
 /// @brief 指令包解析器与状态包构造
-class InstProtocol : public hortor::Noncopyable {
+class Protocol : public hortor::Noncopyable {
  public:
   /**
    * @brief 喂入一字节，推进解析状态
@@ -132,7 +132,7 @@ inline uint8_t InstPacket::CalculateChecksum() const {
   return ~checksum;
 }
 
-inline Error InstProtocol::Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete) {
+inline Error Protocol::Process(InstPacket& packet, const uint8_t recv_data, bool& is_complete) {
   is_complete = false;
   switch (packet_state_) {
     case PacketState::kHeader1: {
@@ -206,11 +206,11 @@ inline Error InstProtocol::Process(InstPacket& packet, const uint8_t recv_data, 
   return Error::kOk;
 }
 
-inline Error InstProtocol::CreateResponse(const uint8_t          id,
-                                          const StatusErrorBits& status,
-                                          const uint8_t*         parameter,
-                                          const size_t           parameter_size,
-                                          StatusPacket&          packet) {
+inline Error Protocol::CreateResponse(const uint8_t          id,
+                                      const StatusErrorBits& status,
+                                      const uint8_t*         parameter,
+                                      const size_t           parameter_size,
+                                      StatusPacket&          packet) {
   packet.header1            = kHeaderByte;
   packet.header2            = kHeaderByte;
   packet.id                 = id;

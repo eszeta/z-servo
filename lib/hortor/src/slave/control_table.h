@@ -92,20 +92,28 @@ using AccCvt      = regmap::RatioConverter<float, 214577, 1000>;  // 214.577 rev
  * 仿照XL330的控制表
  */
 namespace ControlTable {
+//--------------------------------------------------------------------------
+// 控制表项类型定义
+//--------------------------------------------------------------------------
+
+template <typename T, uint8_t Address>
+using ControlTableItem = regmap::Field<T, Address, 0, sizeof(T) * 8>;
+
+// 快捷别名
 template <uint8_t Address>
-using CTIU8 = protocol::ControlTableItemU8<Address>;
+using CTIU8 = ControlTableItem<uint8_t, Address>;
 template <uint8_t Address>
-using CTIU16 = protocol::ControlTableItemU16<Address>;
+using CTIU16 = ControlTableItem<uint16_t, Address>;
 template <uint8_t Address>
-using CTIU32 = protocol::ControlTableItemU32<Address>;
+using CTIU32 = ControlTableItem<uint32_t, Address>;
 template <uint8_t Address>
-using CTIS8 = protocol::ControlTableItemS8<Address>;
+using CTIS8 = ControlTableItem<int8_t, Address>;
 template <uint8_t Address>
-using CTIS16 = protocol::ControlTableItemS16<Address>;
+using CTIS16 = ControlTableItem<int16_t, Address>;
 template <uint8_t Address>
-using CTIS32 = protocol::ControlTableItemS32<Address>;
+using CTIS32 = ControlTableItem<int32_t, Address>;
 template <uint8_t Address>
-using CTIB8 = protocol::ControlTableItemB8<Address>;
+using CTIB8 = ControlTableItem<bool, Address>;
 
 // 统一使用语义化 *Converter 命名。
 using VoltageCvt  = Converters::VoltageCvt;
@@ -380,7 +388,16 @@ constexpr size_t kTotalSize = 0xC0;
 };  // namespace ControlTable
 
 namespace TableBlocks {
-using protocol::ControlTableBlock;
+template <typename BeginType, typename EndType>
+struct ControlTableBlock : public hortor::Noncopyable {
+  static constexpr uint8_t kBegin = BeginType::kAddress;
+  static constexpr uint8_t kEnd   = EndType::kAddress + EndType::kSize;
+
+  static constexpr uint8_t size() { return kEnd - kBegin; }
+  static constexpr bool    InBlock(const uint8_t address, const uint8_t access_size) {
+    return address < kEnd && address + access_size > kBegin;
+  }
+};
 
 struct kEeprom : ControlTableBlock<ControlTable::kFirmwareVersion, ControlTable::kProfileVelocity> {
 };

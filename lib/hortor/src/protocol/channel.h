@@ -26,7 +26,7 @@ namespace hortor::protocol {
  * @tparam TransportType 传输层类型（TransportI2C / TransportSerial）
  */
 template <typename TransportType>
-class ProtocolChannel : public hortor::Noncopyable {
+class Channel : public hortor::Noncopyable {
  public:
   /**
    * @brief 初始化传输层（I2C 须在 wire.begin 前调用 Init 绑定 TwoWire）
@@ -61,7 +61,7 @@ class ProtocolChannel : public hortor::Noncopyable {
   const InstPacket& inst_packet() const { return inst_packet_; }
 
   /** @brief 协议解析器，供 Slave 调用 CreateResponse */
-  InstProtocol* parser() { return &parser_; }
+  Protocol* parser() { return &parser_; }
 
   /** @brief 传输层（可写） */
   TransportType* transport() { return &transport_; }
@@ -70,7 +70,7 @@ class ProtocolChannel : public hortor::Noncopyable {
 
  private:
   TransportType transport_;
-  InstProtocol  parser_;
+  Protocol      parser_;
   InstPacket    inst_packet_{};
   StatusPacket  status_packet_{};
 
@@ -85,12 +85,12 @@ namespace hortor::protocol {
 
 template <typename TransportType>
 template <typename... Args>
-Error ProtocolChannel<TransportType>::Init(Args&&... args) {
+Error Channel<TransportType>::Init(Args&&... args) {
   return transport_.Init(std::forward<Args>(args)...);
 }
 
 template <typename TransportType>
-Error ProtocolChannel<TransportType>::Process(const float dt, bool& is_complete) {
+Error Channel<TransportType>::Process(const float dt, bool& is_complete) {
   is_complete = false;
 
   if (response_pending_) {
@@ -116,8 +116,7 @@ Error ProtocolChannel<TransportType>::Process(const float dt, bool& is_complete)
 }
 
 template <typename TransportType>
-Error ProtocolChannel<TransportType>::Response(const StatusPacket& packet,
-                                               const uint8_t       reply_idx) {
+Error Channel<TransportType>::Response(const StatusPacket& packet, const uint8_t reply_idx) {
   memcpy(status_packet_.buffer, packet.buffer, packet.GetBufferSize());
 
   const float delay = response_delay_ * static_cast<float>(reply_idx + 1);
@@ -131,7 +130,7 @@ Error ProtocolChannel<TransportType>::Response(const StatusPacket& packet,
 }
 
 template <typename TransportType>
-void ProtocolChannel<TransportType>::SetResponseDelay(const float response_delay) {
+void Channel<TransportType>::SetResponseDelay(const float response_delay) {
   response_delay_ = response_delay;
 }
 

@@ -21,7 +21,7 @@ constexpr auto kResolutionBits = 12;
 
 // 总线与协议
 using Transport = hortor::protocol::TransportI2C;
-using Channel   = hortor::protocol::ProtocolChannel<Transport>;
+using Channel   = hortor::protocol::Channel<Transport>;
 
 // 驱动组件
 using Motor      = hortor::drivers::DRV8231A::Motor;
