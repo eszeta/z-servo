@@ -3,7 +3,7 @@
 
 /**
  * @file transport.h
- * @brief 传输层接口（CRTP），字节读写
+ * @brief 传输层接口（CRTP），字节读写 + 中断回调
  */
 
 #pragma once
@@ -19,6 +19,7 @@ namespace hortor::protocol {
  * @brief 传输层接口（CRTP 模式）
  *
  * 纯字节读写，无协议解析。派生类实现具体传输（I2C/Serial 等）。
+ * OnReceive / OnRequest 供硬件中断回调注册用，不支持的传输层可空实现。
  *
  * @tparam DerivedType 派生类类型
  */
@@ -44,6 +45,17 @@ class Transport : public hortor::Noncopyable {
   Error Write(const uint8_t* data, const size_t size) {
     return static_cast<DerivedType*>(this)->WriteImpl(data, size);
   }
+
+  /**
+   * @brief 接收中断回调（如 I2C onReceive）
+   * @param n 本次收到的字节数
+   */
+  void OnReceive(int n) { static_cast<DerivedType*>(this)->OnReceiveImpl(n); }
+
+  /**
+   * @brief 请求发送回调（如 I2C onRequest）
+   */
+  void OnRequest() { static_cast<DerivedType*>(this)->OnRequestImpl(); }
 };
 
 }  // namespace hortor::protocol

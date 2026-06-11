@@ -14,7 +14,6 @@
 
 #include "error.h"
 #include "noncopyable.h"
-#include "protocol/channel.h"
 #include "protocol/dispatcher.h"
 #include "protocol/transport/transport_i2c.h"
 #include "slave/slave_regmap.h"
@@ -24,9 +23,9 @@ namespace hortor::slave {
 /**
  * @brief 伺服从机：绑定舵机与寄存器映射，实现协议指令与寄存器读写
  * @tparam ServoType 舵机类型（如 Servo<...>）
- * @tparam ChannelType 协议通道类型（如 Channel<TransportI2C>）
+ * @tparam TransportType 传输层类型（TransportI2C / TransportSerial）
  */
-template <typename ServoType, typename ChannelType>
+template <typename ServoType, typename TransportType>
 class Slave : public hortor::Noncopyable {
  public:
   /** @brief 获取绑定的舵机实例 */
@@ -37,14 +36,18 @@ class Slave : public hortor::Noncopyable {
    */
   uint8_t id() const { return dispatcher_.id(); }
 
+  /** @brief 获取传输层（用于 I2C OnRequest 等回调） */
+  TransportType* transport() { return dispatcher_.transport(); }
+
   /**
-   * @brief 初始化从机，绑定舵机、寄存器映射与通道
+   * @brief 初始化从机，绑定舵机、寄存器映射与传输层
    * @param servo 舵机指针
    * @param regmap 寄存器映射指针
-   * @param channel 协议通道指针
+   * @param args 转发给 Transport::Init 的参数（如 TwoWire*）
    * @return 错误码
    */
-  Error Init(ServoType* servo, Regmap* regmap, ChannelType* channel);
+  template <typename... Args>
+  Error Init(ServoType* servo, Regmap* regmap, Args&&... args);
 
   /**
    * @brief 主循环：接收指令、分发、更新状态
@@ -112,27 +115,26 @@ class Slave : public hortor::Noncopyable {
   Error UpdateMotorStatus();     ///< 将舵机状态写回寄存器
 
   // 成员变量
-  ChannelType*                      channel_ = nullptr;   ///< 协议通道
-  Regmap*                           regmap_  = nullptr;   ///< 寄存器映射
-  ServoType*                        servo_   = nullptr;   ///< 舵机实例
-  protocol::Dispatcher<ChannelType> dispatcher_;          ///< 指令分发器
-  uint16_t                          realtime_tick_ = 0;   ///< 实时时钟 [ms]
-  uint8_t async_write_buffer_[128]                 = {};  ///< RegWrite 暂存，Action 时写入
-  size_t  async_write_buffer_size_                 = 0;   ///< 暂存长度
+  protocol::Dispatcher<TransportType> dispatcher_;               ///< 协议通道 + 指令分发器
+  Regmap*                             regmap_        = nullptr;  ///< 寄存器映射
+  ServoType*                          servo_         = nullptr;  ///< 舵机实例
+  uint16_t                            realtime_tick_ = 0;        ///< 实时时钟 [ms]
+  uint8_t async_write_buffer_[128]                   = {};       ///< RegWrite 暂存，Action 时写入
+  size_t  async_write_buffer_size_                   = 0;        ///< 暂存长度
 };
 
 }  // namespace hortor::slave
 
 namespace hortor::slave {
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::Init(ServoType* servo, Regmap* regmap, ChannelType* channel) {
-  servo_   = servo;
-  regmap_  = regmap;
-  channel_ = channel;
+template <typename ServoType, typename TransportType>
+template <typename... Args>
+Error Slave<ServoType, TransportType>::Init(ServoType* servo, Regmap* regmap, Args&&... args) {
+  servo_  = servo;
+  regmap_ = regmap;
 
-  // 初始化分发器
-  CHECK(dispatcher_.Init(channel_));
+  // 初始化分发器（转发到 Transport::Init）
+  CHECK(dispatcher_.Init(std::forward<Args>(args)...));
   dispatcher_.set_id(regmap_->ReadId());
   dispatcher_.set_return_level(regmap_->ReadStatusReturnLevel());
 
@@ -183,18 +185,18 @@ Error Slave<ServoType, ChannelType>::Init(ServoType* servo, Regmap* regmap, Chan
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::Process(float dt) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::Process(float dt) {
   CHECK(dispatcher_.Process(dt));
   CHECK(AfterProcessImpl(dt));
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnPing(const protocol::InstPacket& packet,
-                                            protocol::StatusErrorBits&  status,
-                                            uint8_t*                    response_data,
-                                            size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnPing(const protocol::InstPacket& packet,
+                                              protocol::StatusErrorBits&  status,
+                                              uint8_t*                    response_data,
+                                              size_t&                     response_size) {
   (void)packet;
   (void)status;
   (void)response_data;
@@ -202,11 +204,11 @@ Error Slave<ServoType, ChannelType>::OnPing(const protocol::InstPacket& packet,
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnReadData(const protocol::InstPacket& packet,
-                                                protocol::StatusErrorBits&  status,
-                                                uint8_t*                    response_data,
-                                                size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnReadData(const protocol::InstPacket& packet,
+                                                  protocol::StatusErrorBits&  status,
+                                                  uint8_t*                    response_data,
+                                                  size_t&                     response_size) {
   (void)status;
   const uint8_t address = packet.parameter[0];
   const uint8_t size    = packet.parameter[1];
@@ -215,11 +217,11 @@ Error Slave<ServoType, ChannelType>::OnReadData(const protocol::InstPacket& pack
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnWriteData(const protocol::InstPacket& packet,
-                                                 protocol::StatusErrorBits&  status,
-                                                 uint8_t*                    response_data,
-                                                 size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnWriteData(const protocol::InstPacket& packet,
+                                                   protocol::StatusErrorBits&  status,
+                                                   uint8_t*                    response_data,
+                                                   size_t&                     response_size) {
   (void)status;
   (void)response_data;
   response_size         = 0;
@@ -232,11 +234,11 @@ Error Slave<ServoType, ChannelType>::OnWriteData(const protocol::InstPacket& pac
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnRegWrite(const protocol::InstPacket& packet,
-                                                protocol::StatusErrorBits&  status,
-                                                uint8_t*                    response_data,
-                                                size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnRegWrite(const protocol::InstPacket& packet,
+                                                  protocol::StatusErrorBits&  status,
+                                                  uint8_t*                    response_data,
+                                                  size_t&                     response_size) {
   (void)status;
   (void)response_data;
   response_size     = 0;
@@ -250,11 +252,11 @@ Error Slave<ServoType, ChannelType>::OnRegWrite(const protocol::InstPacket& pack
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnAction(const protocol::InstPacket& packet,
-                                              protocol::StatusErrorBits&  status,
-                                              uint8_t*                    response_data,
-                                              size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnAction(const protocol::InstPacket& packet,
+                                                protocol::StatusErrorBits&  status,
+                                                uint8_t*                    response_data,
+                                                size_t&                     response_size) {
   (void)packet;
   (void)response_data;
   response_size         = 0;
@@ -285,11 +287,11 @@ Error Slave<ServoType, ChannelType>::OnAction(const protocol::InstPacket& packet
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnSyncWrite(const protocol::InstPacket& packet,
-                                                 protocol::StatusErrorBits&  status,
-                                                 uint8_t*                    response_data,
-                                                 size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnSyncWrite(const protocol::InstPacket& packet,
+                                                   protocol::StatusErrorBits&  status,
+                                                   uint8_t*                    response_data,
+                                                   size_t&                     response_size) {
   (void)status;
   (void)response_data;
   response_size                 = 0;
@@ -313,11 +315,11 @@ Error Slave<ServoType, ChannelType>::OnSyncWrite(const protocol::InstPacket& pac
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnBulkRead(const protocol::InstPacket& packet,
-                                                protocol::StatusErrorBits&  status,
-                                                uint8_t*                    response_data,
-                                                size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnBulkRead(const protocol::InstPacket& packet,
+                                                  protocol::StatusErrorBits&  status,
+                                                  uint8_t*                    response_data,
+                                                  size_t&                     response_size) {
   (void)status;
   const uint8_t  parameter_size = packet.GetParameterSize();
   const uint8_t  block_count    = (parameter_size - 1) / 3;
@@ -337,11 +339,11 @@ Error Slave<ServoType, ChannelType>::OnBulkRead(const protocol::InstPacket& pack
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::OnReset(const protocol::InstPacket& packet,
-                                             protocol::StatusErrorBits&  status,
-                                             uint8_t*                    response_data,
-                                             size_t&                     response_size) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::OnReset(const protocol::InstPacket& packet,
+                                               protocol::StatusErrorBits&  status,
+                                               uint8_t*                    response_data,
+                                               size_t&                     response_size) {
   (void)packet;
   (void)status;
   (void)response_data;
@@ -350,16 +352,16 @@ Error Slave<ServoType, ChannelType>::OnReset(const protocol::InstPacket& packet,
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::AfterProcessImpl(float dt) {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::AfterProcessImpl(float dt) {
   realtime_tick_ += dt * 1000;
   regmap_->WriteRealtimeTick(realtime_tick_);
   CHECK(UpdateMotorStatus());
   return UpdateStatus();
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::UpdateStatus() {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::UpdateStatus() {
   dispatcher_.status().input_voltage_error = servo_->hardware_input_voltage_error();
   dispatcher_.status().angle_limit_error   = servo_->hardware_angle_limit_error();
   dispatcher_.status().overheating_error   = servo_->hardware_overheating_error();
@@ -368,15 +370,15 @@ Error Slave<ServoType, ChannelType>::UpdateStatus() {
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::ApplyProtocolConfig() {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::ApplyProtocolConfig() {
   dispatcher_.set_id(regmap_->ReadId());
   dispatcher_.set_return_level(regmap_->ReadStatusReturnLevel());
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::ApplyAlignToPosition() {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::ApplyAlignToPosition() {
   const auto align_to_position = regmap_->ReadAlignToPosition();
   if (align_to_position) {
     servo_->AlignToPosition(align_to_position);
@@ -385,8 +387,8 @@ Error Slave<ServoType, ChannelType>::ApplyAlignToPosition() {
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::ApplyMotorConfig() {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::ApplyMotorConfig() {
   ControlBits::DriveModeBits drive_mode{};
   drive_mode.value = regmap_->ReadDriveMode();
   servo_->set_motor_reverse_mode(drive_mode.motor_reverse_mode);
@@ -474,8 +476,8 @@ Error Slave<ServoType, ChannelType>::ApplyMotorConfig() {
   return Error::kOk;
 }
 
-template <typename ServoType, typename ChannelType>
-Error Slave<ServoType, ChannelType>::UpdateMotorStatus() {
+template <typename ServoType, typename TransportType>
+Error Slave<ServoType, TransportType>::UpdateMotorStatus() {
   const auto torque_enable = servo_->torque_enable();
   regmap_->WriteTorqueEnable(torque_enable);
 

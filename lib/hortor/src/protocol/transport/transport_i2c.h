@@ -19,7 +19,8 @@ namespace hortor::protocol {
 /**
  * @brief I2C 从机传输层
  *
- * RX 直读 Wire 内置缓冲（应用层须注册 onReceive）。Write 挂指针，OnRequest 时发送。
+ * RX 直读 Wire 内置缓冲（应用层须注册 onReceive/onRequest）。
+ * Write 挂指针，OnRequest 时发送。
  */
 class TransportI2C : public Transport<TransportI2C> {
  public:
@@ -34,8 +35,11 @@ class TransportI2C : public Transport<TransportI2C> {
   size_t AvailableImpl();
   Error  WriteImpl(const uint8_t* data, const size_t size);
 
-  /** @brief I2C 从机发送回调，写出 tx_data_ */
-  void OnRequest();
+  /** @brief I2C 从机发送回调实现，写出 tx_data_ */
+  void OnRequestImpl();
+
+  /** @brief I2C 从机接收回调实现（收包靠 wire->available 判断） */
+  void OnReceiveImpl(int n) { (void)n; }
 
  private:
   TwoWire* wire_ = nullptr;
@@ -71,7 +75,7 @@ inline Error TransportI2C::WriteImpl(const uint8_t* data, const size_t size) {
   return Error::kOk;
 }
 
-inline void TransportI2C::OnRequest() {
+inline void TransportI2C::OnRequestImpl() {
   if (wire_ != nullptr && tx_data_ != nullptr && tx_size_ > 0) {
     wire_->write(tx_data_, tx_size_);
   }

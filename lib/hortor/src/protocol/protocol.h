@@ -55,7 +55,7 @@ struct __attribute__((packed)) InstPacket {
   uint8_t CalculateChecksum() const;
 };
 
-typedef InstPacket StatusPacket;
+using StatusPacket = InstPacket;
 
 /// @brief 指令包解析器与状态包构造
 class Protocol : public hortor::Noncopyable {

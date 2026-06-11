@@ -7,7 +7,7 @@
 #include <drivers/drv8231a/drv8231a.h>
 #include <drivers/mt6701/mt6701.h>
 #include <info_led/info_led.h>
-#include <protocol/channel.h>
+#include <protocol/dispatcher.h>
 #include <protocol/transport/transport_i2c.h>
 #include <servo/servo.h>
 #include <servo/servo_types.h>
@@ -21,7 +21,6 @@ constexpr auto kResolutionBits = 12;
 
 // 总线与协议
 using Transport = hortor::protocol::TransportI2C;
-using Channel   = hortor::protocol::Channel<Transport>;
 
 // 驱动组件
 using Motor      = hortor::drivers::DRV8231A::Motor;
@@ -31,7 +30,7 @@ using Current    = hortor::drivers::CurrentMirror::Current;
 
 // 伺服与从机
 using Servo  = hortor::servo::Servo<Motor, Encoder, Current, kResolutionBits>;
-using Slave  = hortor::slave::Slave<Servo, Channel>;
+using Slave  = hortor::slave::Slave<Servo, Transport>;
 using Regmap = hortor::slave::Regmap;
 
 // 信息灯
@@ -70,7 +69,6 @@ TwoWire        wire_slave(kPinSlaveSda, kPinSlaveScl);
 
 InfoLED       led{};
 Regmap        regmap{};
-Channel       channel{};
 Slave         slave{};
 Motor         motor{};
 Encoder       encoder{};
@@ -144,8 +142,7 @@ Error SystemSetup() {
 
   CHECK(servo.Init(&motor, &encoder, &current));
   CHECK(regmap.Init());
-  CHECK(channel.Init(&wire_slave));
-  CHECK(slave.Init(&servo, &regmap, &channel));
+  CHECK(slave.Init(&servo, &regmap, &wire_slave));
 
   wire_slave.begin(slave.id());
   wire_slave.onReceive(OnI2cReceive);
@@ -191,9 +188,9 @@ Error DebugOutputCallback(float dt) {
 }
 
 void OnI2cReceive(int n) {
-  (void)n;
+  slave.transport()->OnReceive(n);
 }
 
 void OnI2cRequest() {
-  channel.transport()->OnRequest();
+  slave.transport()->OnRequest();
 }

@@ -34,6 +34,11 @@ class TransportSerial : public Transport<TransportSerial> {
   size_t AvailableImpl();
   Error  WriteImpl(const uint8_t* data, const size_t size);
 
+  /** @brief 串口不需要请求发送回调 */
+  void OnRequestImpl() {}
+  /** @brief 串口不需要接收中断回调 */
+  void OnReceiveImpl(int n) { (void)n; }
+
  private:
   HardwareSerial* serial_ = nullptr;
 };
