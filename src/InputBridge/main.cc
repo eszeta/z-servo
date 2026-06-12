@@ -1,6 +1,35 @@
 // Copyright 2025 ES_ZETA
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @brief 串口 Commander 指令速查表
+ *
+ * 主指令：
+ *
+ * +------+----------------+-----------+-------------------+-------------------------------+
+ * | 指令 | 参数           | 单位/取值 | 功能              | 写入 / 影响                   |
+ * +------+----------------+-----------+-------------------+-------------------------------+
+ * | p    | <angle>        | deg       | 设置目标位置      | angle * kAngleToRaw -> 0x98   |
+ * | t    | <0/1>          | bool      | 力矩使能          | TorqueEnable(0x80)            |
+ * | i    | <id>           | uint8_t   | 切换目标 Slave ID | 更新 target_id                |
+ * | g    | <sub> <value>  | float     | 设置控制增益      | ControlTable 对应寄存器       |
+ * +------+----------------+-----------+-------------------+-------------------------------+
+ *
+ * `g` 指令子标识：
+ *
+ * +------+-----------------------+----------------+
+ * | sub  | ControlTable 寄存器   | 增益类型       |
+ * +------+-----------------------+----------------+
+ * | pp   | PositionPGain         | 位置环 P 增益  |
+ * | pi   | PositionIGain         | 位置环 I 增益  |
+ * | pd   | PositionDGain         | 位置环 D 增益  |
+ * | vp   | VelocityPGain         | 速度环 P 增益  |
+ * | vi   | VelocityIGain         | 速度环 I 增益  |
+ * | f1   | Feedforward1stGain    | 一阶前馈增益   |
+ * | f2   | Feedforward2ndGain    | 二阶前馈增益   |
+ * +------+-----------------------+----------------+
+ */
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <info_led/info_led.h>
