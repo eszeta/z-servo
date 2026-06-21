@@ -10,75 +10,117 @@
 
 #include <Arduino.h>
 
+#include <cstddef>
 #include <cstring>
 
 #include "noncopyable.h"
 
 namespace hortor::utils {
 
-typedef void (*CommandCallback)(int argc, char** argv);
+using CommandCallback = void (*)(int argc, char** argv);
 
-/// @brief 串口命令解析器，首字符为命令 ID，后接参数
+/// @brief 串口命令解析器，首字符为命令 ID，后接空格分隔参数
 class Commander : public hortor::Noncopyable {
  public:
+  static constexpr size_t kLineBufferSize = 64;
+  static constexpr size_t kMaxCommands    = 20;
+  static constexpr size_t kMaxArgs        = 10;
+
   /**
-   * @brief 注册命令：id 为首字符，onCommand 为回调
+   * @brief 注册命令：id 为首字符，on_command 为回调
    * @param id 命令首字符
-   * @param onCommand 回调 (argc, argv)
+   * @param on_command 回调 (argc, argv)
+   * @return 注册成功（含覆盖原回调）返回 true；命令表已满返回 false
    */
-  void add(char id, CommandCallback onCommand);
+  bool add(char id, CommandCallback on_command) {
+    // 已存在则覆盖
+    for (size_t i = 0; i < call_count_; i++) {
+      if (entries_[i].id == id) {
+        entries_[i].cb = on_command;
+        return true;
+      }
+    }
+    if (call_count_ >= kMaxCommands) {
+      return false;
+    }
+    entries_[call_count_++] = {id, on_command};
+    return true;
+  }
+
   /**
    * @brief 解析并执行一行输入（首字符匹配则调用对应回调）
-   * @param user_input 输入字符串（首字符为命令 ID，后接空格分隔参数）
+   * @param user_input 可写字符串（解析过程中会原地修改）；
+   *                   首字符为命令 ID，后接空格分隔参数
+   * @note 允许结尾带 \r/\n；空指针 / 空串安全忽略
    */
-  void run(char* user_input);
+  void run(char* user_input) {
+    if (user_input == nullptr || user_input[0] == '\0') {
+      return;
+    }
 
- private:
-  char            input_buffer[64]{};
-  CommandCallback call_list[20]{};
-  char            call_ids[20]{};
-  int             call_count = 0;
-};
+    const char id = user_input[0];
 
-}  // namespace hortor::utils
+    // 容忍尾部 CR/LF
+    size_t len = std::strlen(user_input);
+    while (len > 0 && (user_input[len - 1] == '\n' || user_input[len - 1] == '\r')) {
+      user_input[--len] = '\0';
+    }
 
-namespace hortor::utils {
-
-inline void Commander::add(char id, CommandCallback onCommand) {
-  if (call_count < 20) {
-    call_list[call_count] = onCommand;
-    call_ids[call_count]  = id;
-    call_count++;
-  }
-}
-
-inline void Commander::run(char* user_input) {
-  char id = user_input[0];
-
-  strncpy(input_buffer, user_input, 63);
-  input_buffer[63] = '\0';
-
-  int len = strlen(input_buffer);
-  while (len > 0 && (input_buffer[len - 1] == '\n' || input_buffer[len - 1] == '\r')) {
-    input_buffer[len - 1] = '\0';
-    len--;
-  }
-
-  for (int i = 0; i < call_count; i++) {
-    if (id == call_ids[i]) {
-      char* argv[10];
-      int   argc = 0;
-
-      char* token = strtok(&input_buffer[1], " ");
-      while (token != nullptr && argc < 10) {
-        argv[argc++] = token;
-        token        = strtok(nullptr, " ");
+    for (size_t i = 0; i < call_count_; i++) {
+      if (entries_[i].id != id) {
+        continue;
       }
 
-      call_list[i](argc, argv);
-      break;
+      char* argv[kMaxArgs];
+      int   argc  = 0;
+      char* save  = nullptr;
+      char* token = (len > 1) ? ::strtok_r(&user_input[1], " ", &save) : nullptr;
+      while (token != nullptr && argc < static_cast<int>(kMaxArgs)) {
+        argv[argc++] = token;
+        token        = ::strtok_r(nullptr, " ", &save);
+      }
+      entries_[i].cb(argc, argv);
+      return;
     }
   }
-}
+
+  /**
+   * @brief 输入一个串口字节，遇到换行符时执行当前行命令
+   * @param byte 输入字节
+   * @note 单行长度超过 kLineBufferSize-1 时整行丢弃（不会触发回调）
+   */
+  void readByte(char byte) {
+    if (byte == '\n' || byte == '\r') {
+      if (!overflow_ && line_len_ > 0) {
+        line_buffer_[line_len_] = '\0';
+        run(line_buffer_);
+      }
+      line_len_ = 0;
+      overflow_ = false;
+      return;
+    }
+
+    if (overflow_) {
+      return;
+    }
+    if (line_len_ < kLineBufferSize - 1) {
+      line_buffer_[line_len_++] = byte;
+    } else {
+      overflow_ = true;  // 超长，等待换行后整行丢弃
+    }
+  }
+
+ private:
+  struct Entry {
+    char            id = '\0';
+    CommandCallback cb = nullptr;
+  };
+
+  char   line_buffer_[kLineBufferSize]{};
+  size_t line_len_ = 0;
+  bool   overflow_ = false;
+  Entry  entries_[kMaxCommands]{};
+  size_t call_count_ = 0;
+};
 
 }  // namespace hortor::utils

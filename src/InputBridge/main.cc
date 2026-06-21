@@ -65,10 +65,6 @@ TaskScheduler scheduler{};
 
 uint8_t target_id = 1;  // 当前控制的 Slave ID（`i` 命令可修改）
 
-// ── 串口行缓冲 ────────────────────────────────────────────────────────────────
-static char    line_buf[64]{};
-static uint8_t line_len = 0;
-
 // ── 函数声明 ──────────────────────────────────────────────────────────────────
 Error SystemSetup();
 Error MainLoopCallback(float dt);
@@ -198,18 +194,9 @@ Error SystemSetup() {
  * @brief 主循环（500Hz）：串口 Commander 解析 + 编码器本地位置控制
  */
 Error MainLoopCallback(float dt) {
-  // --- 串口：逐字符接收，按行触发 Commander ---
+  // --- 串口：逐字符输入 Commander，按行触发命令 ---
   while (serial.available() > 0) {
-    const char c = static_cast<char>(serial.read());
-    if (c == '\n' || c == '\r') {
-      if (line_len > 0) {
-        line_buf[line_len] = '\0';
-        commander.run(line_buf);
-        line_len = 0;
-      }
-    } else if (line_len < sizeof(line_buf) - 1) {
-      line_buf[line_len++] = c;
-    }
+    commander.readByte(static_cast<char>(serial.read()));
   }
   return Error::kOk;
 }
