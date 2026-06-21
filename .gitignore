@@ -78,6 +78,7 @@ yarn-error.log*
 
 # PlatformIO
 .pio
+.pio-mcp-workspace/
 .pioenvs
 .piolibdeps
 .pio/build
