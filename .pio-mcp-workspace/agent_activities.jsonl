@@ -1,8 +1,0 @@
-{"timestamp":1781366103414,"toolName":"get_project_context","args":{"projectDir":"/home/es/Workspace/hortor-servo","includeBuildHistory":true},"success":false,"status":"running","activityId":"81a9d3cb-fb2d-4e51-9327-bb1acc8ad37b"}
-{"timestamp":1781366104644,"toolName":"get_project_context","args":{"projectDir":"/home/es/Workspace/hortor-servo","includeBuildHistory":true},"success":true,"status":"success","activityId":"81a9d3cb-fb2d-4e51-9327-bb1acc8ad37b"}
-{"timestamp":1782003876547,"toolName":"build_project","args":{"projectDir":"/home/es/Workspace/hortor-servo"},"success":false,"status":"running","activityId":"6bf02f6d-3bb0-42ba-b443-522fac583b33"}
-{"timestamp":1782003889712,"toolName":"build_project","args":{"projectDir":"/home/es/Workspace/hortor-servo"},"success":true,"status":"success","activityId":"6bf02f6d-3bb0-42ba-b443-522fac583b33"}
-{"timestamp":1782003890508,"toolName":"build_project","args":{"projectDir":"/home/es/Workspace/hortor-servo"},"success":false,"status":"running","activityId":"544be5ec-f293-4e0c-aa82-a6f2a6778e3d"}
-{"timestamp":1782003893694,"toolName":"build_project","args":{"projectDir":"/home/es/Workspace/hortor-servo"},"success":true,"status":"success","activityId":"544be5ec-f293-4e0c-aa82-a6f2a6778e3d"}
-{"timestamp":1782003900806,"toolName":"build_project","args":{"projectDir":"/home/es/Workspace/hortor-servo","environment":"InputBridge"},"success":false,"status":"running","activityId":"30082e57-9801-47ea-92dd-5be6cf63550d"}
-{"timestamp":1782003902047,"toolName":"build_project","args":{"projectDir":"/home/es/Workspace/hortor-servo","environment":"InputBridge"},"success":true,"status":"success","activityId":"30082e57-9801-47ea-92dd-5be6cf63550d"}
