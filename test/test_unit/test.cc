@@ -4,15 +4,22 @@
 /* 工具与算法单元测试入口。使用 Unity 驱动各模块测试组，Arduino 假对象提供
  * micros/delay 时间语义；支持环境变量 TEST_GROUP 按组过滤。 */
 
-#include <Arduino.h>
-#include <unity.h>
-
+// 解决 ArduinoFake 与 C++17 chrono 库的兼容性问题
+// 先包含 chrono，再包含 Arduino.h，避免宏冲突
 #include <chrono>
 #include <thread>
+
+// 在包含 Arduino.h 前取消可能冲突的宏定义
+#undef abs
+#undef round
+
+#include <Arduino.h>
+#include <unity.h>
 
 #include "test_bit_utils.h"
 #include "test_current.h"
 #include "test_encoder.h"
+#include "test_logger.h"
 #include "test_lowpass_filter.h"
 #include "test_math.h"
 #include "test_motor.h"
@@ -44,6 +51,12 @@ static unsigned long RealMicros() {
 void setUp(void) {
   ArduinoFakeReset();
   When(Method(ArduinoFake(Function), micros)).AlwaysDo([]() { return RealMicros(); });
+  When(Method(ArduinoFake(Function), millis)).AlwaysDo([]() {
+    using namespace std::chrono;
+    static const auto start   = steady_clock::now();
+    const auto        elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
+    return static_cast<unsigned long>(elapsed & 0xFFFFFFFFUL);
+  });
   When(Method(ArduinoFake(Function), delayMicroseconds)).AlwaysDo([](unsigned int us) {
     std::this_thread::sleep_for(std::chrono::microseconds(us));
   });
@@ -68,5 +81,6 @@ int main(int argc, char** argv) {
   RUN_TEST_GROUP(CurrentTest);
   RUN_TEST_GROUP(PlantTest);
   RUN_TEST_GROUP(ServoTest);
+  RUN_TEST_GROUP(LoggerTest);
   return UNITY_END();
 }

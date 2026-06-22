@@ -13,7 +13,7 @@
 #include <servo/servo_types.h>
 #include <slave/slave.h>
 #include <utils/commander.h>
-#include <utils/debug_print.h>
+#include <utils/logger.h>
 #include <utils/monitor.h>
 #include <utils/task_scheduler.h>
 
@@ -42,7 +42,8 @@ using Error = hortor::Error;
 using hortor::IsFail;
 using Monitor       = hortor::utils::Monitor<Servo>;
 using TaskScheduler = hortor::utils::TaskScheduler<>;
-using hortor::utils::DebugEnable;
+using hortor::utils::Logger;
+using hortor::utils::LogLevel;
 
 // 编码器配置
 using EncoderConfig = Encoder::Config;
@@ -57,13 +58,13 @@ constexpr auto kPinSensorSda  = PA8;
 constexpr auto kPinSensorScl  = PA9;
 constexpr auto kPinSlaveSda   = PB7;
 constexpr auto kPinSlaveScl   = PA15;
-constexpr auto kPinDebugTx    = PB4;
-constexpr auto kPinDebugRx    = PB3;
+constexpr auto kPinDebugRx    = PB4;
+constexpr auto kPinDebugTx    = PB3;
 
 constexpr auto kMainLoopRateHz    = 1000;
 constexpr auto kDebugOutputRateHz = 10;
 
-HardwareSerial serial_debug(kPinDebugTx, kPinDebugRx);
+HardwareSerial serial_debug(kPinDebugRx, kPinDebugTx);
 TwoWire        wire_sensor(kPinSensorSda, kPinSensorScl);
 TwoWire        wire_slave(kPinSlaveSda, kPinSlaveScl);
 
@@ -112,13 +113,15 @@ Error SystemSetup() {
   analogWriteFrequency(10 * 1000);
 
   serial_debug.begin(115200);
-  DebugEnable(&serial_debug);
-  hortor::utils::DebugPrintln(F("setup"));
+  Logger::Init(&serial_debug, LogLevel::kDebug);
+
+  LOG_INFO("System initialization started");
 
   led.Init(kPinInfoLed);
   led.SetInfo(InfoLEDInfo::kOk);
 
   wire_sensor.begin();
+  LOG_DEBUG("I2C sensor bus initialized");
 
   CHECK(motor.Init({
       .pin_in1              = kPinMotorIn1,
@@ -126,6 +129,7 @@ Error SystemSetup() {
       .pin_nfault           = 0,     // 如果硬件连接了 nFAULT，填入引脚号
       .slow_decay_threshold = 0.3f,  // 低于 30% 使用慢速衰减
   }));
+  LOG_DEBUG("Motor initialized");
 
   EncoderConfig encoder_config{};
   encoder_config.homing_offset = 0;
@@ -133,26 +137,37 @@ Error SystemSetup() {
   encoder_config.wire          = &wire_sensor;
 
   CHECK(encoder.Init(encoder_config));
+  LOG_DEBUG("Encoder initialized");
+
   CHECK(current.Init({.pin_adc             = kPinCurrentAdc,
                       .ripropi_ohms        = 1000.0f,
                       .scaling_factor      = 1500.0f,
                       .adc_resolution_bits = 12,
                       .adc_vref_volts      = 3.3f,
                       .calibration_samples = 50}));
+  LOG_DEBUG("Current sensor initialized");
 
   CHECK(servo.Init(&motor, &encoder, &current));
+  LOG_DEBUG("Servo initialized");
+
   CHECK(regmap.Init());
+  LOG_DEBUG("Regmap initialized");
+
   CHECK(slave.Init(&servo, &regmap, &wire_slave));
+  LOG_DEBUG("Slave initialized");
 
   wire_slave.begin(slave.id());
   wire_slave.onReceive(OnI2cReceive);
   wire_slave.onRequest(OnI2cRequest);
 
   monitor.Init(&servo, &serial_debug);
+  LOG_DEBUG("Monitor initialized");
 
   // 注册任务：集中式调度
   scheduler.AddTask(MainLoopCallback, kMainLoopRateHz);        // 500Hz 主控制
   scheduler.AddTask(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
+
+  LOG_INFO("System initialization complete");
   return Error::kOk;
 }
 
@@ -165,6 +180,8 @@ void EnterErrorMode(Error error) {
   led.ShowErrorCode(static_cast<uint8_t>(error));
   scheduler.ClearTasks();
   scheduler.AddTask(DebugOutputCallback, kDebugOutputRateHz);  // 10Hz 调试输出
+
+  LOG_ERROR("Entering error mode: %d", static_cast<int>(error));
 }
 
 /**

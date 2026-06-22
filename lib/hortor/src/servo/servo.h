@@ -21,7 +21,7 @@
 #include "servo/encoder.h"
 #include "servo/motor.h"
 #include "servo/servo_types.h"
-#include "utils/debug_print.h"
+#include "utils/logger.h"
 #include "utils/timeout_limiter.h"
 
 namespace hortor::servo {
