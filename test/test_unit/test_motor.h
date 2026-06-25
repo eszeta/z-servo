@@ -12,8 +12,8 @@
 
 namespace MotorTest {
 
-using Motor = hortor::simulator::SimulatorMotor;
-using Error = hortor::Error;
+using Motor = moe::simulator::SimulatorMotor;
+using Error = moe::Error;
 
 void test_init_returns_ok(void) {
   Motor      m;

@@ -11,7 +11,7 @@
 
 namespace TimeoutLimiterTest {
 
-using Limiter = hortor::utils::TimeoutLimiter;
+using Limiter = moe::utils::TimeoutLimiter;
 
 // 验证初始状态与 setter/getter。
 void test_initial_and_setters(void) {

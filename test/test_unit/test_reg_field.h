@@ -12,7 +12,7 @@
 
 namespace RegFieldTest {
 
-namespace reg = hortor::regmap;
+namespace reg = moe::regmap;
 
 // 验证 Trait::SignExtend 按位宽做符号扩展。
 void test_trait_sign_extend(void) {

@@ -11,7 +11,7 @@
 
 namespace MathTest {
 
-namespace m = hortor::math;
+namespace m = moe::math;
 
 // 验证 mapResolution（max-based）：PWM/DAC 等非回绕量。
 void test_map_resolution(void) {

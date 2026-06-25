@@ -16,15 +16,15 @@
 
 namespace PlantTest {
 
-using Motor   = hortor::simulator::SimulatorMotor;
-using Encoder = hortor::simulator::SimulatorEncoder;
-using Current = hortor::simulator::SimulatorCurrent;
-using Plant   = hortor::simulator::SimulatorPlant;
-using Error   = hortor::Error;
+using Motor   = moe::simulator::SimulatorMotor;
+using Encoder = moe::simulator::SimulatorEncoder;
+using Current = moe::simulator::SimulatorCurrent;
+using Plant   = moe::simulator::SimulatorPlant;
+using Error   = moe::Error;
 using Config  = Encoder::Config;
-using Reverse = hortor::servo::Reverse;
+using Reverse = moe::servo::Reverse;
 
-constexpr uint32_t kCpr = (1U << hortor::simulator::kSimEncoderBits);
+constexpr uint32_t kCpr = (1U << moe::simulator::kSimEncoderBits);
 
 // 验证未挂接 motor/encoder/current 时 Process 返回 kInvalidArg。
 void test_process_with_nullptrs_returns_error(void) {

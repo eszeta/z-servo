@@ -12,8 +12,8 @@
 
 namespace CurrentTest {
 
-using Current = hortor::simulator::SimulatorCurrent;
-using Error   = hortor::Error;
+using Current = moe::simulator::SimulatorCurrent;
+using Error   = moe::Error;
 
 void test_init_returns_ok(void) {
   Current    c;

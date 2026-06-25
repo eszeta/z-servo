@@ -20,34 +20,34 @@
 constexpr auto kResolutionBits = 12;
 
 // 总线与协议
-using Transport = hortor::protocol::TransportI2C;
+using Transport = moe::protocol::TransportI2C;
 
 // 驱动组件
-using Motor      = hortor::drivers::DRV8231A::Motor;
-using EncoderBus = hortor::drivers::MT6701::BusType;
-using Encoder    = hortor::drivers::MT6701::Encoder<EncoderBus::kI2C>;
-using Current    = hortor::drivers::CurrentMirror::Current;
+using Motor      = moe::drivers::DRV8231A::Motor;
+using EncoderBus = moe::drivers::MT6701::BusType;
+using Encoder    = moe::drivers::MT6701::Encoder<EncoderBus::kI2C>;
+using Current    = moe::drivers::CurrentMirror::Current;
 
 // 伺服与从机
-using Servo  = hortor::servo::Servo<Motor, Encoder, Current, kResolutionBits>;
-using Slave  = hortor::slave::Slave<Servo, Transport>;
-using Regmap = hortor::slave::Regmap;
+using Servo  = moe::servo::Servo<Motor, Encoder, Current, kResolutionBits>;
+using Slave  = moe::slave::Slave<Servo, Transport>;
+using Regmap = moe::slave::Regmap;
 
 // 信息灯
-using InfoLED     = hortor::info_led::InfoLED<hortor::info_led::LedMode::kOpenDrain>;
+using InfoLED     = moe::info_led::InfoLED<moe::info_led::LedMode::kOpenDrain>;
 using InfoLEDInfo = InfoLED::InfoType;
 
 // 工具
-using Error = hortor::Error;
-using hortor::IsFail;
-using Monitor       = hortor::utils::Monitor<Servo>;
-using TaskScheduler = hortor::utils::TaskScheduler<>;
-using hortor::utils::Logger;
-using hortor::utils::LogLevel;
+using Error = moe::Error;
+using moe::IsFail;
+using Monitor       = moe::utils::Monitor<Servo>;
+using TaskScheduler = moe::utils::TaskScheduler<>;
+using moe::utils::Logger;
+using moe::utils::LogLevel;
 
 // 编码器配置
 using EncoderConfig = Encoder::Config;
-using Reverse       = hortor::servo::Reverse;
+using Reverse       = moe::servo::Reverse;
 
 // 引脚定义
 constexpr auto kPinInfoLed    = PA12;

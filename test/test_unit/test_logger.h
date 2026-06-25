@@ -21,8 +21,8 @@
 #undef round
 #undef abs
 
-using hortor::utils::Logger;
-using hortor::utils::LogLevel;
+using moe::utils::Logger;
+using moe::utils::LogLevel;
 
 namespace LoggerTest {
 namespace {

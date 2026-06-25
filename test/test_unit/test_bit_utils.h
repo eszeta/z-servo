@@ -12,7 +12,7 @@
 
 namespace BitUtilsTest {
 
-namespace bu = hortor::utils::bit_utils;
+namespace bu = moe::utils::bit_utils;
 
 // 验证 GetValue 按掩码提取值。
 void test_get_value(void) {

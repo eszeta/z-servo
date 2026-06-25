@@ -11,8 +11,8 @@
 
 namespace ProfileTest {
 
-using Profile = hortor::math::Profile;
-using Type    = hortor::math::Profile::Type;
+using Profile = moe::math::Profile;
+using Type    = moe::math::Profile::Type;
 
 static constexpr uint16_t kCpr             = 4096;
 static constexpr int      kMaxRectSteps    = 500;   // 步数足够 Rect 轮廓到达 goal

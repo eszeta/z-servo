@@ -13,12 +13,12 @@
 
 namespace SchedulerTest {
 
-using Scheduler = hortor::utils::TaskScheduler<>;
-using Error     = hortor::Error;
+using Scheduler = moe::utils::TaskScheduler<>;
+using Error     = moe::Error;
 
 // 占位回调，仅返回 kOk，用于 AddTask/RemoveTask 等不关心执行逻辑的用例。
-static hortor::Error DummyCallback(float /*dt*/) {
-  return hortor::Error::kOk;
+static moe::Error DummyCallback(float /*dt*/) {
+  return moe::Error::kOk;
 }
 
 // Tick 测试用：记录回调被调用次数。
@@ -27,10 +27,10 @@ static uint32_t g_tick_call_count = 0;
 static float g_tick_last_dt = 0.0f;
 
 // 在 Tick 测试中用于统计调用次数并记录 dt。
-static hortor::Error CountingCallback(float dt) {
+static moe::Error CountingCallback(float dt) {
   g_tick_call_count += 1;
   g_tick_last_dt = dt;
-  return hortor::Error::kOk;
+  return moe::Error::kOk;
 }
 
 // 验证未添加任务时 size==0、capacity==16、min_period_us==0。
@@ -68,7 +68,7 @@ void test_add_task_invalid_args(void) {
 
 // 验证任务列表已满时再添加返回 kInvalidArg，size 不变。
 void test_add_task_full(void) {
-  hortor::utils::TaskScheduler<2> s;
+  moe::utils::TaskScheduler<2> s;
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk), static_cast<int>(s.AddTask(DummyCallback, 100)));
   TEST_ASSERT_EQUAL(static_cast<int>(Error::kOk),
                     static_cast<int>(s.AddTask(CountingCallback, 200)));

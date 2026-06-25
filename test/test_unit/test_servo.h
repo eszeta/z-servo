@@ -14,14 +14,14 @@
 
 namespace ServoTest {
 
-using Motor   = hortor::simulator::SimulatorMotor;
-using Encoder = hortor::simulator::SimulatorEncoder;
-using Current = hortor::simulator::SimulatorCurrent;
-using Servo   = hortor::servo::Servo<Motor, Encoder, Current, hortor::simulator::kSimEncoderBits>;
+using Motor   = moe::simulator::SimulatorMotor;
+using Encoder = moe::simulator::SimulatorEncoder;
+using Current = moe::simulator::SimulatorCurrent;
+using Servo   = moe::servo::Servo<Motor, Encoder, Current, moe::simulator::kSimEncoderBits>;
 using EncoderConfig = Encoder::Config;
-using Error         = hortor::Error;
-using OperatingMode = hortor::servo::OperatingMode;
-using Reverse       = hortor::servo::Reverse;
+using Error         = moe::Error;
+using OperatingMode = moe::servo::OperatingMode;
+using Reverse       = moe::servo::Reverse;
 
 static constexpr float kDt = 0.01f;
 

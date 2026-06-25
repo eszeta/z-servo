@@ -22,10 +22,10 @@
 
 namespace EncoderTest {
 
-using Encoder = hortor::simulator::SimulatorEncoder;
+using Encoder = moe::simulator::SimulatorEncoder;
 using Config  = Encoder::Config;
-using Error   = hortor::Error;
-using Reverse = hortor::servo::Reverse;
+using Error   = moe::Error;
+using Reverse = moe::servo::Reverse;
 
 constexpr uint32_t kCpr = Encoder::kResolution.kEncoderCpr;
 constexpr float    kDt  = 0.001f;

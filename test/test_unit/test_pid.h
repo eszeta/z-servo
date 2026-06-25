@@ -11,8 +11,8 @@
 
 namespace PidTest {
 
-using Pid    = hortor::math::Pid;
-using Config = hortor::math::Pid::Config;
+using Pid    = moe::math::Pid;
+using Config = moe::math::Pid::Config;
 
 // 验证仅 P 项时输出为 kp * error。
 void test_p_only(void) {

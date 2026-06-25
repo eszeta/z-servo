@@ -11,7 +11,7 @@
 
 namespace LowPassFilterTest {
 
-using Filter = hortor::math::LowPassFilter;
+using Filter = moe::math::LowPassFilter;
 
 // 验证构造与 time_constant getter/setter。
 void test_constructor_and_time_constant(void) {

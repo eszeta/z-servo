@@ -11,8 +11,8 @@
 
 namespace RegmapTransportTest {
 
-using hortor::Error;
-using hortor::regmap::RegMmio;
+using moe::Error;
+using moe::regmap::RegMmio;
 
 void assert_error_eq(const Error expected, const Error actual) {
   TEST_ASSERT_EQUAL_UINT8(static_cast<uint8_t>(expected), static_cast<uint8_t>(actual));

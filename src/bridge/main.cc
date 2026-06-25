@@ -39,16 +39,16 @@
 #include <utils/commander.h>
 #include <utils/task_scheduler.h>
 
-using InfoLED       = hortor::info_led::InfoLED<hortor::info_led::LedMode::kOpenDrain>;
+using InfoLED       = moe::info_led::InfoLED<moe::info_led::LedMode::kOpenDrain>;
 using InfoLEDInfo   = InfoLED::InfoType;
-using Commander     = hortor::utils::Commander;
-using TaskScheduler = hortor::utils::TaskScheduler<>;
-using Error         = hortor::Error;
-using hortor::IsFail;
+using Commander     = moe::utils::Commander;
+using TaskScheduler = moe::utils::TaskScheduler<>;
+using Error         = moe::Error;
+using moe::IsFail;
 
 // Slave 编码器分辨率（与 STM32/main.cc 保持一致）
 constexpr uint8_t kResolutionBits = 12;
-using Resolution                  = hortor::math::Resolution<kResolutionBits>;
+using Resolution                  = moe::math::Resolution<kResolutionBits>;
 
 // ── 引脚常量 ──────────────────────────────────────────────────────────────────
 constexpr auto kInfoLedPin     = PB1;
@@ -81,7 +81,7 @@ void  EnterErrorMode(Error error);
  */
 template <typename T>
 void WriteRegI2C(uint8_t id, uint8_t reg_addr, T value) {
-  using namespace hortor::protocol;
+  using namespace moe::protocol;
   InstPacket pkt{};
   pkt.header1            = kHeaderByte;
   pkt.header2            = kHeaderByte;
@@ -164,7 +164,7 @@ Error SystemSetup() {
   // 子标识: pp pi pd vp vi f1 f2
   // 地址与量纲转换来自 slave::ControlTable 寄存器定义
   commander.add('g', [](int argc, char** argv) {
-    namespace CT = hortor::slave::ControlTable;
+    namespace CT = moe::slave::ControlTable;
     if (argc < 2)
       return;
     const float val = atof(argv[1]);
